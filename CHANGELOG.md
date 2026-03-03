@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Planned
+- **Right-click to add term** — context menu action in the Trados Studio editor grid
+  to add the selected source + target text as a new term to the active termbase
+- **Import** — bulk import terms from TBX (TermBase eXchange) and CSV/Excel
+- **Export** — export the full termbase (or a filtered subset) to TBX and CSV/Excel
+
+---
+
 All notable changes to Termview will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/).

@@ -30,6 +30,11 @@ namespace Termview.Controls
         /// </summary>
         public event EventHandler<TermInsertEventArgs> TermInsertRequested;
 
+        /// <summary>
+        /// Fired when the user clicks the gear/settings button in the header.
+        /// </summary>
+        public event EventHandler SettingsRequested;
+
         public TermviewControl()
         {
             SuspendLayout();
@@ -55,14 +60,34 @@ namespace Termview.Controls
             };
             _headerPanel.Controls.Add(_headerLabel);
 
-            // Status label (right side of header)
+            // Gear button (right side of header)
+            var btnSettings = new Button
+            {
+                Text = "\u2699",  // ⚙ gear character
+                Dock = DockStyle.Right,
+                Width = 24,
+                Height = 24,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10f),
+                ForeColor = Color.FromArgb(100, 100, 100),
+                BackColor = Color.Transparent,
+                Cursor = Cursors.Hand,
+                TabStop = false
+            };
+            btnSettings.FlatAppearance.BorderSize = 0;
+            btnSettings.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 220, 220);
+            btnSettings.Click += (s, e) => SettingsRequested?.Invoke(this, EventArgs.Empty);
+            _headerPanel.Controls.Add(btnSettings);
+
+            // Status label (right of header, left of gear button)
             _statusLabel = new Label
             {
                 Dock = DockStyle.Right,
                 AutoSize = true,
                 Font = new Font("Segoe UI", 8f),
                 ForeColor = Color.FromArgb(120, 120, 120),
-                TextAlign = ContentAlignment.MiddleRight
+                TextAlign = ContentAlignment.MiddleRight,
+                Padding = new Padding(0, 0, 4, 0)
             };
             _headerPanel.Controls.Add(_statusLabel);
 

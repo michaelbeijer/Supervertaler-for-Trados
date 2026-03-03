@@ -1,10 +1,11 @@
 using System;
-using System.Linq;
+using System.IO;
 using Sdl.Desktop.IntegrationApi;
 using Sdl.Desktop.IntegrationApi.Extensions;
 using Sdl.Desktop.IntegrationApi.Interfaces;
 using Sdl.TranslationStudioAutomation.IntegrationApi;
 using Termview.Controls;
+using Termview.Settings;
 
 namespace Termview
 {
@@ -15,7 +16,7 @@ namespace Termview
     [ViewPart(
         Id = "TermviewEditorViewPart",
         Name = "Termview",
-        Description = "Inline terminology display — shows source text with translations underneath matched terms",
+        Description = "Inline terminology display \u2014 shows source text with translations underneath matched terms",
         Icon = "TermviewIcon"
     )]
     [ViewPartLayout(typeof(EditorController), Dock = DockType.Bottom)]
@@ -26,6 +27,7 @@ namespace Termview
 
         private EditorController _editorController;
         private IStudioDocument _activeDocument;
+        private TermviewSettings _settings;
 
         protected override IUIControl GetContentControl()
         {
@@ -34,40 +36,102 @@ namespace Termview
 
         protected override void Initialize()
         {
+            // Load persisted settings
+            _settings = TermviewSettings.Load();
+
             _editorController = SdlTradosStudio.Application.GetController<EditorController>();
 
             if (_editorController != null)
             {
                 _editorController.ActiveDocumentChanged += OnActiveDocumentChanged;
+
+                // If a document is already open, wire up to it immediately
+                if (_editorController.ActiveDocument != null)
+                {
+                    _activeDocument = _editorController.ActiveDocument;
+                    _activeDocument.ActiveSegmentChanged += OnActiveSegmentChanged;
+                }
             }
 
             // Wire up term insertion — when user clicks a translation in the panel
             _control.Value.TermInsertRequested += OnTermInsertRequested;
 
-            // Try to load the default Supervertaler termbase
-            TryLoadDefaultTermbase();
+            // Wire up the gear/settings button
+            _control.Value.SettingsRequested += OnSettingsRequested;
+
+            // Load termbase: prefer saved setting, fall back to auto-detect
+            LoadTermbase();
+
+            // Display the current segment immediately (even without a termbase, show all words)
+            UpdateFromActiveSegment();
+        }
+
+        private void LoadTermbase()
+        {
+            // 1. Use the saved termbase path if set and the file exists
+            if (!string.IsNullOrEmpty(_settings.TermbasePath) && File.Exists(_settings.TermbasePath))
+            {
+                _control.Value.LoadTermbase(_settings.TermbasePath);
+                return;
+            }
+
+            // 2. Fallback: auto-detect Supervertaler's default locations
+            var candidates = new[]
+            {
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "Supervertaler_Data", "resources", "supervertaler.db"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Supervertaler", "resources", "supervertaler.db"),
+            };
+
+            foreach (var path in candidates)
+            {
+                if (File.Exists(path))
+                {
+                    _control.Value.LoadTermbase(path);
+                    return;
+                }
+            }
+        }
+
+        private void OnSettingsRequested(object sender, EventArgs e)
+        {
+            SafeInvoke(() =>
+            {
+                using (var form = new TermviewSettingsForm(_settings))
+                {
+                    // Find a parent window handle for proper dialog parenting
+                    var parent = _control.Value.FindForm();
+                    var result = parent != null
+                        ? form.ShowDialog(parent)
+                        : form.ShowDialog();
+
+                    if (result == System.Windows.Forms.DialogResult.OK)
+                    {
+                        // Settings already saved inside the form's OK handler.
+                        // Reload the termbase with the (possibly changed) path.
+                        LoadTermbase();
+                        UpdateFromActiveSegment();
+                    }
+                }
+            });
         }
 
         private void OnActiveDocumentChanged(object sender, DocumentEventArgs e)
         {
-            // Unsubscribe from previous document
             if (_activeDocument != null)
-            {
                 _activeDocument.ActiveSegmentChanged -= OnActiveSegmentChanged;
-            }
 
             _activeDocument = _editorController?.ActiveDocument;
 
             if (_activeDocument != null)
             {
                 _activeDocument.ActiveSegmentChanged += OnActiveSegmentChanged;
-
-                // Update immediately with current segment
                 UpdateFromActiveSegment();
             }
             else
             {
-                _control.Value.Clear();
+                SafeInvoke(() => _control.Value.Clear());
             }
         }
 
@@ -80,22 +144,29 @@ namespace Termview
         {
             if (_activeDocument?.ActiveSegmentPair == null)
             {
-                _control.Value.Clear();
+                SafeInvoke(() => _control.Value.Clear());
                 return;
             }
 
             try
             {
-                // Get the source segment text
                 var sourceSegment = _activeDocument.ActiveSegmentPair.Source;
                 var sourceText = sourceSegment?.ToString() ?? "";
-
-                _control.Value.UpdateSegment(sourceText);
+                SafeInvoke(() => _control.Value.UpdateSegment(sourceText));
             }
             catch (Exception)
             {
                 // Silently handle — segment may not be available during transitions
             }
+        }
+
+        private void SafeInvoke(Action action)
+        {
+            var ctrl = _control.Value;
+            if (ctrl.InvokeRequired)
+                ctrl.BeginInvoke(action);
+            else
+                action();
         }
 
         private void OnTermInsertRequested(object sender, TermInsertEventArgs e)
@@ -105,49 +176,21 @@ namespace Termview
 
             try
             {
-                // Insert the translation at the current cursor position in the target segment
                 _activeDocument.Selection.Target.Replace(e.TargetTerm, "Termview");
             }
             catch (Exception)
             {
-                // Silently handle — editor may be in a state that doesn't allow insertion
-            }
-        }
-
-        private void TryLoadDefaultTermbase()
-        {
-            // Look for the Supervertaler database in standard locations
-            var candidates = new[]
-            {
-                System.IO.Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    "Supervertaler_Data", "resources", "supervertaler.db"),
-                System.IO.Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Supervertaler", "resources", "supervertaler.db"),
-            };
-
-            foreach (var path in candidates)
-            {
-                if (System.IO.File.Exists(path))
-                {
-                    _control.Value.LoadTermbase(path);
-                    return;
-                }
+                // Silently handle — editor may not allow insertion at this moment
             }
         }
 
         public override void Dispose()
         {
             if (_activeDocument != null)
-            {
                 _activeDocument.ActiveSegmentChanged -= OnActiveSegmentChanged;
-            }
 
             if (_editorController != null)
-            {
                 _editorController.ActiveDocumentChanged -= OnActiveDocumentChanged;
-            }
 
             base.Dispose();
         }

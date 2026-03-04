@@ -17,6 +17,28 @@ Version numbers follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.0] — 2026-03-04
+
+### Added
+- **Adjustable font size** — A+ and A− buttons in the TermLens panel header let you
+  increase or decrease the font size on the fly while working; also configurable via a
+  "Panel font size" control in the Settings dialog; size persists across Trados restarts
+- **Dialog size persistence** — the Term Picker dialog remembers its window size and
+  column widths between invocations (and across Trados restarts); the Settings dialog
+  also remembers its window size
+
+### Changed
+- **Subtler expand indicator in Term Picker** — replaced the ► symbol next to source
+  terms with a small ▸ triangle in the # column; less visually distracting while still
+  indicating which rows have expandable synonyms
+- **Double-digit shortcut badges** — numbers 10+ in the TermLens panel now use a
+  pill-shaped (rounded rectangle) badge instead of a circle, so double-digit numbers
+  are no longer clipped
+- **Wider Project column** — increased from 62 px to 72 px in the Settings dialog so
+  the "Project" header is no longer truncated
+
+---
+
 ## [1.3.0] — 2026-03-04
 
 ### Added

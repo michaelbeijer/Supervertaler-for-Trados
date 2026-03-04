@@ -47,6 +47,31 @@ namespace TermLens.Settings
         [DataMember(Name = "projectTermbaseIds")]
         public List<long> ProjectTermbaseIds { get; set; } = new List<long>();
 
+        // ─── Term Picker dialog layout persistence ────────────────────
+        [DataMember(Name = "termPickerWidth")]
+        public int TermPickerWidth { get; set; }
+
+        [DataMember(Name = "termPickerHeight")]
+        public int TermPickerHeight { get; set; }
+
+        [DataMember(Name = "termPickerColumnWidths")]
+        public List<int> TermPickerColumnWidths { get; set; } = new List<int>();
+
+        // ─── Settings form layout persistence ─────────────────────────
+        [DataMember(Name = "settingsFormWidth")]
+        public int SettingsFormWidth { get; set; }
+
+        [DataMember(Name = "settingsFormHeight")]
+        public int SettingsFormHeight { get; set; }
+
+        // ─── Panel font size ─────────────────────────────────────────
+        /// <summary>
+        /// Font size (in points) for the TermLens panel. Default: 9pt.
+        /// Adjustable via the A+/A- buttons in the panel header or the Settings dialog.
+        /// </summary>
+        [DataMember(Name = "panelFontSize")]
+        public float PanelFontSize { get; set; } = 9f;
+
         /// <summary>
         /// Loads settings from disk. Returns default settings if the file doesn't exist or can't be read.
         /// </summary>

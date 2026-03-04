@@ -72,6 +72,12 @@ namespace TermLens
             // Wire up the gear/settings button
             _control.Value.SettingsRequested += OnSettingsRequested;
 
+            // Wire up font size changes from the A+/A- buttons in the panel header
+            _control.Value.FontSizeChanged += OnFontSizeChanged;
+
+            // Apply persisted font size
+            _control.Value.SetFontSize(_settings.PanelFontSize);
+
             // Load termbase: prefer saved setting, fall back to auto-detect
             LoadTermbase();
 
@@ -129,12 +135,25 @@ namespace TermLens
                     if (result == System.Windows.Forms.DialogResult.OK)
                     {
                         // Settings already saved inside the form's OK handler.
+                        // Apply font size change (user may have adjusted it in settings)
+                        _control.Value.SetFontSize(_settings.PanelFontSize);
+
                         // Force reload — the user may have toggled glossaries.
                         LoadTermbase(forceReload: true);
                         UpdateFromActiveSegment();
                     }
                 }
             });
+        }
+
+        private void OnFontSizeChanged(object sender, EventArgs e)
+        {
+            // Persist the new font size from the A+/A- buttons
+            _settings.PanelFontSize = _control.Value.Font.Size;
+            _settings.Save();
+
+            // Refresh the segment display with the new font
+            UpdateFromActiveSegment();
         }
 
         private void OnActiveDocumentChanged(object sender, DocumentEventArgs e)
@@ -324,7 +343,7 @@ namespace TermLens
 
             instance.SafeInvoke(() =>
             {
-                using (var dlg = new TermPickerDialog(matches))
+                using (var dlg = new TermPickerDialog(matches, instance._settings))
                 {
                     var parent = _control.Value.FindForm();
                     var result = parent != null

@@ -24,6 +24,7 @@ namespace TermLens.Settings
         private DataGridView _dgvTermbases;
         private Label _lblTermbasesHeader;
         private CheckBox _chkAutoLoad;
+        private NumericUpDown _nudFontSize;
         private Button _btnOK;
         private Button _btnCancel;
 
@@ -35,6 +36,10 @@ namespace TermLens.Settings
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             BuildUI();
             PopulateFromSettings();
+
+            // Restore persisted form size
+            if (_settings.SettingsFormWidth > 0 && _settings.SettingsFormHeight > 0)
+                Size = new Size(_settings.SettingsFormWidth, _settings.SettingsFormHeight);
         }
 
         private void BuildUI()
@@ -45,8 +50,8 @@ namespace TermLens.Settings
             MaximizeBox = false;
             MinimizeBox = false;
             StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(560, 420);
-            MinimumSize = new Size(480, 340);
+            ClientSize = new Size(560, 440);
+            MinimumSize = new Size(480, 360);
             BackColor = Color.White;
 
             // === Termbase section ===
@@ -99,7 +104,7 @@ namespace TermLens.Settings
             };
             _lblTermbaseInfo.Width = ClientSize.Width - 32;
 
-            // === Glossary grid (Read / Write columns) ===
+            // === Glossary grid (Read / Write / Project columns) ===
             _lblTermbasesHeader = new Label
             {
                 Text = "Glossaries:",
@@ -142,7 +147,7 @@ namespace TermLens.Settings
                 SelectionForeColor = Color.FromArgb(40, 40, 40)
             };
             _dgvTermbases.Width = ClientSize.Width - 32;
-            _dgvTermbases.Height = ClientSize.Height - 140 - 100;
+            _dgvTermbases.Height = ClientSize.Height - 140 - 120;
 
             // Columns
             var colRead = new DataGridViewCheckBoxColumn
@@ -165,7 +170,7 @@ namespace TermLens.Settings
             {
                 Name = "colProject",
                 HeaderText = "Project",
-                Width = 62,
+                Width = 72,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
                 FillWeight = 1,
                 ToolTipText = "Mark as project glossary (shown in pink)"
@@ -208,7 +213,7 @@ namespace TermLens.Settings
             // === Options section ===
             var sep = new Label
             {
-                Location = new Point(16, ClientSize.Height - 90),
+                Location = new Point(16, ClientSize.Height - 110),
                 Height = 1,
                 BorderStyle = BorderStyle.Fixed3D,
                 Anchor = AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right
@@ -218,9 +223,39 @@ namespace TermLens.Settings
             _chkAutoLoad = new CheckBox
             {
                 Text = "Automatically load termbase when Trados Studio starts",
-                Location = new Point(16, ClientSize.Height - 80),
+                Location = new Point(16, ClientSize.Height - 98),
                 AutoSize = true,
                 ForeColor = Color.FromArgb(60, 60, 60),
+                Anchor = AnchorStyles.Left | AnchorStyles.Bottom
+            };
+
+            var lblFontSize = new Label
+            {
+                Text = "Panel font size:",
+                Location = new Point(16, ClientSize.Height - 70),
+                AutoSize = true,
+                ForeColor = Color.FromArgb(60, 60, 60),
+                Anchor = AnchorStyles.Left | AnchorStyles.Bottom
+            };
+
+            _nudFontSize = new NumericUpDown
+            {
+                Location = new Point(120, ClientSize.Height - 72),
+                Width = 60,
+                Minimum = 7,
+                Maximum = 16,
+                DecimalPlaces = 1,
+                Increment = 0.5m,
+                Value = (decimal)_settings.PanelFontSize,
+                Anchor = AnchorStyles.Left | AnchorStyles.Bottom
+            };
+
+            var lblFontPt = new Label
+            {
+                Text = "pt",
+                Location = new Point(184, ClientSize.Height - 70),
+                AutoSize = true,
+                ForeColor = Color.FromArgb(100, 100, 100),
                 Anchor = AnchorStyles.Left | AnchorStyles.Bottom
             };
 
@@ -253,7 +288,7 @@ namespace TermLens.Settings
             {
                 lblSection, lblPath, _txtTermbasePath, _btnBrowse,
                 _lblTermbaseInfo, _lblTermbasesHeader, _dgvTermbases,
-                sep, _chkAutoLoad,
+                sep, _chkAutoLoad, lblFontSize, _nudFontSize, lblFontPt,
                 _btnOK, _btnCancel
             });
         }
@@ -285,6 +320,7 @@ namespace TermLens.Settings
         {
             _txtTermbasePath.Text = _settings.TermbasePath ?? "";
             _chkAutoLoad.Checked = _settings.AutoLoadOnStartup;
+            _nudFontSize.Value = Math.Max(_nudFontSize.Minimum, Math.Min(_nudFontSize.Maximum, (decimal)_settings.PanelFontSize));
             UpdateTermbaseInfo(_settings.TermbasePath);
             PopulateTermbaseList(_settings.TermbasePath);
         }
@@ -394,6 +430,7 @@ namespace TermLens.Settings
         {
             _settings.TermbasePath = _txtTermbasePath.Text.Trim();
             _settings.AutoLoadOnStartup = _chkAutoLoad.Checked;
+            _settings.PanelFontSize = (float)_nudFontSize.Value;
 
             // Build disabled list, write ID, and project IDs from grid cells
             _settings.DisabledTermbaseIds = new List<long>();
@@ -415,6 +452,16 @@ namespace TermLens.Settings
             }
 
             _settings.Save();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            // Always persist form size (even on Cancel)
+            _settings.SettingsFormWidth = Width;
+            _settings.SettingsFormHeight = Height;
+            _settings.Save();
+
+            base.OnFormClosing(e);
         }
     }
 }

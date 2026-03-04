@@ -59,7 +59,24 @@ namespace TermLens.Controls
         public IReadOnlyList<TermEntry> Entries => _entries;
         public int ShortcutIndex => _shortcutIndex;
 
-        private const int BadgeDiameter = 16;
+        private const int BadgeHeight = 16;
+
+        /// <summary>
+        /// Calculates the badge width for the shortcut number.
+        /// Single digits use a circle (diameter = BadgeHeight).
+        /// Double digits use a wider pill shape.
+        /// </summary>
+        private int GetBadgeWidth(Graphics g)
+        {
+            if (_shortcutIndex < 0) return 0;
+
+            var badgeText = (_shortcutIndex + 1).ToString();
+            if (badgeText.Length <= 1)
+                return BadgeHeight; // circle
+
+            // Pill: text width + horizontal padding
+            return (int)Math.Ceiling(g.MeasureString(badgeText, BadgeFont).Width) + 6;
+        }
 
         private void CalculateSize()
         {
@@ -76,7 +93,7 @@ namespace TermLens.Controls
 
                 int badgeWidth = 0;
                 if (_shortcutIndex >= 0)
-                    badgeWidth = BadgeDiameter + 4;
+                    badgeWidth = GetBadgeWidth(g) + 4;
 
                 int targetRowWidth = (int)Math.Ceiling(targetSize.Width) + extraWidth + badgeWidth + 10;
                 int width = (int)Math.Ceiling(Math.Max(sourceSize.Width + 10, targetRowWidth));
@@ -114,7 +131,7 @@ namespace TermLens.Controls
             if (extraCount > 0)
                 extraWidth = g.MeasureString($"+{extraCount}", BadgeFont).Width + 4;
 
-            float badgeWidth = _shortcutIndex >= 0 ? BadgeDiameter + 4 : 0;
+            float badgeWidth = _shortcutIndex >= 0 ? GetBadgeWidth(g) + 4 : 0;
             float targetRowWidth = targetSize.Width + extraWidth + badgeWidth + 4;
 
             var bgColor = IsProjectGlossary
@@ -147,12 +164,13 @@ namespace TermLens.Controls
                 }
             }
 
-            // Shortcut badge — filled circle with number, after translation
+            // Shortcut badge — filled circle/pill with number, after translation
             if (_shortcutIndex >= 0)
             {
                 var badgeText = (_shortcutIndex + 1).ToString();
-                float circleX = targetX + 2;
-                float circleY = y + (targetSize.Height - BadgeDiameter) / 2 + 1;
+                int badgeW = GetBadgeWidth(g);
+                float badgeX = targetX + 2;
+                float badgeY = y + (targetSize.Height - BadgeHeight) / 2 + 1;
 
                 var badgeColor = IsProjectGlossary
                     ? Color.FromArgb(200, 100, 150)
@@ -160,14 +178,28 @@ namespace TermLens.Controls
 
                 using (var circleBrush = new SolidBrush(badgeColor))
                 {
-                    g.FillEllipse(circleBrush, circleX, circleY, BadgeDiameter, BadgeDiameter);
+                    if (badgeText.Length > 1)
+                    {
+                        // Pill shape for double-digit numbers
+                        using (var path = RoundedRect(
+                            new Rectangle((int)badgeX, (int)badgeY, badgeW, BadgeHeight),
+                            BadgeHeight / 2))
+                        {
+                            g.FillPath(circleBrush, path);
+                        }
+                    }
+                    else
+                    {
+                        // Circle for single-digit numbers
+                        g.FillEllipse(circleBrush, badgeX, badgeY, BadgeHeight, BadgeHeight);
+                    }
                 }
 
                 using (var textBrush = new SolidBrush(Color.White))
                 {
-                    var badgeSize = g.MeasureString(badgeText, BadgeFont);
-                    float tx = circleX + (BadgeDiameter - badgeSize.Width) / 2 + 1;
-                    float ty = circleY + (BadgeDiameter - badgeSize.Height) / 2 + 1;
+                    var textSize = g.MeasureString(badgeText, BadgeFont);
+                    float tx = badgeX + (badgeW - textSize.Width) / 2 + 1;
+                    float ty = badgeY + (BadgeHeight - textSize.Height) / 2 + 1;
                     g.DrawString(badgeText, BadgeFont, textBrush, tx, ty);
                 }
             }

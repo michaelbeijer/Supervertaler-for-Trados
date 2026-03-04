@@ -3,20 +3,22 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using TermLens.Models;
+using TermLens.Settings;
 
 namespace TermLens.Controls
 {
     /// <summary>
     /// Modal dialog that lists all matched terms for the current segment.
     /// The user can select a term by clicking, pressing Enter, or typing its number.
-    /// Rows with multiple target synonyms show a ► indicator and can be expanded
-    /// with the Right arrow key to reveal all alternative translations.
+    /// Rows with multiple target synonyms show a small ▸ indicator in the # column
+    /// and can be expanded with the Right arrow key to reveal all alternative translations.
     /// Triggered by Ctrl+Shift+G.
     /// </summary>
     public class TermPickerDialog : Form
     {
         private readonly ListView _listView;
         private readonly List<TermPickerMatch> _matches;
+        private readonly TermLensSettings _settings;
 
         // Track which parent indices (1-based) are currently expanded
         private readonly HashSet<int> _expandedParents = new HashSet<int>();
@@ -31,9 +33,10 @@ namespace TermLens.Controls
         /// </summary>
         public string SelectedTargetTerm { get; private set; }
 
-        public TermPickerDialog(List<TermPickerMatch> matches)
+        public TermPickerDialog(List<TermPickerMatch> matches, TermLensSettings settings = null)
         {
             _matches = matches ?? new List<TermPickerMatch>();
+            _settings = settings;
 
             Text = "TermLens \u2014 Pick Term to Insert";
             Size = new Size(580, 400);
@@ -44,6 +47,10 @@ namespace TermLens.Controls
             MinimizeBox = false;
             ShowInTaskbar = false;
             KeyPreview = true;
+
+            // Restore persisted size
+            if (_settings != null && _settings.TermPickerWidth > 0 && _settings.TermPickerHeight > 0)
+                Size = new Size(_settings.TermPickerWidth, _settings.TermPickerHeight);
 
             _listView = new ListView
             {
@@ -56,12 +63,20 @@ namespace TermLens.Controls
                 Font = new Font("Segoe UI", 9.5f)
             };
 
-            _listView.Columns.Add("#", 40, HorizontalAlignment.Right);
+            _listView.Columns.Add("#", 48, HorizontalAlignment.Right);
             _listView.Columns.Add("Source", 160, HorizontalAlignment.Left);
             _listView.Columns.Add("Target", 210, HorizontalAlignment.Left);
             _listView.Columns.Add("Termbase", 130, HorizontalAlignment.Left);
 
             PopulateMainRows();
+
+            // Restore persisted column widths (must happen after PopulateMainRows)
+            if (_settings != null && _settings.TermPickerColumnWidths != null
+                && _settings.TermPickerColumnWidths.Count == _listView.Columns.Count)
+            {
+                for (int i = 0; i < _listView.Columns.Count; i++)
+                    _listView.Columns[i].Width = _settings.TermPickerColumnWidths[i];
+            }
 
             // Select first item
             if (_listView.Items.Count > 0)
@@ -80,7 +95,7 @@ namespace TermLens.Controls
 
             var hintLabel = new Label
             {
-                Text = "Type a number or Enter to insert \u2022 \u25B6 Right arrow expands synonyms",
+                Text = "Type a number or Enter to insert \u2022 Right arrow expands synonyms",
                 Dock = DockStyle.Left,
                 AutoSize = true,
                 ForeColor = Color.FromArgb(120, 120, 120),
@@ -128,17 +143,16 @@ namespace TermLens.Controls
                 var allTargets = match.GetAllTargets();
                 bool hasExpansion = allTargets.Count > 1;
 
-                // Source text with ► indicator if expandable
-                string sourceDisplay = match.SourceText;
+                // # column: number + subtle ▸ indicator for expandable rows
+                string indexDisplay = match.Index.ToString();
                 if (hasExpansion)
-                    sourceDisplay += "  \u25B6"; // ►
+                    indexDisplay += " \u25B8"; // small right triangle ▸
 
-                var item = new ListViewItem(match.Index.ToString());
-                item.SubItems.Add(sourceDisplay);
+                var item = new ListViewItem(indexDisplay);
+                item.SubItems.Add(match.SourceText);
                 item.SubItems.Add(match.PrimaryEntry.TargetTerm ?? "");
                 item.SubItems.Add(match.PrimaryEntry.TermbaseName ?? "");
 
-                // Tag stores: ("parent", parentIndex, targetTerm)
                 item.Tag = new RowTag
                 {
                     IsSubItem = false,
@@ -174,9 +188,8 @@ namespace TermLens.Controls
             }
             if (parentPos < 0) return;
 
-            // Change ► to ▼ on the parent row
-            string sourceText = match.SourceText + "  \u25BC"; // ▼
-            _listView.Items[parentPos].SubItems[1].Text = sourceText;
+            // Change ▸ to ▾ on the parent row's # column
+            _listView.Items[parentPos].Text = match.Index + " \u25BE"; // ▾
 
             // Get all targets, skip the primary (already shown on parent row)
             var allTargets = match.GetAllTargets();
@@ -208,7 +221,7 @@ namespace TermLens.Controls
 
         private void RemoveSubItems(int parentIndex)
         {
-            // Remove all sub-items for this parent and reset ► indicator
+            // Remove all sub-items for this parent
             for (int i = _listView.Items.Count - 1; i >= 0; i--)
             {
                 var tag = _listView.Items[i].Tag as RowTag;
@@ -218,15 +231,13 @@ namespace TermLens.Controls
                 }
             }
 
-            // Find the parent row and change ▼ back to ►
+            // Find the parent row and change ▾ back to ▸
             for (int i = 0; i < _listView.Items.Count; i++)
             {
                 var tag = _listView.Items[i].Tag as RowTag;
                 if (tag != null && !tag.IsSubItem && tag.ParentIndex == parentIndex)
                 {
-                    var match = FindMatch(parentIndex);
-                    if (match != null)
-                        _listView.Items[i].SubItems[1].Text = match.SourceText + "  \u25B6"; // ►
+                    _listView.Items[i].Text = parentIndex + " \u25B8"; // ▸
                     break;
                 }
             }
@@ -374,6 +385,24 @@ namespace TermLens.Controls
         {
             base.OnShown(e);
             _listView.Focus();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            // Persist dialog size and column widths
+            if (_settings != null)
+            {
+                _settings.TermPickerWidth = Width;
+                _settings.TermPickerHeight = Height;
+
+                _settings.TermPickerColumnWidths = new List<int>();
+                for (int i = 0; i < _listView.Columns.Count; i++)
+                    _settings.TermPickerColumnWidths.Add(_listView.Columns[i].Width);
+
+                _settings.Save();
+            }
+
+            base.OnFormClosing(e);
         }
 
         /// <summary>

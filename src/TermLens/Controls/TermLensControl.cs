@@ -42,6 +42,12 @@ namespace TermLens.Controls
         /// </summary>
         public event EventHandler SettingsRequested;
 
+        /// <summary>
+        /// Fired when the user changes font size via the A+/A- buttons.
+        /// The ViewPart should persist the new size and refresh the segment display.
+        /// </summary>
+        public event EventHandler FontSizeChanged;
+
         public TermLensControl()
         {
             SuspendLayout();
@@ -90,7 +96,49 @@ namespace TermLens.Controls
             btnSettings.Click += (s, e) => SettingsRequested?.Invoke(this, EventArgs.Empty);
             _headerPanel.Controls.Add(btnSettings);
 
-            // Status label (right of header, left of gear button)
+            // Font size increase button (A+)
+            var btnFontUp = new Button
+            {
+                Text = "A+",
+                Dock = DockStyle.Right,
+                Width = 28,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
+                ForeColor = Color.FromArgb(100, 100, 100),
+                BackColor = Color.Transparent,
+                Cursor = Cursors.Hand,
+                TabStop = false,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Padding = Padding.Empty,
+                Margin = Padding.Empty
+            };
+            btnFontUp.FlatAppearance.BorderSize = 0;
+            btnFontUp.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 220, 220);
+            btnFontUp.Click += OnFontIncrease;
+            _headerPanel.Controls.Add(btnFontUp);
+
+            // Font size decrease button (A−)
+            var btnFontDown = new Button
+            {
+                Text = "A\u2212", // A followed by minus sign (−)
+                Dock = DockStyle.Right,
+                Width = 28,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
+                ForeColor = Color.FromArgb(100, 100, 100),
+                BackColor = Color.Transparent,
+                Cursor = Cursors.Hand,
+                TabStop = false,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Padding = Padding.Empty,
+                Margin = Padding.Empty
+            };
+            btnFontDown.FlatAppearance.BorderSize = 0;
+            btnFontDown.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 220, 220);
+            btnFontDown.Click += OnFontDecrease;
+            _headerPanel.Controls.Add(btnFontDown);
+
+            // Status label (right of header, left of font buttons)
             _statusLabel = new Label
             {
                 Dock = DockStyle.Right,
@@ -303,6 +351,30 @@ namespace TermLens.Controls
             _flowPanel.Controls.Clear();
             _statusLabel.Text = "";
             MatchCount = 0;
+        }
+
+        /// <summary>
+        /// Sets the panel font size (in points). Call this on startup with the
+        /// persisted value, or when the user changes it via Settings.
+        /// </summary>
+        public void SetFontSize(float sizeInPoints)
+        {
+            sizeInPoints = Math.Max(7f, Math.Min(16f, sizeInPoints));
+            Font = new Font("Segoe UI", sizeInPoints, FontStyle.Regular);
+        }
+
+        private void OnFontIncrease(object sender, EventArgs e)
+        {
+            var newSize = Math.Min(Font.Size + 0.5f, 16f);
+            Font = new Font(Font.FontFamily, newSize, Font.Style);
+            FontSizeChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnFontDecrease(object sender, EventArgs e)
+        {
+            var newSize = Math.Max(Font.Size - 0.5f, 7f);
+            Font = new Font(Font.FontFamily, newSize, Font.Style);
+            FontSizeChanged?.Invoke(this, EventArgs.Empty);
         }
 
         protected override void Dispose(bool disposing)

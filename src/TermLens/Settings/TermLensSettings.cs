@@ -41,11 +41,12 @@ namespace TermLens.Settings
         public long WriteTermbaseId { get; set; } = -1;
 
         /// <summary>
-        /// IDs of termbases the user has marked as "Project" glossaries.
-        /// Project glossaries are shown in pink; all others in blue.
+        /// ID of the termbase the user has marked as the "Project" glossary.
+        /// The project glossary is shown in pink; all others in blue.
+        /// -1 means no project glossary is configured.
         /// </summary>
-        [DataMember(Name = "projectTermbaseIds")]
-        public List<long> ProjectTermbaseIds { get; set; } = new List<long>();
+        [DataMember(Name = "projectTermbaseId")]
+        public long ProjectTermbaseId { get; set; } = -1;
 
         // ─── Term Picker dialog layout persistence ────────────────────
         [DataMember(Name = "termPickerWidth")]

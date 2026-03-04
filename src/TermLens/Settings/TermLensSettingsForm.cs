@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using TermLens.Controls;
 using TermLens.Core;
 using TermLens.Models;
 
@@ -20,9 +21,14 @@ namespace TermLens.Settings
         // Controls
         private TextBox _txtTermbasePath;
         private Button _btnBrowse;
+        private Button _btnCreateNew;
         private Label _lblTermbaseInfo;
         private DataGridView _dgvTermbases;
         private Label _lblTermbasesHeader;
+        private Button _btnAddGlossary;
+        private Button _btnRemoveGlossary;
+        private Button _btnImport;
+        private Button _btnExport;
         private CheckBox _chkAutoLoad;
         private NumericUpDown _nudFontSize;
         private Button _btnOK;
@@ -83,6 +89,17 @@ namespace TermLens.Settings
             _btnBrowse.Location = new Point(ClientSize.Width - 16 - _btnBrowse.Width, 58);
             _btnBrowse.Click += OnBrowseClick;
 
+            _btnCreateNew = new Button
+            {
+                Text = "Create New...",
+                Width = 120,
+                Height = 23,
+                FlatStyle = FlatStyle.System,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
+            };
+            _btnCreateNew.Location = new Point(_btnBrowse.Left - 6 - _btnCreateNew.Width, 58);
+            _btnCreateNew.Click += OnCreateNewClick;
+
             _txtTermbasePath = new TextBox
             {
                 Location = new Point(16, 60),
@@ -91,7 +108,7 @@ namespace TermLens.Settings
                 ForeColor = Color.FromArgb(40, 40, 40),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
-            _txtTermbasePath.Width = _btnBrowse.Left - 16 - 6;
+            _txtTermbasePath.Width = _btnCreateNew.Left - 16 - 6;
 
             _lblTermbaseInfo = new Label
             {
@@ -112,6 +129,67 @@ namespace TermLens.Settings
                 AutoSize = true,
                 ForeColor = Color.FromArgb(80, 80, 80)
             };
+
+            // Glossary management buttons (right-aligned on the Glossaries row)
+            _btnAddGlossary = new Button
+            {
+                Text = "+",
+                Width = 26,
+                Height = 22,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                ForeColor = Color.FromArgb(80, 80, 80),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
+            };
+            _btnAddGlossary.FlatAppearance.BorderSize = 0;
+            _btnAddGlossary.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 220, 220);
+            _btnAddGlossary.Location = new Point(ClientSize.Width - 16 - 26, 118);
+            _btnAddGlossary.Click += OnAddGlossaryClick;
+
+            _btnRemoveGlossary = new Button
+            {
+                Text = "\u2212",
+                Width = 26,
+                Height = 22,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                ForeColor = Color.FromArgb(80, 80, 80),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
+            };
+            _btnRemoveGlossary.FlatAppearance.BorderSize = 0;
+            _btnRemoveGlossary.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 220, 220);
+            _btnRemoveGlossary.Location = new Point(_btnAddGlossary.Left - 28, 118);
+            _btnRemoveGlossary.Click += OnRemoveGlossaryClick;
+
+            _btnImport = new Button
+            {
+                Text = "Import",
+                Width = 65,
+                Height = 22,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 8f),
+                ForeColor = Color.FromArgb(80, 80, 80),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
+            };
+            _btnImport.FlatAppearance.BorderSize = 0;
+            _btnImport.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 220, 220);
+            _btnImport.Location = new Point(_btnRemoveGlossary.Left - _btnImport.Width - 2, 118);
+            _btnImport.Click += OnImportClick;
+
+            _btnExport = new Button
+            {
+                Text = "Export",
+                Width = 65,
+                Height = 22,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 8f),
+                ForeColor = Color.FromArgb(80, 80, 80),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
+            };
+            _btnExport.FlatAppearance.BorderSize = 0;
+            _btnExport.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 220, 220);
+            _btnExport.Location = new Point(_btnImport.Left - _btnExport.Width - 2, 118);
+            _btnExport.Click += OnExportClick;
 
             _dgvTermbases = new DataGridView
             {
@@ -286,8 +364,10 @@ namespace TermLens.Settings
 
             Controls.AddRange(new Control[]
             {
-                lblSection, lblPath, _txtTermbasePath, _btnBrowse,
-                _lblTermbaseInfo, _lblTermbasesHeader, _dgvTermbases,
+                lblSection, lblPath, _txtTermbasePath, _btnCreateNew, _btnBrowse,
+                _lblTermbaseInfo, _lblTermbasesHeader,
+                _btnExport, _btnImport, _btnRemoveGlossary, _btnAddGlossary,
+                _dgvTermbases,
                 sep, _chkAutoLoad, lblFontSize, _nudFontSize, lblFontPt,
                 _btnOK, _btnCancel
             });
@@ -297,20 +377,23 @@ namespace TermLens.Settings
         {
             if (e.ColumnIndex < 0 || e.RowIndex < 0) return;
 
-            if (_dgvTermbases.Columns[e.ColumnIndex].Name == "colWrite")
+            var colName = _dgvTermbases.Columns[e.ColumnIndex].Name;
+
+            // Radio-button enforcement for Write and Project columns (only one can be checked)
+            if (colName == "colWrite" || colName == "colProject")
             {
                 // Commit the edit so .Value is up-to-date
                 _dgvTermbases.CommitEdit(DataGridViewDataErrorContexts.Commit);
 
-                var clicked = _dgvTermbases.Rows[e.RowIndex].Cells["colWrite"].Value as bool? ?? false;
+                var clicked = _dgvTermbases.Rows[e.RowIndex].Cells[colName].Value as bool? ?? false;
 
                 if (clicked)
                 {
-                    // Radio-button: uncheck all other rows
+                    // Radio-button: uncheck all other rows in this column
                     foreach (DataGridViewRow row in _dgvTermbases.Rows)
                     {
                         if (row.Index != e.RowIndex)
-                            row.Cells["colWrite"].Value = false;
+                            row.Cells[colName].Value = false;
                     }
                 }
             }
@@ -403,13 +486,12 @@ namespace TermLens.Settings
 
                     _termbases = reader.GetTermbases();
                     var disabled = new HashSet<long>(_settings.DisabledTermbaseIds ?? new List<long>());
-                    var projectIds = new HashSet<long>(_settings.ProjectTermbaseIds ?? new List<long>());
 
                     foreach (var tb in _termbases)
                     {
                         bool isRead = !disabled.Contains(tb.Id);
                         bool isWrite = tb.Id == _settings.WriteTermbaseId;
-                        bool isProject = projectIds.Contains(tb.Id);
+                        bool isProject = tb.Id == _settings.ProjectTermbaseId;
                         _dgvTermbases.Rows.Add(
                             isRead,
                             isWrite,
@@ -426,16 +508,223 @@ namespace TermLens.Settings
             }
         }
 
+        private void OnCreateNewClick(object sender, EventArgs e)
+        {
+            using (var dlg = new SaveFileDialog())
+            {
+                dlg.Title = "Create New Termbase";
+                dlg.Filter = "Supervertaler Termbase (*.db)|*.db";
+                dlg.FileName = "supervertaler.db";
+
+                var current = _txtTermbasePath.Text;
+                if (!string.IsNullOrEmpty(current) && File.Exists(current))
+                    dlg.InitialDirectory = Path.GetDirectoryName(current);
+
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    try
+                    {
+                        TermbaseReader.CreateDatabase(dlg.FileName);
+                        _txtTermbasePath.Text = dlg.FileName;
+                        UpdateTermbaseInfo(dlg.FileName);
+                        PopulateTermbaseList(dlg.FileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Failed to create database:\n{ex.Message}",
+                            "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void OnAddGlossaryClick(object sender, EventArgs e)
+        {
+            var dbPath = _txtTermbasePath.Text.Trim();
+            if (string.IsNullOrEmpty(dbPath) || !File.Exists(dbPath))
+            {
+                MessageBox.Show("Please select or create a termbase file first.",
+                    "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using (var dlg = new NewGlossaryDialog())
+            {
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    try
+                    {
+                        TermbaseReader.CreateTermbase(dbPath, dlg.GlossaryName,
+                            dlg.SourceLang, dlg.TargetLang);
+                        UpdateTermbaseInfo(dbPath);
+                        PopulateTermbaseList(dbPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Failed to create glossary:\n{ex.Message}",
+                            "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void OnRemoveGlossaryClick(object sender, EventArgs e)
+        {
+            var dbPath = _txtTermbasePath.Text.Trim();
+            if (string.IsNullOrEmpty(dbPath) || !File.Exists(dbPath))
+                return;
+
+            if (_dgvTermbases.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Select a glossary first.",
+                    "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            int idx = _dgvTermbases.SelectedRows[0].Index;
+            if (idx < 0 || idx >= _termbases.Count)
+                return;
+
+            var selected = _termbases[idx];
+            var result = MessageBox.Show(
+                $"Delete glossary \"{selected.Name}\" and all its {selected.TermCount:N0} terms?\n\nThis cannot be undone.",
+                "TermLens \u2014 Delete Glossary",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    TermbaseReader.DeleteTermbase(dbPath, selected.Id);
+
+                    // Clear write/project references if the deleted glossary was selected
+                    if (_settings.WriteTermbaseId == selected.Id)
+                        _settings.WriteTermbaseId = -1;
+                    if (_settings.ProjectTermbaseId == selected.Id)
+                        _settings.ProjectTermbaseId = -1;
+
+                    UpdateTermbaseInfo(dbPath);
+                    PopulateTermbaseList(dbPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to delete glossary:\n{ex.Message}",
+                        "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void OnImportClick(object sender, EventArgs e)
+        {
+            var dbPath = _txtTermbasePath.Text.Trim();
+            if (string.IsNullOrEmpty(dbPath) || !File.Exists(dbPath))
+            {
+                MessageBox.Show("Please select or create a termbase file first.",
+                    "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (_dgvTermbases.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Select a glossary to import into.",
+                    "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            int idx = _dgvTermbases.SelectedRows[0].Index;
+            if (idx < 0 || idx >= _termbases.Count)
+                return;
+
+            var selected = _termbases[idx];
+
+            using (var dlg = new OpenFileDialog())
+            {
+                dlg.Title = $"Import TSV into \"{selected.Name}\"";
+                dlg.Filter = "Tab-separated files (*.tsv;*.txt)|*.tsv;*.txt|All files (*.*)|*.*";
+
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+
+                try
+                {
+                    Cursor = Cursors.WaitCursor;
+                    int count = TermbaseReader.ImportTsv(dbPath, selected.Id, dlg.FileName,
+                        selected.SourceLang, selected.TargetLang);
+                    Cursor = Cursors.Default;
+
+                    MessageBox.Show($"Imported {count:N0} terms into \"{selected.Name}\".",
+                        "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    UpdateTermbaseInfo(dbPath);
+                    PopulateTermbaseList(dbPath);
+                }
+                catch (Exception ex)
+                {
+                    Cursor = Cursors.Default;
+                    MessageBox.Show($"Import failed:\n{ex.Message}",
+                        "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void OnExportClick(object sender, EventArgs e)
+        {
+            var dbPath = _txtTermbasePath.Text.Trim();
+            if (string.IsNullOrEmpty(dbPath) || !File.Exists(dbPath))
+            {
+                MessageBox.Show("Please select or create a termbase file first.",
+                    "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (_dgvTermbases.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Select a glossary to export.",
+                    "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            int idx = _dgvTermbases.SelectedRows[0].Index;
+            if (idx < 0 || idx >= _termbases.Count)
+                return;
+
+            var selected = _termbases[idx];
+
+            using (var dlg = new SaveFileDialog())
+            {
+                dlg.Title = $"Export \"{selected.Name}\" as TSV";
+                dlg.Filter = "Tab-separated files (*.tsv)|*.tsv|All files (*.*)|*.*";
+                dlg.FileName = $"{selected.Name}.tsv";
+
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+
+                try
+                {
+                    Cursor = Cursors.WaitCursor;
+                    int count = TermbaseReader.ExportTsv(dbPath, selected.Id, dlg.FileName);
+                    Cursor = Cursors.Default;
+
+                    MessageBox.Show($"Exported {count:N0} terms from \"{selected.Name}\".",
+                        "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    Cursor = Cursors.Default;
+                    MessageBox.Show($"Export failed:\n{ex.Message}",
+                        "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
         private void OnOKClick(object sender, EventArgs e)
         {
             _settings.TermbasePath = _txtTermbasePath.Text.Trim();
             _settings.AutoLoadOnStartup = _chkAutoLoad.Checked;
             _settings.PanelFontSize = (float)_nudFontSize.Value;
 
-            // Build disabled list, write ID, and project IDs from grid cells
+            // Build disabled list, write ID, and project ID from grid cells
             _settings.DisabledTermbaseIds = new List<long>();
             _settings.WriteTermbaseId = -1;
-            _settings.ProjectTermbaseIds = new List<long>();
+            _settings.ProjectTermbaseId = -1;
 
             for (int i = 0; i < _termbases.Count; i++)
             {
@@ -448,7 +737,7 @@ namespace TermLens.Settings
                 if (writeChecked)
                     _settings.WriteTermbaseId = _termbases[i].Id;
                 if (projectChecked)
-                    _settings.ProjectTermbaseIds.Add(_termbases[i].Id);
+                    _settings.ProjectTermbaseId = _termbases[i].Id;
             }
 
             _settings.Save();

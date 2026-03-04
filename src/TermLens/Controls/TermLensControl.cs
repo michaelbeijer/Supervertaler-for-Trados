@@ -24,7 +24,7 @@ namespace TermLens.Controls
         private TermMatcher _matcher;
         private TermbaseReader _reader;
         private string _currentDbPath;
-        private HashSet<long> _projectTermbaseIds = new HashSet<long>();
+        private long _projectTermbaseId = -1;
 
         /// <summary>
         /// Number of matched terms in the current segment display.
@@ -103,7 +103,7 @@ namespace TermLens.Controls
                 Dock = DockStyle.Right,
                 Width = 28,
                 FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(100, 100, 100),
                 BackColor = Color.Transparent,
                 Cursor = Cursors.Hand,
@@ -124,7 +124,7 @@ namespace TermLens.Controls
                 Dock = DockStyle.Right,
                 Width = 28,
                 FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 7f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(100, 100, 100),
                 BackColor = Color.Transparent,
                 Cursor = Cursors.Hand,
@@ -170,12 +170,12 @@ namespace TermLens.Controls
         }
 
         /// <summary>
-        /// Sets the project termbase IDs (glossaries shown in pink).
-        /// Call this whenever settings change.
+        /// Sets the project termbase ID (glossary shown in pink).
+        /// Call this whenever settings change. Pass -1 for no project glossary.
         /// </summary>
-        public void SetProjectTermbaseIds(IEnumerable<long> ids)
+        public void SetProjectTermbaseId(long id)
         {
-            _projectTermbaseIds = ids != null ? new HashSet<long>(ids) : new HashSet<long>();
+            _projectTermbaseId = id;
         }
 
         /// <summary>
@@ -260,14 +260,17 @@ namespace TermLens.Controls
 
                 if (token.HasMatch)
                 {
-                    // A term is "project" if any of its entries come from a project glossary
+                    // A term is "project" if any of its entries come from the project glossary
                     bool isProject = false;
-                    foreach (var m in token.Matches)
+                    if (_projectTermbaseId >= 0)
                     {
-                        if (_projectTermbaseIds.Contains(m.TermbaseId))
+                        foreach (var m in token.Matches)
                         {
-                            isProject = true;
-                            break;
+                            if (m.TermbaseId == _projectTermbaseId)
+                            {
+                                isProject = true;
+                                break;
+                            }
                         }
                     }
 

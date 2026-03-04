@@ -11,19 +11,18 @@ using TermLens.Settings;
 namespace TermLens
 {
     /// <summary>
-    /// Editor context menu action: "Quick add Term to TermLens".
-    /// Appears in the right-click context menu and responds to Ctrl+Alt+Shift+T.
-    /// Extracts selected source/target text and inserts the term directly,
-    /// bypassing the AddTermDialog for faster workflow.
+    /// Keyboard-only action: "Quick add Term to Project Glossary".
+    /// Responds to Alt+Up. Extracts selected source/target text and inserts
+    /// the term directly into the project glossary, bypassing the AddTermDialog.
     /// </summary>
-    [Action("TermLens_QuickAddTerm", typeof(EditorController),
-        Name = "Quick add Term to glossaries set to 'Read'",
-        Description = "Quickly add the selected source/target text to the Write termbase (no dialog)")]
+    [Action("TermLens_QuickAddProjectTerm", typeof(EditorController),
+        Name = "Quick add Term to project glossary",
+        Description = "Quickly add the selected source/target text to the project glossary (no dialog)")]
     [ActionLayout(
-        typeof(TranslationStudioDefaultContextMenus.EditorDocumentContextMenuLocation), 6,
+        typeof(TranslationStudioDefaultContextMenus.EditorDocumentContextMenuLocation), 7,
         DisplayType.Default, "", false)]
-    [Shortcut(Keys.Alt | Keys.Down)]
-    public class QuickAddTermAction : AbstractAction
+    [Shortcut(Keys.Alt | Keys.Up)]
+    public class QuickAddProjectTermAction : AbstractAction
     {
         protected override void Execute()
         {
@@ -40,14 +39,14 @@ namespace TermLens
 
                 var settings = TermLensSettings.Load();
 
-                // Validate write termbase is configured
-                if (settings.WriteTermbaseId < 0)
+                // Validate project glossary is configured
+                if (settings.ProjectTermbaseId < 0)
                 {
                     MessageBox.Show(
-                        "No write termbase is configured.\n\n" +
-                        "Open TermLens settings (gear icon) and check the \u201cWrite\u201d column " +
-                        "for the termbase where new terms should be added.",
-                        "TermLens \u2014 Quick Add Term",
+                        "No project glossary is configured.\n\n" +
+                        "Open TermLens settings (gear icon) and check the \u201cProject\u201d column " +
+                        "for the glossary that should receive project-specific terms.",
+                        "TermLens \u2014 Quick Add to Project",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -57,7 +56,7 @@ namespace TermLens
                 {
                     MessageBox.Show(
                         "Termbase file not found. Please check the TermLens settings.",
-                        "TermLens \u2014 Quick Add Term",
+                        "TermLens \u2014 Quick Add to Project",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -120,25 +119,25 @@ namespace TermLens
                         "Both source and target text are required.\n\n" +
                         "Make sure you have an active segment with text in both " +
                         "the source and target columns.",
-                        "TermLens \u2014 Quick Add Term",
+                        "TermLens \u2014 Quick Add to Project",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                // Get write termbase metadata
-                Models.TermbaseInfo writeTermbase = null;
+                // Get project termbase metadata
+                Models.TermbaseInfo projectTermbase = null;
                 using (var reader = new TermbaseReader(settings.TermbasePath))
                 {
                     if (reader.Open())
-                        writeTermbase = reader.GetTermbaseById(settings.WriteTermbaseId);
+                        projectTermbase = reader.GetTermbaseById(settings.ProjectTermbaseId);
                 }
 
-                if (writeTermbase == null)
+                if (projectTermbase == null)
                 {
                     MessageBox.Show(
-                        "The configured write termbase was not found in the database.\n" +
+                        "The configured project glossary was not found in the database.\n" +
                         "Please check the TermLens settings.",
-                        "TermLens \u2014 Quick Add Term",
+                        "TermLens \u2014 Quick Add to Project",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -148,11 +147,11 @@ namespace TermLens
                 {
                     var newId = TermbaseReader.InsertTerm(
                         settings.TermbasePath,
-                        settings.WriteTermbaseId,
+                        settings.ProjectTermbaseId,
                         sourceText,
                         targetText,
-                        writeTermbase.SourceLang,
-                        writeTermbase.TargetLang,
+                        projectTermbase.SourceLang,
+                        projectTermbase.TargetLang,
                         ""); // No definition for quick-add
 
                     if (newId > 0)
@@ -166,7 +165,7 @@ namespace TermLens
                     MessageBox.Show(
                         $"Failed to add term: {ex.Message}\n\n" +
                         "The database may be locked by another application.",
-                        "TermLens \u2014 Quick Add Term",
+                        "TermLens \u2014 Quick Add to Project",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }

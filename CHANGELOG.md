@@ -3,17 +3,49 @@
 ## [Unreleased]
 
 ### Planned
-- **Import** — bulk import terms from TSV (matching Supervertaler's format exactly:
-  tab-separated, pipe-delimited synonyms, `[!forbidden]` syntax, UUID tracking);
-  TBX to be added in sync with Supervertaler when that is implemented
-- **Export** — export the full termbase (or a filtered subset) to the same TSV format,
-  so files are interchangeable between Supervertaler and TermLens without conversion
+- **TBX support** — to be added simultaneously in both Supervertaler and TermLens
+  when the format is finalized
 
 ---
 
 All notable changes to TermLens will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/).
+
+---
+
+## [1.5.0] — 2026-03-04
+
+### Added
+- **Standalone database creation** — "Create New…" button in Settings creates a fresh
+  Supervertaler-compatible SQLite database from scratch, so TermLens can function
+  independently without Supervertaler installed
+- **Glossary management** — "+" and "−" buttons in Settings to create and delete
+  individual glossaries inside a database; new glossary dialog collects name, source
+  language, and target language
+- **TSV import** — bulk import terms from tab-separated files matching Supervertaler's
+  format (pipe-delimited synonyms, `[!forbidden]` markers, UUID-based duplicate
+  detection); flexible header mapping supports multiple column name conventions
+- **TSV export** — export all terms from a glossary to the same TSV format, so files
+  are fully interchangeable between Supervertaler and TermLens
+- **Alt+Down quick-add shortcut** — adds the current source/target text directly to
+  the Write glossary (replaces the previous Ctrl+Alt+Shift+T binding)
+- **Alt+Up quick-add to project glossary** — new action that adds the current
+  source/target text directly to the Project glossary (no dialog)
+
+### Changed
+- **Project column is now single-select** — the Project column in Settings uses
+  radio-button behavior (only one glossary can be the project glossary at a time),
+  matching the single Write glossary pattern
+- **Context menu reorganised** — the "Add Term to TermLens" actions are now grouped
+  under a separator in the editor context menu, with clearer names ("Add Term to
+  TermLens (dialogue)" and "Quick add Term to glossaries set to 'Read'")
+- **A+/A− button font sizes** — adjusted for better visual balance (A+ uses 9pt,
+  A− uses 7pt instead of both using 7.5pt)
+
+### Fixed
+- **Term block text truncation** — TermBlock now recalculates its size when the font
+  changes (via `OnFontChanged` override), preventing clipped text after A+/A− resizing
 
 ---
 

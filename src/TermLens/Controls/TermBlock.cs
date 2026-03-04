@@ -107,6 +107,13 @@ namespace TermLens.Controls
         private Font TargetFont => new Font(Font.FontFamily, Font.Size, FontStyle.Regular);
         private Font BadgeFont => new Font(Font.FontFamily, Font.Size - 1, FontStyle.Bold);
 
+        protected override void OnFontChanged(EventArgs e)
+        {
+            base.OnFontChanged(e);
+            CalculateSize();
+            Invalidate();
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = e.Graphics;

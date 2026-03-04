@@ -18,11 +18,11 @@ namespace TermLens
     /// Extracts selected source/target text, opens AddTermDialog, and inserts the term.
     /// </summary>
     [Action("TermLens_AddTerm", typeof(EditorController),
-        Name = "Add Term to TermLens",
-        Description = "Add the selected source/target text as a new term")]
+        Name = "Add Term to TermLens (dialogue)",
+        Description = "Add the selected source/target text as a new term via dialogue")]
     [ActionLayout(
-        typeof(TranslationStudioDefaultContextMenus.EditorDocumentContextMenuLocation), 9,
-        DisplayType.Default, "", false)]
+        typeof(TranslationStudioDefaultContextMenus.EditorDocumentContextMenuLocation), 8,
+        DisplayType.Default, "", true)]
     [Shortcut(Keys.Control | Keys.Alt | Keys.T)]
     public class AddTermAction : AbstractAction
     {

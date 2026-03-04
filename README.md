@@ -20,7 +20,10 @@ As you navigate between segments in the Trados Studio editor, the TermLens panel
 - **Term Picker dialog** — press Ctrl+Shift+G to browse all matched terms and their synonyms in a list, with expandable synonym rows
 - **Add terms from the editor** — right-click to add a new term from the active segment's source/target text, with or without a confirmation dialog
 - **Adjustable font size** — A+/A− buttons in the panel header for quick on-the-fly size changes, or set the exact size in Settings; persists across restarts
-- **Read/Write/Project termbase selection** — choose which termbases to search (Read), which one receives new terms (Write), and which are project glossaries (Project)
+- **Read/Write/Project termbase selection** — choose which termbases to search (Read), which one receives new terms (Write), and which is the project glossary (Project)
+- **Standalone database creation** — create a fresh Supervertaler-compatible termbase database from the Settings dialog, no external tools required
+- **Glossary management** — add and remove individual glossaries inside a database directly from Settings
+- **TSV import/export** — bulk import and export terms in Supervertaler's TSV format (tab-separated, pipe-delimited synonyms, `[!forbidden]` markers, UUID tracking)
 - **Supervertaler-compatible** — reads and writes Supervertaler's SQLite termbase format directly, so you can share termbases between both tools
 - **Auto-detect** — automatically finds your Supervertaler termbase if no file is configured
 - **Remembers layout** — dialog sizes and column widths are saved and restored between sessions

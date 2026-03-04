@@ -91,8 +91,8 @@ namespace TermLens
                 ? new HashSet<long>(_settings.DisabledTermbaseIds)
                 : null;
 
-            // Push project glossary IDs to the control for pink/blue coloring
-            _control.Value.SetProjectTermbaseIds(_settings.ProjectTermbaseIds);
+            // Push project glossary ID to the control for pink/blue coloring
+            _control.Value.SetProjectTermbaseId(_settings.ProjectTermbaseId);
 
             // 1. Use the saved termbase path if set and the file exists
             if (!string.IsNullOrEmpty(_settings.TermbasePath) && File.Exists(_settings.TermbasePath))

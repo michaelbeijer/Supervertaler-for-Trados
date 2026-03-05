@@ -58,7 +58,7 @@ Alternatively, you can copy the `.sdlplugin` file manually to:
 %LocalAppData%\Trados\Trados Studio\18\Plugins\Packages\
 ```
 
-Restart Trados Studio and the TermLens panel will appear above the editor when you open a document.
+Restart Trados Studio and the Supervertaler for Trados panel will appear above the editor when you open a document, with tabs for TermLens and upcoming AI features.
 
 > **Upgrading from TermLens?** The old TermLens plugin should be uninstalled first. Your settings will be migrated automatically.
 

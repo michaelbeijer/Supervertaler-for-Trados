@@ -16,6 +16,17 @@ OLD_UNPACKED_DIR="$LOCALAPPDATA/Trados/Trados Studio/18/Plugins/Unpacked/TermLen
 echo "=== Building Supervertaler for Trados ==="
 "$DOTNET" build "$PROJECT_DIR/Supervertaler.Trados.csproj" -c Release
 
+# Ensure ARM64 native SQLite binary is in the build output.
+# NuGet restore downloads it but MSBuild only copies x64/x86/arm to the output.
+# Needed for Windows on ARM (Parallels on Apple Silicon, Surface Pro X, etc.).
+ARM64_SRC="$USERPROFILE/.nuget/packages/sqlitepclraw.lib.e_sqlite3/2.1.6/runtimes/win-arm64/native/e_sqlite3.dll"
+ARM64_DST="$BUILD_DIR/runtimes/win-arm64/native"
+if [ -f "$ARM64_SRC" ] && [ ! -f "$ARM64_DST/e_sqlite3.dll" ]; then
+    echo "  Copying win-arm64 native e_sqlite3.dll..."
+    mkdir -p "$ARM64_DST"
+    cp "$ARM64_SRC" "$ARM64_DST/e_sqlite3.dll"
+fi
+
 echo ""
 echo "=== Packaging Supervertaler.Trados.sdlplugin (OPC format) ==="
 mkdir -p "$DIST_DIR"

@@ -50,6 +50,9 @@ namespace Supervertaler.Trados
         private BatchTranslator _batchTranslator;
         private CancellationTokenSource _batchCts;
 
+        // Prompt library
+        private PromptLibrary _promptLibrary;
+
         // --- Alt+digit chord state machine ---
         private static int? _pendingDigit;
         private static System.Windows.Forms.Timer _chordTimer;
@@ -65,6 +68,10 @@ namespace Supervertaler.Trados
 
             // Load persisted settings
             _settings = TermLensSettings.Load();
+
+            // Initialize prompt library and seed built-in prompts on first run
+            _promptLibrary = new PromptLibrary();
+            _promptLibrary.EnsureBuiltInPrompts();
 
             _editorController = SdlTradosStudio.Application.GetController<EditorController>();
 
@@ -111,6 +118,9 @@ namespace Supervertaler.Trados
             // Update batch translate tab with current provider info and segment counts
             UpdateBatchProviderDisplay();
             UpdateBatchSegmentCounts();
+
+            // Populate prompt dropdown from library
+            PopulateBatchPromptDropdown();
         }
 
         private void LoadTermbase(bool forceReload = false)
@@ -152,7 +162,7 @@ namespace Supervertaler.Trados
         {
             SafeInvoke(() =>
             {
-                using (var form = new TermLensSettingsForm(_settings))
+                using (var form = new TermLensSettingsForm(_settings, _promptLibrary))
                 {
                     // Find a parent window handle for proper dialog parenting
                     var parent = _control.Value.FindForm();
@@ -172,6 +182,10 @@ namespace Supervertaler.Trados
 
                         // Refresh batch translate provider display (user may have changed AI settings)
                         UpdateBatchProviderDisplay();
+
+                        // Refresh prompt library (user may have added/edited/deleted prompts)
+                        _promptLibrary.Refresh();
+                        PopulateBatchPromptDropdown();
                     }
                 }
             });
@@ -481,6 +495,35 @@ namespace Supervertaler.Trados
             instance.UpdateFromActiveSegment();
         }
 
+        // ─── Prompt Library ───────────────────────────────────────────
+
+        private void PopulateBatchPromptDropdown()
+        {
+            SafeInvoke(() =>
+            {
+                var prompts = _promptLibrary?.GetAllPrompts();
+                var selectedPath = _settings?.AiSettings?.SelectedPromptPath ?? "";
+                _batchControl.Value.SetPrompts(prompts, selectedPath);
+            });
+        }
+
+        /// <summary>
+        /// Resolves the custom prompt content for the currently selected prompt.
+        /// Applies variable substitution for source/target language.
+        /// </summary>
+        private string ResolveCustomPromptContent(string sourceLang, string targetLang)
+        {
+            var selectedPath = _settings?.AiSettings?.SelectedPromptPath;
+            if (string.IsNullOrEmpty(selectedPath) || _promptLibrary == null)
+                return null;
+
+            var prompt = _promptLibrary.GetPromptByRelativePath(selectedPath);
+            if (prompt == null || string.IsNullOrWhiteSpace(prompt.Content))
+                return null;
+
+            return PromptLibrary.ApplyVariables(prompt.Content, sourceLang, targetLang);
+        }
+
         // ─── Batch Translate ──────────────────────────────────────────
 
         private void OnBatchTranslateRequested(object sender, EventArgs e)
@@ -558,6 +601,14 @@ namespace Supervertaler.Trados
                 // Get glossary terms for prompt injection
                 var glossaryTerms = _control.Value.GetAllLoadedTerms();
 
+                // Resolve custom prompt from library selection
+                var selectedPromptPath = _batchControl.Value.GetSelectedPromptPath();
+                aiSettings.SelectedPromptPath = selectedPromptPath;
+                _settings.Save();
+
+                var customPromptContent = ResolveCustomPromptContent(sourceLang, targetLang);
+                var customSystemPrompt = aiSettings.CustomSystemPrompt;
+
                 int batchSize = aiSettings.BatchSize > 0 ? aiSettings.BatchSize : 20;
 
                 // Start the batch translation
@@ -581,7 +632,8 @@ namespace Supervertaler.Trados
                     {
                         await _batchTranslator.TranslateAsync(
                             segments, sourceLang, targetLang,
-                            aiSettings, glossaryTerms, batchSize, ct);
+                            aiSettings, glossaryTerms, batchSize, ct,
+                            customPromptContent, customSystemPrompt);
                     }
                     catch (Exception ex)
                     {
@@ -908,6 +960,10 @@ namespace Supervertaler.Trados
                     // Get glossary terms for prompt injection
                     var glossaryTerms = _control.Value.GetAllLoadedTerms();
 
+                    // Resolve custom prompt from settings (same prompt as batch translate)
+                    var customPromptContent = instance.ResolveCustomPromptContent(sourceLang, targetLang);
+                    var customSystemPrompt = aiSettings.CustomSystemPrompt;
+
                     // Log to batch translate panel for visibility
                     _batchControl.Value.AppendLog($"Translating segment: \"{Truncate(sourceText, 60)}\"...");
 
@@ -918,7 +974,8 @@ namespace Supervertaler.Trados
                         try
                         {
                             var systemPrompt = TranslationPrompt.BuildSystemPrompt(
-                                sourceLang, targetLang, glossaryTerms);
+                                sourceLang, targetLang,
+                                customPromptContent, glossaryTerms, customSystemPrompt);
 
                             var client = new LlmClient(
                                 capturedAiSettings.SelectedProvider,

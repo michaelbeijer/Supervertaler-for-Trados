@@ -34,6 +34,7 @@ PLUGIN_FILES = [
     # --- Native SQLite library (per-architecture) ---
     "runtimes/win-x64/native/e_sqlite3.dll",
     "runtimes/win-x86/native/e_sqlite3.dll",
+    "runtimes/win-arm64/native/e_sqlite3.dll",
 ]
 
 # Extra files listed in the <Include> section of pluginpackage.manifest.xml
@@ -49,6 +50,7 @@ INCLUDE_FILES = [
     "System.Runtime.CompilerServices.Unsafe.dll",
     "runtimes/win-x64/native/e_sqlite3.dll",
     "runtimes/win-x86/native/e_sqlite3.dll",
+    "runtimes/win-arm64/native/e_sqlite3.dll",
 ]
 
 

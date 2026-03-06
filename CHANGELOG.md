@@ -3,7 +3,6 @@
 ## [Unreleased]
 
 ### Planned
-- **Prompt manager / library** — manage system and custom prompts for AI translation
 - **AI chat assistant** — project-aware chat interface docked in Trados
 - **TBX support** — to be added simultaneously in both Supervertaler and this plugin
 
@@ -12,6 +11,41 @@
 All notable changes to Supervertaler for Trados (formerly TermLens) will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/).
+
+---
+
+## [3.1.0] — 2026-03-06
+
+### Added
+- **Prompt manager / library** — 14 built-in prompts (domain expertise for Medical,
+  Legal, Patent, Financial, Technical, Marketing, IT; style guides for Dutch, English,
+  French, German, Spanish; project prompts for professional tone and formatting);
+  prompts stored as Markdown files with YAML frontmatter, compatible with Supervertaler
+  desktop prompt format
+- **Prompt selector in Batch Translate** — dropdown between Scope and Provider lets you
+  pick a prompt before translating; selected prompt persists across sessions
+- **Prompts tab in Settings** — third tab in the Settings dialog with system prompt
+  viewer/editor and full prompt library management (create, edit, delete, restore
+  built-in prompts)
+- **Composable prompt assembly** — base system prompt (tag preservation, number
+  formatting) + custom prompt (domain/style instructions) + glossary terms; custom
+  system prompt override available for advanced users
+- **Supervertaler desktop prompt discovery** — automatically scans
+  `~/Supervertaler_Data/` and `%AppData%\Supervertaler\` for shared prompt libraries
+- **Variable substitution** — prompts support `{source_lang}`, `{target_lang}`,
+  `{{SOURCE_LANGUAGE}}`, `{{TARGET_LANGUAGE}}` placeholders, replaced at translation
+  time with the document's language pair
+
+### Fixed
+- **Windows on ARM support** — the plugin now works on Windows on ARM (Parallels on
+  Apple Silicon Macs, Surface Pro X, etc.); ships ARM64 native SQLite binary alongside
+  x64 and x86; properly detects process architecture and copies the correct native
+  library where SQLitePCLRaw can find it
+- **SQLitePCLRaw initialization order** — `AssemblyResolve` handler is now registered
+  before native library preloading, and `Batteries_V2.Init()` is called explicitly to
+  prevent `TypeInitializationException` on non-standard environments
+- **Improved error diagnostics** — database creation errors now show the full inner
+  exception chain for easier troubleshooting
 
 ---
 

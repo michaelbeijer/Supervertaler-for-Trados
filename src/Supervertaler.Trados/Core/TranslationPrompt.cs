@@ -8,15 +8,17 @@ namespace Supervertaler.Trados.Core
 {
     /// <summary>
     /// Builds system and user prompts for AI translation, and parses batch responses.
+    /// Supports composable prompt assembly: Base → Custom → Glossary.
     /// Ported from Python Supervertaler's UnifiedPromptLibrary / build_final_prompt().
     /// </summary>
     public static class TranslationPrompt
     {
         /// <summary>
-        /// Builds the system prompt for translation, including glossary injection.
+        /// Builds the base system prompt with critical translation instructions.
+        /// This includes persona, core rules, tag preservation, and number formatting.
+        /// Always included — custom prompts are appended after this.
         /// </summary>
-        public static string BuildSystemPrompt(string sourceLang, string targetLang,
-            List<TermEntry> glossaryTerms = null)
+        public static string BuildBaseSystemPrompt(string sourceLang, string targetLang)
         {
             var sb = new StringBuilder(4096);
 
@@ -62,12 +64,64 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine("- If the target language is English or Irish, use a period as the decimal " +
                 "separator (e.g., 17.1 cm).");
             sb.AppendLine("- Follow the number formatting conventions of the target language.");
-            sb.AppendLine();
 
-            // Glossary injection
+            return sb.ToString().TrimEnd();
+        }
+
+        /// <summary>
+        /// Returns the default base system prompt text (for display in settings UI).
+        /// </summary>
+        public static string GetDefaultBaseSystemPrompt()
+        {
+            return BuildBaseSystemPrompt("{{SOURCE_LANGUAGE}}", "{{TARGET_LANGUAGE}}");
+        }
+
+        /// <summary>
+        /// Builds the full system prompt by composing: Base → Custom Prompt → Glossary.
+        /// This is the main entry point used by both batch and single-segment translate.
+        /// </summary>
+        /// <param name="sourceLang">Source language display name</param>
+        /// <param name="targetLang">Target language display name</param>
+        /// <param name="customPromptContent">Optional custom prompt content (from library); already variable-substituted</param>
+        /// <param name="glossaryTerms">Optional glossary terms to inject</param>
+        /// <param name="customSystemPrompt">Optional system prompt override (replaces base prompt entirely)</param>
+        public static string BuildSystemPrompt(string sourceLang, string targetLang,
+            string customPromptContent = null,
+            List<TermEntry> glossaryTerms = null,
+            string customSystemPrompt = null)
+        {
+            var sb = new StringBuilder(4096);
+
+            // Layer 1: Base system prompt (or user's custom override)
+            if (!string.IsNullOrWhiteSpace(customSystemPrompt))
+            {
+                // User has overridden the system prompt — apply variable substitution
+                var resolved = PromptLibrary.ApplyVariables(customSystemPrompt, sourceLang, targetLang);
+                sb.Append(resolved);
+            }
+            else
+            {
+                sb.Append(BuildBaseSystemPrompt(sourceLang, targetLang));
+            }
+
+            // Layer 2: Custom prompt from library (appended as additional instructions)
+            if (!string.IsNullOrWhiteSpace(customPromptContent))
+            {
+                sb.AppendLine();
+                sb.AppendLine();
+                sb.AppendLine("# CUSTOM INSTRUCTIONS");
+                sb.AppendLine();
+                sb.Append(customPromptContent);
+            }
+
+            // Layer 3: Glossary injection
             if (glossaryTerms != null && glossaryTerms.Count > 0)
             {
-                sb.AppendLine("**GLOSSARY** \u2014 Use these approved terms consistently in your translation:");
+                sb.AppendLine();
+                sb.AppendLine();
+                sb.AppendLine("# GLOSSARY");
+                sb.AppendLine();
+                sb.AppendLine("Use these approved terms consistently in your translation:");
                 sb.AppendLine();
                 foreach (var term in glossaryTerms)
                 {
@@ -81,7 +135,6 @@ namespace Supervertaler.Trados.Core
                     else
                         sb.AppendLine("- " + term.SourceTerm + " \u2192 " + term.TargetTerm);
                 }
-                sb.AppendLine();
             }
 
             return sb.ToString().TrimEnd();

@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Supervertaler.Trados.Core;
+using Supervertaler.Trados.Models;
 
 namespace Supervertaler.Trados.Controls
 {
@@ -17,8 +19,12 @@ namespace Supervertaler.Trados.Controls
 
         // Configuration
         private ComboBox _cmbScope;
+        private ComboBox _cmbPrompt;
         private Label _lblProvider;
         private Label _lblSegmentCount;
+
+        // Prompt list (aligned with ComboBox indices; index 0 = "None")
+        private List<PromptTemplate> _promptList = new List<PromptTemplate>();
 
         // Progress
         private ProgressBar _progressBar;
@@ -96,6 +102,28 @@ namespace Supervertaler.Trados.Controls
             _cmbScope.SelectedIndexChanged += (s, e) => ScopeChanged?.Invoke(this, EventArgs.Empty);
             Controls.Add(lblScope);
             Controls.Add(_cmbScope);
+            y += 28;
+
+            // ─── Prompt ──────────────────────────────────────────
+            var lblPrompt = new Label
+            {
+                Text = "Prompt:",
+                Location = new Point(12, y + 3),
+                AutoSize = true,
+                Font = bodyFont,
+                ForeColor = labelColor
+            };
+            _cmbPrompt = new ComboBox
+            {
+                Location = new Point(100, y),
+                Width = 200,
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = bodyFont
+            };
+            _cmbPrompt.Items.Add("(None \u2014 default)");
+            _cmbPrompt.SelectedIndex = 0;
+            Controls.Add(lblPrompt);
+            Controls.Add(_cmbPrompt);
             y += 28;
 
             // ─── Provider ───────────────────────────────────────
@@ -248,6 +276,57 @@ namespace Supervertaler.Trados.Controls
         }
 
         /// <summary>
+        /// Populates the prompt dropdown with available prompts and selects the specified one.
+        /// </summary>
+        public void SetPrompts(List<PromptTemplate> prompts, string selectedRelativePath)
+        {
+            _cmbPrompt.Items.Clear();
+            _cmbPrompt.Items.Add("(None \u2014 default)");
+            _promptList.Clear();
+
+            int selectedIdx = 0;
+            if (prompts != null)
+            {
+                foreach (var p in prompts)
+                {
+                    _promptList.Add(p);
+                    var display = string.IsNullOrEmpty(p.Domain)
+                        ? p.Name
+                        : p.Domain + " / " + p.Name;
+                    _cmbPrompt.Items.Add(display);
+
+                    if (!string.IsNullOrEmpty(selectedRelativePath) &&
+                        string.Equals(p.RelativePath, selectedRelativePath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        selectedIdx = _cmbPrompt.Items.Count - 1;
+                    }
+                }
+            }
+
+            _cmbPrompt.SelectedIndex = selectedIdx;
+        }
+
+        /// <summary>
+        /// Returns the currently selected prompt template, or null if "(None)" is selected.
+        /// </summary>
+        public PromptTemplate GetSelectedPrompt()
+        {
+            var idx = _cmbPrompt.SelectedIndex - 1; // 0 = "(None)", so subtract 1
+            if (idx < 0 || idx >= _promptList.Count)
+                return null;
+            return _promptList[idx];
+        }
+
+        /// <summary>
+        /// Returns the relative path of the selected prompt (for settings persistence).
+        /// </summary>
+        public string GetSelectedPromptPath()
+        {
+            var prompt = GetSelectedPrompt();
+            return prompt?.RelativePath ?? "";
+        }
+
+        /// <summary>
         /// Returns the selected batch scope.
         /// </summary>
         public BatchScope GetSelectedScope()
@@ -300,6 +379,7 @@ namespace Supervertaler.Trados.Controls
             _isRunning = running;
             _btnTranslate.Text = running ? "\u25A0  Stop" : "\u25B6  Translate";
             _cmbScope.Enabled = !running;
+            _cmbPrompt.Enabled = !running;
 
             if (!running)
             {

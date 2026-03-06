@@ -16,10 +16,12 @@ namespace Supervertaler.Trados.Settings
     public class TermLensSettingsForm : Form
     {
         private readonly TermLensSettings _settings;
+        private readonly Core.PromptLibrary _promptLibrary;
 
         // Tab control
         private TabControl _tabControl;
         private AiSettingsPanel _aiSettingsPanel;
+        private PromptManagerPanel _promptManagerPanel;
 
         // TermLens tab controls
         private TextBox _txtTermbasePath;
@@ -43,9 +45,10 @@ namespace Supervertaler.Trados.Settings
         // Cached termbase list from the DB, aligned with DataGridView row indices
         private List<TermbaseInfo> _termbases = new List<TermbaseInfo>();
 
-        public TermLensSettingsForm(TermLensSettings settings)
+        public TermLensSettingsForm(TermLensSettings settings, Core.PromptLibrary promptLibrary = null)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            _promptLibrary = promptLibrary ?? new Core.PromptLibrary();
             BuildUI();
             PopulateFromSettings();
 
@@ -114,6 +117,15 @@ namespace Supervertaler.Trados.Settings
             };
             aiPage.Controls.Add(_aiSettingsPanel);
             _tabControl.TabPages.Add(aiPage);
+
+            // --- Prompts tab ---
+            var promptsPage = new TabPage("Prompts") { BackColor = Color.White };
+            _promptManagerPanel = new PromptManagerPanel
+            {
+                Dock = DockStyle.Fill
+            };
+            promptsPage.Controls.Add(_promptManagerPanel);
+            _tabControl.TabPages.Add(promptsPage);
 
             Controls.AddRange(new Control[] { _tabControl, _btnOK, _btnCancel });
         }
@@ -560,6 +572,9 @@ namespace Supervertaler.Trados.Settings
 
             // AI settings
             _aiSettingsPanel.PopulateFromSettings(_settings.AiSettings);
+
+            // Prompts
+            _promptManagerPanel.PopulateFromSettings(_settings.AiSettings, _promptLibrary);
         }
 
         private void OnBrowseClick(object sender, EventArgs e)
@@ -686,7 +701,13 @@ namespace Supervertaler.Trados.Settings
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Failed to create database:\n{ex.Message}",
+                        // Show full exception chain for diagnostics
+                        var msg = ex.Message;
+                        if (ex.InnerException != null)
+                            msg += "\n\nInner: " + ex.InnerException.Message;
+                        if (ex.InnerException?.InnerException != null)
+                            msg += "\n\nRoot: " + ex.InnerException.InnerException.Message;
+                        MessageBox.Show($"Failed to create database:\n{msg}",
                             "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
@@ -899,6 +920,9 @@ namespace Supervertaler.Trados.Settings
 
             // AI settings
             _aiSettingsPanel.ApplyToSettings(_settings.AiSettings);
+
+            // Prompts
+            _promptManagerPanel.ApplyToSettings(_settings.AiSettings);
 
             _settings.Save();
         }

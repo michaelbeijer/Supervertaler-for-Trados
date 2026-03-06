@@ -56,6 +56,8 @@ Supervertaler for Trados includes built-in AI translation powered by OpenAI, Ant
 - **Filtered segment support** — use Trados's advanced display filter to narrow down which segments to translate, then batch-translate only those
 - **Multiple AI providers** — OpenAI (GPT-4o, GPT-4o mini, o1, o3-mini), Anthropic (Claude Sonnet, Haiku, Opus), and Google (Gemini 2.0 Flash, Gemini 1.5 Pro)
 - **Glossary-aware prompts** — AI translations automatically include your approved terms (including non-translatable terms) in the prompt
+- **Prompt library** — 14 built-in prompts for domain expertise (Medical, Legal, Patent, Financial, Technical, Marketing, IT), style guides (Dutch, English, French, German, Spanish), and project prompts; create custom prompts with Markdown + YAML frontmatter; compatible with Supervertaler desktop prompt format
+- **Composable prompt assembly** — base system prompt + custom domain/style instructions + glossary injection; advanced users can override the base system prompt entirely
 - **Configurable settings** — provider, model, API key, and temperature are set in the AI Settings panel and persist across sessions
 - **Real-time progress** — batch translations show segment-by-segment progress in a scrollable log panel, with cancel support
 
@@ -63,6 +65,7 @@ Supervertaler for Trados includes built-in AI translation powered by OpenAI, Ant
 
 - Trados Studio 2024 or later
 - .NET Framework 4.8
+- Runs on Windows x64, x86, and Windows on ARM (Parallels on Apple Silicon Macs, Surface Pro X, etc.)
 
 ## Installation
 

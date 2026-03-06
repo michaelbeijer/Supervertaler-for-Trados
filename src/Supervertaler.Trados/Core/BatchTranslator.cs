@@ -84,7 +84,9 @@ namespace Supervertaler.Trados.Core
             AiSettings aiSettings,
             List<TermEntry> glossaryTerms,
             int batchSize,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            string customPromptContent = null,
+            string customSystemPrompt = null)
         {
             var sw = Stopwatch.StartNew();
             int translated = 0;
@@ -100,9 +102,10 @@ namespace Supervertaler.Trados.Core
                 return;
             }
 
-            // Build system prompt
+            // Build system prompt (composable: base → custom prompt → glossary)
             var systemPrompt = TranslationPrompt.BuildSystemPrompt(
-                sourceLang, targetLang, glossaryTerms);
+                sourceLang, targetLang,
+                customPromptContent, glossaryTerms, customSystemPrompt);
 
             // Resolve provider settings
             var provider = aiSettings.SelectedProvider ?? LlmModels.ProviderOpenAi;

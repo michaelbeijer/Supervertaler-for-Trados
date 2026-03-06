@@ -143,6 +143,11 @@ namespace Supervertaler.Trados.Settings
                     if (s.AiSettings.CustomOpenAiProfiles == null)
                         s.AiSettings.CustomOpenAiProfiles = new List<CustomOpenAiProfile>();
 
+                    // Ensure prompt settings have safe defaults
+                    if (s.AiSettings.SelectedPromptPath == null)
+                        s.AiSettings.SelectedPromptPath = "";
+                    // CustomSystemPrompt is intentionally nullable (null = use default)
+
                     return s;
                 }
             }

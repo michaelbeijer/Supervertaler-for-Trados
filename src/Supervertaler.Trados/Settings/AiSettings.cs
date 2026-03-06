@@ -42,6 +42,21 @@ namespace Supervertaler.Trados.Settings
         public int BatchSize { get; set; } = 20;
 
         /// <summary>
+        /// Relative path of the selected custom prompt from the prompt library.
+        /// Empty string means no custom prompt (use default system prompt only).
+        /// </summary>
+        [DataMember(Name = "selectedPromptPath")]
+        public string SelectedPromptPath { get; set; } = "";
+
+        /// <summary>
+        /// User's custom system prompt override. When non-null and non-empty,
+        /// replaces the entire base system prompt (tag preservation, number formatting, etc.).
+        /// Null means use the default base system prompt.
+        /// </summary>
+        [DataMember(Name = "customSystemPrompt")]
+        public string CustomSystemPrompt { get; set; }
+
+        /// <summary>
         /// Returns the selected model ID for the currently active provider.
         /// </summary>
         public string GetSelectedModel()

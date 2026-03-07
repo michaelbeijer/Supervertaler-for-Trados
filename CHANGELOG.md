@@ -36,7 +36,22 @@ Version numbers follow [Semantic Versioning](https://semver.org/).
   `{{SOURCE_LANGUAGE}}`, `{{TARGET_LANGUAGE}}` placeholders, replaced at translation
   time with the document's language pair
 
+### Changed
+- **Prompts tab side-by-side layout** — the Settings dialog Prompts tab now shows the
+  custom prompt library on the left and the system prompt on the right, making better
+  use of the available space
+- **Prompt variable display simplified** — prompt editor shows only the standard
+  `{{SOURCE_LANGUAGE}}` / `{{TARGET_LANGUAGE}}` placeholders; legacy `{source_lang}` /
+  `{target_lang}` aliases still work silently for backward compatibility
+
 ### Fixed
+- **TermLens glossary list no longer cut off** — the TermLens settings tab now uses
+  Dock-based panel layout instead of absolute pixel positioning, so the glossary grid
+  scales correctly across screen resolutions and DPI settings
+- **Prompt library Source column resizable** — the Source column in the prompt list now
+  uses proportional FillWeight sizing instead of a fixed width
+- **Plugin manifest version updated** — `plugin.xml` now reports v3.1.0 (was stuck at
+  2.0.1 since the rename)
 - **Windows on ARM support** — the plugin now works on Windows on ARM (Parallels on
   Apple Silicon Macs, Surface Pro X, etc.); ships ARM64 native SQLite binary alongside
   x64 and x86; properly detects process architecture and copies the correct native

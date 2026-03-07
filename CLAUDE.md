@@ -4,8 +4,9 @@
 Supervertaler for Trados is a Trados Studio 2024 (v18) plugin that brings key Supervertaler features into the Trados ecosystem. It uses a **tabbed ViewPart** with separate tabs for each feature:
 
 - **TermLens** — live inline terminology display (glossary panel) — fully implemented
-- **AI Assistant** — project-aware chat interface — placeholder, not yet implemented
-- **Batch Translate** — AI-powered segment translation — placeholder, not yet implemented
+- **AI Assistant** — project-aware chat interface — tab exists as placeholder, implementation next
+- **Batch Translate** — AI-powered segment translation — fully implemented (OpenAI/Anthropic/Google)
+- **Prompt Library** — domain-specific and custom prompt management — fully implemented (14 built-in prompts)
 
 ### Tech stack
 - **Language**: C# / .NET Framework 4.8, SDK-style .csproj
@@ -25,8 +26,11 @@ The ViewPart ("Supervertaler for Trados") uses a three-layer structure:
 TermLensEditorViewPart (AbstractViewPartController)
   └── MainPanelControl (UserControl, IUIControl) — tabbed container
         ├── Tab "TermLens" → TermLensControl (glossary panel with header, flow panel)
-        ├── Tab "AI Assistant" → placeholder
-        └── Tab "Batch Translate" → placeholder
+        ├── Tab "AI Assistant" → launcher panel (activates the dockable AI Assistant panel)
+        └── Tab "Batch Translate" → BatchTranslateControl (scope/prompt/provider, translate button, log)
+
+AiAssistantViewPart (AbstractViewPartController) — planned, separate dockable panel
+  └── AiAssistantControl — chat UI (message history, input, context)
 ```
 
 - `TermLensEditorViewPart` owns the lifecycle, settings, and event routing
@@ -148,7 +152,19 @@ Source-available license (not MIT). Source code viewable/forkable for personal u
 
 ## Planned features
 
-- **AI batch translation** — translate segments using LLM providers (OpenAI, Anthropic, Google); will need AI settings infrastructure (API keys, provider/model selection)
-- **Prompt manager / library** — manage system and custom prompts for AI translation; Supervertaler (Python) has `UnifiedPromptLibrary` with Markdown+YAML frontmatter to reference
-- **AI chat assistant** — project-aware chat interface in the AI Assistant tab
+### AI Chat Assistant (next up)
+
+The "AI Assistant" tab in the main ViewPart is currently a placeholder. Design decisions:
+
+- **Separate dockable ViewPart** — the chat UI needs space that a tab in the existing narrow panel can't provide. Register a second `AbstractViewPartController` in `plugin.xml` so it becomes a fully native Trados dockable panel. Users can dock it right, bottom, floating, or on a second monitor. Position/size persists across sessions automatically (Trados handles this). Many RWS AppStore plugins use multiple dockable ViewParts.
+- **The "AI Assistant" tab becomes a launcher** — shows an "Open AI Assistant" button that activates the dockable panel, plus a brief description. Alternatively, the tab could be removed entirely — the panel would just appear in Trados's View menu like any other dockable panel.
+- **Implementation**: New `AiAssistantViewPart` (extends `AbstractViewPartController`) + `AiAssistantControl` (the chat UI). Register in `Supervertaler.Trados.plugin.xml` as a separate ViewPart.
+- **Same LLM providers as Batch Translate** — OpenAI, Anthropic, Google (reuse `AiSettings` for API keys, provider/model selection).
+- **Project-aware context** — the assistant should have access to: current segment (source + target), current file info, TM matches, glossary terms from TermLens. This makes it useful for asking "why was this translated this way?" or "suggest a better translation for this term in context."
+- **Conversation history** — TBD whether to persist across sessions or keep ephemeral.
+- **Ability to apply suggestions** — the assistant should be able to insert its suggestion directly into the target segment (with user confirmation).
+- **Layout tip for laptop users** — consider showing a first-run tip suggesting users dock the Supervertaler panel to the right of the editor grid (instead of above/below) for better screen real estate usage on smaller screens.
+
+### Other planned features
+
 - **TBX support** — to be added simultaneously in both Supervertaler and this plugin

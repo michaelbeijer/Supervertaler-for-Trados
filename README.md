@@ -11,7 +11,7 @@ Supervertaler for Trados is a Trados Studio plugin (.sdlplugin) that brings key 
 
 TermLens renders the full source segment word-by-word in a dedicated panel, with glossary translations displayed directly underneath each matched term. Translators see every term match in context.
 
-<img width="2560" height="1440" alt="1_TermLens-in-Trados-Studio-2024" src="https://github.com/user-attachments/assets/0f8af9a5-587b-43a8-b1e1-6a9d4274032f" />
+<img width="2560" height="1439" alt="image" src="https://github.com/user-attachments/assets/417e4240-c294-4ee8-826c-ac5f05c607c0" />
 
 ### How it works
 

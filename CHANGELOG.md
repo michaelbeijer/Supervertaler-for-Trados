@@ -4,6 +4,20 @@
 
 ---
 
+## [3.4.2] — 2026-03-10
+
+### Added
+- **Term metadata in tooltips** — hovering over a term chip now shows Domain and Notes fields alongside Definition (previously only Definition was displayed)
+- **Metadata indicator on badges** — the shortcut badge number on term chips turns black (instead of white) when the term has metadata (definition, domain, or notes), giving a visual cue to hover for more info
+
+### Changed
+- **"MultiTerm Help"** — renamed the context menu item from "MultiTerm Support" to "MultiTerm Help" for consistency
+
+### Fixed
+- **Shift+Enter in AI Assistant** — Shift+Enter now correctly inserts a newline in the chat input instead of being intercepted by Trados Studio; uses a custom TextBox subclass with `IsInputKey` override for robust key claiming
+
+---
+
 All notable changes to Supervertaler for Trados (formerly TermLens) will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Version numbers follow [Semantic Versioning](https://semver.org/).

@@ -138,7 +138,7 @@ namespace Supervertaler.Trados.Controls
 
         private void BuildUI(TermbaseInfo termbase)
         {
-            Text = IsEditMode ? $"Edit Term Entry (ID {_termId})" : "Add Term Entry";
+            Text = IsEditMode ? $"Edit term entry (ID {_termId})" : "Add term entry";
             if (termbase != null)
                 Text += $" \u2014 {termbase.Name}";
 
@@ -626,7 +626,7 @@ namespace Supervertaler.Trados.Controls
                 _lstTargetSynonyms.Items.Add(FormatSynonymDisplay(syn));
 
             // Update title bar
-            Text = $"Edit Term Entry (ID {ed.Entry.Id}) \u2014 {ed.Termbase?.Name ?? "Unknown"}";
+            Text = $"Edit term entry (ID {ed.Entry.Id}) \u2014 {ed.Termbase?.Name ?? "Unknown"}";
         }
 
         private void LoadSynonymsForEntry(EntryData ed)

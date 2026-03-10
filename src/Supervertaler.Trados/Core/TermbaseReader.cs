@@ -1719,6 +1719,74 @@ namespace Supervertaler.Trados.Core
         // ==================================================================
 
         /// <summary>
+        /// Loads a single term entry by its database row ID.
+        /// Used to open the Term Entry Editor after a merge operation.
+        /// </summary>
+        public static TermEntry GetTermById(string dbPath, long termId)
+        {
+            var connStr = new SqliteConnectionStringBuilder
+            {
+                DataSource = dbPath,
+                Mode = SqliteOpenMode.ReadOnly
+            }.ToString();
+
+            using (var conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+                bool hasDomain = HasColumn(conn, "termbase_terms", "domain");
+                bool hasNotes = HasColumn(conn, "termbase_terms", "notes");
+                bool hasNt = HasColumn(conn, "termbase_terms", "is_nontranslatable");
+
+                var cols = "id, source_term, target_term, source_lang, target_lang, termbase_id, definition";
+                if (hasDomain) cols += ", domain";
+                if (hasNotes) cols += ", notes";
+                if (hasNt) cols += ", is_nontranslatable";
+
+                var sql = $"SELECT {cols} FROM termbase_terms WHERE id = @id";
+                using (var cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", termId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.Read()) return null;
+
+                        int col = 0;
+                        var entry = new TermEntry
+                        {
+                            Id = reader.GetInt64(col++),
+                            SourceTerm = reader.IsDBNull(col) ? "" : reader.GetString(col), // 1
+                            TargetTerm = reader.IsDBNull(col + 1) ? "" : reader.GetString(col + 1), // 2
+                            SourceLang = reader.IsDBNull(col + 2) ? "" : reader.GetString(col + 2), // 3
+                            TargetLang = reader.IsDBNull(col + 3) ? "" : reader.GetString(col + 3), // 4
+                            TermbaseId = reader.IsDBNull(col + 4) ? 0 : reader.GetInt64(col + 4), // 5
+                            Definition = reader.IsDBNull(col + 5) ? "" : reader.GetString(col + 5)  // 6
+                        };
+                        col += 6;
+
+                        if (hasDomain)
+                        {
+                            col++;
+                            entry.Domain = reader.IsDBNull(col) ? "" : reader.GetString(col);
+                        }
+                        if (hasNotes)
+                        {
+                            col++;
+                            entry.Notes = reader.IsDBNull(col) ? "" : reader.GetString(col);
+                        }
+                        if (hasNt)
+                        {
+                            col++;
+                            entry.IsNonTranslatable = !reader.IsDBNull(col) && GetBool(reader, col);
+                        }
+
+                        return entry;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Loads all synonyms (source and target) for a single term.
         /// Used by the Term Entry Editor dialog.
         /// </summary>

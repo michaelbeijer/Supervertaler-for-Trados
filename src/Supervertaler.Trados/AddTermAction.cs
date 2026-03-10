@@ -155,7 +155,7 @@ namespace Supervertaler.Trados
                                     if (mergeResult == DialogResult.Cancel)
                                         return;
 
-                                    if (mergeResult == DialogResult.Yes)
+                                    if (mergeResult == DialogResult.Yes || mergeResult == DialogResult.Retry)
                                     {
                                         // Add as synonym to each matched entry
                                         foreach (var match in mergeMatches)
@@ -188,6 +188,27 @@ namespace Supervertaler.Trados
 
                                         // Full reload to pick up synonym changes
                                         TermLensEditorViewPart.NotifyTermAdded();
+
+                                        // "Add & Edit" — open the term entry editor
+                                        if (mergeResult == DialogResult.Retry)
+                                        {
+                                            var firstMatch = mergeMatches[0];
+                                            var tb2 = writeTermbases.Find(t => t.Id == firstMatch.TermbaseId);
+                                            if (tb2 != null)
+                                            {
+                                                var entry = TermbaseReader.GetTermById(
+                                                    settings.TermbasePath, firstMatch.TermId);
+                                                if (entry != null)
+                                                {
+                                                    using (var editor = new TermEntryEditorDialog(
+                                                        entry, settings.TermbasePath, tb2))
+                                                    {
+                                                        if (editor.ShowDialog() == DialogResult.OK)
+                                                            TermLensEditorViewPart.NotifyTermAdded();
+                                                    }
+                                                }
+                                            }
+                                        }
                                         return;
                                     }
                                     // DialogResult.No = "Keep Both" — fall through to normal insert

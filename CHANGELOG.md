@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+- **Select All / Deselect All** links for termbases in AI Settings → AI Context section
+
+### Fixed
+- **Settings TextBox overlap** — the database file path TextBox no longer extends over the "Create New..." button when the settings dialog is resized
+
 ---
 
 All notable changes to Supervertaler for Trados (formerly TermLens) will be documented here.

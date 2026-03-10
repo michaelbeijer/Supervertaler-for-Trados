@@ -215,9 +215,15 @@ namespace Supervertaler.Trados.Settings
                 ReadOnly = true,
                 BackColor = Color.FromArgb(250, 250, 250),
                 ForeColor = Color.FromArgb(40, 40, 40),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+                Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
             _txtTermbasePath.Width = _btnCreateNew.Left - 10 - 10;
+
+            // Keep TextBox width in sync with button positions when the panel resizes
+            topPanel.Layout += (s, e) =>
+            {
+                _txtTermbasePath.Width = _btnCreateNew.Left - 10 - 10;
+            };
 
             _lblTermbaseInfo = new Label
             {

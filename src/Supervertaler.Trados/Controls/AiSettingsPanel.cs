@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
@@ -44,6 +44,8 @@ namespace Supervertaler.Trados.Controls
         private CheckedListBox _clbAiTermbases;
         private Label _lblAiContextHeader;
         private Label _lblAiTermbases;
+        private LinkLabel _lnkSelectAll;
+        private LinkLabel _lnkDeselectAll;
         private Label _lblInfo;
         private List<TermbaseInfo> _availableTermbases = new List<TermbaseInfo>();
 
@@ -385,6 +387,42 @@ namespace Supervertaler.Trados.Controls
             };
             Controls.Add(_lblAiTermbases);
 
+            var linkFont = new Font("Segoe UI", 7.5f);
+            var linkColor = Color.FromArgb(80, 80, 80);
+
+            _lnkSelectAll = new LinkLabel
+            {
+                Text = "Select all",
+                Location = new Point(16, 0), // positioned dynamically
+                AutoSize = true,
+                Font = linkFont,
+                LinkColor = linkColor,
+                ActiveLinkColor = Color.FromArgb(0, 102, 204)
+            };
+            _lnkSelectAll.LinkClicked += (s, e) =>
+            {
+                for (int i = 0; i < _clbAiTermbases.Items.Count; i++)
+                    _clbAiTermbases.SetItemChecked(i, true);
+            };
+            Controls.Add(_lnkSelectAll);
+
+            _lnkDeselectAll = new LinkLabel
+            {
+                Text = "Deselect all",
+                Location = new Point(16, 0), // positioned dynamically
+                AutoSize = true,
+                Font = linkFont,
+                LinkColor = linkColor,
+                ActiveLinkColor = Color.FromArgb(0, 102, 204)
+            };
+            _lnkDeselectAll.LinkClicked += (s, e) =>
+            {
+                for (int i = 0; i < _clbAiTermbases.Items.Count; i++)
+                    _clbAiTermbases.SetItemChecked(i, false);
+            };
+            Controls.Add(_lnkDeselectAll);
+
+
             _clbAiTermbases = new CheckedListBox
             {
                 Location = new Point(16, 0), // positioned dynamically
@@ -445,6 +483,8 @@ namespace Supervertaler.Trados.Controls
             y += 28;
 
             _lblAiTermbases.Location = new Point(16, y);
+            _lnkSelectAll.Location = new Point(_lblAiTermbases.Right + 8, y + 2);
+            _lnkDeselectAll.Location = new Point(_lnkSelectAll.Right + 4, y + 2);
             y += 20;
 
             _clbAiTermbases.Location = new Point(16, y);

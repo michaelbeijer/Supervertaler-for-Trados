@@ -104,9 +104,9 @@ and displays their terms as green chips alongside Supervertaler terms.
 
 | What | URL / Path |
 |------|------------|
-| Website (Trados page) | `https://supervertaler.com/trados.html` (source: `Supervertaler` repo `docs/trados.html`) |
+| Website (Trados page) | `https://supervertaler.com/trados.html` (source: `Supervertaler-Workbench` repo `docs/trados.html`) |
 | Documentation (GitBook) | `https://supervertaler.gitbook.io/trados` |
-| Docs source (git-synced) | `Supervertaler` repo `docs/help/supervertaler-for-trados/` |
+| Docs source (git-synced) | `docs/` in this repo |
 
 ---
 

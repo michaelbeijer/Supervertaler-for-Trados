@@ -2,7 +2,7 @@
 
 ## Download
 
-1. Go to the [GitHub Releases](https://github.com/michaelbeijer/Supervertaler-for-Trados/releases) page
+1. Go to the [GitHub Releases](https://github.com/Supervertaler/Supervertaler-for-Trados/releases) page
 2. Download the latest `.sdlplugin` file
 
 ## Install

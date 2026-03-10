@@ -183,7 +183,7 @@ namespace Supervertaler.Trados.Controls
             AddLink("Website", "https://supervertaler.com", leftPad, ref y);
             AddLink("Plugin Help", null, leftPad, ref y, () => HelpSystem.OpenHelp(HelpSystem.Topics.Overview));
             AddLink("Documentation", null, leftPad, ref y, () => HelpSystem.OpenDocsHome());
-            AddLink("Support", "https://github.com/michaelbeijer/Supervertaler/issues", leftPad, ref y);
+            AddLink("Support", "https://github.com/Supervertaler/Supervertaler-for-Trados/issues", leftPad, ref y);
 
             // Close button
             var btnClose = new Button

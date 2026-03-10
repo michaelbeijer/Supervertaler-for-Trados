@@ -115,7 +115,7 @@ See [MultiTerm Support](multiterm-support.md) for full details.
 
 ## Still having issues?
 
-1. Check the [GitHub Issues](https://github.com/michaelbeijer/Supervertaler/issues) for known bugs and workarounds
+1. Check the [GitHub Issues](https://github.com/Supervertaler/Supervertaler-for-Trados/issues) for known bugs and workarounds
 2. Open a new issue with:
    - Your Trados Studio version
    - The Supervertaler plugin version

@@ -243,8 +243,10 @@ namespace Supervertaler.Trados.Controls
 
             // Links
             AddLink("Website", "https://supervertaler.com", leftPad, ref y);
-            AddLink("Documentation", null, leftPad, ref y, () => HelpSystem.OpenDocsHome());
-            AddLink("Support & Community", "https://supervertaler.com/trados/#support", leftPad, ref y);
+            AddLink("Documentation", null, leftPad, ref y, () => HelpSystem.OpenDocsHome(),
+                tooltip: "Open the plugin documentation");
+            AddLink("Support & Community", "https://supervertaler.com/trados/#support", leftPad, ref y,
+                tooltip: "Groups.io mailing list, ProZ forum, and GitHub Issues");
 
             y += 4;
 
@@ -301,7 +303,7 @@ namespace Supervertaler.Trados.Controls
             CancelButton = btnClose;
         }
 
-        private void AddLink(string text, string url, int x, ref int y, Action customAction = null)
+        private void AddLink(string text, string url, int x, ref int y, Action customAction = null, string tooltip = null)
         {
             var link = new NoFocusCuesLinkLabel
             {
@@ -312,6 +314,11 @@ namespace Supervertaler.Trados.Controls
                 LinkColor = Color.FromArgb(40, 100, 180),
                 ActiveLinkColor = Color.FromArgb(30, 80, 160)
             };
+            if (tooltip != null)
+            {
+                var tip = new ToolTip();
+                tip.SetToolTip(link, tooltip);
+            }
             link.LinkClicked += (s, e) =>
             {
                 try

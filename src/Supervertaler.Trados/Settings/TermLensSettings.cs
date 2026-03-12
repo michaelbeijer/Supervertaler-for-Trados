@@ -113,11 +113,11 @@ namespace Supervertaler.Trados.Settings
         /// <summary>
         /// Delay in milliseconds for the sequential chord timer.
         /// After the first digit, the system waits this long for a second digit
-        /// before inserting the single-digit term. Default: 1000ms.
+        /// before inserting the single-digit term. Default: 1100ms.
         /// Only applies when TermShortcutStyle is "sequential".
         /// </summary>
         [DataMember(Name = "chordDelayMs")]
-        public int ChordDelayMs { get; set; } = 1000;
+        public int ChordDelayMs { get; set; } = 1100;
 
         // ─── AI settings ────────────────────────────────────────────
         /// <summary>
@@ -160,6 +160,10 @@ namespace Supervertaler.Trados.Settings
                     // Ensure list is never null
                     if (s.WriteTermbaseIds == null)
                         s.WriteTermbaseIds = new List<long>();
+
+                    // Migrate: chord delay missing from older settings (deserializes as 0)
+                    if (s.ChordDelayMs <= 0)
+                        s.ChordDelayMs = 1100;
 
                     // Ensure AI settings are never null (backward compat with older settings files)
                     if (s.AiSettings == null)

@@ -53,7 +53,7 @@ Both modes behave identically when a segment has 9 or fewer matches — pressing
 
 ## Shortcut delay
 
-Controls how long the system waits for the next digit in **Sequential** mode (in milliseconds). Default: **1000 ms**. Valid range: **300 ms** to **3000 ms**.
+Controls how long the system waits for the next digit in **Sequential** mode (in milliseconds). Default: **1100 ms**. Valid range: **300 ms** to **3000 ms**.
 
 Increase the delay if you need more time between keystrokes. Decrease it if you find the pause too long when inserting single-digit terms in segments with 10+ matches. This setting has no effect in Repeated digit mode.
 

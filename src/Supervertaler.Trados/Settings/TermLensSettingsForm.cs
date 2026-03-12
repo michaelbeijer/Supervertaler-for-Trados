@@ -459,7 +459,7 @@ namespace Supervertaler.Trados.Settings
 
             _nudFontSize = new NumericUpDown
             {
-                Location = new Point(114, 34),
+                Location = new Point(130, 34),
                 Width = 60,
                 Minimum = 7,
                 Maximum = 16,
@@ -471,7 +471,7 @@ namespace Supervertaler.Trados.Settings
             var lblFontPt = new Label
             {
                 Text = "pt",
-                Location = new Point(178, 36),
+                Location = new Point(194, 36),
                 AutoSize = true,
                 ForeColor = Color.FromArgb(100, 100, 100)
             };
@@ -486,12 +486,12 @@ namespace Supervertaler.Trados.Settings
 
             _cboShortcutStyle = new ComboBox
             {
-                Location = new Point(114, 62),
+                Location = new Point(130, 62),
                 Width = 280,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            _cboShortcutStyle.Items.Add("Sequential (Alt+4, Alt+5 = term 45)");
-            _cboShortcutStyle.Items.Add("Repeated digit (Alt+5, Alt+5 = term 14)");
+            _cboShortcutStyle.Items.Add("Sequential (type digits: Alt 4 5 = term 45)");
+            _cboShortcutStyle.Items.Add("Repeated digit (same key: Alt 5\u00d72 = term 14)");
             _cboShortcutStyle.SelectedIndex = _settings.TermShortcutStyle == "repeated" ? 1 : 0;
 
             var lblChordDelay = new Label
@@ -504,7 +504,7 @@ namespace Supervertaler.Trados.Settings
 
             _nudChordDelay = new NumericUpDown
             {
-                Location = new Point(114, 90),
+                Location = new Point(130, 90),
                 Width = 70,
                 Minimum = 300,
                 Maximum = 3000,
@@ -515,7 +515,7 @@ namespace Supervertaler.Trados.Settings
             var lblChordMs = new Label
             {
                 Text = "ms",
-                Location = new Point(188, 92),
+                Location = new Point(204, 92),
                 AutoSize = true,
                 ForeColor = Color.FromArgb(100, 100, 100)
             };

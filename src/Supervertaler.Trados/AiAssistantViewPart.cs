@@ -196,7 +196,23 @@ namespace Supervertaler.Trados
                         ? form.ShowDialog(parent)
                         : form.ShowDialog();
 
-                    if (result == System.Windows.Forms.DialogResult.OK)
+                    if (form.SettingsImported)
+                    {
+                        // User imported settings from file — reload from disk
+                        var fresh = TermLensSettings.Load();
+                        _settings.AiSettings = fresh.AiSettings;
+                        _settings.TermbasePath = fresh.TermbasePath;
+                        _settings.AutoLoadOnStartup = fresh.AutoLoadOnStartup;
+                        _settings.PanelFontSize = fresh.PanelFontSize;
+                        _settings.TermShortcutStyle = fresh.TermShortcutStyle;
+                        _settings.ChordDelayMs = fresh.ChordDelayMs;
+                        _settings.DisabledTermbaseIds = fresh.DisabledTermbaseIds;
+                        _settings.WriteTermbaseIds = fresh.WriteTermbaseIds;
+                        _settings.ProjectTermbaseId = fresh.ProjectTermbaseId;
+                        _settings.DisabledMultiTermIds = fresh.DisabledMultiTermIds;
+                    }
+
+                    if (result == System.Windows.Forms.DialogResult.OK || form.SettingsImported)
                     {
                         // Refresh provider displays
                         UpdateProviderDisplay();

@@ -20,6 +20,11 @@ namespace Supervertaler.Trados.Settings
 
         private static readonly string SettingsFile = Path.Combine(SettingsDir, "settings.json");
 
+        /// <summary>
+        /// Full path to the settings JSON file on disk.
+        /// </summary>
+        public static string SettingsFilePath => SettingsFile;
+
         // Old settings path for auto-migration from TermLens
         private static readonly string OldSettingsFile = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

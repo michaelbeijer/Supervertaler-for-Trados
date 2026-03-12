@@ -44,6 +44,14 @@ namespace Supervertaler.Trados.Settings
         // Form buttons (outside tabs)
         private Button _btnOK;
         private Button _btnCancel;
+        private Button _btnExportSettings;
+        private Button _btnImportSettings;
+
+        /// <summary>
+        /// True if the user imported settings from a file.
+        /// The caller should reload settings from disk when this is set.
+        /// </summary>
+        public bool SettingsImported { get; private set; }
 
         // Cached termbase list from the DB, aligned with DataGridView row indices
         private List<TermbaseInfo> _termbases = new List<TermbaseInfo>();
@@ -114,6 +122,27 @@ namespace Supervertaler.Trados.Settings
             AcceptButton = _btnOK;
             CancelButton = _btnCancel;
 
+            // === Export / Import Settings — anchored to bottom-left ===
+            _btnExportSettings = new Button
+            {
+                Text = "Export Settings...",
+                Location = new Point(8, ClientSize.Height - 40),
+                Width = 110,
+                FlatStyle = FlatStyle.System,
+                Anchor = AnchorStyles.Bottom | AnchorStyles.Left
+            };
+            _btnExportSettings.Click += OnExportSettingsClick;
+
+            _btnImportSettings = new Button
+            {
+                Text = "Import Settings...",
+                Location = new Point(124, ClientSize.Height - 40),
+                Width = 110,
+                FlatStyle = FlatStyle.System,
+                Anchor = AnchorStyles.Bottom | AnchorStyles.Left
+            };
+            _btnImportSettings.Click += OnImportSettingsClick;
+
             // === Tab Control ===
             _tabControl = new TabControl
             {
@@ -153,7 +182,7 @@ namespace Supervertaler.Trados.Settings
             licensePage.Controls.Add(licensePanel);
             _tabControl.TabPages.Add(licensePage);
 
-            Controls.AddRange(new Control[] { _tabControl, _btnOK, _btnCancel });
+            Controls.AddRange(new Control[] { _tabControl, _btnExportSettings, _btnImportSettings, _btnOK, _btnCancel });
         }
 
         /// <summary>
@@ -1100,6 +1129,119 @@ namespace Supervertaler.Trados.Settings
             _promptManagerPanel.ApplyToSettings(_settings.AiSettings);
 
             _settings.Save();
+        }
+
+        private void OnExportSettingsClick(object sender, EventArgs e)
+        {
+            using (var dlg = new SaveFileDialog
+            {
+                Title = "Export Settings",
+                Filter = "JSON files (*.json)|*.json",
+                FileName = "supervertaler-settings.json",
+                OverwritePrompt = true
+            })
+            {
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    try
+                    {
+                        var src = TermLensSettings.SettingsFilePath;
+                        if (!File.Exists(src))
+                        {
+                            // Save current in-memory settings first so there is something to export
+                            _settings.Save();
+                        }
+                        File.Copy(src, dlg.FileName, overwrite: true);
+                        MessageBox.Show(this,
+                            "Settings exported successfully.",
+                            "Export Settings",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(this,
+                            "Failed to export settings:\n" + ex.Message,
+                            "Export Settings",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void OnImportSettingsClick(object sender, EventArgs e)
+        {
+            using (var dlg = new OpenFileDialog
+            {
+                Title = "Import Settings",
+                Filter = "JSON files (*.json)|*.json"
+            })
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                // Validate the file is a readable settings JSON
+                TermLensSettings imported;
+                try
+                {
+                    var json = File.ReadAllText(dlg.FileName, System.Text.Encoding.UTF8);
+                    using (var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json)))
+                    {
+                        var serializer = new System.Runtime.Serialization.Json.DataContractJsonSerializer(
+                            typeof(TermLensSettings));
+                        imported = (TermLensSettings)serializer.ReadObject(stream);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this,
+                        "The selected file is not a valid Supervertaler settings file.\n\n" + ex.Message,
+                        "Import Settings",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var result = MessageBox.Show(this,
+                    "Importing settings will replace all your current settings and close this dialog.\n\n" +
+                    "Your current settings will be backed up as settings.backup.json.\n\n" +
+                    "Continue?",
+                    "Import Settings",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (result != DialogResult.Yes)
+                    return;
+
+                try
+                {
+                    // Back up current settings
+                    var currentFile = TermLensSettings.SettingsFilePath;
+                    if (File.Exists(currentFile))
+                    {
+                        var backupFile = Path.Combine(
+                            Path.GetDirectoryName(currentFile),
+                            "settings.backup.json");
+                        File.Copy(currentFile, backupFile, overwrite: true);
+                    }
+
+                    // Copy imported file over current settings
+                    File.Copy(dlg.FileName, currentFile, overwrite: true);
+
+                    MessageBox.Show(this,
+                        "Settings imported successfully. The dialog will now close and the new settings will take effect.",
+                        "Import Settings",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Signal import and close — caller checks SettingsImported flag
+                    SettingsImported = true;
+                    DialogResult = DialogResult.Cancel;
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this,
+                        "Failed to import settings:\n" + ex.Message,
+                        "Import Settings",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

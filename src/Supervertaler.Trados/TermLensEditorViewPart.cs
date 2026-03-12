@@ -781,9 +781,24 @@ namespace Supervertaler.Trados
                         ? form.ShowDialog(parent)
                         : form.ShowDialog();
 
-                    if (result == System.Windows.Forms.DialogResult.OK)
+                    if (form.SettingsImported)
                     {
-                        // Settings already saved inside the form's OK handler.
+                        // User imported settings from file — reload everything from disk
+                        var fresh = TermLensSettings.Load();
+                        _settings.TermbasePath = fresh.TermbasePath;
+                        _settings.AutoLoadOnStartup = fresh.AutoLoadOnStartup;
+                        _settings.PanelFontSize = fresh.PanelFontSize;
+                        _settings.TermShortcutStyle = fresh.TermShortcutStyle;
+                        _settings.ChordDelayMs = fresh.ChordDelayMs;
+                        _settings.DisabledTermbaseIds = fresh.DisabledTermbaseIds;
+                        _settings.WriteTermbaseIds = fresh.WriteTermbaseIds;
+                        _settings.ProjectTermbaseId = fresh.ProjectTermbaseId;
+                        _settings.DisabledMultiTermIds = fresh.DisabledMultiTermIds;
+                        _settings.AiSettings = fresh.AiSettings;
+                    }
+
+                    if (result == System.Windows.Forms.DialogResult.OK || form.SettingsImported)
+                    {
                         // Apply font size change (user may have adjusted it in settings)
                         _control.Value.SetFontSize(_settings.PanelFontSize);
 

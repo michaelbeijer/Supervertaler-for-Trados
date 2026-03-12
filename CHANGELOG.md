@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0-beta] — 2026-03-12
+
+### Added
+- **Update checker** — on startup, the plugin checks GitHub Releases for a newer version and shows a dialog with Download, Skip This Version, and Remind Me Later buttons. Checks once per session, respects skipped versions, and never blocks Trados startup (runs in background)
+
+---
+
 ## [4.1.0-beta] — 2026-03-12
 
 ### Added

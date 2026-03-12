@@ -124,6 +124,14 @@ namespace Supervertaler.Trados.Settings
         [DataMember(Name = "chordDelayMs")]
         public int ChordDelayMs { get; set; } = 1100;
 
+        // ─── Update checker ──────────────────────────────────────────
+        /// <summary>
+        /// Version string the user chose to skip (e.g. "4.2.0-beta").
+        /// The update dialog will not show again for this version.
+        /// </summary>
+        [DataMember(Name = "skippedUpdateVersion")]
+        public string SkippedUpdateVersion { get; set; } = "";
+
         // ─── AI settings ────────────────────────────────────────────
         /// <summary>
         /// AI provider configuration (API keys, provider selection, model selection).
@@ -184,6 +192,10 @@ namespace Supervertaler.Trados.Settings
                     if (s.AiSettings.SelectedPromptPath == null)
                         s.AiSettings.SelectedPromptPath = "";
                     // CustomSystemPrompt is intentionally nullable (null = use default)
+
+                    // Ensure update checker field is never null
+                    if (s.SkippedUpdateVersion == null)
+                        s.SkippedUpdateVersion = "";
 
                     return s;
                 }

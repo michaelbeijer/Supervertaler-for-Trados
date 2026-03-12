@@ -81,6 +81,38 @@ namespace Supervertaler.Trados
                 }));
             };
 
+            // Check for plugin updates in the background.
+            // Runs regardless of license state — even expired-trial users should
+            // know about new versions.
+            var ctrl = _control.Value;
+            System.Threading.Tasks.Task.Run(async () =>
+            {
+                try
+                {
+                    var update = await UpdateChecker.CheckForUpdateAsync();
+                    if (!update.HasValue) return;
+
+                    // Wait for the control's window handle to be created.
+                    // Initialize() runs before the control is parented in the
+                    // Trados docking framework, so IsHandleCreated may still be
+                    // false.  Poll briefly — the handle is created within a
+                    // second or two once Trados finishes layout.
+                    for (int i = 0; i < 30 && !ctrl.IsHandleCreated; i++)
+                        await System.Threading.Tasks.Task.Delay(500);
+
+                    if (!ctrl.IsHandleCreated) return; // give up after 15 s
+
+                    ctrl.BeginInvoke(new Action(() =>
+                    {
+                        ShowUpdateDialog(update.Value.version, update.Value.url);
+                    }));
+                }
+                catch
+                {
+                    // Silently ignore — network errors, parse errors, etc.
+                }
+            });
+
             if (LicenseManager.Instance.CurrentTier == LicenseTier.None)
             {
                 _control.Value.ShowLicenseRequired();
@@ -1534,6 +1566,85 @@ namespace Supervertaler.Trados
                 _editorController.ActiveDocumentChanged -= OnActiveDocumentChanged;
 
             base.Dispose();
+        }
+
+        // ─── Update checker dialog ──────────────────────────────────
+
+        private void ShowUpdateDialog(string newVersion, string releaseUrl)
+        {
+            var currentVersion = UpdateChecker.GetCurrentVersion();
+
+            using (var form = new Form())
+            {
+                form.Text = "Update Available";
+                form.FormBorderStyle = FormBorderStyle.FixedDialog;
+                form.StartPosition = FormStartPosition.CenterScreen;
+                form.MaximizeBox = false;
+                form.MinimizeBox = false;
+                form.Size = new System.Drawing.Size(420, 200);
+                form.Font = new System.Drawing.Font("Segoe UI", 9f);
+
+                var lbl = new Label
+                {
+                    Text = $"A new version of Supervertaler for Trados is available.\n\n" +
+                           $"Latest version:   v{newVersion}\n" +
+                           $"Your version:      v{currentVersion}",
+                    Location = new System.Drawing.Point(16, 16),
+                    Size = new System.Drawing.Size(380, 80),
+                    AutoSize = false
+                };
+
+                var btnDownload = new Button
+                {
+                    Text = "Download",
+                    DialogResult = DialogResult.Yes,
+                    Location = new System.Drawing.Point(16, 110),
+                    Width = 100,
+                    Height = 30,
+                    FlatStyle = FlatStyle.System
+                };
+
+                var btnSkip = new Button
+                {
+                    Text = "Skip This Version",
+                    DialogResult = DialogResult.Ignore,
+                    Location = new System.Drawing.Point(124, 110),
+                    Width = 130,
+                    Height = 30,
+                    FlatStyle = FlatStyle.System
+                };
+
+                var btnLater = new Button
+                {
+                    Text = "Remind Me Later",
+                    DialogResult = DialogResult.Cancel,
+                    Location = new System.Drawing.Point(262, 110),
+                    Width = 130,
+                    Height = 30,
+                    FlatStyle = FlatStyle.System
+                };
+
+                form.Controls.AddRange(new Control[] { lbl, btnDownload, btnSkip, btnLater });
+                form.AcceptButton = btnDownload;
+                form.CancelButton = btnLater;
+
+                var result = form.ShowDialog();
+
+                if (result == DialogResult.Yes)
+                {
+                    // Open the release page in the default browser
+                    try { System.Diagnostics.Process.Start(releaseUrl); }
+                    catch { }
+                }
+                else if (result == DialogResult.Ignore)
+                {
+                    // Save "skip this version" to settings
+                    var settings = TermLensSettings.Load();
+                    settings.SkippedUpdateVersion = newVersion;
+                    settings.Save();
+                }
+                // Remind Me Later — do nothing, will check again next session
+            }
         }
     }
 }

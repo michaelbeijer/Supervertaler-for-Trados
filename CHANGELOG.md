@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.1.0-beta] — 2026-03-12
+
+### Added
+- **Settings backup and restore** — new **Backup** tab in the Settings dialog with Export and Import buttons; export saves all plugin settings (termbase paths, toggle states, font size, shortcut preferences, AI provider keys, model selections, prompt configuration) to a JSON file; import validates the file, creates an automatic backup of current settings, and applies the imported configuration immediately
+- **Open settings folder** — clickable link in the Backup tab opens the `%LocalAppData%\Supervertaler.Trados\` folder in Explorer for easy access to settings files
+- **Open prompts folder** — clickable link in the Prompts tab opens the `%LocalAppData%\Supervertaler.Trados\prompts\` folder in Explorer
+
+### Fixed
+- **Restore button clipped in Prompts tab** — the "Restore" button width was too narrow, causing the label to be truncated
+
+---
+
 ## [4.0.2-beta] — 2026-03-12
 
 ### Added

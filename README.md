@@ -58,6 +58,7 @@ As you navigate between segments in the Trados Studio editor, the TermLens panel
 - **Help / About** — "?" button in the panel header shows version, keyboard shortcuts, and links to documentation and support
 - **Supervertaler-compatible** — reads and writes Supervertaler's SQLite termbase format directly, so you can share termbases between both tools
 - **Auto-detect** — automatically finds your Supervertaler termbase if no file is configured
+- **Settings backup and restore** — export and import all plugin settings from the Backup tab; great for upgrading or transferring your setup to another machine
 - **Remembers layout** — dialog sizes and column widths are saved and restored between sessions
 
 ### Screenshots

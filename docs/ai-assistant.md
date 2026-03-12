@@ -2,6 +2,8 @@
 
 The Supervertaler Assistant is a conversational chat panel that runs inside Trados Studio as a separate dockable panel. It is context-aware: it automatically includes your current source and target text, matched terminology, and TM matches in every request, so the AI can give you informed answers about the segment you are working on.
 
+<figure><img src=".gitbook/assets/Sv_Supervertaler-Assistant.png" alt=""><figcaption></figcaption></figure>
+
 ## Opening the Panel
 
 The Supervertaler Assistant lives in its own dockable panel. To open it, go to **View > Supervertaler Assistant**.
@@ -16,20 +18,20 @@ The Chat tab is the main interface. Type a message in the input field at the bot
 
 Because the assistant has access to your current segment context, you can ask things like:
 
-- "Translate this segment"
-- "What is the difference between these two translations?"
-- "Is this terminology correct in a legal context?"
-- "Suggest a more formal alternative"
-- "Explain this source text"
+* "Translate this segment"
+* "What is the difference between these two translations?"
+* "Is this terminology correct in a legal context?"
+* "Suggest a more formal alternative"
+* "Explain this source text"
 
 The AI will consider your current source text, target text, matched terminology from your termbases, and TM fuzzy matches when responding.
 
 ### Sending Messages
 
-| Action | How |
-|--------|-----|
-| Send a message | Press **Enter** |
-| Insert a line break | Press **Shift+Enter** |
+| Action                      | How                       |
+| --------------------------- | ------------------------- |
+| Send a message              | Press **Enter**           |
+| Insert a line break         | Press **Shift+Enter**     |
 | Stop a response in progress | Click the **Stop** button |
 
 ## Context Awareness
@@ -76,11 +78,11 @@ You can control exactly what context the assistant receives. In the settings dia
 
 The Supervertaler Assistant supports multimodal input. You can attach images to your messages for visual context – for example, a screenshot of the source document layout, a reference image, or a table that is hard to describe in text.
 
-| Method | How |
-|--------|-----|
-| Paste | Press **Ctrl+V** with an image on the clipboard |
-| Drag and drop | Drag an image file into the chat input area |
-| Browse | Click the **Browse** button to select an image file |
+| Method        | How                                                 |
+| ------------- | --------------------------------------------------- |
+| Paste         | Press **Ctrl+V** with an image on the clipboard     |
+| Drag and drop | Drag an image file into the chat input area         |
+| Browse        | Click the **Browse** button to select an image file |
 
 {% hint style="warning" %}
 Image limits: up to **5 images** per message, **10 MB** maximum per image. Supported formats: PNG, JPEG, GIF, WebP.
@@ -102,22 +104,22 @@ The current provider and model are shown in the status area of the chat panel. T
 
 ### Supported Providers
 
-| Provider | Models |
-|----------|--------|
-| **OpenAI** | GPT-4o, GPT-4o Mini, GPT-5, o1, o3 |
-| **Anthropic** | Claude Sonnet 4.6, Claude Haiku 4.5, Claude Opus 4.6 |
-| **Google** | Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3 Pro Preview |
-| **Ollama** | TranslateGemma, Qwen 3, Aya Expanse (local, no API key needed) |
-| **Custom** | Any OpenAI-compatible API endpoint |
+| Provider      | Models                                                         |
+| ------------- | -------------------------------------------------------------- |
+| **OpenAI**    | GPT-4o, GPT-4o Mini, GPT-5, o1, o3                             |
+| **Anthropic** | Claude Sonnet 4.6, Claude Haiku 4.5, Claude Opus 4.6           |
+| **Google**    | Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3 Pro Preview         |
+| **Ollama**    | TranslateGemma, Qwen 3, Aya Expanse (local, no API key needed) |
+| **Custom**    | Any OpenAI-compatible API endpoint                             |
 
 {% hint style="info" %}
 You only need one provider to get started. If you want privacy or offline use, try [Ollama](https://supervertaler.gitbook.io/supervertaler/ai-translation/ollama) with a local model.
 {% endhint %}
 
----
+***
 
 ## See Also
 
-- [Batch Translate](batch-translate.md)
-- [Getting Started](getting-started.md)
-- [Keyboard Shortcuts](keyboard-shortcuts.md)
+* [Batch Translate](batch-translate.md)
+* [Getting Started](getting-started.md)
+* [Keyboard Shortcuts](keyboard-shortcuts.md)

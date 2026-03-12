@@ -44,8 +44,8 @@ Each matched term in TermLens is assigned a **numbered badge**. Press **Alt+1** 
 
 For terms numbered 10 and above, TermLens supports two shortcut styles (configurable in Settings):
 
-* **Sequential** (default) — type the term number digit by digit: `Alt+4`, `Alt+5` inserts term 45
-* **Repeated digit** — press the same key multiple times: `Alt+5`, `Alt+5` inserts term 14
+* **Sequential** (default) — type the term number digit by digit: `Alt+14` inserts term 14
+* **Repeated digit** — press the same digit key multiple times: `Alt+55` inserts term 14 (5th term in the second tier: 9+5)
 
 The badge on each term chip shows exactly which key combination to use. See [Keyboard Shortcuts](keyboard-shortcuts.md) for details on both modes.
 

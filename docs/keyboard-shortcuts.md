@@ -37,9 +37,9 @@ Type the term number digit by digit. Each badge shows the plain term number (10,
 
 | Shortcut | Inserts |
 |----------|---------|
-| `Alt+1`, `Alt+0` | Term 10 |
-| `Alt+2`, `Alt+3` | Term 23 |
-| `Alt+4`, `Alt+5` | Term 45 |
+| `Alt+10` | Term 10 |
+| `Alt+23` | Term 23 |
+| `Alt+45` | Term 45 |
 
 After the first digit, TermLens waits briefly for a possible second (or third) digit. If no further digit is pressed, the single-digit term is inserted.
 
@@ -50,10 +50,10 @@ Press the **same digit key** multiple times. Each badge shows the repeated digit
 | Presses | Shortcut example | Badge | Terms |
 |---------|-----------------|-------|-------|
 | 1x | `Alt+1` ... `Alt+9` | **1** – **9** | 1–9 |
-| 2x | `Alt+1,1` ... `Alt+9,9` | **11** – **99** | 10–18 |
-| 3x | `Alt+1,1,1` ... `Alt+9,9,9` | **111** – **999** | 19–27 |
-| 4x | `Alt+1,1,1,1` ... `Alt+9,9,9,9` | **1111** – **9999** | 28–36 |
-| 5x | `Alt+1,1,1,1,1` ... `Alt+9,9,9,9,9` | **11111** – **99999** | 37–45 |
+| 2x | `Alt+11` ... `Alt+99` | **11** – **99** | 10–18 |
+| 3x | `Alt+111` ... `Alt+999` | **111** – **999** | 19–27 |
+| 4x | `Alt+1111` ... `Alt+9999` | **1111** – **9999** | 28–36 |
+| 5x | `Alt+11111` ... `Alt+99999` | **11111** – **99999** | 37–45 |
 
 {% hint style="info" %}
 In both modes, when a segment has 9 or fewer matches, pressing Alt+N inserts immediately with no delay.

@@ -39,6 +39,7 @@ namespace Supervertaler.Trados.Settings
         private CheckBox _chkAutoLoad;
         private NumericUpDown _nudFontSize;
         private ComboBox _cboShortcutStyle;
+        private NumericUpDown _nudChordDelay;
 
         // Form buttons (outside tabs)
         private Button _btnOK;
@@ -169,7 +170,7 @@ namespace Supervertaler.Trados.Settings
             // Bottom: separator, auto-load, font size (fixed height)
             // Middle: DataGridView fills remaining space
             var topPanel = new Panel { Dock = DockStyle.Top, Height = 138, Width = w, BackColor = Color.White };
-            var bottomPanel = new Panel { Dock = DockStyle.Bottom, Height = 96, BackColor = Color.White };
+            var bottomPanel = new Panel { Dock = DockStyle.Bottom, Height = 124, BackColor = Color.White };
             var gridPanel = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -486,17 +487,46 @@ namespace Supervertaler.Trados.Settings
             _cboShortcutStyle = new ComboBox
             {
                 Location = new Point(114, 62),
-                Width = 210,
+                Width = 280,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
             _cboShortcutStyle.Items.Add("Sequential (Alt+4, Alt+5 = term 45)");
             _cboShortcutStyle.Items.Add("Repeated digit (Alt+5, Alt+5 = term 14)");
             _cboShortcutStyle.SelectedIndex = _settings.TermShortcutStyle == "repeated" ? 1 : 0;
 
+            var lblChordDelay = new Label
+            {
+                Text = "Shortcut delay:",
+                Location = new Point(10, 92),
+                AutoSize = true,
+                ForeColor = Color.FromArgb(60, 60, 60)
+            };
+
+            _nudChordDelay = new NumericUpDown
+            {
+                Location = new Point(114, 90),
+                Width = 70,
+                Minimum = 300,
+                Maximum = 3000,
+                Increment = 100,
+                Value = Math.Max(300, Math.Min(3000, _settings.ChordDelayMs))
+            };
+
+            var lblChordMs = new Label
+            {
+                Text = "ms",
+                Location = new Point(188, 92),
+                AutoSize = true,
+                ForeColor = Color.FromArgb(100, 100, 100)
+            };
+
             var tips = new ToolTip();
             tips.SetToolTip(_cboShortcutStyle,
                 "Sequential: type the term number digit by digit (short delay).\n" +
                 "Repeated digit: press the same key multiple times (no delay).");
+            tips.SetToolTip(_nudChordDelay,
+                "How long the system waits for the next digit in Sequential mode (in milliseconds).\n" +
+                "Increase if you need more time between keystrokes. Only applies to Sequential mode.");
 
             // Add controls to their respective panels
             topPanel.Controls.AddRange(new Control[]
@@ -509,7 +539,8 @@ namespace Supervertaler.Trados.Settings
             bottomPanel.Controls.AddRange(new Control[]
             {
                 sep, _chkAutoLoad, lblFontSize, _nudFontSize, lblFontPt,
-                lblShortcutStyle, _cboShortcutStyle
+                lblShortcutStyle, _cboShortcutStyle,
+                lblChordDelay, _nudChordDelay, lblChordMs
             });
 
             gridPanel.Controls.Add(_dgvTermbases);
@@ -1027,6 +1058,7 @@ namespace Supervertaler.Trados.Settings
             _settings.AutoLoadOnStartup = _chkAutoLoad.Checked;
             _settings.PanelFontSize = (float)_nudFontSize.Value;
             _settings.TermShortcutStyle = _cboShortcutStyle.SelectedIndex == 1 ? "repeated" : "sequential";
+            _settings.ChordDelayMs = (int)_nudChordDelay.Value;
 
             // Build disabled list, write IDs, and project ID from grid cells
             _settings.DisabledTermbaseIds = new List<long>();

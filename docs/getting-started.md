@@ -37,6 +37,10 @@ You need at least one API key to use AI features (Supervertaler Assistant, Batch
 
 Settings are saved and applied immediately.
 
+{% hint style="success" %}
+**Want to try it with a real project?** Download the [Example Project](example-project.md) — a pre-configured patent translation with terminology, a translation memory, and a Supervertaler termbase all ready to go.
+{% endhint %}
+
 ## Try It Out
 
 ### TermLens
@@ -72,5 +76,6 @@ Settings are saved and applied immediately.
 ## See Also
 
 - [Installation](installation.md)
+- [Example Project](example-project.md)
 - [TermLens](termlens.md)
 - [Supervertaler Assistant](ai-assistant.md)

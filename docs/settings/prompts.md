@@ -6,17 +6,25 @@ Prompts control how the AI translates your content. The Prompt Manager lets you 
 
 Open the plugin **Settings** dialog and switch to the **Prompts** tab.
 
-## Built-in domain prompts
+## Built-in prompts
 
-The plugin ships with 14 domain-specific prompts, ready to use out of the box:
+The plugin ships with built-in prompts organised into two categories:
 
-| Category | Prompts |
-|----------|---------|
-| **Domain** | Medical, Legal, Patent, Financial, Technical, Marketing, IT |
-| **Style guides** | Dutch Style Guide, English Style Guide, French Style Guide, German Style Guide, Spanish Style Guide |
-| **General** | General Translation, Creative / Transcreation |
+| Category | Prompts | Used in |
+|----------|---------|---------|
+| **Translate** | Medical, Legal, Patent, Financial, Technical, Marketing, IT, Dutch Style Guide, English Style Guide, French Style Guide, German Style Guide, Spanish Style Guide, General Translation, Creative / Transcreation | Batch Translate mode |
+| **Proofread** | General Proofreading | Batch Proofread mode |
 
-Each prompt is tuned for its domain, including instructions for tone, terminology handling, and formatting conventions.
+Each prompt is tuned for its purpose, including instructions for tone, terminology handling, and formatting conventions.
+
+### Prompt category filtering
+
+Prompts are filtered by mode in the **Batch Operations** tab:
+
+* In **Translate** mode, only prompts with the **Translate** category appear in the dropdown
+* In **Proofread** mode, only prompts with the **Proofread** category appear
+
+This keeps the prompt list focused and relevant to the task at hand.
 
 {% hint style="info" %}
 Built-in prompts are **read-only**. If you want to customise one, create a new prompt and copy the content as a starting point.
@@ -72,14 +80,39 @@ Built-in prompts cannot be edited. To modify a built-in prompt, create a new cus
 
 Built-in prompts cannot be deleted.
 
-## Using prompts for Batch Translate
+## Prompt file format
 
-The currently selected prompt is used when running **Batch Translate**. Before starting a batch, make sure you have the correct prompt selected for the domain and style you need.
+Prompts are stored as `.svprompt` files with YAML frontmatter. This is the same format used by Supervertaler desktop, so prompts are interchangeable between both applications.
+
+```yaml
+---
+name: Medical Translation Specialist
+description: Clinical and pharmaceutical content
+category: Translate
+---
+
+You are a professional medical translator...
+```
+
+| Field | Description |
+|-------|-------------|
+| `name` | Display name shown in the prompt selector |
+| `description` | Optional summary |
+| `category` | **Translate** or **Proofread** — controls which mode the prompt appears in |
+
+{% hint style="info" %}
+Older prompts using `.md` extension or the `domain` YAML key are still loaded for backward compatibility. They will be saved as `.svprompt` with the `category` key when edited.
+{% endhint %}
+
+## Using prompts
+
+The currently selected prompt is used when running **Batch Translate** or **Batch Proofread**. Before starting a batch, make sure you have the correct prompt selected for the domain and style you need.
 
 ---
 
 ## See Also
 
 - [AI Settings](ai-settings.md)
+- [AI Proofreader](../ai-proofreader.md)
 - [Batch Translation (Workbench)](https://supervertaler.gitbook.io/supervertaler/ai-translation/batch-translation)
 - [Creating Prompts (Workbench)](https://supervertaler.gitbook.io/supervertaler/ai-translation/prompts)

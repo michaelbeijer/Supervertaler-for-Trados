@@ -17,6 +17,7 @@
 * [MultiTerm Support](multiterm-support.md)
 * [Supervertaler Assistant](ai-assistant.md)
 * [Batch Translate](batch-translate.md)
+* [AI Proofreader](ai-proofreader.md)
 
 ## Terminology
 

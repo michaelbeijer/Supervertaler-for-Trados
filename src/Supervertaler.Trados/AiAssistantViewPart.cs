@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using Sdl.Desktop.IntegrationApi;
 using Sdl.Desktop.IntegrationApi.Extensions;
 using Sdl.Desktop.IntegrationApi.Interfaces;
+using Sdl.FileTypeSupport.Framework.BilingualApi;
 using Sdl.TranslationStudioAutomation.IntegrationApi;
 using Supervertaler.Trados.Controls;
 using Supervertaler.Trados.Core;
@@ -618,7 +619,28 @@ namespace Supervertaler.Trados
                     if (ids == null || ids.Length < 2) return;
 
                     _activeDocument.SetActiveSegmentPair(ids[0], ids[1], true);
-                    _activeDocument.Selection.Target.Replace(e.Translation, "Supervertaler");
+
+                    // If source had tags, try to reconstruct target with proper tag objects
+                    if (e.HasTags && e.TagMap != null && e.TagMap.Count > 0)
+                    {
+                        var pair = _activeDocument.ActiveSegmentPair;
+                        if (pair != null)
+                        {
+                            bool reconstructed = SegmentTagHandler.ReconstructTarget(
+                                pair.Target, pair.Source, e.Translation, e.TagMap);
+
+                            if (reconstructed)
+                                return; // Success — tags preserved in target
+                        }
+
+                        // Reconstruction failed — fall back to plain text (strip placeholders)
+                        var plainTranslation = SegmentTagHandler.StripTagPlaceholders(e.Translation);
+                        _activeDocument.Selection.Target.Replace(plainTranslation, "Supervertaler");
+                    }
+                    else
+                    {
+                        _activeDocument.Selection.Target.Replace(e.Translation, "Supervertaler");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -672,10 +694,16 @@ namespace Supervertaler.Trados
                 int index = 0;
                 foreach (var pair in pairs)
                 {
-                    var sourceText = pair.Source?.ToString() ?? "";
                     var targetText = pair.Target?.ToString() ?? "";
 
-                    if (string.IsNullOrWhiteSpace(sourceText))
+                    // Serialize source with tag placeholders (if segment has inline tags)
+                    var sourceSegment = pair.Source;
+                    var serialization = SegmentTagHandler.Serialize(sourceSegment);
+                    var sourceText = serialization.HasTags
+                        ? serialization.SerializedText
+                        : (sourceSegment?.ToString() ?? "");
+
+                    if (string.IsNullOrWhiteSpace(SegmentTagHandler.StripTagPlaceholders(sourceText)))
                     {
                         index++;
                         continue;
@@ -695,7 +723,9 @@ namespace Supervertaler.Trados
                             Index = index,
                             SourceText = sourceText,
                             ExistingTarget = targetText,
-                            SegmentPairRef = new[] { paragraphUnitId, segmentId }
+                            SegmentPairRef = new[] { paragraphUnitId, segmentId },
+                            HasTags = serialization.HasTags,
+                            TagMap = serialization.HasTags ? serialization.TagMap : null
                         });
                     }
 
@@ -855,8 +885,16 @@ namespace Supervertaler.Trados
                         return;
                     }
 
-                    var sourceText = instance._activeDocument.ActiveSegmentPair.Source?.ToString() ?? "";
-                    if (string.IsNullOrWhiteSpace(sourceText))
+                    // Serialize source with tag placeholders if segment has inline tags
+                    var sourceSegment = instance._activeDocument.ActiveSegmentPair.Source;
+                    var serialization = SegmentTagHandler.Serialize(sourceSegment);
+                    var hasTags = serialization.HasTags;
+                    var tagMap = hasTags ? serialization.TagMap : null;
+                    var sourceText = hasTags
+                        ? serialization.SerializedText
+                        : (sourceSegment?.ToString() ?? "");
+
+                    if (string.IsNullOrWhiteSpace(SegmentTagHandler.StripTagPlaceholders(sourceText)))
                     {
                         MessageBox.Show("Active segment has no source text.",
                             "Supervertaler \u2014 AI Translate",
@@ -910,10 +948,37 @@ namespace Supervertaler.Trados
                                      (translation.StartsWith("\u201c") && translation.EndsWith("\u201d"))))
                                     translation = translation.Substring(1, translation.Length - 2);
 
+                                // Capture tag state for use in UI thread
+                                var capturedHasTags = hasTags;
+                                var capturedTagMap = tagMap;
+
                                 instance.SafeInvoke(() =>
                                 {
                                     try
                                     {
+                                        // If source had tags, try to reconstruct with proper tags
+                                        if (capturedHasTags && capturedTagMap != null &&
+                                            capturedTagMap.Count > 0)
+                                        {
+                                            var pair = instance._activeDocument.ActiveSegmentPair;
+                                            if (pair != null)
+                                            {
+                                                bool reconstructed = SegmentTagHandler.ReconstructTarget(
+                                                    pair.Target, pair.Source,
+                                                    translation, capturedTagMap);
+
+                                                if (reconstructed)
+                                                {
+                                                    batchControl.AppendLog(
+                                                        $"Done (with tags): \"{Truncate(SegmentTagHandler.StripTagPlaceholders(translation), 60)}\"");
+                                                    return;
+                                                }
+                                            }
+
+                                            // Reconstruction failed — strip placeholders, use plain text
+                                            translation = SegmentTagHandler.StripTagPlaceholders(translation);
+                                        }
+
                                         instance._activeDocument.Selection.Target.Replace(
                                             translation, "Supervertaler");
                                         batchControl.AppendLog(

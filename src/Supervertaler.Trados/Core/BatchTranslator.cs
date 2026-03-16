@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Supervertaler.Trados.Core;
 using Supervertaler.Trados.Models;
 using Supervertaler.Trados.Settings;
 
@@ -23,6 +24,18 @@ namespace Supervertaler.Trados.Core
         /// so the engine doesn't depend on Trados SDK types.
         /// </summary>
         public object SegmentPairRef { get; set; }
+
+        /// <summary>
+        /// Whether the source segment contains inline tags (formatting, field codes, etc.).
+        /// When true, SourceText contains numbered tag placeholders and TagMap is populated.
+        /// </summary>
+        public bool HasTags { get; set; }
+
+        /// <summary>
+        /// Maps tag placeholder numbers to original Trados markup data.
+        /// Only populated when HasTags is true.
+        /// </summary>
+        public Dictionary<int, TagInfo> TagMap { get; set; }
     }
 
     public enum BatchScope
@@ -58,6 +71,12 @@ namespace Supervertaler.Trados.Core
         public int SegmentIndex { get; set; }
         public string Translation { get; set; }
         public object SegmentPairRef { get; set; }
+
+        /// <summary>Whether the source segment had inline tags.</summary>
+        public bool HasTags { get; set; }
+
+        /// <summary>Tag map for reconstructing tags in the target segment.</summary>
+        public Dictionary<int, TagInfo> TagMap { get; set; }
     }
 
     // ─── Engine ──────────────────────────────────────────────
@@ -199,7 +218,9 @@ namespace Supervertaler.Trados.Core
                                 {
                                     SegmentIndex = segments[i].Index,
                                     Translation = translation,
-                                    SegmentPairRef = segments[i].SegmentPairRef
+                                    SegmentPairRef = segments[i].SegmentPairRef,
+                                    HasTags = segments[i].HasTags,
+                                    TagMap = segments[i].TagMap
                                 });
 
                                 batchTranslated++;

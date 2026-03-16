@@ -35,26 +35,27 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine("- Maintain accuracy and natural fluency");
             sb.AppendLine();
 
-            // Tag preservation — critical for CAT tools
-            sb.AppendLine("**CRITICAL: INLINE FORMATTING TAG PRESERVATION**:");
-            sb.AppendLine("- Source text may contain formatting tags: <b>bold</b>, <i>italic</i>, <u>underline</u>");
-            sb.AppendLine("- These tags MUST be preserved in the translation");
-            sb.AppendLine("- Place tags around the CORRESPONDING translated words");
-            sb.AppendLine("- Example: \"Click the <b>Save</b> button\" -> \"Klik op de knop <b>Opslaan</b>\"");
-            sb.AppendLine("- Ensure every opening tag has a matching closing tag");
+            // Numbered tag placeholder preservation (Trados inline tags)
+            sb.AppendLine("**CRITICAL: NUMBERED TAG PLACEHOLDER PRESERVATION**:");
+            sb.AppendLine("- Source segments may contain numbered tag placeholders representing inline formatting:");
+            sb.AppendLine("  - Paired tags: <t1>formatted text</t1>, <t2>another format</t2>");
+            sb.AppendLine("  - Standalone tags: <t3/> (e.g., page breaks, field codes)");
+            sb.AppendLine("- You MUST preserve ALL tag placeholders exactly as they appear");
+            sb.AppendLine("- Place paired tags around the CORRESPONDING translated words");
+            sb.AppendLine("- Keep standalone tags (<tN/>) in the correct position relative to the translated text");
+            sb.AppendLine("- If source has N tags, target must have exactly N tags with the same numbers");
+            sb.AppendLine("- Never translate, remove, or modify the tag placeholders themselves");
+            sb.AppendLine("- Tags may be reordered to fit natural target language word order");
+            sb.AppendLine("- Example: \"Click the <t1>Save</t1> button\" → \"Klik op de knop <t1>Opslaan</t1>\"");
+            sb.AppendLine("- Example: \"Page <t2/> of <t3/>\" → \"Pagina <t2/> van <t3/>\"");
             sb.AppendLine();
 
-            // CAT tool tags (Trados, memoQ, CafeTran, etc.)
-            sb.AppendLine("**CRITICAL: CAT TOOL TAG PRESERVATION**:");
-            sb.AppendLine("- Source may contain CAT tool formatting tags in various formats:");
-            sb.AppendLine("  - Trados Studio: <cf bold=True>text</cf>, <field name=\"Page\" value=\"2\"/>");
-            sb.AppendLine("  - memoQ: [1}, {2], [3}, {4] (asymmetric bracket-brace pairs)");
-            sb.AppendLine("  - Numbered tags: <410>text</410>, <434>text</434>");
-            sb.AppendLine("  - CafeTran: |formatted text| (pipe symbols)");
-            sb.AppendLine("- PRESERVE ALL tags exactly as they appear");
-            sb.AppendLine("- If source has N tags, target must have exactly N tags");
-            sb.AppendLine("- Reposition tags for natural target language word order");
-            sb.AppendLine("- Never translate, omit, or modify the tags themselves");
+            // Generic formatting tag preservation (for non-Trados sources)
+            sb.AppendLine("**INLINE FORMATTING TAG PRESERVATION**:");
+            sb.AppendLine("- Source text may also contain formatting tags: <b>bold</b>, <i>italic</i>, <u>underline</u>");
+            sb.AppendLine("- These tags MUST be preserved in the translation");
+            sb.AppendLine("- Place tags around the CORRESPONDING translated words");
+            sb.AppendLine("- Ensure every opening tag has a matching closing tag");
             sb.AppendLine();
 
             // Number formatting

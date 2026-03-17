@@ -1,3 +1,7 @@
+{% hint style="info" %}
+You are viewing help for **Supervertaler for Trados** — the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://help.supervertaler.com).
+{% endhint %}
+
 # AI Settings
 
 Configure the AI provider, model, and context options used by the Supervertaler for Trados plugin.

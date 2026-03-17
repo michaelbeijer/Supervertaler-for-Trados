@@ -23,7 +23,7 @@ This plugin makes **no network calls** except to:
 1. **Your chosen AI provider** (OpenAI, Anthropic, Google Gemini, or local Ollama) — only when you use AI features
 2. **Lemon Squeezy licence API** — for licence activation and periodic validation (sends only your licence key and a hashed machine fingerprint)
 
-No telemetry, no tracking, no analytics, no data collection. Your API keys are stored locally in `%LocalAppData%\Supervertaler.Trados\settings.json` and are never transmitted anywhere except to your chosen AI provider. The full source code is available here for security audit.
+No telemetry, no tracking, no analytics, no data collection. Your API keys are stored locally in your Supervertaler data folder (`~/Supervertaler/trados/settings.json` by default) and are never transmitted anywhere except to your chosen AI provider. The full source code is available here for security audit.
 
 ## TermLens — inline terminology display
 
@@ -74,6 +74,14 @@ As you navigate between segments in the Trados Studio editor, the TermLens panel
 ---
 
 <img width="1411" height="1015" alt="4_TermLens-in-Trados-Studio-2024-Settings-KBS" src="https://github.com/user-attachments/assets/ee14c3ae-43f3-4f76-8ec2-871a9c18e10b" />
+
+## QuickLauncher — one-click AI prompts
+
+QuickLauncher puts your most-used AI prompts in the editor right-click menu. Select a word or phrase, press **Ctrl+Q** (or right-click → QuickLauncher), choose a prompt, and the AI Assistant receives the expanded prompt with the current segment context already filled in.
+
+Prompts support five variables: `{{SOURCE_LANGUAGE}}`, `{{TARGET_LANGUAGE}}`, `{{SOURCE_SEGMENT}}` (full source segment), `{{TARGET_SEGMENT}}` (your translation so far), and `{{SELECTION}}` (selected text). Any `.svprompt` file marked with `sv_quicklauncher: true` or placed in a `QuickLauncher` folder appears in the menu automatically — and is shared with Supervertaler Workbench via the shared prompt library.
+
+---
 
 ## AI Assistant — project-aware chat
 

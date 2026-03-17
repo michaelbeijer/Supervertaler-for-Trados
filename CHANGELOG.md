@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.10.1] — 2026-03-17
+
+### Added
+- **`{{SOURCE_SEGMENT}}` and `{{TARGET_SEGMENT}}` variables** — renamed from `{{SOURCE_TEXT}}` / `{{TARGET_TEXT}}` for clarity; the old names continue to work as aliases
+- **Ctrl+Q shortcut** — opens the QuickLauncher prompt menu directly from the keyboard; note that Trados's default "View Internally Source" shortcut must be removed first (File → Options → Keyboard Shortcuts)
+- **QuickLauncher help page** — new documentation page covering variables, examples, and setup
+
+### Fixed
+- **QuickLauncher prompts appear immediately** — newly created or edited prompts now appear in the right-click menu without restarting Trados
+- **Case column width** — the Case column in TermLens settings was too narrow to display "Insensitive" in full; widened to fit
+
+---
+
 ## [4.10.0] — 2026-03-17
 
 ### Added

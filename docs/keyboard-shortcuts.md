@@ -6,13 +6,17 @@ All keyboard shortcuts available in Supervertaler for Trados, with Mac equivalen
 **Mac users (Parallels):** Ctrl = Control, Alt = Option on Mac keyboards. Check **Parallels → Preferences → Shortcuts** if your modifier key mapping differs.
 {% endhint %}
 
+{% hint style="warning" %}
+**Trados conflict with Ctrl+Alt+T:** Trados Studio assigns this shortcut to "Insert TM Symbol" by default. If Ctrl+Alt+T does nothing, go to **File → Options → Keyboard Shortcuts**, search for "Insert TM Symbol", and remove or reassign its shortcut to free up Ctrl+Alt+T for Supervertaler.
+{% endhint %}
+
 ## Terminology
 
 | Shortcut (Windows) | Shortcut (Mac) | Action |
 |---------------------|----------------|--------|
 | `Alt+Down` | `Option+Down` | Quick-add term to write termbases |
 | `Alt+Up` | `Option+Up` | Quick-add term to project termbase |
-| `Ctrl+Alt+T` | `Control+Option+T` | Add term (opens dialog with full control) |
+| `Ctrl+Alt+T` | `Control+Option+T` | Add term entry (opens full editor with definition, domain, notes, synonyms) |
 | `Ctrl+Alt+N` | `Control+Option+N` | Quick-add non-translatable term |
 | `Ctrl+Alt+G` | `Control+Option+G` | Open Term Picker |
 | `Alt+1` ... `Alt+9` | `Option+1` ... `Option+9` | Insert term 1–9 by badge number |

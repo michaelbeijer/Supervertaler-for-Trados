@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 using Sdl.Desktop.IntegrationApi;
 using Sdl.Desktop.IntegrationApi.Extensions;
@@ -132,135 +131,17 @@ namespace Supervertaler.Trados
                     return;
                 }
 
-                // Show the dialog
-                using (var dlg = new AddTermDialog(sourceText.Trim(), targetText.Trim(), writeTermbases))
+                // Pick target termbase — prefer project termbase, fall back to first write termbase
+                var primaryTb = settings.ProjectTermbaseId > 0
+                    ? writeTermbases.Find(t => t.Id == settings.ProjectTermbaseId) ?? writeTermbases[0]
+                    : writeTermbases[0];
+
+                // Open the full term entry editor in add mode
+                using (var dlg = new TermEntryEditorDialog(
+                    sourceText.Trim(), targetText.Trim(), settings.TermbasePath, primaryTb))
                 {
                     if (dlg.ShowDialog() == DialogResult.OK)
-                    {
-                        if (string.IsNullOrWhiteSpace(dlg.SourceTerm) ||
-                            string.IsNullOrWhiteSpace(dlg.TargetTerm))
-                        {
-                            MessageBox.Show("Both source and target terms are required.",
-                                "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
-                        }
-
-                        try
-                        {
-                            // Check for existing entries with matching source or target
-                            var mergeMatches = TermMergeChecker.FindMergeMatches(
-                                settings.TermbasePath, dlg.SourceTerm, dlg.TargetTerm,
-                                writeTermbases);
-
-                            if (mergeMatches.Count > 0)
-                            {
-                                using (var mergeDlg = new MergePromptDialog(
-                                    mergeMatches, dlg.SourceTerm, dlg.TargetTerm))
-                                {
-                                    var mergeResult = mergeDlg.ShowDialog();
-
-                                    if (mergeResult == DialogResult.Cancel)
-                                        return;
-
-                                    if (mergeResult == DialogResult.Yes || mergeResult == DialogResult.Retry)
-                                    {
-                                        // Add as synonym to each matched entry
-                                        foreach (var match in mergeMatches)
-                                        {
-                                            if (match.MatchType == "source")
-                                                TermbaseReader.AddSynonym(
-                                                    settings.TermbasePath, match.TermId,
-                                                    dlg.TargetTerm, "target");
-                                            else
-                                                TermbaseReader.AddSynonym(
-                                                    settings.TermbasePath, match.TermId,
-                                                    dlg.SourceTerm, "source");
-                                        }
-
-                                        // Insert normally into termbases without a match
-                                        var matchedTbIds = new HashSet<long>(
-                                            mergeMatches.Select(m => m.TermbaseId));
-                                        foreach (var tb in writeTermbases)
-                                        {
-                                            if (!matchedTbIds.Contains(tb.Id))
-                                            {
-                                                TermbaseReader.InsertTerm(
-                                                    settings.TermbasePath, tb.Id,
-                                                    dlg.SourceTerm, dlg.TargetTerm,
-                                                    tb.SourceLang, tb.TargetLang,
-                                                    dlg.Definition,
-                                                    isNonTranslatable: dlg.IsNonTranslatable);
-                                            }
-                                        }
-
-                                        // Full reload to pick up synonym changes
-                                        TermLensEditorViewPart.NotifyTermAdded();
-
-                                        // "Add & Edit" — open the term entry editor
-                                        if (mergeResult == DialogResult.Retry)
-                                        {
-                                            var firstMatch = mergeMatches[0];
-                                            var tb2 = writeTermbases.Find(t => t.Id == firstMatch.TermbaseId);
-                                            if (tb2 != null)
-                                            {
-                                                var entry = TermbaseReader.GetTermById(
-                                                    settings.TermbasePath, firstMatch.TermId);
-                                                if (entry != null)
-                                                {
-                                                    using (var editor = new TermEntryEditorDialog(
-                                                        entry, settings.TermbasePath, tb2))
-                                                    {
-                                                        if (editor.ShowDialog() == DialogResult.OK)
-                                                            TermLensEditorViewPart.NotifyTermAdded();
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        return;
-                                    }
-                                    // DialogResult.No = "Keep Both" — fall through to normal insert
-                                }
-                            }
-
-                            // Normal insert into all write termbases
-                            bool anyInserted = false;
-                            foreach (var tb in writeTermbases)
-                            {
-                                var newId = TermbaseReader.InsertTerm(
-                                    settings.TermbasePath,
-                                    tb.Id,
-                                    dlg.SourceTerm,
-                                    dlg.TargetTerm,
-                                    tb.SourceLang,
-                                    tb.TargetLang,
-                                    dlg.Definition,
-                                    isNonTranslatable: dlg.IsNonTranslatable);
-
-                                if (newId > 0) anyInserted = true;
-                            }
-
-                            if (anyInserted)
-                            {
-                                // Reload term index so the new term appears immediately
-                                TermLensEditorViewPart.NotifyTermAdded();
-                            }
-                            else
-                            {
-                                MessageBox.Show(
-                                    "This term already exists in the termbase.",
-                                    "TermLens \u2014 Add Term",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(
-                                $"Failed to add term: {ex.Message}\n\n" +
-                                "The database may be locked by another application.",
-                                "TermLens \u2014 Add Term",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
+                        TermLensEditorViewPart.NotifyTermAdded();
                 }
             }
             catch (Exception ex)

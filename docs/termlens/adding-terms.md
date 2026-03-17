@@ -33,24 +33,28 @@ For terms that should remain identical in source and target (brand names, produc
 
 This creates a term entry where source and target are the same. Non-translatable terms appear with a distinct yellow highlight in [TermLens (Workbench)](https://supervertaler.gitbook.io/supervertaler/glossaries/termlens).
 
-## Add Term dialog (Ctrl+Alt+T)
+## Add term entry (Ctrl+Alt+T)
 
-For more control, open the full Add Term dialog:
-
-1. Press **Ctrl+Alt+T** (or right-click in the editor and choose **Add Term...**)
-2. Fill in the fields:
+For full control over a new term, press **Ctrl+Alt+T** (or right-click in the editor and choose **Add Term...**). This opens the **Add term entry** dialog, which lets you fill in all fields before saving:
 
 | Field | Description |
 |-------|-------------|
 | **Source** | The source-language term |
 | **Target** | The target-language translation |
-| **Source Abbreviation** | Optional abbreviated form of the source term (e.g., "GC" for "gaschromatografie") |
-| **Target Abbreviation** | Optional abbreviated form of the target term (e.g., "GC" for "gas chromatography") |
+| **Source Abbreviation** | Optional abbreviated form (e.g. "GC" for "gaschromatografie"). Separate multiple variants with `\|`. |
+| **Target Abbreviation** | Optional abbreviated form of the target term |
+| **Source synonyms** | Alternative source-language forms for the same concept |
+| **Target synonyms** | Alternative target-language translations |
 | **Definition** | Optional definition or usage note |
+| **Domain** | Subject area or client (e.g. "Legal", "ACME Corp") |
+| **Notes** | Any additional notes for translators |
 | **Non-translatable** | Check this to mark the term as non-translatable |
-| **Termbase** | Choose which termbase to add the term to |
 
-3. Click **OK** to save
+The term is added to the **project termbase** if one is configured, or the first write-enabled termbase otherwise.
+
+{% hint style="warning" %}
+**Trados conflict:** Trados Studio assigns **Ctrl+Alt+T** to "Insert TM Symbol" by default. If pressing Ctrl+Alt+T does nothing, you need to remove Trados's binding first. Go to **File → Options → Keyboard Shortcuts**, search for "Insert TM Symbol", and delete or reassign its shortcut. Then Ctrl+Alt+T will work as expected in Supervertaler.
+{% endhint %}
 
 {% hint style="success" %}
 **Tip:** Use the project termbase for client-specific terminology that should be prioritised over background termbases. Project termbase terms appear in pink in TermLens.
@@ -78,7 +82,7 @@ When you make a selection, Supervertaler scans the full segment text for every o
 
 - **Select at least 3–4 characters** — very short selections (1–2 characters) may match common short words elsewhere in the segment (e.g., selecting **he** could match the word _the_)
 - **Select the whole word when in doubt** — if a segment contains similar-looking words and you want a specific one, a complete-word selection is always matched correctly
-- **Use Ctrl+Alt+T for tricky cases** — the Add Term dialog lets you review and edit the expanded term before saving, so you can catch any unexpected expansion
+- **Use Ctrl+Alt+T for tricky cases** — the Add Term Entry dialog lets you review and edit the expanded term before saving, so you can catch any unexpected expansion
 
 {% hint style="info" %}
 Press **F2** to manually expand your current selection to word boundaries without adding a term. This lets you preview exactly what Supervertaler would capture before pressing a quick-add shortcut.

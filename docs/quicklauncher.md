@@ -40,9 +40,9 @@ QuickLauncher prompts have access to the full segment and project context at the
 
 | Variable | Replaced with | Example |
 |----------|---------------|---------|
-| `{{SOURCE_SEGMENT}}` | Full text of the **active source segment** | `De stand der techniek...` |
-| `{{TARGET_SEGMENT}}` | Full text of the **active target segment** (your translation so far) | `The prior art...` |
-| `{{SELECTION}}` | Text currently **selected** in the editor | `vloerbekledingen` |
+| `{{SOURCE_SEGMENT}}` | Full text of the **active source segment** | `De uitvinding heeft betrekking op...` |
+| `{{TARGET_SEGMENT}}` | Full text of the **active target segment** (your translation so far) | `The invention relates to...` |
+| `{{SELECTION}}` | Text currently **selected** in the editor | `werkwijze` |
 
 {% hint style="info" %}
 **Segment vs selection:** `{{SOURCE_SEGMENT}}` and `{{TARGET_SEGMENT}}` always give the **entire active segment**. `{{SELECTION}}` gives only the **highlighted portion** — useful for term lookups or focused questions. If nothing is selected, `{{SELECTION}}` is an empty string.
@@ -52,26 +52,26 @@ QuickLauncher prompts have access to the full segment and project context at the
 
 | Variable | Replaced with |
 |----------|---------------|
-| `{{PROJECT_NAME}}` | Trados project name (e.g. `EP3456789_NL_EN`) |
-| `{{DOCUMENT_NAME}}` | Active file name (e.g. `EP3456789A1.docx`) |
+| `{{PROJECT_NAME}}` | Trados project name (e.g. `Patent_NL_EN_2026`) |
+| `{{DOCUMENT_NAME}}` | Active file name (e.g. `source_document.docx`) |
 | `{{SURROUNDING_SEGMENTS}}` | N source segments before and after the active segment, with their actual Trados segment numbers and the active segment marked `← ACTIVE` |
 | `{{PROJECT}}` | All source segments in the active document, numbered with their actual Trados segment numbers |
 
 **`{{SURROUNDING_SEGMENTS}}` example output** (with N = 2):
 
 ```
-[11] Voorgaande zin.
-[12] Nog een voorgaande zin.
-[13 ← ACTIVE] De stand der techniek op het gebied van vloerbekledingen...
-[14] Volgende zin.
+[11] Vorige zin hier.
+[12] Nog een vorige zin.
+[13 ← ACTIVE] De uitvinding heeft betrekking op een nieuwe werkwijze...
+[14] Volgende zin hier.
 [15] Nog een volgende zin.
 ```
 
 **`{{PROJECT}}` example output** (single-file project):
 
 ```
-[1] De uitvinding heeft betrekking op een werkwijze...
-[2] De stand der techniek op het gebied van vloerbekledingen...
+[1] De uitvinding heeft betrekking op een nieuwe werkwijze...
+[2] De conclusies omvatten de volgende kenmerken...
 [3] ...
 ```
 

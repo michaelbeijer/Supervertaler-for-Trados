@@ -18,8 +18,8 @@ The example package contains:
 | `supervertaler_example.db` | Supervertaler termbase with patent terminology (Dutch → English) |
 | `Example project (patent, en-nl).svproj` | Supervertaler project file |
 | `Example project (patent, en-nl)_backup.tmx` | Translation memory backup in TMX format |
-| `US8312383.docx` | Source document (US patent) |
-| `US8312383.pdf` | Original patent PDF for reference |
+| `example_patent.docx` | Source document (US patent) |
+| `example_patent.pdf` | Original patent PDF for reference |
 
 ## How to Use It
 
@@ -72,7 +72,7 @@ If you have an API key configured (see [Getting Started](getting-started.md#3.-c
 - Open the **Supervertaler Assistant** panel to ask questions about terminology or the current segment
 
 {% hint style="info" %}
-The example project is a real patent document, so it's a good test of how TermLens handles technical terminology in context.
+The example project uses realistic patent content, so it's a good test of how TermLens handles technical terminology in context.
 {% endhint %}
 
 ---

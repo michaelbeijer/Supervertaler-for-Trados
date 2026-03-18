@@ -46,11 +46,11 @@ These work in Batch Translate, Batch Proofread, and QuickLauncher prompts:
 
 These are only available in QuickLauncher prompts, because they refer to the specific segment active at the moment you trigger the menu:
 
-| Variable             | Replaced with                                                                                  | Example                                                  |
-| -------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `{{SOURCE_SEGMENT}}` | Full source text of the **active segment**                                                     | `De stand der techniek op het gebied van vloerlijmen...` |
-| `{{TARGET_SEGMENT}}` | Full target text of the **active segment** (your translation so far — may be empty or partial) | `The prior art in the field of floor adhesives...`       |
-| `{{SELECTION}}`      | Text currently **selected** in the editor (source side preferred; falls back to target side)   | `vloerbekledingen`                                       |
+| Variable             | Replaced with                                                                                  | Example                                                      |
+| -------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `{{SOURCE_SEGMENT}}` | Full source text of the **active segment**                                                     | `De uitvinding heeft betrekking op een nieuwe werkwijze...`  |
+| `{{TARGET_SEGMENT}}` | Full target text of the **active segment** (your translation so far — may be empty or partial) | `The invention relates to a novel method...`                 |
+| `{{SELECTION}}`      | Text currently **selected** in the editor (source side preferred; falls back to target side)   | `werkwijze`                                                  |
 
 {% hint style="info" %}
 **Segment vs selection:** `{{SOURCE_SEGMENT}}` and `{{TARGET_SEGMENT}}` always give you the **entire active segment**. `{{SELECTION}}` gives you only the **highlighted portion** — useful for looking up or explaining a specific word or phrase within the segment. If nothing is selected, `{{SELECTION}}` is replaced with an empty string.
@@ -60,8 +60,8 @@ These are only available in QuickLauncher prompts, because they refer to the spe
 
 | Variable                   | Replaced with                                                                                                                                                                                                   |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `{{PROJECT_NAME}}`         | Trados project name (e.g. `EP3456789_NL_EN`)                                                                                                                                                                    |
-| `{{DOCUMENT_NAME}}`        | Active file name (e.g. `EP3456789A1.docx`)                                                                                                                                                                      |
+| `{{PROJECT_NAME}}`         | Trados project name (e.g. `Patent_NL_EN_2026`)                                                                                                                                                                  |
+| `{{DOCUMENT_NAME}}`        | Active file name (e.g. `source_document.docx`)                                                                                                                                                                  |
 | `{{SURROUNDING_SEGMENTS}}` | N source segments before and after the active segment, with actual Trados segment numbers and the active segment marked `← ACTIVE`. N is set in **Settings → AI Settings → Surrounding segments** (default: 5). |
 | `{{PROJECT}}`              | All source segments in the document, numbered with their actual Trados segment numbers. In multi-file projects a `=== File N ===` header separates each file (Trados restarts segment numbering per file).      |
 
@@ -108,12 +108,12 @@ suggest the standard {{TARGET_LANGUAGE}} equivalent, and note any regional
 or register variations the translator should be aware of.
 ```
 
-When the translator selects "vloerbekledingen" in the source segment and triggers this prompt via QuickLauncher, the AI receives:
+When the translator selects "werkwijze" in the source segment and triggers this prompt via QuickLauncher, the AI receives:
 
 ```
 The user is translating a patent from Dutch (Belgium) to English (United States).
 
-The selected term is: vloerbekledingen
+The selected term is: werkwijze
 
 Please explain what this term means...
 ```

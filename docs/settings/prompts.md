@@ -67,6 +67,8 @@ These are only available in QuickLauncher prompts, because they refer to the spe
 
 {% hint style="warning" %}
 `{{PROJECT}}` sends the entire document to the AI and uses significantly more tokens than other variables. For a 10,000-word document, this costs roughly 4–5 cents per call with a Sonnet-class model. Reserve it for prompts where full document context genuinely matters.
+
+To keep the chat history readable, the chat bubble shows a compact summary (e.g. `[source document — 47 segments]`) instead of the full source text. The complete document is still sent to the AI.
 {% endhint %}
 
 ***

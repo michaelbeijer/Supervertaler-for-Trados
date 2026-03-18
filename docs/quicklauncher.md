@@ -88,6 +88,8 @@ In a **multi-file project**, a file header is inserted at each boundary (because
 
 {% hint style="warning" %}
 `{{PROJECT}}` sends all source segments to the AI. For a typical 10,000-word patent this costs roughly **4–5 cents** per call with a Sonnet-class model — negligible for important work, but avoid using it in high-frequency prompts. The number of surrounding segments for `{{SURROUNDING_SEGMENTS}}` is configured in **Settings → AI Settings → Surrounding segments** (default: 5).
+
+To keep the chat history readable, the chat bubble shows a compact summary (e.g. `[source document — 47 segments]`) instead of the full source text. The complete document is still sent to the AI.
 {% endhint %}
 
 ### Example: explain a selected term

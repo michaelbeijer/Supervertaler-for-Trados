@@ -11,9 +11,9 @@ QuickLauncher gives you one-click access to your most-used AI prompts directly f
 1. **Right-click** anywhere in the editor (or press `Ctrl+Q`)
 2. Click **QuickLauncher** in the context menu
 3. Select a prompt from the list
-4. The prompt is filled in with the current segment context and sent to the Supervertaler Assistant
+4. The prompt is filled in with the current segment context and submitted to the Supervertaler Assistant chat
 
-The AI response appears in the **Supervertaler Assistant** chat panel.
+The expanded prompt appears as a user message bubble in the **Supervertaler Assistant** chat panel, and the AI response follows immediately below it. The conversation continues from there — you can ask follow-up questions in the chat input as normal.
 
 ## Keyboard shortcut
 

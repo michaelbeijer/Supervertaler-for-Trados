@@ -30,6 +30,8 @@ namespace Supervertaler.Trados.Controls
         private static readonly Color NonTranslatableHover = ColorTranslator.FromHtml("#FFE8A0");
         private static readonly Color MultiTermBg = ColorTranslator.FromHtml("#D4EDDA");
         private static readonly Color MultiTermHover = ColorTranslator.FromHtml("#B8D9C0");
+        private static readonly Color AbbreviationBg = ColorTranslator.FromHtml("#E8DAFF");
+        private static readonly Color AbbreviationHover = ColorTranslator.FromHtml("#D8C8FF");
         private static readonly Color SeparatorColor = Color.FromArgb(180, 180, 180);
 
         private bool _isHovered;
@@ -284,6 +286,8 @@ namespace Supervertaler.Trados.Controls
             Color bgColor;
             if (_isNonTranslatable)
                 bgColor = _isHovered ? NonTranslatableHover : NonTranslatableBg;
+            else if (IsAbbreviationMatch)
+                bgColor = _isHovered ? AbbreviationHover : AbbreviationBg;
             else if (IsProjectTermbase)
                 bgColor = _isHovered ? ProjectHover : ProjectBg;
             else if (_isMultiTerm)
@@ -328,6 +332,8 @@ namespace Supervertaler.Trados.Controls
                 Color badgeColor;
                 if (_isNonTranslatable)
                     badgeColor = Color.FromArgb(180, 150, 50);
+                else if (IsAbbreviationMatch)
+                    badgeColor = Color.FromArgb(130, 90, 200);
                 else if (IsProjectTermbase)
                     badgeColor = Color.FromArgb(200, 100, 150);
                 else if (_isMultiTerm)

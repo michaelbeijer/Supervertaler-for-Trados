@@ -49,6 +49,13 @@ namespace Supervertaler.Trados.Core
             if (string.IsNullOrEmpty(fullText) || string.IsNullOrEmpty(partialSelection))
                 return (partialSelection ?? "").Trim();
 
+            // Strip leading/trailing whitespace before matching — a selection like
+            // "trimethoxysilaan " (trailing space) would otherwise cause endPos to land
+            // on the next word, making the expansion loop swallow it ("trimethoxysilaan of").
+            partialSelection = partialSelection.Trim();
+            if (string.IsNullOrEmpty(partialSelection))
+                return "";
+
             // Try case-sensitive first, then case-insensitive
             string result = FindBestExpansion(fullText, partialSelection, StringComparison.Ordinal);
             if (result == null)

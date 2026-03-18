@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.10.8] — 2026-03-18
+
+### Fixed
+- **Smart selection no longer swallows the next word when selection has trailing space** — selecting a single word with a trailing space (e.g. by shift+arrow-key overshoot) now correctly adds just that word to the termbase; previously the expansion algorithm would land past the space and consume the following word (e.g. "trimethoxysilaan of" instead of "trimethoxysilaan")
+
+---
+
 ## [4.10.7] — 2026-03-18
 
 ### Added

@@ -1079,6 +1079,34 @@ namespace Supervertaler.Trados.Core
         }
 
         /// <summary>
+        /// Renames a termbase. The name column has a UNIQUE constraint, so this
+        /// will throw if the new name already exists.
+        /// </summary>
+        public static void RenameTermbase(string dbPath, long termbaseId, string newName)
+        {
+            if (string.IsNullOrWhiteSpace(newName))
+                throw new ArgumentException("Termbase name cannot be empty.");
+
+            var connStr = new SqliteConnectionStringBuilder
+            {
+                DataSource = dbPath,
+                Mode = SqliteOpenMode.ReadWrite
+            }.ToString();
+
+            using (var conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                using (var cmd = new SqliteCommand(
+                    "UPDATE termbases SET name = @name WHERE id = @id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@name", newName.Trim());
+                    cmd.Parameters.AddWithValue("@id", termbaseId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
         /// Loads all terms belonging to a specific termbase, for use in the
         /// Termbase Editor dialog. Uses a short-lived ReadOnly connection.
         /// </summary>

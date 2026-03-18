@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.10.12] — 2026-03-18
+
+### Added
+- **Termbase rename** — double-click a termbase name in TermLens Settings (or press **F2**) to rename it
+- **fix_reversed_entries.py** — `tools/` script to detect and swap term entries that were stored in the wrong direction in a termbase
+
+---
+
 ## [4.10.11] — 2026-03-18
 
 ### Fixed

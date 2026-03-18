@@ -789,6 +789,13 @@ namespace Supervertaler.Trados.Settings
             if (colName == "colRead" || colName == "colWrite" || colName == "colProject" || colName == "colCS")
                 return;
 
+            // Double-click on name column → rename
+            if (colName == "colName")
+            {
+                RenameTermbase(e.RowIndex);
+                return;
+            }
+
             OpenTermbaseEditor(e.RowIndex);
         }
 
@@ -1058,6 +1065,53 @@ namespace Supervertaler.Trados.Settings
                         MessageBox.Show($"Failed to create termbase:\n{ex.Message}",
                             "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+                }
+            }
+        }
+
+        private void RenameTermbase(int rowIndex)
+        {
+            var dbPath = _txtTermbasePath.Text.Trim();
+            if (string.IsNullOrEmpty(dbPath) || !File.Exists(dbPath)) return;
+            if (rowIndex < 0 || rowIndex >= _termbases.Count) return;
+
+            var tb = _termbases[rowIndex];
+
+            using (var dlg = new Form())
+            {
+                dlg.Text = "Rename Termbase";
+                dlg.Width = 400;
+                dlg.Height = 150;
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.MaximizeBox = false;
+                dlg.MinimizeBox = false;
+                dlg.Font = new Font("Segoe UI", 9f);
+
+                var lbl = new Label { Text = "New name:", Left = 15, Top = 15, AutoSize = true };
+                var txt = new TextBox { Text = tb.Name, Left = 15, Top = 38, Width = 350 };
+                txt.SelectAll();
+                var btnOk = new Button { Text = "OK", DialogResult = DialogResult.OK, Left = 210, Top = 72, Width = 75 };
+                var btnCancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, Left = 290, Top = 72, Width = 75 };
+                dlg.AcceptButton = btnOk;
+                dlg.CancelButton = btnCancel;
+                dlg.Controls.AddRange(new Control[] { lbl, txt, btnOk, btnCancel });
+
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+
+                var newName = txt.Text.Trim();
+                if (string.IsNullOrWhiteSpace(newName) || newName == tb.Name) return;
+
+                try
+                {
+                    TermbaseReader.RenameTermbase(dbPath, tb.Id, newName);
+                    UpdateTermbaseInfo(dbPath);
+                    PopulateTermbaseList(dbPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to rename termbase: {ex.Message}",
+                        "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
         }
@@ -1429,6 +1483,13 @@ namespace Supervertaler.Trados.Settings
             if (keyData == Keys.F1)
             {
                 HelpSystem.OpenHelp(GetCurrentHelpTopic());
+                return true;
+            }
+            if (keyData == Keys.F2 && _dgvTermbases.Focused && _dgvTermbases.SelectedRows.Count > 0)
+            {
+                var rowIndex = _dgvTermbases.SelectedRows[0].Index;
+                if (rowIndex >= 0 && rowIndex < _termbases.Count)
+                    RenameTermbase(rowIndex);
                 return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);

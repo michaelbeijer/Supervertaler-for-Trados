@@ -60,7 +60,7 @@ If you share the database via a cloud-sync folder, ensure the file is fully sync
 
 1. **Check the Read toggle** –open [TermLens Settings](settings/termlens.md) and verify the termbase has **Read** enabled
 2. **Verify the database path** –ensure the path points to the correct `.db` file
-3. **Press F5** to force a full reload of all termbases from disk
+3. **Press F5** to force a full reload of your Supervertaler termbases from disk (note: F5 does not reload MultiTerm termbases)
 4. **Reload the database** –click the **gear icon** in the TermLens panel to open settings, then close the dialog. This forces a reload of the termbase data
 5. **Check language pair** –the termbase source/target languages must match the current Trados project languages
 
@@ -75,8 +75,7 @@ If you share the database via a cloud-sync folder, ensure the file is fully sync
 1. **Check your Trados project** –verify that MultiTerm termbases are attached via **Project Settings > Language Pairs > Termbases**
 2. **Check the Read toggle** –open Supervertaler Settings (gear icon) and make sure the MultiTerm termbase's Read checkbox is enabled
 3. **Check languages** –the termbase's source and target languages must match the current project's language pair
-4. **Press F5** to force a full reload of the TermLens panel
-5. **Navigate to another segment and back** to trigger an auto-refresh
+4. **Navigate to another segment and back** to trigger a MultiTerm auto-refresh (F5 does not reload MultiTerm termbases — only segment navigation does)
 
 {% hint style="info" %}
 When you add terms in MultiTerm, navigate to a different segment in Trados to trigger the auto-refresh. TermLens checks for file changes on each segment change.

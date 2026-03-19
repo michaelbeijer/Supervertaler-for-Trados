@@ -9,9 +9,13 @@ DIST_DIR="$SCRIPT_DIR/dist"
 BUILD_DIR="$PROJECT_DIR/bin/Release"
 DOTNET="${HOME}/.dotnet/dotnet"
 
-PACKAGES_DIR="$LOCALAPPDATA/Trados/Trados Studio/18/Plugins/Packages"
-UNPACKED_DIR="$LOCALAPPDATA/Trados/Trados Studio/18/Plugins/Unpacked/Supervertaler.Trados"
-OLD_UNPACKED_DIR="$LOCALAPPDATA/Trados/Trados Studio/18/Plugins/Unpacked/TermLens"
+PACKAGES_DIR="$APPDATA/Trados/Trados Studio/18/Plugins/Packages"
+UNPACKED_DIR="$APPDATA/Trados/Trados Studio/18/Plugins/Unpacked/Supervertaler.Trados"
+OLD_UNPACKED_DIR="$APPDATA/Trados/Trados Studio/18/Plugins/Unpacked/TermLens"
+
+# Also clean up old Local install location if present
+OLD_LOCAL_PACKAGES="$LOCALAPPDATA/Trados/Trados Studio/18/Plugins/Packages"
+OLD_LOCAL_UNPACKED="$LOCALAPPDATA/Trados/Trados Studio/18/Plugins/Unpacked/Supervertaler.Trados"
 
 echo "=== Building Supervertaler for Trados ==="
 "$DOTNET" build "$PROJECT_DIR/Supervertaler.Trados.csproj" -c Release
@@ -59,6 +63,16 @@ if [ -d "$OLD_UNPACKED_DIR" ]; then
     echo "  Removing old Unpacked/TermLens..."
     rm -rf "$OLD_UNPACKED_DIR"
     echo "  Old TermLens folder cleaned."
+fi
+
+# Clean up old Local install location (switched to Roaming)
+if [ -f "$OLD_LOCAL_PACKAGES/Supervertaler.Trados.sdlplugin" ]; then
+    echo "  Removing old Local Packages/Supervertaler.Trados.sdlplugin..."
+    rm -f "$OLD_LOCAL_PACKAGES/Supervertaler.Trados.sdlplugin"
+fi
+if [ -d "$OLD_LOCAL_UNPACKED" ]; then
+    echo "  Removing old Local Unpacked/Supervertaler.Trados..."
+    rm -rf "$OLD_LOCAL_UNPACKED"
 fi
 
 # Remove old TermLens package if it exists

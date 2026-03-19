@@ -130,41 +130,73 @@ namespace Supervertaler.Trados.Settings
         /// <summary>
         /// One-time migration from the legacy %LocalAppData%\Supervertaler.Trados\ folder
         /// to the new unified location.  A .migrated flag file prevents re-running.
+        /// After successful migration, removes the legacy folder.
+        /// Also cleans up other stale AppData folders on every startup.
         /// Safe to call on every startup.
         /// </summary>
         public static void MigrateIfNeeded()
         {
-            if (!Directory.Exists(LegacyDir)) return;
-
             var flagFile = Path.Combine(TradosDir, ".migrated");
-            if (File.Exists(flagFile)) return;
 
-            try
+            // Run migration if legacy dir exists and hasn't been migrated yet
+            if (Directory.Exists(LegacyDir) && !File.Exists(flagFile))
             {
-                Directory.CreateDirectory(TradosDir);
+                try
+                {
+                    Directory.CreateDirectory(TradosDir);
 
-                MigrateFile(
-                    Path.Combine(LegacyDir, "settings.json"),
-                    SettingsFilePath);
+                    MigrateFile(
+                        Path.Combine(LegacyDir, "settings.json"),
+                        SettingsFilePath);
 
-                MigrateFile(
-                    Path.Combine(LegacyDir, "license.json"),
-                    LicenseFilePath);
+                    MigrateFile(
+                        Path.Combine(LegacyDir, "license.json"),
+                        LicenseFilePath);
 
-                MigrateDirectory(
-                    Path.Combine(LegacyDir, "projects"),
-                    ProjectsDir);
+                    MigrateDirectory(
+                        Path.Combine(LegacyDir, "projects"),
+                        ProjectsDir);
 
-                // Legacy plugin prompts → shared prompt_library
-                MigrateDirectory(
-                    Path.Combine(LegacyDir, "prompts"),
-                    PromptLibraryDir);
+                    // Legacy plugin prompts → shared prompt_library
+                    MigrateDirectory(
+                        Path.Combine(LegacyDir, "prompts"),
+                        PromptLibraryDir);
 
-                File.WriteAllText(flagFile, DateTime.UtcNow.ToString("O"), Encoding.UTF8);
+                    File.WriteAllText(flagFile, DateTime.UtcNow.ToString("O"), Encoding.UTF8);
+                }
+                catch
+                {
+                    // Non-fatal — legacy files remain in place as a fallback
+                }
             }
-            catch
+
+            // Clean up legacy/stale AppData folders (safe to run every startup)
+            CleanupLegacyFolders();
+        }
+
+        /// <summary>
+        /// Removes legacy AppData folders that are no longer used:
+        ///   %LocalAppData%\Supervertaler.Trados\  — old plugin settings (migrated)
+        ///   %LocalAppData%\Supervertaler\          — stale Workbench artifact on Windows
+        /// Only deletes if the migration flag exists (data has been safely copied).
+        /// </summary>
+        private static void CleanupLegacyFolders()
+        {
+            var flagFile = Path.Combine(TradosDir, ".migrated");
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+            // Remove %LocalAppData%\Supervertaler.Trados\ (old plugin-only dir)
+            // Only if migration has completed (flag exists)
+            if (File.Exists(flagFile) && Directory.Exists(LegacyDir))
             {
-                // Non-fatal — legacy files remain in place as a fallback
+                try { Directory.Delete(LegacyDir, true); } catch { }
+            }
+
+            // Remove %LocalAppData%\Supervertaler\ (stale Workbench artifact, not used by any current code)
+            var staleWorkbenchDir = Path.Combine(localAppData, "Supervertaler");
+            if (Directory.Exists(staleWorkbenchDir))
+            {
+                try { Directory.Delete(staleWorkbenchDir, true); } catch { }
             }
         }
 

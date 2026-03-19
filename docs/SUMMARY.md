@@ -20,6 +20,7 @@
 * [Batch Operations](batch-operations.md)
   * [Batch Translate](batch-translate.md)
   * [AI Proofreader](ai-proofreader.md)
+  * [Analyze Project & Generate Prompt](generate-prompt.md)
 
 ## Terminology
 

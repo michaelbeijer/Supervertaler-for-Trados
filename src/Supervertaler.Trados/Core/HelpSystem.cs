@@ -36,6 +36,7 @@ namespace Supervertaler.Trados.Core
             public const string BatchTranslate     = "features/batch-operations/batch-translate";
             public const string AiProofreader      = "features/batch-operations/ai-proofreader";
             public const string AiProofreaderReports = "features/batch-operations/ai-proofreader#reports-tab";
+            public const string GeneratePrompt      = "features/batch-operations/generate-prompt";
             public const string MultiTermSupport   = "features/multiterm-support";
             public const string TermbaseEditor     = "terminology/termbase-management";
             public const string SettingsTermLens   = "settings/termlens";

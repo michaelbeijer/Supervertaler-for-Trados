@@ -76,6 +76,9 @@ namespace Supervertaler.Trados.Controls
         /// <summary>Raised when the user clicks "Apply to target" on a message.</summary>
         public event EventHandler<string> ApplyToTargetRequested;
 
+        /// <summary>Raised when the user clicks "Save as Prompt" on a message.</summary>
+        public event EventHandler<string> SaveAsPromptRequested;
+
         /// <summary>Raised when the user clicks Stop during a chat request.</summary>
         public event EventHandler StopRequested;
 
@@ -877,6 +880,8 @@ namespace Supervertaler.Trados.Controls
             var bubble = new ChatBubble(message, Math.Max(200, bubbleWidth));
             bubble.ApplyRequested += (s, text) =>
                 ApplyToTargetRequested?.Invoke(this, text);
+            bubble.SaveAsPromptRequested += (s, text) =>
+                SaveAsPromptRequested?.Invoke(this, text);
 
             _messageFlow.Controls.Add(bubble);
 

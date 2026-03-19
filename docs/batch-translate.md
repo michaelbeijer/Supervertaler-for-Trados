@@ -73,9 +73,13 @@ Ctrl+T is also available via right-click in the editor ("Translate active segmen
 
 Start by translating only the empty segments (scope: **Empty Segments Only**). Review the results, then fix any issues. This avoids overwriting segments you have already edited.
 
-### Create Domain-Specific Prompts
+### Generate a Domain-Specific Prompt Automatically
 
-For specialised content, duplicate the Default Translation Prompt in the Prompt Manager and add domain-specific instructions (terminology rules, style preferences, formatting requirements). A tailored prompt is the single most effective way to improve translation quality.
+Click **Analyze Project & Generate Prompt…** next to the prompt dropdown. Supervertaler analyzes your entire document, detects the domain, and uses AI to generate a comprehensive translation prompt with terminology rules, style guidelines, and anti-truncation controls — all tailored to your specific project. See [Analyze Project & Generate Prompt](generate-prompt.md) for details.
+
+### Create Domain-Specific Prompts Manually
+
+For specialised content, you can also duplicate the Default Translation Prompt in the Prompt Manager and add domain-specific instructions (terminology rules, style preferences, formatting requirements). A tailored prompt is the single most effective way to improve translation quality.
 
 ### Combine with TM
 
@@ -93,6 +97,7 @@ AI translation is a first draft. After a batch run:
 
 ## See Also
 
+* [Analyze Project & Generate Prompt](generate-prompt.md)
 * [AI Proofreader](ai-proofreader.md)
 * [Supervertaler Assistant](ai-assistant.md)
 * [TermLens](termlens.md)

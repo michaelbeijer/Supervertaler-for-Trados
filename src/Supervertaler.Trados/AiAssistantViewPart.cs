@@ -109,6 +109,7 @@ namespace Supervertaler.Trados
             _control.Value.SendRequested += OnSendRequested;
             _control.Value.ClearRequested += OnClearRequested;
             _control.Value.ApplyToTargetRequested += OnApplyToTargetRequested;
+            _control.Value.SaveAsPromptRequested += OnSaveAsPromptRequested;
             _control.Value.StopRequested += OnStopRequested;
 
             // Wire settings/help buttons
@@ -122,6 +123,7 @@ namespace Supervertaler.Trados
             batchControl.ScopeChanged += OnBatchScopeChanged;
             batchControl.OpenAiSettingsRequested += OnSettingsRequested;
             batchControl.BatchModeChanged += (s, e) => PopulateBatchPromptDropdown();
+            batchControl.GeneratePromptRequested += OnGeneratePromptRequested;
 
             // Wire reports control events
             var reportsControl = _control.Value.ReportsControl;
@@ -450,6 +452,199 @@ namespace Supervertaler.Trados
             {
                 // Editor may not allow insertion at this moment
             }
+        }
+
+        // ─── Generate Prompt ──────────────────────────────────────────
+
+        private void OnGeneratePromptRequested(object sender, EventArgs e)
+        {
+            SafeInvoke(() =>
+            {
+                if (_activeDocument == null)
+                {
+                    AddErrorMessage("No document open. Open a document in Trados first.");
+                    return;
+                }
+
+                var aiSettings = _settings?.AiSettings;
+                if (aiSettings == null)
+                {
+                    AddErrorMessage("AI settings not configured. Open Settings \u2192 AI Settings to configure a provider.");
+                    return;
+                }
+
+                // Resolve provider/API key
+                var provider = aiSettings.SelectedProvider ?? LlmModels.ProviderOpenAi;
+                string apiKey;
+                string baseUrl = null;
+                string model = aiSettings.GetSelectedModel();
+
+                if (provider == LlmModels.ProviderOllama)
+                {
+                    apiKey = "ollama";
+                    baseUrl = aiSettings.OllamaEndpoint ?? "http://localhost:11434";
+                }
+                else if (provider == LlmModels.ProviderCustomOpenAi)
+                {
+                    var profile = aiSettings.GetActiveCustomProfile();
+                    if (profile == null)
+                    {
+                        AddErrorMessage("No custom OpenAI profile configured.");
+                        return;
+                    }
+                    apiKey = profile.ApiKey;
+                    baseUrl = profile.Endpoint;
+                    model = profile.Model;
+                }
+                else
+                {
+                    apiKey = LlmClient.ResolveApiKey(provider, aiSettings.ApiKeys);
+                }
+
+                if (string.IsNullOrEmpty(apiKey))
+                {
+                    AddErrorMessage($"No API key configured for {provider}. Open Settings \u2192 AI Settings to add one.");
+                    return;
+                }
+
+                // Gather language pair
+                var sourceLang = GetDocumentSourceLanguage();
+                var targetLang = GetDocumentTargetLanguage();
+                if (string.IsNullOrEmpty(sourceLang) || string.IsNullOrEmpty(targetLang))
+                {
+                    AddErrorMessage("Cannot determine source/target language from the document.");
+                    return;
+                }
+
+                // Phase 1: Collect all source segments
+                var docCtx = CollectDocumentContext();
+                var sourceSegments = docCtx.Item1;
+                if (sourceSegments == null || sourceSegments.Count == 0)
+                {
+                    AddErrorMessage("No segments found in the document.");
+                    return;
+                }
+
+                // Phase 2: Document analysis (domain, tone)
+                var analysis = DocumentAnalyzer.Analyze(sourceSegments);
+
+                // Phase 3: Gather termbase terms (filtered by AI-disabled list)
+                var allTerms = TermLensEditorViewPart.GetCurrentTermbaseTerms();
+                var disabledIds = aiSettings.DisabledAiTermbaseIds ?? new List<long>();
+                var termbaseTerms = disabledIds.Count > 0
+                    ? allTerms.Where(t => !disabledIds.Contains(t.TermbaseId)).ToList()
+                    : allTerms;
+
+                // Phase 4: Gather TM reference pairs from translated segments
+                var tmPairs = CollectTmReferencePairs();
+
+                // Phase 5: Build meta-prompt
+                var ctx = new PromptGenerationContext
+                {
+                    SourceLang = sourceLang,
+                    TargetLang = targetLang,
+                    DetectedDomain = analysis.PrimaryDomain,
+                    AnalysisSummary = analysis.ToSummary(),
+                    SegmentCount = sourceSegments.Count,
+                    SourceSegments = sourceSegments,
+                    TermbaseTerms = termbaseTerms,
+                    TmPairs = tmPairs
+                };
+
+                var metaPrompt = PromptGenerator.BuildMetaPrompt(ctx);
+                var displayText = PromptGenerator.BuildDisplayMessage(ctx);
+
+                // Phase 6: Send via chat (switches to AI Assistant panel)
+                _control.Value.SubmitMessage(metaPrompt, displayText);
+            });
+        }
+
+        /// <summary>
+        /// Collects source/target pairs from already-translated segments to use as
+        /// TM reference pairs for the prompt generator. Samples up to 50 diverse pairs.
+        /// </summary>
+        private List<TmMatch> CollectTmReferencePairs()
+        {
+            var pairs = new List<TmMatch>();
+            if (_activeDocument == null) return pairs;
+
+            try
+            {
+                foreach (var pair in _activeDocument.SegmentPairs)
+                {
+                    var sourceText = pair.Source?.ToString() ?? "";
+                    var targetText = pair.Target?.ToString() ?? "";
+
+                    // Only include segments that have a non-empty translation
+                    if (string.IsNullOrWhiteSpace(sourceText) || string.IsNullOrWhiteSpace(targetText))
+                        continue;
+
+                    // Skip very short segments (headers, numbers)
+                    if (sourceText.Length < 20) continue;
+
+                    pairs.Add(new TmMatch
+                    {
+                        SourceText = sourceText,
+                        TargetText = targetText,
+                        MatchPercentage = 100
+                    });
+
+                    // Cap at 50 to avoid excessive prompt size
+                    if (pairs.Count >= 50) break;
+                }
+            }
+            catch (Exception)
+            {
+                // Document may not be accessible
+            }
+
+            return pairs;
+        }
+
+        private void OnSaveAsPromptRequested(object sender, string promptContent)
+        {
+            SafeInvoke(() =>
+            {
+                if (string.IsNullOrWhiteSpace(promptContent))
+                    return;
+
+                // Try to extract the prompt from delimiters (in case the full AI response is passed)
+                var extracted = PromptGenerator.ParseGeneratedPrompt(promptContent);
+                var content = extracted ?? promptContent;
+
+                // Ask user for a name
+                using (var dlg = new SavePromptDialog())
+                {
+                    if (dlg.ShowDialog(_control.Value.FindForm()) != DialogResult.OK)
+                        return;
+
+                    var name = dlg.PromptName;
+                    if (string.IsNullOrWhiteSpace(name))
+                        return;
+
+                    var template = new PromptTemplate
+                    {
+                        Name = name,
+                        Domain = "Translate",
+                        Content = content,
+                        Description = "Generated by Analyze Project & Generate Prompt"
+                    };
+
+                    _promptLibrary.SavePrompt(template);
+                    PopulateBatchPromptDropdown();
+
+                    // Confirmation in chat
+                    var confirmMsg = new ChatMessage
+                    {
+                        Role = ChatRole.Assistant,
+                        Content = $"Prompt saved as **\"{name}\"** in the Translate category. " +
+                                  "You can select it from the Prompt dropdown on the Batch Operations tab."
+                    };
+                    _chatHistory.Add(confirmMsg);
+                    _control.Value.AddMessage(confirmMsg);
+                    SaveChatHistory();
+                }
+            });
         }
 
         // ─── Prompt Library ─────────────────────────────────────────

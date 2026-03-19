@@ -52,6 +52,9 @@ namespace Supervertaler.Trados.Controls
         /// <summary>Raised when user clicks "Apply to target" on an assistant bubble.</summary>
         public event EventHandler<string> ApplyRequested;
 
+        /// <summary>Raised when user clicks "Save as Prompt" on an assistant bubble.</summary>
+        public event EventHandler<string> SaveAsPromptRequested;
+
         public ChatBubble(ChatMessage message, int maxWidth)
         {
             _message = message;
@@ -341,6 +344,15 @@ namespace Supervertaler.Trados.Controls
                         ApplyRequested?.Invoke(this, textToApply);
                 };
                 menu.Items.Add(applyItem);
+
+                var savePromptItem = new ToolStripMenuItem("Save as Prompt\u2026");
+                savePromptItem.Click += (s, e) =>
+                {
+                    var textToSave = _plainContent;
+                    if (!string.IsNullOrEmpty(textToSave))
+                        SaveAsPromptRequested?.Invoke(this, textToSave);
+                };
+                menu.Items.Add(savePromptItem);
             }
 
             // Apply context menu to both the bubble and the RTB

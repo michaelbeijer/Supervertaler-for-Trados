@@ -47,10 +47,6 @@ Create, edit, and import termbases in Supervertaler's `.db` format. Quick-add te
 
 Supervertaler for Trados uses the same SQLite-based termbase format (`.db`) as [Supervertaler Workbench](https://supervertaler.gitbook.io/supervertaler/). Termbases created in either tool are fully compatible – you can open the same `.db` file in both applications.
 
-{% hint style="info" %}
-For the SDLPPX round-trip workflow (translating Trados packages in Supervertaler Workbench), see [Trados Studio Workflow](https://supervertaler.gitbook.io/supervertaler/cat-tools/trados).
-{% endhint %}
-
 ## Context-Sensitive Help
 
 Press **F1** at any time to open context-sensitive help for the panel or dialog that currently has focus.

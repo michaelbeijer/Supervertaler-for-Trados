@@ -830,6 +830,49 @@ Assess how I translated the current segment. Point out any inaccuracies, awkward
                     Domain = "QuickLauncher",
                     IsBuiltIn = true,
                     Content = @"Explain ""{{SELECTION}}"" in simple, clear language. Include a practical example if helpful."
+                },
+                new PromptTemplate
+                {
+                    Name = "Explain (within project context)",
+                    Description = "Explains the selected term using the full document as context",
+                    Domain = "QuickLauncher",
+                    IsBuiltIn = true,
+                    Content = @"PROJECT CONTEXT - The complete source text from the current translation project:
+
+{{PROJECT}}
+
+---
+
+Explain the term ""{{SELECTION}}"" in simple, clear language. If the project context above provides relevant information about how this term is used in this specific document, reference those segments in your explanation."
+                },
+                new PromptTemplate
+                {
+                    Name = "Translate segment using fuzzy matches as reference",
+                    Description = "Translates the active segment, using TM fuzzy matches as a starting point",
+                    Domain = "QuickLauncher",
+                    IsBuiltIn = true,
+                    Content = @"Translate the following from {{SOURCE_LANGUAGE}} to {{TARGET_LANGUAGE}}.
+
+Source: {{SOURCE_SEGMENT}}
+
+TM fuzzy matches:
+{{TM_MATCHES}}
+
+Use the fuzzy matches as reference, but produce a fresh, accurate translation."
+                },
+                new PromptTemplate
+                {
+                    Name = "Translate selection in context of current project",
+                    Description = "Suggests the best translation for a selected term using full document context",
+                    Domain = "QuickLauncher",
+                    IsBuiltIn = true,
+                    Content = @"PROJECT CONTEXT - The complete source text of the current translation project:
+
+{{PROJECT}}
+
+---
+
+Using the project context above, suggest the best translation for ""{{SELECTION}}"" from {{SOURCE_LANGUAGE}} to {{TARGET_LANGUAGE}}. Reference relevant segments in your explanation."
                 }
             };
         }

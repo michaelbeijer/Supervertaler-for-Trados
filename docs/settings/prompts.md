@@ -65,6 +65,7 @@ These are only available in QuickLauncher prompts, because they refer to the spe
 | `{{DOCUMENT_NAME}}`        | Active file name (e.g. `source_document.docx`)                                                                                                                                                                  |
 | `{{SURROUNDING_SEGMENTS}}` | N source segments before and after the active segment, with actual Trados segment numbers and the active segment marked `← ACTIVE`. N is set in **Settings → AI Settings → Surrounding segments** (default: 5). |
 | `{{PROJECT}}`              | All source segments in the document, numbered with their actual Trados segment numbers. In multi-file projects a `=== File N ===` header separates each file (Trados restarts segment numbering per file).      |
+| `{{TM_MATCHES}}`          | Translation memory fuzzy matches (≥70%) for the active segment, showing match percentage, TM name, source text, and target text. If no matches meet the threshold, replaced with "(no fuzzy matches above 70%)". |
 
 {% hint style="warning" %}
 `{{PROJECT}}` sends the entire document to the AI and uses significantly more tokens than other variables. For a 10,000-word document, this costs roughly 4–5 cents per call with a Sonnet-class model. Reserve it for prompts where full document context genuinely matters.
@@ -215,6 +216,7 @@ terminology used elsewhere in the document? Point out any issues.
 * **Use `{{SURROUNDING_SEGMENTS}}` instead of `{{SOURCE_SEGMENT}}` when context matters.** The surrounding passage often gives the AI enough context for a better answer at a fraction of the cost of `{{PROJECT}}`.
 * **Use `{{PROJECT}}` sparingly.** It is best suited for high-stakes queries on short-to-medium documents — terminology consistency checks, key term decisions, or reviewing a handful of specific segments. Avoid it in prompts you run on every segment.
 * **Segment numbers in `{{PROJECT}}` match the Trados editor.** After sending `{{PROJECT}}`, you can ask the AI about "segment 4" or "segment 12" and it will know exactly which segment you mean — the same number shown in the Trados grid.
+* **Use `{{TM_MATCHES}}` to leverage existing translations.** When a segment has a high fuzzy match, the AI can use it as a starting point — especially useful for repetitive or formulaic content like patents and legal texts.
 * **Batch Translate prompts receive one segment at a time.** You do not need to handle lists of segments or loop logic.
 * **Proofread prompts receive multiple segment pairs.** The built-in proofreading prompt shows the expected input/output format — follow that structure if you write a custom one.
 

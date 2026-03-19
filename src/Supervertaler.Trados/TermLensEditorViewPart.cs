@@ -1748,7 +1748,7 @@ namespace Supervertaler.Trados
                 form.StartPosition = FormStartPosition.CenterScreen;
                 form.MaximizeBox = false;
                 form.MinimizeBox = false;
-                form.Size = new System.Drawing.Size(420, 200);
+                form.Size = new System.Drawing.Size(420, 240);
                 form.Font = new System.Drawing.Font("Segoe UI", 9f);
 
                 var lbl = new Label
@@ -1761,11 +1761,37 @@ namespace Supervertaler.Trados
                     AutoSize = false
                 };
 
+                // Link to open the Unpacked plugins folder — essential for
+                // Mac/Parallels users who must manually delete the old folder
+                // before installing the update (Trados won't re-extract otherwise).
+                var unpackedPath = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    @"Trados\Trados Studio\18\Plugins\Unpacked");
+                var lnkFolder = new LinkLabel
+                {
+                    Text = "Open Plugins folder (delete old version before updating)",
+                    Location = new System.Drawing.Point(16, 92),
+                    Size = new System.Drawing.Size(380, 18),
+                    AutoSize = false
+                };
+                lnkFolder.LinkClicked += (s, ev) =>
+                {
+                    try
+                    {
+                        if (System.IO.Directory.Exists(unpackedPath))
+                            System.Diagnostics.Process.Start("explorer.exe", unpackedPath);
+                        else
+                            System.Diagnostics.Process.Start("explorer.exe",
+                                System.IO.Path.GetDirectoryName(unpackedPath));
+                    }
+                    catch { }
+                };
+
                 var btnDownload = new Button
                 {
                     Text = "Download",
                     DialogResult = DialogResult.Yes,
-                    Location = new System.Drawing.Point(16, 110),
+                    Location = new System.Drawing.Point(16, 150),
                     Width = 100,
                     Height = 30,
                     FlatStyle = FlatStyle.System
@@ -1775,7 +1801,7 @@ namespace Supervertaler.Trados
                 {
                     Text = "Skip This Version",
                     DialogResult = DialogResult.Ignore,
-                    Location = new System.Drawing.Point(124, 110),
+                    Location = new System.Drawing.Point(124, 150),
                     Width = 130,
                     Height = 30,
                     FlatStyle = FlatStyle.System
@@ -1785,13 +1811,13 @@ namespace Supervertaler.Trados
                 {
                     Text = "Remind Me Later",
                     DialogResult = DialogResult.Cancel,
-                    Location = new System.Drawing.Point(262, 110),
+                    Location = new System.Drawing.Point(262, 150),
                     Width = 130,
                     Height = 30,
                     FlatStyle = FlatStyle.System
                 };
 
-                form.Controls.AddRange(new Control[] { lbl, btnDownload, btnSkip, btnLater });
+                form.Controls.AddRange(new Control[] { lbl, lnkFolder, btnDownload, btnSkip, btnLater });
                 form.AcceptButton = btnDownload;
                 form.CancelButton = btnLater;
 

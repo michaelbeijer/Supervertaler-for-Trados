@@ -1,3 +1,5 @@
+# Supervertaler Assistant
+
 {% hint style="info" %}
 You are viewing help for **Supervertaler for Trados** — the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://help.supervertaler.com).
 {% endhint %}
@@ -6,17 +8,19 @@ The Supervertaler Assistant is a conversational chat panel that runs inside Trad
 
 <figure><img src=".gitbook/assets/Sv_Supervertaler-Assistant.png" alt=""><figcaption></figcaption></figure>
 
-## Opening the Panel
+### Opening the Panel
 
 The Supervertaler Assistant lives in its own dockable panel. To open it, go to **View > Supervertaler Assistant**.
 
 You can dock the panel on the right side, bottom, or as a floating window. Trados remembers the panel position between sessions.
 
-## Chat Tab
+### Chat Tab
 
 The Chat tab is the main interface. Type a message in the input field at the bottom and press **Enter** to send.
 
-### What You Can Ask
+<figure><img src=".gitbook/assets/Supervertaler-Assistant.png" alt=""><figcaption></figcaption></figure>
+
+#### What You Can Ask
 
 Because the assistant has access to your current segment context, you can ask things like:
 
@@ -28,7 +32,7 @@ Because the assistant has access to your current segment context, you can ask th
 
 The AI will consider your current source text, target text, matched terminology from your termbases, and TM fuzzy matches when responding.
 
-### Sending Messages
+#### Sending Messages
 
 | Action                      | How                       |
 | --------------------------- | ------------------------- |
@@ -36,7 +40,7 @@ The AI will consider your current source text, target text, matched terminology 
 | Insert a line break         | Press **Shift+Enter**     |
 | Stop a response in progress | Click the **Stop** button |
 
-### Chat History
+#### Chat History
 
 The conversation is saved automatically after every message and restored the next time Trados starts. Your history persists until you explicitly clear it.
 
@@ -46,33 +50,33 @@ To clear the history, click the **Clear** button in the chat toolbar. This remov
 Chat history is stored in `~/Supervertaler/trados/chat_history.json`. It is a single global history — not per project or per file.
 {% endhint %}
 
-## Context Awareness
+### Context Awareness
 
 The Supervertaler Assistant is deeply integrated with your Trados project. Every time you send a message, the assistant automatically receives a rich snapshot of your current work so it can give you informed, project-specific answers. This context is assembled fresh on each message, so the AI always sees the latest state.
 
-### Project and file information
+#### Project and file information
 
 The assistant knows which project and file you are working in, the language pair (e.g. Dutch → English), and your current position in the document (e.g. "Segment 42 of 318").
 
-### Full document content
+#### Full document content
 
 When enabled, all source segments in the current document are included in the AI prompt. This allows the assistant to analyse the document and determine its type — legal, medical, technical, marketing, financial, scientific, etc. — and use that assessment to inform its advice on terminology, style, and translation choices.
 
 For very large documents, the content is automatically truncated to the configured maximum (default: 500 segments). The truncation preserves the first 80% and the last 20% so the AI still sees both the beginning and the end of the document.
 
-### Current segment
+#### Current segment
 
 The source text you are translating and any target translation you have already entered.
 
-### Surrounding segments
+#### Surrounding segments
 
 Two segments before and two segments after your current position are included, with their translations where available. This gives the AI local context for cohesion and consistency.
 
-### Translation Memory matches
+#### Translation Memory matches
 
 TM fuzzy matches for the current segment are included, showing the match percentage, source text, and target text. This gives the AI reference material from your previous translations.
 
-### Terminology
+#### Terminology
 
 Matched terms from your active termbases are included with their approved translations and synonyms. Optionally, term definitions, domains, and usage notes are also included, giving the AI deeper understanding of your terminology requirements.
 
@@ -86,7 +90,7 @@ You can control exactly what context the assistant receives. In the settings dia
 **Tip:** For the best results, keep document content and term metadata enabled. The more context the AI has, the more accurate and consistent its suggestions will be. The document type analysis is especially valuable — it helps the AI understand that "consideration" means something different in a legal contract than in a marketing brochure.
 {% endhint %}
 
-## Image Attachments
+### Image Attachments
 
 The Supervertaler Assistant supports multimodal input. You can attach images to your messages for visual context – for example, a screenshot of the source document layout, a reference image, or a table that is hard to describe in text.
 
@@ -100,7 +104,7 @@ The Supervertaler Assistant supports multimodal input. You can attach images to 
 Image limits: up to **5 images** per message, **10 MB** maximum per image. Supported formats: PNG, JPEG, GIF, WebP.
 {% endhint %}
 
-## Apply to Target
+### Apply to Target
 
 To use an AI response as your translation:
 
@@ -110,11 +114,11 @@ To use an AI response as your translation:
 
 This is useful when the assistant suggests a translation and you want to use it directly.
 
-## Provider and Model
+### Provider and Model
 
 The current provider and model are shown in the status area of the chat panel. To change the provider or model, open the settings dialog (gear icon) and switch to the **AI Settings** tab.
 
-### Supported Providers
+#### Supported Providers
 
 | Provider      | Models                                                         |
 | ------------- | -------------------------------------------------------------- |
@@ -130,7 +134,7 @@ You only need one provider to get started. If you want privacy or offline use, t
 
 ***
 
-## See Also
+### See Also
 
 * [Batch Translate](batch-translate.md)
 * [Getting Started](getting-started.md)

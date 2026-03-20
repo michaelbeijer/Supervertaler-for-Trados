@@ -292,6 +292,15 @@ namespace Supervertaler.Trados.Core
                     sourceSynonymsByTermId.TryGetValue(entry.Id, out srcSynsForIndex);
                 }
 
+                // Hydrate SourceSynonyms so TermBlock can show the synonym indicator.
+                // After inversion, srcSynsForIndex holds the project-source synonyms.
+                if (srcSynsForIndex != null && srcSynsForIndex.Count > 0)
+                {
+                    entry.SourceSynonyms = new List<Models.SynonymEntry>();
+                    foreach (var synText in srcSynsForIndex)
+                        entry.SourceSynonyms.Add(new Models.SynonymEntry { Text = synText, Language = "source" });
+                }
+
                 var key = TermMatcher.NormalizeScriptChars(entry.SourceTerm.Trim().ToLowerInvariant());
 
                 // Also index with trailing punctuation stripped

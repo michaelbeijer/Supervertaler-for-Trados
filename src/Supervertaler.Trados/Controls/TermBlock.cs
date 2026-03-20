@@ -395,8 +395,10 @@ namespace Supervertaler.Trados.Controls
                 }
             }
 
-            // "≡" synonym indicator when any entry has target synonyms
-            bool hasSynonyms = _entries.Any(t => t.TargetSynonyms != null && t.TargetSynonyms.Count > 0);
+            // "≡" synonym indicator when any entry has synonyms (source or target)
+            bool hasSynonyms = _entries.Any(t =>
+                (t.TargetSynonyms != null && t.TargetSynonyms.Count > 0) ||
+                (t.SourceSynonyms != null && t.SourceSynonyms.Count > 0));
             if (hasSynonyms)
             {
                 const int iconSize = 10;
@@ -465,6 +467,18 @@ namespace Supervertaler.Trados.Controls
                             lines.Add($"  Abbr: {entry.SourceAbbreviation} \u2192 {entry.TargetAbbreviation}");
                     }
 
+                    // Source synonyms (alternative source forms that match this entry)
+                    if (entry.SourceSynonyms != null && entry.SourceSynonyms.Count > 0)
+                    {
+                        var srcSynTexts = string.Join(", ",
+                            entry.SourceSynonyms
+                                .Where(s => !string.IsNullOrEmpty(s.Text))
+                                .Select(s => s.Text));
+                        if (!string.IsNullOrEmpty(srcSynTexts))
+                            lines.Add($"  Also: {srcSynTexts}");
+                    }
+
+                    // Target synonyms (alternative translations)
                     foreach (var syn in entry.TargetSynonyms)
                         lines.Add($"  \u2022 {syn}");
 

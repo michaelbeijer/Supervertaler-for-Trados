@@ -622,6 +622,7 @@ namespace Supervertaler.Trados.Controls
             _providerApiKeys[LlmModels.ProviderOpenAi] = keys.OpenAi ?? "";
             _providerApiKeys[LlmModels.ProviderClaude] = keys.Claude ?? "";
             _providerApiKeys[LlmModels.ProviderGemini] = keys.Gemini ?? "";
+            _providerApiKeys[LlmModels.ProviderGrok] = keys.Grok ?? "";
             _providerApiKeys[LlmModels.ProviderCustomOpenAi] = keys.CustomOpenAi ?? "";
             _providerApiKeys[LlmModels.ProviderOllama] = ""; // Ollama doesn't use API keys
 
@@ -708,6 +709,9 @@ namespace Supervertaler.Trados.Controls
                 case LlmModels.ProviderGemini:
                     settings.GeminiModel = selectedModel?.Id ?? "gemini-2.5-flash";
                     break;
+                case LlmModels.ProviderGrok:
+                    settings.GrokModel = selectedModel?.Id ?? "grok-4.20-0309-non-reasoning";
+                    break;
                 case LlmModels.ProviderOllama:
                     settings.OllamaModel = selectedModel?.Id ?? "translategemma:12b";
                     break;
@@ -722,6 +726,7 @@ namespace Supervertaler.Trados.Controls
             settings.ApiKeys.OpenAi = _providerApiKeys.TryGetValue(LlmModels.ProviderOpenAi, out val) ? val : "";
             settings.ApiKeys.Claude = _providerApiKeys.TryGetValue(LlmModels.ProviderClaude, out val) ? val : "";
             settings.ApiKeys.Gemini = _providerApiKeys.TryGetValue(LlmModels.ProviderGemini, out val) ? val : "";
+            settings.ApiKeys.Grok = _providerApiKeys.TryGetValue(LlmModels.ProviderGrok, out val) ? val : "";
             settings.ApiKeys.CustomOpenAi = _providerApiKeys.TryGetValue(LlmModels.ProviderCustomOpenAi, out val) ? val : "";
 
             // Ollama endpoint
@@ -938,6 +943,7 @@ namespace Supervertaler.Trados.Controls
                 case LlmModels.ProviderOpenAi: targetId = settings.OpenAiModel; break;
                 case LlmModels.ProviderClaude: targetId = settings.ClaudeModel; break;
                 case LlmModels.ProviderGemini: targetId = settings.GeminiModel; break;
+                case LlmModels.ProviderGrok: targetId = settings.GrokModel; break;
                 case LlmModels.ProviderOllama: targetId = settings.OllamaModel; break;
                 default: return;
             }

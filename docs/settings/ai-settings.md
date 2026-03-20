@@ -14,11 +14,12 @@ Choose one of the supported AI providers:
 
 | Provider | Description |
 |----------|-------------|
-| **OpenAI** | GPT models (GPT-4o, GPT-4, etc.) |
-| **Anthropic** | Claude models |
-| **Google** | Gemini models |
-| **Ollama** | Run models locally, no API key required |
-| **Custom OpenAI-compatible** | Any provider with an OpenAI-compatible API |
+| **OpenAI** | GPT models (GPT-4o, GPT-5, o1, o3) |
+| **Claude (Anthropic)** | Claude models (Sonnet 4.6, Haiku 4.5, Opus 4.6) |
+| **Gemini (Google)** | Gemini models (2.5 Flash, 2.5 Pro, 3 Pro Preview) |
+| **Grok (xAI)** | Grok models (4.20, 4.20 Reasoning, 4.1 Fast) — multimodal, large context window |
+| **Ollama (Local)** | Run models locally, no API key required |
+| **Custom (OpenAI-compatible)** | Any provider with an OpenAI-compatible API |
 
 {% hint style="info" %}
 You only need one provider to get started. See [Setting Up API Keys](https://supervertaler.gitbook.io/supervertaler/get-started/api-keys) for instructions on obtaining a key.

@@ -83,6 +83,7 @@ namespace Supervertaler.Trados.Core
             switch (_provider)
             {
                 case LlmModels.ProviderOpenAi:
+                case LlmModels.ProviderGrok:
                 case LlmModels.ProviderCustomOpenAi:
                     return await CallOpenAiAsync(prompt, systemPrompt, maxTokens, cancellationToken);
                 case LlmModels.ProviderClaude:
@@ -109,6 +110,7 @@ namespace Supervertaler.Trados.Core
             switch (_provider)
             {
                 case LlmModels.ProviderOpenAi:
+                case LlmModels.ProviderGrok:
                 case LlmModels.ProviderCustomOpenAi:
                     return await CallOpenAiChatAsync(messages, systemPrompt, maxTokens, cancellationToken);
                 case LlmModels.ProviderClaude:
@@ -176,6 +178,7 @@ namespace Supervertaler.Trados.Core
                 case LlmModels.ProviderOpenAi: return keys.OpenAi;
                 case LlmModels.ProviderClaude: return keys.Claude;
                 case LlmModels.ProviderGemini: return keys.Gemini;
+                case LlmModels.ProviderGrok: return keys.Grok;
                 case LlmModels.ProviderCustomOpenAi: return keys.CustomOpenAi;
                 default: return null;
             }
@@ -233,15 +236,36 @@ namespace Supervertaler.Trados.Core
             return null;
         }
 
+        /// <summary>
+        /// Returns a human-readable label for the active OpenAI-compatible provider.
+        /// </summary>
+        private string OpenAiProviderLabel()
+        {
+            if (_provider == LlmModels.ProviderGrok) return "Grok";
+            if (_provider == LlmModels.ProviderCustomOpenAi) return "Custom OpenAI";
+            return "OpenAI";
+        }
+
+        /// <summary>
+        /// Resolves the base URL for OpenAI-compatible providers.
+        /// Grok uses xAI's API; Custom OpenAI uses user-configured endpoint.
+        /// </summary>
+        private string ResolveOpenAiBaseUrl()
+        {
+            if (_provider == LlmModels.ProviderGrok)
+                return "https://api.x.ai/v1";
+            if (_provider == LlmModels.ProviderCustomOpenAi && !string.IsNullOrEmpty(_baseUrl))
+                return _baseUrl.TrimEnd('/');
+            return "https://api.openai.com/v1";
+        }
+
         // ─── Provider Implementations ────────────────────────────────
 
         private async Task<string> CallOpenAiAsync(
             string prompt, string systemPrompt, int? maxTokens,
             CancellationToken ct)
         {
-            var baseUrl = _provider == LlmModels.ProviderCustomOpenAi && !string.IsNullOrEmpty(_baseUrl)
-                ? _baseUrl.TrimEnd('/')
-                : "https://api.openai.com/v1";
+            var baseUrl = ResolveOpenAiBaseUrl();
 
             var url = $"{baseUrl}/chat/completions";
             var tokens = maxTokens ?? _maxTokens;
@@ -284,7 +308,7 @@ namespace Supervertaler.Trados.Core
                     var body = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"OpenAI API error {(int)response.StatusCode}: {TruncateError(body)}");
+                        throw new HttpRequestException($"{OpenAiProviderLabel()} API error {(int)response.StatusCode}: {TruncateError(body)}");
 
                     return ExtractOpenAiContent(body);
                 }
@@ -457,9 +481,7 @@ namespace Supervertaler.Trados.Core
             List<ChatMessage> messages, string systemPrompt, int? maxTokens,
             CancellationToken ct)
         {
-            var baseUrl = _provider == LlmModels.ProviderCustomOpenAi && !string.IsNullOrEmpty(_baseUrl)
-                ? _baseUrl.TrimEnd('/')
-                : "https://api.openai.com/v1";
+            var baseUrl = ResolveOpenAiBaseUrl();
 
             var url = $"{baseUrl}/chat/completions";
             var tokens = maxTokens ?? _maxTokens;
@@ -524,7 +546,7 @@ namespace Supervertaler.Trados.Core
                     var body = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"OpenAI API error {(int)response.StatusCode}: {TruncateError(body)}");
+                        throw new HttpRequestException($"{OpenAiProviderLabel()} API error {(int)response.StatusCode}: {TruncateError(body)}");
 
                     return ExtractOpenAiContent(body);
                 }

@@ -22,6 +22,9 @@ namespace Supervertaler.Trados.Settings
         [DataMember(Name = "geminiModel")]
         public string GeminiModel { get; set; } = "gemini-2.5-flash";
 
+        [DataMember(Name = "grokModel")]
+        public string GrokModel { get; set; } = "grok-4.20-0309-non-reasoning";
+
         [DataMember(Name = "ollamaModel")]
         public string OllamaModel { get; set; } = "translategemma:12b";
 
@@ -132,6 +135,7 @@ namespace Supervertaler.Trados.Settings
                 case "openai": return OpenAiModel;
                 case "claude": return ClaudeModel;
                 case "gemini": return GeminiModel;
+                case "grok": return GrokModel;
                 case "ollama": return OllamaModel;
                 case "custom_openai":
                     var profile = GetActiveCustomProfile();
@@ -169,6 +173,9 @@ namespace Supervertaler.Trados.Settings
 
         [DataMember(Name = "gemini")]
         public string Gemini { get; set; } = "";
+
+        [DataMember(Name = "grok")]
+        public string Grok { get; set; } = "";
 
         [DataMember(Name = "custom_openai")]
         public string CustomOpenAi { get; set; } = "";

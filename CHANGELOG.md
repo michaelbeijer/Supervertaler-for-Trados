@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.15.0] — 2026-03-20
+
+### Added
+- **Grok (xAI) provider support** — Grok is now available as a first-class AI provider alongside OpenAI, Claude, Gemini, Ollama, and Custom OpenAI-compatible endpoints. Three models included: Grok 4.20 (Reasoning), Grok 4.20, and Grok 4.1 Fast. All models support multimodal input (text + images).
+- **Source synonym indicator** — the ≡ synonym indicator on term chips now also appears when the entry has source-side synonyms, not just target-side ones.
+- **Source synonyms in tooltip** — hovering over a term chip now shows source-side synonyms (prefixed with "Also:") alongside the existing target-side synonym bullets.
+
+### Fixed
+- **Merge prompt direction** — the "Similar Term Found" merge dialog now correctly displays terms in the project's language direction when working with inverted termbases.
+
+---
+
 ## [4.14.1] — 2026-03-19
 
 ### Added

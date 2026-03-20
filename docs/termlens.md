@@ -36,6 +36,17 @@ Designate one termbase as the **Project termbase** in settings to make its terms
 **MultiTerm termbases** attached to your Trados project appear automatically as green chips. They are read-only – to edit MultiTerm terms, use Trados's built-in MultiTerm interface. See [MultiTerm Support](multiterm-support.md) for details.
 {% endhint %}
 
+## Chip Indicators
+
+In addition to colour coding, TermLens shows small indicators in the top-right corner of term chips:
+
+| Indicator | Meaning |
+| --------- | ------- |
+| **≡** (indigo) | The entry has synonyms (source-side, target-side, or both). Hover to see them. |
+| **●** (amber) | The entry has metadata — a definition, domain, or notes. Hover to see details. |
+
+Both indicators can appear simultaneously. Hover over any term chip to see the full details, including source synonyms (prefixed with "Also:") and target synonyms (shown as bullet points).
+
 ## Inserting Terms
 
 ### Click to Insert

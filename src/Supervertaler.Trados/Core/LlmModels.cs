@@ -8,6 +8,7 @@ namespace Supervertaler.Trados.Core
         OpenAi,
         Claude,
         Gemini,
+        Grok,
         Ollama,
         CustomOpenAi
     }
@@ -34,6 +35,7 @@ namespace Supervertaler.Trados.Core
         public const string ProviderClaude = "claude";
         public const string ProviderGemini = "gemini";
         public const string ProviderOllama = "ollama";
+        public const string ProviderGrok = "grok";
         public const string ProviderCustomOpenAi = "custom_openai";
 
         public static readonly LlmModelInfo[] OpenAiModels =
@@ -151,6 +153,31 @@ namespace Supervertaler.Trados.Core
             }
         };
 
+        public static readonly LlmModelInfo[] GrokModels =
+        {
+            new LlmModelInfo
+            {
+                Id = "grok-4.20-0309-reasoning", DisplayName = "Grok 4.20 (Reasoning)",
+                Description = "Flagship with deep reasoning — ideal for prompt generation",
+                Provider = LlmProvider.Grok,
+                IsReasoningModel = true,
+                DefaultTimeoutMs = 600_000,
+                DefaultMaxTokens = 32768
+            },
+            new LlmModelInfo
+            {
+                Id = "grok-4.20-0309-non-reasoning", DisplayName = "Grok 4.20",
+                Description = "Flagship — highest quality, multimodal",
+                Provider = LlmProvider.Grok
+            },
+            new LlmModelInfo
+            {
+                Id = "grok-4-1-fast-non-reasoning", DisplayName = "Grok 4.1 Fast",
+                Description = "Fast and affordable, multimodal — great for batch jobs",
+                Provider = LlmProvider.Grok
+            }
+        };
+
         /// <summary>
         /// Returns the model array for a given provider key string.
         /// </summary>
@@ -161,6 +188,7 @@ namespace Supervertaler.Trados.Core
                 case ProviderOpenAi: return OpenAiModels;
                 case ProviderClaude: return ClaudeModels;
                 case ProviderGemini: return GeminiModels;
+                case ProviderGrok: return GrokModels;
                 case ProviderOllama: return OllamaModels;
                 case ProviderCustomOpenAi: return new LlmModelInfo[0]; // Custom models are user-defined
                 default: return new LlmModelInfo[0];
@@ -174,7 +202,7 @@ namespace Supervertaler.Trados.Core
         {
             if (string.IsNullOrEmpty(modelId)) return null;
 
-            var allArrays = new[] { OpenAiModels, ClaudeModels, GeminiModels, OllamaModels };
+            var allArrays = new[] { OpenAiModels, ClaudeModels, GeminiModels, GrokModels, OllamaModels };
             foreach (var arr in allArrays)
             {
                 foreach (var m in arr)
@@ -196,6 +224,7 @@ namespace Supervertaler.Trados.Core
                 case LlmProvider.OpenAi: return ProviderOpenAi;
                 case LlmProvider.Claude: return ProviderClaude;
                 case LlmProvider.Gemini: return ProviderGemini;
+                case LlmProvider.Grok: return ProviderGrok;
                 case LlmProvider.Ollama: return ProviderOllama;
                 case LlmProvider.CustomOpenAi: return ProviderCustomOpenAi;
                 default: return ProviderOpenAi;
@@ -212,6 +241,7 @@ namespace Supervertaler.Trados.Core
                 case ProviderOpenAi: return "OpenAI";
                 case ProviderClaude: return "Claude (Anthropic)";
                 case ProviderGemini: return "Gemini (Google)";
+                case ProviderGrok: return "Grok (xAI)";
                 case ProviderOllama: return "Ollama (Local)";
                 case ProviderCustomOpenAi: return "Custom (OpenAI-compatible)";
                 default: return providerKey;
@@ -223,7 +253,7 @@ namespace Supervertaler.Trados.Core
         /// </summary>
         public static readonly string[] AllProviderKeys =
         {
-            ProviderOpenAi, ProviderClaude, ProviderGemini, ProviderOllama, ProviderCustomOpenAi
+            ProviderOpenAi, ProviderClaude, ProviderGemini, ProviderGrok, ProviderOllama, ProviderCustomOpenAi
         };
     }
 }

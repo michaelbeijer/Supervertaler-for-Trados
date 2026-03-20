@@ -389,11 +389,11 @@ namespace Supervertaler.Trados.Controls
         private void PopulateProofreadScopes()
         {
             _cmbScope.Items.Clear();
-            _cmbScope.Items.Add("Confirmed only");
-            _cmbScope.Items.Add("Translated + Confirmed");
+            _cmbScope.Items.Add("Translated only");
+            _cmbScope.Items.Add("Translated + approved/signed-off");
             _cmbScope.Items.Add("All segments");
             _cmbScope.Items.Add("Filtered segments");
-            _cmbScope.Items.Add("Filtered (confirmed only)");
+            _cmbScope.Items.Add("Filtered (translated only)");
             _cmbScope.SelectedIndex = 0;
         }
 

@@ -33,6 +33,7 @@ namespace Supervertaler.Trados.Models
         public string Definition { get; set; }
         public string Domain { get; set; }
         public string Notes { get; set; }
+        public string Url { get; set; }
         public bool Forbidden { get; set; }
         public bool CaseSensitive { get; set; }
         public bool IsNonTranslatable { get; set; }

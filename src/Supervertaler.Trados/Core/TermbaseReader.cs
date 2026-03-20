@@ -22,6 +22,7 @@ namespace Supervertaler.Trados.Core
         private bool _hasNonTranslatableColumn;
         private bool _hasTermUuidColumn;
         private bool _hasAbbreviationColumns;
+        private bool _hasUrlColumn;
         private bool _hasTermbaseCaseSensitive;
 
         public TermbaseReader(string dbPath)
@@ -59,6 +60,7 @@ namespace Supervertaler.Trados.Core
                 _hasNonTranslatableColumn = HasColumn(_connection, "termbase_terms", "is_nontranslatable");
                 _hasTermUuidColumn = HasColumn(_connection, "termbase_terms", "term_uuid");
                 _hasAbbreviationColumns = HasColumn(_connection, "termbase_terms", "source_abbreviation");
+                _hasUrlColumn = HasColumn(_connection, "termbase_terms", "url");
                 _hasTermbaseCaseSensitive = HasColumn(_connection, "termbases", "case_sensitive");
                 return true;
             }
@@ -129,6 +131,7 @@ namespace Supervertaler.Trados.Core
             var ntCol = _hasNonTranslatableColumn ? ", t.is_nontranslatable" : "";
             var uuidCol = _hasTermUuidColumn ? ", t.term_uuid" : "";
             var abbrCol = _hasAbbreviationColumns ? ", t.source_abbreviation, t.target_abbreviation" : "";
+            var urlCol = _hasUrlColumn ? ", t.url" : "";
             var sql = $@"
                 SELECT t.id, t.source_term, t.target_term, t.termbase_id,
                        t.source_lang, t.target_lang, t.definition, t.domain,
@@ -139,6 +142,7 @@ namespace Supervertaler.Trados.Core
                        {ntCol}
                        {uuidCol}
                        {abbrCol}
+                       {urlCol}
                 FROM termbase_terms t
                 LEFT JOIN termbases tb ON CAST(t.termbase_id AS INTEGER) = tb.id
                 WHERE (LOWER(t.source_term) = LOWER(@term)
@@ -202,6 +206,7 @@ namespace Supervertaler.Trados.Core
             var ntCol = _hasNonTranslatableColumn ? ", t.is_nontranslatable" : "";
             var uuidCol = _hasTermUuidColumn ? ", t.term_uuid" : "";
             var abbrCol = _hasAbbreviationColumns ? ", t.source_abbreviation, t.target_abbreviation" : "";
+            var urlCol = _hasUrlColumn ? ", t.url" : "";
             var sql = $@"
                 SELECT t.id, t.source_term, t.target_term, t.termbase_id,
                        t.source_lang, t.target_lang, t.definition, t.domain,
@@ -212,6 +217,7 @@ namespace Supervertaler.Trados.Core
                        {ntCol}
                        {uuidCol}
                        {abbrCol}
+                       {urlCol}
                 FROM termbase_terms t
                 LEFT JOIN termbases tb ON CAST(t.termbase_id AS INTEGER) = tb.id
                 WHERE COALESCE(t.forbidden, 0) = 0";
@@ -550,6 +556,16 @@ namespace Supervertaler.Trados.Core
                 }
             }
 
+            // Ensure url column exists
+            if (!HasColumn(conn, "termbase_terms", "url"))
+            {
+                using (var cmd = new SqliteCommand(
+                    "ALTER TABLE termbase_terms ADD COLUMN url TEXT DEFAULT ''", conn))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
             // Backfill missing UUIDs (same as Supervertaler's generate_missing_uuids)
             BackfillMissingUuids(conn);
         }
@@ -613,7 +629,13 @@ namespace Supervertaler.Trados.Core
             {
                 sourceAbbr = reader.IsDBNull(nextCol) ? null : reader.GetString(nextCol);
                 targetAbbr = reader.IsDBNull(nextCol + 1) ? null : reader.GetString(nextCol + 1);
+                nextCol += 2;
             }
+
+            // URL column (optional, after abbreviation)
+            string url = null;
+            if (reader.FieldCount > nextCol && !reader.IsDBNull(nextCol))
+                url = reader.GetString(nextCol);
 
             return new TermEntry
             {
@@ -634,7 +656,8 @@ namespace Supervertaler.Trados.Core
                 Ranking = reader.IsDBNull(13) ? 99 : reader.GetInt32(13),
                 IsNonTranslatable = isNt,
                 SourceAbbreviation = sourceAbbr,
-                TargetAbbreviation = targetAbbr
+                TargetAbbreviation = targetAbbr,
+                Url = url
             };
         }
 
@@ -688,7 +711,8 @@ namespace Supervertaler.Trados.Core
             string sourceLang, string targetLang,
             string definition = "", string domain = "", string notes = "",
             bool isNonTranslatable = false,
-            string sourceAbbreviation = null, string targetAbbreviation = null)
+            string sourceAbbreviation = null, string targetAbbreviation = null,
+            string url = null)
         {
             var connStr = new SqliteConnectionStringBuilder
             {
@@ -724,11 +748,11 @@ namespace Supervertaler.Trados.Core
                     INSERT INTO termbase_terms
                         (source_term, target_term, termbase_id, source_lang, target_lang,
                          definition, domain, notes, forbidden, case_sensitive, is_nontranslatable,
-                         term_uuid, source_abbreviation, target_abbreviation)
+                         term_uuid, source_abbreviation, target_abbreviation, url)
                     VALUES
                         (@source, @target, @tbId, @srcLang, @tgtLang,
                          @def, @domain, @notes, 0, 0, @nt,
-                         @uuid, @srcAbbr, @tgtAbbr);
+                         @uuid, @srcAbbr, @tgtAbbr, @url);
                     SELECT last_insert_rowid();";
 
                 using (var cmd = new SqliteCommand(sql, conn))
@@ -745,6 +769,7 @@ namespace Supervertaler.Trados.Core
                     cmd.Parameters.AddWithValue("@uuid", System.Guid.NewGuid().ToString());
                     cmd.Parameters.AddWithValue("@srcAbbr", sourceAbbreviation ?? "");
                     cmd.Parameters.AddWithValue("@tgtAbbr", targetAbbreviation ?? "");
+                    cmd.Parameters.AddWithValue("@url", url ?? "");
 
                     var result = cmd.ExecuteScalar();
                     return result != null ? Convert.ToInt64(result) : -1;
@@ -922,7 +947,8 @@ namespace Supervertaler.Trados.Core
             string sourceTerm, string targetTerm,
             string definition = "", string domain = "", string notes = "",
             bool isNonTranslatable = false,
-            string sourceAbbreviation = null, string targetAbbreviation = null)
+            string sourceAbbreviation = null, string targetAbbreviation = null,
+            string url = null)
         {
             var connStr = new SqliteConnectionStringBuilder
             {
@@ -965,7 +991,8 @@ namespace Supervertaler.Trados.Core
                         notes       = @notes,
                         is_nontranslatable = @nt,
                         source_abbreviation = @srcAbbr,
-                        target_abbreviation = @tgtAbbr
+                        target_abbreviation = @tgtAbbr,
+                        url         = @url
                     WHERE id = @id";
 
                 using (var cmd = new SqliteCommand(sql, conn))
@@ -978,6 +1005,7 @@ namespace Supervertaler.Trados.Core
                     cmd.Parameters.AddWithValue("@nt", isNonTranslatable ? 1 : 0);
                     cmd.Parameters.AddWithValue("@srcAbbr", sourceAbbreviation ?? "");
                     cmd.Parameters.AddWithValue("@tgtAbbr", targetAbbreviation ?? "");
+                    cmd.Parameters.AddWithValue("@url", url ?? "");
                     cmd.Parameters.AddWithValue("@id", termId);
 
                     return cmd.ExecuteNonQuery() > 0;

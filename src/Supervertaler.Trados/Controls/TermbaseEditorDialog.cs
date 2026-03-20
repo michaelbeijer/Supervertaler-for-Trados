@@ -288,6 +288,7 @@ namespace Supervertaler.Trados.Controls
                 _dataTable.Columns.Add("NT", typeof(bool));
                 _dataTable.Columns.Add("SrcAbbr", typeof(string));
                 _dataTable.Columns.Add("TgtAbbr", typeof(string));
+                _dataTable.Columns.Add("Url", typeof(string));
 
                 foreach (var term in terms)
                 {
@@ -303,7 +304,8 @@ namespace Supervertaler.Trados.Controls
                         term.Notes ?? "",
                         term.IsNonTranslatable,
                         term.SourceAbbreviation ?? "",
-                        term.TargetAbbreviation ?? "");
+                        term.TargetAbbreviation ?? "",
+                        term.Url ?? "");
                 }
 
                 _bindingSource = new BindingSource { DataSource = _dataTable };
@@ -374,6 +376,13 @@ namespace Supervertaler.Trados.Controls
                     _dgvTerms.Columns["TgtAbbr"].ToolTipText = "Target abbreviation";
                     _dgvTerms.Columns["TgtAbbr"].FillWeight = 8;
                     _dgvTerms.Columns["TgtAbbr"].MinimumWidth = 50;
+                }
+                if (_dgvTerms.Columns.Contains("Url"))
+                {
+                    _dgvTerms.Columns["Url"].HeaderText = "URL";
+                    _dgvTerms.Columns["Url"].ToolTipText = "Reference URL";
+                    _dgvTerms.Columns["Url"].FillWeight = 12;
+                    _dgvTerms.Columns["Url"].MinimumWidth = 50;
                 }
 
                 UpdateTermCountLabel();
@@ -523,7 +532,8 @@ namespace Supervertaler.Trados.Controls
                     row["Notes"] as string ?? "",
                     isNonTranslatable: isNt,
                     sourceAbbreviation: row["SrcAbbr"] as string ?? "",
-                    targetAbbreviation: row["TgtAbbr"] as string ?? "");
+                    targetAbbreviation: row["TgtAbbr"] as string ?? "",
+                    url: row["Url"] as string ?? "");
 
                 // Refresh the in-memory term index so TermLens reflects
                 // the edit immediately (source/target text may have changed)
@@ -578,7 +588,8 @@ namespace Supervertaler.Trados.Controls
                     _termbase.SourceLang, _termbase.TargetLang,
                     row["Definition"] as string ?? "",
                     row["Domain"] as string ?? "",
-                    row["Notes"] as string ?? "");
+                    row["Notes"] as string ?? "",
+                    url: row["Url"] as string ?? "");
 
                 if (newId > 0)
                 {
@@ -743,6 +754,7 @@ namespace Supervertaler.Trados.Controls
                 Definition = row["Definition"] as string ?? "",
                 Domain = row["Domain"] as string ?? "",
                 Notes = row["Notes"] as string ?? "",
+                Url = row["Url"] as string ?? "",
                 IsNonTranslatable = row["NT"] as bool? ?? false,
                 TermbaseId = _termbase.Id
             };
@@ -762,6 +774,7 @@ namespace Supervertaler.Trados.Controls
                         row["Definition"] = dlg.Definition;
                         row["Domain"] = dlg.Domain;
                         row["Notes"] = dlg.Notes;
+                        row["Url"] = dlg.Url;
                         row["NT"] = dlg.IsNonTranslatable;
 
                         // Update synonym count

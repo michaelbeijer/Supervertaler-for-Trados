@@ -17,13 +17,13 @@ The AI Proofreader checks your translated segments for errors using AI. It ident
 
 The scope dropdown controls which segments are checked:
 
-| Scope                        | Description                                                                     |
-| ---------------------------- | ------------------------------------------------------------------------------- |
-| **Confirmed Only**           | Checks only segments with Confirmed status                                      |
-| **Translated + Confirmed**   | Checks segments with Translated or Confirmed status                             |
-| **All Segments**             | Checks every segment that has target text                                       |
-| **Filtered Segments**        | Checks only segments visible after applying a Trados display filter             |
-| **Filtered (Confirmed Only)**| Checks confirmed segments within the current filter                             |
+| Scope                              | Description                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------- |
+| **Translated only**                | Checks only segments with Translated status                                     |
+| **Translated + approved/signed-off** | Checks segments with Translated, Approved, or Signed-off status              |
+| **All segments**                   | Checks every segment that has target text                                       |
+| **Filtered segments**              | Checks only segments visible after applying a Trados display filter             |
+| **Filtered (translated only)**     | Checks translated segments within the current filter                            |
 
 ## Prompt Selection
 
@@ -46,6 +46,10 @@ Proofreading results appear in the **Reports** tab of the Supervertaler Assistan
 ### Navigating to Issues
 
 Click any issue card to navigate directly to that segment in the Trados editor. This works correctly in multi-file projects — the plugin uses the segment's internal identifiers to find the exact segment.
+
+### Dismissing Issues
+
+Each issue card has a checkbox. Tick it to dismiss the issue and remove it from the list. This lets you work through the results one by one, keeping track of which issues you have already addressed. When all issues have been dismissed, the Reports tab shows "All issues addressed — well done!"
 
 ### Clearing Results
 

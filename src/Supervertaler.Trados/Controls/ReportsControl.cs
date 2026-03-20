@@ -44,6 +44,13 @@ namespace Supervertaler.Trados.Controls
 
         // State
         private int _issueCount;
+        private int _checkedCount;
+
+        // Card colours
+        private static readonly Color CardColor = Color.FromArgb(255, 253, 231);      // #FFFDE7
+        private static readonly Color HoverColor = Color.FromArgb(255, 249, 196);
+        private static readonly Color TextColor = Color.FromArgb(60, 60, 60);
+        private static readonly Color SuggColor = Color.FromArgb(120, 120, 120);
 
         /// <summary>Fired when user clicks an issue card to navigate to that segment.</summary>
         public event EventHandler<NavigateToSegmentEventArgs> NavigateToSegmentRequested;
@@ -231,11 +238,8 @@ namespace Supervertaler.Trados.Controls
             var bodyFont = new Font("Segoe UI", 8.5f);
             var segNumFont = new Font("Segoe UI", 8.5f, FontStyle.Bold);
             var suggFont = new Font("Segoe UI", 8f);
-            var cardColor = Color.FromArgb(255, 253, 231);  // #FFFDE7
-            var hoverColor = Color.FromArgb(255, 249, 196);
-            var textColor = Color.FromArgb(60, 60, 60);
-            var suggColor = Color.FromArgb(120, 120, 120);
 
+            _checkedCount = 0;
             int yPos = 4;
 
             foreach (var issue in report.Issues)
@@ -245,20 +249,30 @@ namespace Supervertaler.Trados.Controls
                 var card = new Panel
                 {
                     Location = new Point(4, yPos),
-                    BackColor = cardColor,
+                    BackColor = CardColor,
                     Cursor = Cursors.Hand,
                     Padding = new Padding(8, 6, 8, 6),
                     Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                     Tag = issue
                 };
 
-                // Segment number + warning icon
+                // Checkbox for marking issue as addressed
+                var chk = new CheckBox
+                {
+                    AutoSize = true,
+                    Location = new Point(8, 6),
+                    BackColor = Color.Transparent,
+                    Cursor = Cursors.Hand,
+                    Tag = "chk"
+                };
+
+                // Segment number + warning icon (offset right for checkbox)
                 var lblSegNum = new Label
                 {
                     Text = $"\u26A0 Segment {issue.SegmentNumber}",
                     Font = segNumFont,
-                    ForeColor = textColor,
-                    Location = new Point(8, 6),
+                    ForeColor = TextColor,
+                    Location = new Point(26, 6),
                     AutoSize = true
                 };
 
@@ -267,7 +281,7 @@ namespace Supervertaler.Trados.Controls
                 {
                     Text = issue.IssueDescription ?? "",
                     Font = bodyFont,
-                    ForeColor = textColor,
+                    ForeColor = TextColor,
                     Location = new Point(8, 24),
                     AutoSize = false,
                     MaximumSize = new Size(0, 0),  // will be set on resize
@@ -282,7 +296,7 @@ namespace Supervertaler.Trados.Controls
                     {
                         Text = "Suggestion: " + issue.Suggestion,
                         Font = suggFont,
-                        ForeColor = suggColor,
+                        ForeColor = SuggColor,
                         Location = new Point(8, 44),
                         AutoSize = false,
                         MaximumSize = new Size(0, 0),
@@ -290,19 +304,57 @@ namespace Supervertaler.Trados.Controls
                     };
                 }
 
+                card.Controls.Add(chk);
                 card.Controls.Add(lblSegNum);
                 card.Controls.Add(lblDesc);
                 if (lblSugg != null)
                     card.Controls.Add(lblSugg);
 
-                // Hover effect — apply to card and all children
+                // Checkbox toggle — change card colour and text when checked
                 var capturedCard = card;
+                var capturedSegNum = lblSegNum;
+                var capturedDesc = lblDesc;
+                var capturedSugg = lblSugg;
+                chk.CheckedChanged += (s, e) =>
+                {
+                    if (!chk.Checked) return;
+
+                    // Remove the card from the panel
+                    _resultsPanel.SuspendLayout();
+                    _resultsPanel.Controls.Remove(capturedCard);
+                    capturedCard.Dispose();
+
+                    // Update count
+                    _checkedCount++;
+                    UpdateIssueCountLabel();
+
+                    // Re-flow remaining cards
+                    RelayoutCards();
+                    _resultsPanel.ResumeLayout(true);
+
+                    // Show empty state if all issues addressed
+                    if (_checkedCount >= _issueCount)
+                    {
+                        _lblEmpty.Text = "All issues addressed \u2014 well done!";
+                        _lblEmpty.Visible = true;
+                    }
+                };
+
+                // Hover effect — apply to card and all children (except checkbox)
                 Action<Control> applyHover = null;
                 applyHover = (ctrl) =>
                 {
-                    ctrl.MouseEnter += (s, e) => capturedCard.BackColor = hoverColor;
-                    ctrl.MouseLeave += (s, e) => capturedCard.BackColor = cardColor;
-                    ctrl.Click += (s, e) => OnIssueCardClick(capturedCard.Tag as ProofreadingIssue);
+                    ctrl.MouseEnter += (s, e) =>
+                    {
+                        capturedCard.BackColor = HoverColor;
+                    };
+                    ctrl.MouseLeave += (s, e) =>
+                    {
+                        capturedCard.BackColor = CardColor;
+                    };
+                    // Only navigate on click for non-checkbox controls
+                    if (!(ctrl is CheckBox))
+                        ctrl.Click += (s, e) => OnIssueCardClick(capturedCard.Tag as ProofreadingIssue);
                     ctrl.Cursor = Cursors.Hand;
                 };
                 applyHover(card);
@@ -354,6 +406,15 @@ namespace Supervertaler.Trados.Controls
             _resultsPanel.ResumeLayout();
         }
 
+        private void UpdateIssueCountLabel()
+        {
+            var totalChecked = _issueCount; // total issues, not total segments
+            if (_checkedCount > 0)
+                _lblIssueCount.Text = $"{_issueCount} issue{(_issueCount != 1 ? "s" : "")} found — {_checkedCount} addressed";
+            // Text is set in SetResults initially; only update when checked count changes
+            _lblIssueCount.Parent?.PerformLayout();
+        }
+
         private void OnIssueCardClick(ProofreadingIssue issue)
         {
             if (issue == null) return;
@@ -390,6 +451,11 @@ namespace Supervertaler.Trados.Controls
             card.Height = Math.Max(40, cardHeight);
         }
 
+        private void RelayoutCards()
+        {
+            OnResultsPanelResize(this, EventArgs.Empty);
+        }
+
         private void OnResultsPanelResize(object sender, EventArgs e)
         {
             if (_resultsPanel == null) return;
@@ -404,7 +470,7 @@ namespace Supervertaler.Trados.Controls
 
                 card.Location = new Point(4, yPos);
 
-                // Find labels inside card
+                // Find labels inside card (skip CheckBox controls)
                 Label lblSegNum = null, lblDesc = null, lblSugg = null;
                 foreach (Control child in card.Controls)
                 {
@@ -412,7 +478,7 @@ namespace Supervertaler.Trados.Controls
                     if (lbl == null) continue;
                     if (lbl.Font.Bold)
                         lblSegNum = lbl;
-                    else if (lbl.ForeColor == Color.FromArgb(120, 120, 120))
+                    else if (lbl.ForeColor == SuggColor)
                         lblSugg = lbl;
                     else
                         lblDesc = lbl;

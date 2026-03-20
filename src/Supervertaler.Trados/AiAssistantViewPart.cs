@@ -1242,9 +1242,11 @@ namespace Supervertaler.Trados
                     {
                         case ProofreadScope.ConfirmedOnly:
                         case ProofreadScope.FilteredConfirmedOnly:
-                            include = confirmLevel >= Sdl.Core.Globalization.ConfirmationLevel.ApprovedTranslation;
+                            // "Translated only" — segments at exactly Translated status
+                            include = confirmLevel == Sdl.Core.Globalization.ConfirmationLevel.Translated;
                             break;
                         case ProofreadScope.TranslatedAndConfirmed:
+                            // "Translated + Approved" — Translated, Approved, and Signed-off
                             include = confirmLevel >= Sdl.Core.Globalization.ConfirmationLevel.Translated;
                             break;
                         case ProofreadScope.AllSegments:

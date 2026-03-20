@@ -28,6 +28,7 @@ namespace Supervertaler.Trados.Controls
         private TextBox _txtDefinition;
         private TextBox _txtDomain;
         private TextBox _txtNotes;
+        private TextBox _txtUrl;
         private CheckBox _chkNonTranslatable;
 
         // Synonym lists
@@ -53,7 +54,7 @@ namespace Supervertaler.Trados.Controls
         {
             public TermEntry Entry;
             public TermbaseInfo Termbase;
-            public string Source, Target, Definition, Domain, Notes;
+            public string Source, Target, Definition, Domain, Notes, Url;
             public string SourceAbbr, TargetAbbr;
             public bool IsNonTranslatable;
             public List<SynonymEntry> SourceSyns = new List<SynonymEntry>();
@@ -69,6 +70,7 @@ namespace Supervertaler.Trados.Controls
         public string Definition => _txtDefinition.Text.Trim();
         public string Domain => _txtDomain.Text.Trim();
         public string Notes => _txtNotes.Text.Trim();
+        public string Url => _txtUrl.Text.Trim();
         public bool IsNonTranslatable => _chkNonTranslatable.Checked;
         public long TermId => _termId;
         public bool IsEditMode => _termId > 0;
@@ -136,6 +138,7 @@ namespace Supervertaler.Trados.Controls
                     Definition = entry.Definition ?? "",
                     Domain = entry.Domain ?? "",
                     Notes = entry.Notes ?? "",
+                    Url = entry.Url ?? "",
                     IsNonTranslatable = entry.IsNonTranslatable
                 });
             }
@@ -518,6 +521,19 @@ namespace Supervertaler.Trados.Controls
             _contentPanel.Controls.Add(_txtNotes);
             y += 28;
 
+            _contentPanel.Controls.Add(MakeLabel("URL (optional):", leftX, y, labelColor));
+            y += 18;
+
+            _txtUrl = new TextBox
+            {
+                Location = new Point(leftX, y),
+                Width = _contentPanel.Width - 32,
+                BackColor = inputBg,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+            };
+            _contentPanel.Controls.Add(_txtUrl);
+            y += 28;
+
             // Non-translatable checkbox
             _chkNonTranslatable = new CheckBox
             {
@@ -618,6 +634,7 @@ namespace Supervertaler.Trados.Controls
             _txtDefinition.Text = entry.Definition ?? "";
             _txtDomain.Text = entry.Domain ?? "";
             _txtNotes.Text = entry.Notes ?? "";
+            _txtUrl.Text = entry.Url ?? "";
             _chkNonTranslatable.Checked = entry.IsNonTranslatable;
         }
 
@@ -672,6 +689,7 @@ namespace Supervertaler.Trados.Controls
             ed.Definition = _txtDefinition.Text.Trim();
             ed.Domain = _txtDomain.Text.Trim();
             ed.Notes = _txtNotes.Text.Trim();
+            ed.Url = _txtUrl.Text.Trim();
             ed.IsNonTranslatable = _chkNonTranslatable.Checked;
             // Synonym lists are stored by reference — already up to date
             ed.SourceSyns = new List<SynonymEntry>(_sourceSyns);
@@ -698,6 +716,7 @@ namespace Supervertaler.Trados.Controls
             _txtDefinition.Text = ed.Definition;
             _txtDomain.Text = ed.Domain;
             _txtNotes.Text = ed.Notes;
+            _txtUrl.Text = ed.Url ?? "";
             _chkNonTranslatable.Checked = ed.IsNonTranslatable;
 
             // Load synonyms
@@ -984,7 +1003,8 @@ namespace Supervertaler.Trados.Controls
                         source, target, Definition, Domain, Notes,
                         isNonTranslatable: IsNonTranslatable,
                         sourceAbbreviation: SourceAbbreviation,
-                        targetAbbreviation: TargetAbbreviation);
+                        targetAbbreviation: TargetAbbreviation,
+                        url: Url);
                 }
                 else if (_termbase != null)
                 {
@@ -996,7 +1016,8 @@ namespace Supervertaler.Trados.Controls
                         Definition, Domain, Notes,
                         isNonTranslatable: IsNonTranslatable,
                         sourceAbbreviation: SourceAbbreviation,
-                        targetAbbreviation: TargetAbbreviation);
+                        targetAbbreviation: TargetAbbreviation,
+                        url: Url);
 
                     // Can't save synonyms without a term ID
                     if (newId <= 0)

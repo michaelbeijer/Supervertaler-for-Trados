@@ -50,6 +50,7 @@ For full control over a new term, press **Ctrl+Alt+T** (or right-click in the ed
 | **Definition** | Optional definition or usage note |
 | **Domain** | Subject area or client (e.g. "Legal", "ACME Corp") |
 | **Notes** | Any additional notes for translators |
+| **URL** | Optional reference URL (shown as a clickable link in the term popup) |
 | **Non-translatable** | Check this to mark the term as non-translatable |
 
 The term is added to the **project termbase** if one is configured, or the first write-enabled termbase otherwise.

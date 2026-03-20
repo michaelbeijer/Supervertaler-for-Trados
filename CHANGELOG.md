@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.16.0] — 2026-03-20
+
+### Added
+- **Interactive term popup** — hovering over a term chip now shows an interactive popup instead of a standard tooltip. The popup supports word-wrapped text, stays open when you move the mouse into it, and renders URLs as clickable links.
+- **URL metadata field** — term entries now support a URL field for linking to reference material. URLs appear as clickable links in the hover popup, and can be edited in the term entry editor and termbase editor grid.
+- **Dismissible proofreading issues** — each issue card in the Reports tab now has a checkbox; ticking it removes the card from the list so you can track which issues you have addressed.
+
+### Changed
+- **Proofreading scope labels** — dropdown labels now use correct Trados terminology: "Translated only" and "Translated + approved/signed-off" instead of the previous MemoQ-style "Confirmed" labels.
+- **Faster popup close** — the hover popup close delay was reduced from 200ms to 150ms for a snappier feel.
+
+### Fixed
+- **Popup text truncation** — long definitions, notes, and other metadata no longer get cut off in the hover popup. Text now word-wraps correctly within the popup.
+- **Popup spacing** — removed excessive vertical spacing between metadata lines in the hover popup.
+
+---
+
 ## [4.15.0] — 2026-03-20
 
 ### Added

@@ -378,7 +378,8 @@ namespace Supervertaler.Trados.Controls
             bool hasMetadata = _entries.Any(t =>
                 !string.IsNullOrEmpty(t.Definition) ||
                 !string.IsNullOrEmpty(t.Domain) ||
-                !string.IsNullOrEmpty(t.Notes));
+                !string.IsNullOrEmpty(t.Notes) ||
+                !string.IsNullOrEmpty(t.Url));
             if (hasMetadata)
             {
                 const int dotSize = 8;
@@ -436,35 +437,35 @@ namespace Supervertaler.Trados.Controls
             _isHovered = true;
             Invalidate();
 
-            // Show tooltip with all translations and metadata
+            // Show interactive popup with all translations and metadata
             if (_entries.Count > 0)
             {
-                var lines = new List<string>();
+                var lines = new List<PopupLine>();
                 if (_isMultiTerm)
-                    lines.Add("[MultiTerm \u2014 read-only]");
+                    lines.Add(new PopupLine("[MultiTerm \u2014 read-only]", PopupLineType.Tag));
                 if (_isNonTranslatable)
-                    lines.Add("[Non-translatable]");
+                    lines.Add(new PopupLine("[Non-translatable]", PopupLineType.Tag));
                 foreach (var entry in _entries)
                 {
                     bool isAbbrMatch = _abbreviationMatchIds.Contains(entry.Id);
-                    string line;
+                    string heading;
                     if (isAbbrMatch && !string.IsNullOrEmpty(entry.TargetAbbreviation))
-                        line = $"{entry.SourceAbbreviation} \u2192 {entry.TargetAbbreviation}";
+                        heading = $"{entry.SourceAbbreviation} \u2192 {entry.TargetAbbreviation}";
                     else
-                        line = $"{entry.SourceTerm} \u2192 {entry.TargetTerm}";
+                        heading = $"{entry.SourceTerm} \u2192 {entry.TargetTerm}";
                     if (!string.IsNullOrEmpty(entry.TermbaseName))
-                        line += $" [{entry.TermbaseName}]";
-                    line += $" (ID {entry.Id})";
-                    lines.Add(line);
+                        heading += $" [{entry.TermbaseName}]";
+                    heading += $" (ID {entry.Id})";
+                    lines.Add(new PopupLine(heading, PopupLineType.Heading));
 
                     // Show the complementary form (abbreviation or full term)
                     if (!string.IsNullOrEmpty(entry.SourceAbbreviation) &&
                         !string.IsNullOrEmpty(entry.TargetAbbreviation))
                     {
                         if (isAbbrMatch)
-                            lines.Add($"  Full: {entry.SourceTerm} \u2192 {entry.TargetTerm}");
+                            lines.Add(new PopupLine($"  Full: {entry.SourceTerm} \u2192 {entry.TargetTerm}", PopupLineType.Synonym));
                         else
-                            lines.Add($"  Abbr: {entry.SourceAbbreviation} \u2192 {entry.TargetAbbreviation}");
+                            lines.Add(new PopupLine($"  Abbr: {entry.SourceAbbreviation} \u2192 {entry.TargetAbbreviation}", PopupLineType.Synonym));
                     }
 
                     // Source synonyms (alternative source forms that match this entry)
@@ -475,23 +476,25 @@ namespace Supervertaler.Trados.Controls
                                 .Where(s => !string.IsNullOrEmpty(s.Text))
                                 .Select(s => s.Text));
                         if (!string.IsNullOrEmpty(srcSynTexts))
-                            lines.Add($"  Also: {srcSynTexts}");
+                            lines.Add(new PopupLine($"  Also: {srcSynTexts}", PopupLineType.Synonym));
                     }
 
                     // Target synonyms (alternative translations)
                     foreach (var syn in entry.TargetSynonyms)
-                        lines.Add($"  \u2022 {syn}");
+                        lines.Add(new PopupLine($"  \u2022 {syn}", PopupLineType.Synonym));
 
                     if (!string.IsNullOrEmpty(entry.Definition))
-                        lines.Add($"  Def: {entry.Definition}");
+                        lines.Add(new PopupLine($"  Def: {entry.Definition}", PopupLineType.Meta));
                     if (!string.IsNullOrEmpty(entry.Domain))
-                        lines.Add($"  Domain: {entry.Domain}");
+                        lines.Add(new PopupLine($"  Domain: {entry.Domain}", PopupLineType.Meta));
                     if (!string.IsNullOrEmpty(entry.Notes))
-                        lines.Add($"  Notes: {entry.Notes}");
+                        lines.Add(new PopupLine($"  Notes: {entry.Notes}", PopupLineType.Meta));
+                    if (!string.IsNullOrEmpty(entry.Url))
+                        lines.Add(new PopupLine($"  URL: {entry.Url}", PopupLineType.Meta));
                 }
 
-                var tip = new ToolTip { AutoPopDelay = 10000 };
-                tip.SetToolTip(this, string.Join("\n", lines));
+                var popup = TermPopup.GetInstance();
+                popup.ShowBelow(this, lines);
             }
 
             base.OnMouseEnter(e);
@@ -501,6 +504,11 @@ namespace Supervertaler.Trados.Controls
         {
             _isHovered = false;
             Invalidate();
+
+            // Schedule popup close (cancelled if mouse enters the popup)
+            var popup = TermPopup.GetInstance();
+            popup.ScheduleClose();
+
             base.OnMouseLeave(e);
         }
 

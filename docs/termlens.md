@@ -43,9 +43,9 @@ In addition to colour coding, TermLens shows small indicators in the top-right c
 | Indicator | Meaning |
 | --------- | ------- |
 | **≡** (indigo) | The entry has synonyms (source-side, target-side, or both). Hover to see them. |
-| **●** (amber) | The entry has metadata — a definition, domain, or notes. Hover to see details. |
+| **●** (amber) | The entry has metadata — a definition, domain, notes, or URL. Hover to see details. |
 
-Both indicators can appear simultaneously. Hover over any term chip to see the full details, including source synonyms (prefixed with "Also:") and target synonyms (shown as bullet points).
+Both indicators can appear simultaneously. Hover over any term chip to see an interactive popup with full details, including source synonyms (prefixed with "Also:"), target synonyms (shown as bullet points), definitions, domain, notes, and clickable URLs. The popup stays open when you move the mouse into it, so you can click on links.
 
 ## Inserting Terms
 
@@ -95,7 +95,7 @@ You can add terms without opening a dialogue:
 | -------------- | ------------------------------------------------------------------------- |
 | **Alt+Down**   | Quick-add the selected text to all write termbases                        |
 | **Alt+Up**     | Quick-add the selected text to the project termbase                       |
-| **Ctrl+Alt+T** | Open the Add Term Entry dialog (full editor: definition, domain, notes, synonyms) |
+| **Ctrl+Alt+T** | Open the Add Term Entry dialog (full editor: definition, domain, notes, URL, synonyms) |
 | **Ctrl+Alt+N** | Quick-add the selected text as a non-translatable term                    |
 
 {% hint style="success" %}
@@ -110,8 +110,8 @@ Use the **A+** and **A-** buttons in the TermLens panel header to increase or de
 
 * TermLens respects termbase activation –only terms from activated termbases are shown.
 * If you have many termbases, designate one as the **Project termbase** (shown in pink) to make its terms stand out.
-* Hover over a term to see a tooltip with all translations, synonyms, abbreviation pairs, definitions, and the termbase name.
-* A small **indigo ≡ indicator** appears in the top-right corner of a term chip when the entry has synonyms. An **amber dot** appears when the entry has metadata (definition, domain, or notes). Both indicators can appear together.
+* Hover over a term to see an interactive popup with all translations, synonyms, abbreviation pairs, definitions, URLs, and the termbase name. The popup stays open when you move the mouse into it, allowing you to click on URLs.
+* A small **indigo ≡ indicator** appears in the top-right corner of a term chip when the entry has synonyms. An **amber dot** appears when the entry has metadata (definition, domain, notes, or URL). Both indicators can appear together.
 * If a term has an **abbreviation** (e.g., "GC" for "gaschromatografie"), both the full term and the abbreviation are highlighted when they appear in the same segment. The abbreviation chip shows the abbreviated translation; the full-term chip shows the full translation.
 
 ***

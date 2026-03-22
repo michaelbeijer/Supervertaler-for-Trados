@@ -19,14 +19,15 @@ This gives you an at-a-glance overview of every term in the segment that has a t
 
 ## Colour Coding
 
-TermLens uses four background colours to distinguish term types:
+TermLens uses five background colours to distinguish term types:
 
-| Colour     | Meaning                                  |
-| ---------- | ---------------------------------------- |
-| **Blue**   | Regular Supervertaler termbase match     |
-| **Pink**   | Project termbase match (higher priority) |
-| **Yellow** | Non-translatable term (source = target)  |
-| **Green**  | MultiTerm termbase match (`.sdltb`)      |
+| Colour       | Meaning                                                        |
+| ------------ | -------------------------------------------------------------- |
+| **Blue**     | Regular Supervertaler termbase match                           |
+| **Lavender** | Abbreviation match (matched via source abbreviation, not the full term) |
+| **Pink**     | Project termbase match (higher priority)                       |
+| **Yellow**   | Non-translatable term (source = target)                        |
+| **Green**    | MultiTerm termbase match (`.sdltb`)                            |
 
 {% hint style="info" %}
 Designate one termbase as the **Project termbase** in settings to make its terms appear in pink. Project terms take visual priority over regular terms, making it easy to spot client-specific terminology.

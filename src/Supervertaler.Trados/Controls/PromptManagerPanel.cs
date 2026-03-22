@@ -74,15 +74,13 @@ namespace Supervertaler.Trados.Controls
             SuspendLayout();
             BackColor = Color.White;
 
-            // Two-panel layout: left 60% (Fill), right 40% (Dock.Right)
-            _rightPanel = new Panel
+            _leftPanel = new Panel
             {
-                Dock = DockStyle.Right,
-                Width = 250,
+                Dock = DockStyle.Fill,
                 BackColor = Color.White
             };
 
-            _leftPanel = new Panel
+            _rightPanel = new Panel
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.White
@@ -91,14 +89,29 @@ namespace Supervertaler.Trados.Controls
             BuildLeftPanel();
             BuildRightPanels();
 
-            Controls.Add(_leftPanel);
-            Controls.Add(_rightPanel);
+            var splitter = new SplitContainer
+            {
+                Dock = DockStyle.Fill,
+                Orientation = Orientation.Vertical,
+                BackColor = Color.FromArgb(220, 220, 220),
+                SplitterWidth = 5,
+                FixedPanel = FixedPanel.None,
+                BorderStyle = BorderStyle.None
+            };
+            splitter.Panel1.Controls.Add(_leftPanel);
+            splitter.Panel2.Controls.Add(_rightPanel);
+            Controls.Add(splitter);
 
-            // Keep right panel at ~40% of total width
+            // Set initial splitter position after layout is ready
+            splitter.SplitterDistance = 100; // temporary; updated on first resize
+            var initialised = false;
             Resize += (s, e) =>
             {
-                if (Width > 100)
-                    _rightPanel.Width = Math.Max(200, (int)(Width * 0.40));
+                if (!initialised && Width > 100)
+                {
+                    splitter.SplitterDistance = (int)(Width * 0.55);
+                    initialised = true;
+                }
             };
 
             ResumeLayout(false);

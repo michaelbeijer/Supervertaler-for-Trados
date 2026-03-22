@@ -122,7 +122,7 @@ namespace Supervertaler.Trados.Controls
             }
 
             // Create embedded RichTextBox for text rendering
-            _rtb = new RichTextBox
+            _rtb = new ChatRichTextBox
             {
                 ReadOnly = true,
                 BorderStyle = BorderStyle.None,
@@ -130,10 +130,11 @@ namespace Supervertaler.Trados.Controls
                 BackColor = _isUser ? UserBg : AssistantBg,
                 ForeColor = TextColor,
                 Font = MessageFont,
-                Cursor = Cursors.Default,
+                Cursor = Cursors.IBeam,
                 DetectUrls = false,
                 WordWrap = true,
-                TabStop = false,
+                TabStop = true,
+                ShortcutsEnabled = true,
             };
 
             // Set content: plain text for user or display-override messages,
@@ -475,4 +476,13 @@ namespace Supervertaler.Trados.Controls
             base.Dispose(disposing);
         }
     }
+
+    /// <summary>
+    /// RichTextBox subclass that intercepts Ctrl+C and Ctrl+A before
+    /// Trados's global shortcut system can steal them.
+    /// </summary>
+    internal class ChatRichTextBox : RichTextBox
+    {
+    }
+
 }

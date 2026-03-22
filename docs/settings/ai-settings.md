@@ -70,7 +70,7 @@ For [prompt generation](../generate-prompt.md), **TermScan** automatically filte
 
 ### Include TM matches
 
-When enabled, translation memory matches for the current segment are included in the prompt. This gives the AI context from previous translations, improving consistency.
+When enabled, translation memory matches for the current segment are included in the prompt. This gives the AI context from previous translations, improving consistency. This setting also controls whether TM reference pairs are included when using [Analyse Project & Generate Prompt](../generate-prompt.md).
 
 ### Include full document content
 

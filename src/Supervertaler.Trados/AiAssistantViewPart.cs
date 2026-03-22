@@ -46,6 +46,7 @@ namespace Supervertaler.Trados
         // Chat state
         private readonly List<ChatMessage> _chatHistory = new List<ChatMessage>();
         private CancellationTokenSource _chatCts;
+        private bool _userCancelled;
 
         // Batch translate state
         private BatchTranslator _batchTranslator;
@@ -456,7 +457,12 @@ namespace Supervertaler.Trados
             var capturedMessages = messagesToSend;
             var capturedMaxTokens = args.MaxTokens ?? 4096;
 
-            // 7. Call LLM async
+            // 7. Call LLM async — calculate prompt size for diagnostics
+            var promptCharCount = 0;
+            foreach (var m in capturedMessages)
+                promptCharCount += m.Content?.Length ?? 0;
+            promptCharCount += capturedSystemPrompt?.Length ?? 0;
+
             Task.Run(async () =>
             {
                 try
@@ -480,15 +486,27 @@ namespace Supervertaler.Trados
                         SaveChatHistory();
                     });
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException oce)
                 {
                     SafeInvoke(() =>
                     {
                         _control.Value.SetThinking(false);
-                        // Only show timeout message if the user didn't explicitly cancel
-                        // (Stop button sets _chatCts to a new instance before cancelling)
-                        if (ct.IsCancellationRequested)
-                            AddErrorMessage("The request timed out or was cancelled. Try again, or use a faster model.");
+                        if (_userCancelled)
+                        {
+                            _userCancelled = false;
+                        }
+                        else
+                        {
+                            var tokensEst = promptCharCount / 4;
+                            var inner = oce.InnerException?.Message;
+                            var detail = inner != null ? $"\n\nInner: {inner}" : "";
+                            AddErrorMessage(
+                                $"The request timed out.\n\n" +
+                                $"Model: {capturedModel}\n" +
+                                $"Prompt size: ~{tokensEst:N0} tokens ({promptCharCount:N0} chars)\n" +
+                                $"Max output tokens: {capturedMaxTokens}" +
+                                detail);
+                        }
                     });
                 }
                 catch (Exception ex)
@@ -496,7 +514,9 @@ namespace Supervertaler.Trados
                     SafeInvoke(() =>
                     {
                         _control.Value.SetThinking(false);
-                        AddErrorMessage($"Error: {ex.Message}");
+                        var inner = ex.InnerException?.Message;
+                        var detail = inner != null ? $"\n\nInner: {inner}" : "";
+                        AddErrorMessage($"Error: {ex.Message}{detail}");
                     });
                 }
             });
@@ -511,6 +531,7 @@ namespace Supervertaler.Trados
 
         private void OnStopRequested(object sender, EventArgs e)
         {
+            _userCancelled = true;
             _chatCts?.Cancel();
         }
 
@@ -615,7 +636,9 @@ namespace Supervertaler.Trados
                 termbaseTerms = PromptGenerator.FilterRelevantTerms(termbaseTerms, sourceSegments);
 
                 // Phase 4: Gather TM reference pairs from translated segments
-                var tmPairs = CollectTmReferencePairs();
+                // Respects the "Include TM matches" toggle in AI Settings
+                var includeTm = aiSettings.IncludeTmMatches;
+                var tmPairs = includeTm ? CollectTmReferencePairs() : new List<TmMatch>();
 
                 // Phase 5: Build meta-prompt
                 var ctx = new PromptGenerationContext

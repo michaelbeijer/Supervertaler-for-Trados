@@ -11,6 +11,13 @@
 ### Changed
 - **Improved term popup readability** — definition and notes text is now darker and more readable in the TermLens hover popup.
 - **Multi-line term fields** — Definition and Notes in the term entry editor now have expand/collapse buttons (▲/▼) to toggle between compact and expanded views.
+- **Resizable Prompts panel** — the divider between the tree and detail pane in Settings → Prompts can now be dragged left or right to resize.
+- **Prompt generator respects TM toggle** — the "Analyse Project & Generate Prompt" feature now respects the "Include TM matches in AI context" setting. Previously, TM reference pairs were always collected regardless of this toggle.
+
+### Fixed
+- **HttpClient timeout causing prompt generation failures** — the .NET HttpClient's default 100-second timeout was silently overriding our per-request timeout settings (up to 10 minutes). This caused all long-running API calls (prompt generation, large batch translations) to fail after exactly 100 seconds across all providers. Fixed by setting HttpClient.Timeout to infinite and managing timeouts via CancellationToken as intended.
+- **Silent timeout errors** — when an API request timed out, the thinking indicator would disappear with no error message. Now shows a diagnostic message with model name, prompt size, and max output tokens to help troubleshoot.
+- **Expand buttons in term editor** — fixed z-order issue where the Definition expand button was hidden behind the text box. Both expand buttons now render correctly.
 
 ---
 

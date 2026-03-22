@@ -28,6 +28,7 @@ namespace Supervertaler.Trados.Core
         {
             var handler = new HttpClientHandler();
             Http = new HttpClient(handler);
+            Http.Timeout = System.Threading.Timeout.InfiniteTimeSpan; // We manage timeouts via CancellationToken
             Http.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
         }

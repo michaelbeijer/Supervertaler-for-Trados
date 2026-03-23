@@ -54,8 +54,8 @@ namespace Supervertaler.Trados.Core
             },
             new LlmModelInfo
             {
-                Id = "gpt-5.3-chat-latest", DisplayName = "GPT-5.3",
-                Description = "Premium quality — best results for complex legal, medical, or technical translation",
+                Id = "gpt-5.4", DisplayName = "GPT-5.4",
+                Description = "Premium quality — OpenAI's most advanced model for complex legal, medical, or technical translation",
                 Provider = LlmProvider.OpenAi
             },
             new LlmModelInfo

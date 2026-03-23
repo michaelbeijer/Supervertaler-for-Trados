@@ -191,7 +191,9 @@ namespace Supervertaler.Trados
         private void UpdateContextDisplay()
         {
             var sourceText = _activeDocument?.ActiveSegmentPair?.Source?.ToString();
-            var targetText = _activeDocument?.ActiveSegmentPair?.Target?.ToString();
+            var targetText = _activeDocument?.ActiveSegmentPair?.Target != null
+                ? SegmentTagHandler.GetFinalText(_activeDocument.ActiveSegmentPair.Target)
+                : null;
             var matches = TermLensEditorViewPart.GetCurrentSegmentMatches();
             var langPair = BuildLangPairString();
 
@@ -354,7 +356,9 @@ namespace Supervertaler.Trados
 
             // 2. Gather current context
             var sourceText = _activeDocument?.ActiveSegmentPair?.Source?.ToString();
-            var targetText = _activeDocument?.ActiveSegmentPair?.Target?.ToString();
+            var targetText = _activeDocument?.ActiveSegmentPair?.Target != null
+                ? SegmentTagHandler.GetFinalText(_activeDocument.ActiveSegmentPair.Target)
+                : null;
             var sourceLang = GetDocumentSourceLanguage();
             var targetLang = GetDocumentTargetLanguage();
 
@@ -699,7 +703,8 @@ namespace Supervertaler.Trados
                 foreach (var pair in _activeDocument.SegmentPairs)
                 {
                     var sourceText = pair.Source?.ToString() ?? "";
-                    var targetText = pair.Target?.ToString() ?? "";
+                    var targetText = pair.Target != null
+                        ? SegmentTagHandler.GetFinalText(pair.Target) : "";
 
                     // Only include segments that have a non-empty translation
                     if (string.IsNullOrWhiteSpace(sourceText) || string.IsNullOrWhiteSpace(targetText))
@@ -1362,7 +1367,8 @@ namespace Supervertaler.Trados
                 int index = 0;
                 foreach (var pair in pairs)
                 {
-                    var targetText = pair.Target?.ToString() ?? "";
+                    var targetText = pair.Target != null
+                        ? SegmentTagHandler.GetFinalText(pair.Target) : "";
 
                     // Skip segments with empty target — nothing to proofread
                     if (string.IsNullOrWhiteSpace(targetText))
@@ -1458,7 +1464,8 @@ namespace Supervertaler.Trados
                 int index = 0;
                 foreach (var pair in pairs)
                 {
-                    var targetText = pair.Target?.ToString() ?? "";
+                    var targetText = pair.Target != null
+                        ? SegmentTagHandler.GetFinalText(pair.Target) : "";
 
                     // Serialize source with tag placeholders (if segment has inline tags)
                     var sourceSegment = pair.Source;
@@ -1534,7 +1541,8 @@ namespace Supervertaler.Trados
                     foreach (var pair in _activeDocument.SegmentPairs)
                     {
                         total++;
-                        var targetText = pair.Target?.ToString() ?? "";
+                        var targetText = pair.Target != null
+                            ? SegmentTagHandler.GetFinalText(pair.Target) : "";
                         if (string.IsNullOrWhiteSpace(targetText))
                             empty++;
                     }
@@ -1948,7 +1956,8 @@ namespace Supervertaler.Trados
                         {
                             Index = 0,
                             SourceText = sourceText,
-                            ExistingTarget = pair.Target?.ToString() ?? "",
+                            ExistingTarget = pair.Target != null
+                                ? SegmentTagHandler.GetFinalText(pair.Target) : "",
                             SegmentPairRef = segRef,
                             HasTags = hasTags,
                             TagMap = hasTags ? serialization.TagMap : null
@@ -2034,7 +2043,8 @@ namespace Supervertaler.Trados
                 if (originType == "tm" || originType == "auto-propagated")
                 {
                     var sourceText = pair.Source?.ToString();
-                    var targetText = pair.Target?.ToString();
+                    var targetText = pair.Target != null
+                        ? SegmentTagHandler.GetFinalText(pair.Target) : null;
 
                     if (!string.IsNullOrEmpty(sourceText) && !string.IsNullOrEmpty(targetText))
                     {
@@ -2267,7 +2277,8 @@ namespace Supervertaler.Trados
                 foreach (var pair in _activeDocument.SegmentPairs)
                 {
                     var src = pair.Source?.ToString() ?? "";
-                    var tgt = pair.Target?.ToString() ?? "";
+                    var tgt = pair.Target != null
+                        ? SegmentTagHandler.GetFinalText(pair.Target) : "";
                     allPairs.Add(Tuple.Create(src, tgt));
 
                     if (activeIdx < 0)

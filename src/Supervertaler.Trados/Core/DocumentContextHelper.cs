@@ -245,7 +245,8 @@ namespace Supervertaler.Trados.Core
                 if (originType == "tm" || originType == "auto-propagated")
                 {
                     var sourceText = pair.Source?.ToString();
-                    var targetText = pair.Target?.ToString();
+                    var targetText = pair.Target != null
+                        ? SegmentTagHandler.GetFinalText(pair.Target) : null;
 
                     if (!string.IsNullOrEmpty(sourceText) && !string.IsNullOrEmpty(targetText))
                     {

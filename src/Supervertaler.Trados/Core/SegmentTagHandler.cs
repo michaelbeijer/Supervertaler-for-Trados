@@ -144,9 +144,17 @@ namespace Supervertaler.Trados.Core
 
                     sb.Append("<t").Append(tagNum).Append("/>");
                 }
+                else if (item is IRevisionMarker revision)
+                {
+                    // Tracked changes: skip deleted text, include inserted/unchanged
+                    if (revision.Properties.RevisionType != RevisionType.Delete)
+                    {
+                        SerializeContainer(revision, sb, tagMap, ref tagCounter);
+                    }
+                }
                 else if (item is IAbstractMarkupDataContainer nestedContainer)
                 {
-                    // ILockedContent, IRevisionMarker, etc. — treat as paired tag
+                    // ILockedContent, etc. — treat as paired tag
                     tagCounter++;
                     int tagNum = tagCounter;
                     tagMap[tagNum] = new TagInfo
@@ -422,6 +430,45 @@ namespace Supervertaler.Trados.Core
                         AddElementsToContainer(container, ot.Children, tagMap, textTemplate);
                     }
                 }
+            }
+        }
+
+        // ─── Tracked Changes ────────────────────────────────
+
+        /// <summary>
+        /// Returns the final (accepted) plain text of a segment, stripping deleted
+        /// tracked changes and keeping only inserted/current text.
+        /// Use this instead of segment.ToString() when tracked changes may be present.
+        /// </summary>
+        public static string GetFinalText(ISegment segment)
+        {
+            if (segment == null) return "";
+            var sb = new StringBuilder();
+            AppendFinalText(segment, sb);
+            return sb.ToString();
+        }
+
+        private static void AppendFinalText(IAbstractMarkupDataContainer container, StringBuilder sb)
+        {
+            foreach (var item in container)
+            {
+                if (item is IRevisionMarker revision)
+                {
+                    // Skip deleted text entirely; include inserted/unchanged text
+                    if (revision.Properties.RevisionType != RevisionType.Delete)
+                    {
+                        AppendFinalText(revision, sb);
+                    }
+                }
+                else if (item is IText textItem)
+                {
+                    sb.Append(textItem.Properties.Text);
+                }
+                else if (item is IAbstractMarkupDataContainer nested)
+                {
+                    AppendFinalText(nested, sb);
+                }
+                // Standalone tags, placeholders, etc. — skip (plain text only)
             }
         }
 

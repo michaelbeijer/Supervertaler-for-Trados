@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.18.4] — 2026-03-23
+
+### Fixed
+- **Tracked changes no longer confuse AI features** — proofreading, batch translation, AI chat, and prompt generation now read only the final (accepted) text from segments with tracked changes, instead of including both deleted and inserted text
+- **GPT-5.4 replaces GPT-5.3** — updated to OpenAI's latest flagship model
+
+### Changed
+- **Updated LLM model lineup** — OpenAI: GPT-4.1, GPT-4.1 Mini, GPT-5.4, o4-mini; Gemini: added 3.1 Pro (Preview); Ollama: Qwen 3 bumped to 14B
+- **Descriptive model tooltips** — each model now shows a short description to help translators choose the right one
+
+---
+
 ## [4.18.3] — 2026-03-23
 
 ### New Features

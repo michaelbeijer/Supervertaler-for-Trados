@@ -48,6 +48,14 @@ In addition to colour coding, TermLens shows small indicators in the top-right c
 
 Both indicators can appear simultaneously. Hover over any term chip to see an interactive popup with full details, including source synonyms (prefixed with "Also:"), target synonyms (shown as bullet points), definitions, domain, notes, and clickable URLs. The popup stays open when you move the mouse into it, so you can click on links.
 
+### Markdown Rendering
+
+The **Notes** and **Definition** fields in the term popup support Markdown formatting. If the content contains Markdown syntax (tables, bold, italic, headings, bullet lists, code blocks), it is rendered with proper formatting instead of plain text. This is especially useful when AI-generated term notes include structured data like translation tables.
+
+### Resizable Popup
+
+You can resize the term popup by dragging the grip in the bottom-right corner. The width is remembered for the rest of the session, so subsequent popups open at your preferred size.
+
 ## Inserting Terms
 
 ### Click to Insert

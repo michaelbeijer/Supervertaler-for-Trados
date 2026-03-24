@@ -51,6 +51,7 @@ namespace Supervertaler.Trados.Controls
         private readonly bool _isUser;
         private readonly string _timestampText;
         private readonly string _plainContent;
+        private readonly string _markdownContent;
         private readonly RichTextBox _rtb;
         private readonly List<PictureBox> _imageThumbs = new List<PictureBox>();
 
@@ -126,10 +127,11 @@ namespace Supervertaler.Trados.Controls
                 ? (message.DisplayContent ?? message.Content ?? "")
                 : null;
 
-            // Prepare plain content (for copy/apply)
+            // Prepare plain content (for apply-to-target) and raw markdown (for copy)
             _plainContent = _isUser || hasDisplayOverride
                 ? userDisplayText
                 : MarkdownToRtf.StripMarkdown(message.Content ?? "");
+            _markdownContent = message.Content ?? "";
 
             // Create image thumbnails if present
             if (message.HasImages)
@@ -426,9 +428,10 @@ namespace Supervertaler.Trados.Controls
                 {
                     _rtb.Copy();
                 }
-                else if (!string.IsNullOrEmpty(_plainContent))
+                else if (!string.IsNullOrEmpty(_markdownContent))
                 {
-                    Clipboard.SetText(_plainContent);
+                    // Copy raw markdown so tables, formatting etc. are preserved
+                    Clipboard.SetText(_markdownContent);
                 }
             };
             menu.Items.Add(copyItem);

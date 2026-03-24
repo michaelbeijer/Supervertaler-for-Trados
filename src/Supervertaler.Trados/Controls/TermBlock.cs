@@ -493,13 +493,13 @@ namespace Supervertaler.Trados.Controls
                     if (hasDefOrDomain)
                         lines.Add(new PopupLine("", PopupLineType.Plain)); // space before def/domain
                     if (!string.IsNullOrEmpty(entry.Definition))
-                        lines.Add(new PopupLine("  Def:", entry.Definition, PopupLineType.MetaLabelled));
+                        lines.Add(new PopupLine("  Def:", entry.Definition, PopupLineType.MarkdownLabelled));
                     if (!string.IsNullOrEmpty(entry.Domain))
                         lines.Add(new PopupLine("  Domain:", entry.Domain, PopupLineType.MetaLabelled));
                     if (!string.IsNullOrEmpty(entry.Notes))
                     {
                         lines.Add(new PopupLine("", PopupLineType.Plain)); // space before notes
-                        lines.Add(new PopupLine("  Notes:", entry.Notes, PopupLineType.MetaLabelled));
+                        lines.Add(new PopupLine("  Notes:", entry.Notes, PopupLineType.MarkdownLabelled));
                     }
                     if (!string.IsNullOrEmpty(entry.Url))
                         lines.Add(new PopupLine("  URL:", entry.Url, PopupLineType.MetaLabelled));

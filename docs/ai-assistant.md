@@ -135,15 +135,17 @@ Up to **5 documents** per message, **20 MB** maximum per file. Very large docume
 **Tip:** Attaching a client style guide or reference document alongside your translation question gives the AI much better context for providing accurate, style-consistent suggestions.
 {% endhint %}
 
-### Apply to Target
+### Right-Click Menu
 
-To use an AI response as your translation:
+Right-click any assistant response bubble to access:
 
-1. **Right-click** any assistant response bubble
-2. Select **Apply to target**
-3. The response text is inserted into the active target segment in the Trados editor
+| Action              | Description                                                                 |
+| ------------------- | --------------------------------------------------------------------------- |
+| **Copy**            | Copies the raw Markdown to the clipboard, preserving tables and formatting  |
+| **Apply to target** | Inserts the plain text (Markdown stripped) into the active target segment    |
+| **Save as Prompt…** | Saves the response as a reusable prompt template                            |
 
-This is useful when the assistant suggests a translation and you want to use it directly.
+If you select text within a bubble before right-clicking, **Copy** and **Apply to target** operate on the selection only.
 
 ### Provider and Model
 

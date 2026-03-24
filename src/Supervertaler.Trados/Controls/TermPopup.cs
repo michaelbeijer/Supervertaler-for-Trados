@@ -27,13 +27,23 @@ namespace Supervertaler.Trados.Controls
             @"(https?://[^\s\)\""\\>]+)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static int MaxPopupWidth => UiScale.Pixels(500);
+        private static int DefaultMaxPopupWidth => UiScale.Pixels(700);
         private static int MinPopupWidth => UiScale.Pixels(180);
         private static int ContentPad => UiScale.Pixels(10);
+        private static int GripSize => UiScale.Pixels(12);
 
         private readonly Timer _closeTimer;
         private bool _mouseInPopup;
         private Control _ownerChip;
+
+        // Resize state
+        private bool _isResizing;
+        private Point _resizeStart;
+        private Size _resizeOriginal;
+        /// <summary>User's preferred width, remembered across popups within the session.</summary>
+        private static int? _userWidth;
+
+        private int MaxPopupWidth => _userWidth ?? DefaultMaxPopupWidth;
 
         // Reuse a single instance across all term chips
         private static TermPopup _instance;
@@ -46,6 +56,7 @@ namespace Supervertaler.Trados.Controls
             BackColor = BgColor;
             AutoScaleMode = AutoScaleMode.Dpi;
             TopMost = true;
+            DoubleBuffered = true;
 
             // Prevent stealing focus from Trados
             SetStyle(ControlStyles.Selectable, false);
@@ -74,6 +85,20 @@ namespace Supervertaler.Trados.Controls
             // Draw border
             using (var pen = new Pen(BorderColor))
                 e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
+
+            // Draw resize grip (bottom-right corner)
+            var g = e.Graphics;
+            int gs = GripSize;
+            int x = Width - gs - 1;
+            int y = Height - gs - 1;
+            using (var pen = new Pen(Color.FromArgb(180, 180, 180)))
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    int offset = (gs / 3) * i + gs / 4;
+                    g.DrawLine(pen, x + offset, y + gs, x + gs, y + offset);
+                }
+            }
         }
 
         protected override void OnMouseEnter(EventArgs e)
@@ -85,9 +110,60 @@ namespace Supervertaler.Trados.Controls
 
         protected override void OnMouseLeave(EventArgs e)
         {
-            _mouseInPopup = false;
-            ScheduleClose();
+            if (!_isResizing)
+            {
+                _mouseInPopup = false;
+                ScheduleClose();
+            }
             base.OnMouseLeave(e);
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            if (_isResizing)
+            {
+                var dx = Cursor.Position.X - _resizeStart.X;
+                var dy = Cursor.Position.Y - _resizeStart.Y;
+                int newW = Math.Max(MinPopupWidth, _resizeOriginal.Width + dx);
+                int newH = Math.Max(UiScale.Pixels(60), _resizeOriginal.Height + dy);
+                Size = new Size(newW, newH);
+                return;
+            }
+
+            // Show resize cursor when near bottom-right corner
+            if (IsInGripZone(e.Location))
+                Cursor = Cursors.SizeNWSE;
+            else
+                Cursor = Cursors.Default;
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+            if (e.Button == MouseButtons.Left && IsInGripZone(e.Location))
+            {
+                _isResizing = true;
+                _resizeStart = Cursor.Position;
+                _resizeOriginal = Size;
+                _closeTimer.Stop();
+            }
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+            if (_isResizing)
+            {
+                _isResizing = false;
+                _userWidth = Width; // remember for next popup
+            }
+        }
+
+        private bool IsInGripZone(Point p)
+        {
+            int gs = GripSize + 4; // slightly larger hit area
+            return p.X >= Width - gs && p.Y >= Height - gs;
         }
 
         private void OnCloseTimerTick(object sender, EventArgs e)
@@ -154,6 +230,12 @@ namespace Supervertaler.Trados.Controls
             foreach (var line in lines)
             {
                 if (line.Type == PopupLineType.Separator) continue;
+                if (line.Type == PopupLineType.MarkdownLabelled)
+                {
+                    // Markdown content (tables, etc.) benefits from full width
+                    maxNaturalWidth = MaxPopupWidth - ContentPad * 2;
+                    continue;
+                }
                 if (line.Type == PopupLineType.MetaLabelled)
                 {
                     var fullText = (line.Label ?? "") + " " + (line.Text ?? "");
@@ -184,6 +266,13 @@ namespace Supervertaler.Trados.Controls
                     sep.Location = new Point(ContentPad, y);
                     Controls.Add(sep);
                     y += sep.Height;
+                }
+                else if (line.Type == PopupLineType.MarkdownLabelled)
+                {
+                    var ctrl = CreateMarkdownMeta(line, font, boldFont, contentWidth);
+                    ctrl.Location = new Point(ContentPad, y);
+                    Controls.Add(ctrl);
+                    y += ctrl.Height;
                 }
                 else if (line.Type == PopupLineType.MetaLabelled)
                 {
@@ -393,6 +482,103 @@ namespace Supervertaler.Trados.Controls
         }
 
         /// <summary>
+        /// Creates a meta line with a bold label and Markdown-rendered value using a RichTextBox.
+        /// Falls back to plain text rendering if the value has no markdown markers.
+        /// </summary>
+        private Control CreateMarkdownMeta(PopupLine line, Font font, Font boldFont, int maxWidth)
+        {
+            string labelText = line.Label ?? "";
+            string valueText = line.Text ?? "";
+
+            // If there's no markdown in the text, fall back to the plain label renderer
+            if (!ContainsMarkdown(valueText))
+                return CreateLabelledMeta(line, font, boldFont, maxWidth);
+
+            // Measure the bold label width to establish the hanging indent
+            int labelWidth = TextRenderer.MeasureText(labelText + " ", boldFont).Width - 4;
+
+            var panel = new Panel
+            {
+                AutoSize = false,
+                BackColor = BgColor,
+                Margin = Padding.Empty,
+                Padding = Padding.Empty
+            };
+
+            // Bold label
+            var lblLabel = new Label
+            {
+                Text = labelText,
+                Font = boldFont,
+                ForeColor = MetaLabelColor,
+                BackColor = BgColor,
+                AutoSize = true,
+                Margin = Padding.Empty,
+                Padding = Padding.Empty,
+                Location = new Point(0, 0)
+            };
+            panel.Controls.Add(lblLabel);
+
+            // RichTextBox for Markdown-rendered content
+            int rtbWidth = maxWidth - labelWidth;
+            if (rtbWidth < UiScale.Pixels(150)) rtbWidth = maxWidth; // fallback if label is very wide
+
+            var rtb = new RichTextBox
+            {
+                ReadOnly = true,
+                BorderStyle = BorderStyle.None,
+                BackColor = BgColor,
+                ScrollBars = RichTextBoxScrollBars.None,
+                TabStop = false,
+                Margin = Padding.Empty,
+                Cursor = Cursors.Arrow,
+                DetectUrls = false,
+                Location = new Point(labelWidth, 0),
+                Width = rtbWidth
+            };
+
+            // Convert markdown to RTF and set content
+            rtb.Rtf = MarkdownToRtf.Convert(valueText);
+
+            // Auto-size height to content
+            // Use GetPositionFromCharIndex to find the bottom of the last character
+            var lastCharPos = rtb.GetPositionFromCharIndex(Math.Max(0, rtb.TextLength - 1));
+            // Add one line height for safety
+            using (var g = rtb.CreateGraphics())
+            {
+                var lineHeight = (int)Math.Ceiling(font.GetHeight(g));
+                rtb.Height = lastCharPos.Y + lineHeight + UiScale.Pixels(4);
+            }
+
+            // Wire up mouse events to keep popup open
+            rtb.MouseEnter += (s, e) => { _mouseInPopup = true; _closeTimer.Stop(); };
+            rtb.MouseLeave += (s, e) => { _mouseInPopup = false; ScheduleClose(); };
+            panel.Controls.Add(rtb);
+
+            int totalHeight = Math.Max(lblLabel.PreferredHeight, rtb.Height);
+            panel.Size = new Size(maxWidth, totalHeight);
+
+            panel.MouseEnter += (s, e) => { _mouseInPopup = true; _closeTimer.Stop(); };
+            panel.MouseLeave += (s, e) => { _mouseInPopup = false; ScheduleClose(); };
+            lblLabel.MouseEnter += (s, e) => { _mouseInPopup = true; _closeTimer.Stop(); };
+            lblLabel.MouseLeave += (s, e) => { _mouseInPopup = false; ScheduleClose(); };
+
+            return panel;
+        }
+
+        /// <summary>
+        /// Quick check for common markdown markers to decide whether to use rich rendering.
+        /// </summary>
+        private static bool ContainsMarkdown(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return false;
+            // Tables (pipes), bold, italic, headings, code blocks, bullet lists
+            return text.Contains("|") || text.Contains("**") || text.Contains("*")
+                || text.Contains("# ") || text.Contains("```") || text.Contains("- ")
+                || text.Contains("`");
+        }
+
+        /// <summary>
         /// Creates a meta line that may contain clickable URLs mixed with plain text.
         /// Uses a two-part approach: label prefix + link for URLs.
         /// </summary>
@@ -554,6 +740,8 @@ namespace Supervertaler.Trados.Controls
         Meta,
         /// <summary>Meta line with a bold label prefix and hanging indent for wrapped text.</summary>
         MetaLabelled,
+        /// <summary>Meta line with a bold label prefix and Markdown-rendered value (uses RichTextBox).</summary>
+        MarkdownLabelled,
         Separator,
         Plain
     }

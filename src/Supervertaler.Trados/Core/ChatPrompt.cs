@@ -56,6 +56,14 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine("You are a professional translation assistant integrated into Trados Studio.");
             sb.AppendLine("You help translators with their work by answering questions about translations,");
             sb.AppendLine("suggesting improvements, explaining terminology, and providing context.");
+            sb.AppendLine();
+            sb.AppendLine("# FORMATTING");
+            sb.AppendLine("Use proper Markdown formatting in your responses. When presenting tabular data,");
+            sb.AppendLine("always use valid Markdown table syntax with pipe delimiters and a separator row:");
+            sb.AppendLine("| Header 1 | Header 2 |");
+            sb.AppendLine("|----------|----------|");
+            sb.AppendLine("| Cell 1   | Cell 2   |");
+            sb.AppendLine("Use bullet lists (- item), bold (**text**), and headings (##) where appropriate.");
 
             // ── Project context ──────────────────────────────────────
             var hasLangPair = !string.IsNullOrEmpty(ctx.SourceLang) && !string.IsNullOrEmpty(ctx.TargetLang);

@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.18.9] — 2026-03-24
+
+### Added
+- **Markdown rendering in TermLens popup** — Notes and Definition fields now render Markdown formatting (tables, bold, italic, headings, bullet lists, code blocks) instead of plain text
+- **Resizable TermLens popup** — drag the bottom-right corner grip to resize the popup; width is remembered for the rest of the session
+- **Copy raw Markdown from AI Assistant** — right-click → Copy on a chat bubble now copies the original Markdown (preserving tables and formatting) instead of stripped plain text
+
+### Changed
+- **Wider TermLens popup** — default maximum width increased from 500px to 700px so tables display more clearly
+- **AI Assistant uses proper Markdown tables** — system prompt now instructs the AI to use valid Markdown table syntax with pipe delimiters and separator rows
+- **User data folder restructured** — Trados settings files (`settings.json`, `license.json`, `chat_history.json`) now live under `trados/settings/` instead of directly in `trados/`; auto-migrated on first run
+
+### Fixed
+- **In-plugin purchase links now use live checkout** — the "Buy" links in Settings → License were still pointing to test mode URLs
+
+---
+
 ## [4.18.8] — 2026-03-24
 
 ### Fixed

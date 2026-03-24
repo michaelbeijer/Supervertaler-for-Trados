@@ -52,6 +52,10 @@ Both indicators can appear simultaneously. Hover over any term chip to see an in
 
 The **Notes** and **Definition** fields in the term popup support Markdown formatting. If the content contains Markdown syntax (tables, bold, italic, headings, bullet lists, code blocks), it is rendered with proper formatting instead of plain text. This is especially useful when AI-generated term notes include structured data like translation tables.
 
+<figure><img src=".gitbook/assets/Markdown formatting rendered in TermLens term popup.png" alt=""><figcaption>Markdown formatting rendered in TermLens term popup</figcaption></figure>
+
+<figure><img src=".gitbook/assets/Markdown in the Edit Term entry dialogue.png" alt=""><figcaption>Markdown in the Edit Term entry dialogue</figcaption></figure>
+
 ### Resizable Popup
 
 You can resize the term popup by dragging the grip in the bottom-right corner. The width is remembered for the rest of the session, so subsequent popups open at your preferred size.

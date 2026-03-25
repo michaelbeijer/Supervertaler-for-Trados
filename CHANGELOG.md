@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.18.11] — 2026-03-25
+
+### Added
+- **MultiTerm termbases in AI Settings** — MultiTerm termbases now appear in the "Termbases included in AI prompts" checklist on the AI Settings tab, matching what's shown on the TermLens tab
+
+### Changed
+- **Feature renamed: AutoPrompt** — "Analyse Project & Generate Prompt" is now called **AutoPrompt** throughout the UI, docs, and log labels
+- **TermScan** naming consistent in docs — the automatic glossary extraction step is consistently referred to as TermScan
+
+---
+
 ## [4.18.10] — 2026-03-24
 
 ### Added

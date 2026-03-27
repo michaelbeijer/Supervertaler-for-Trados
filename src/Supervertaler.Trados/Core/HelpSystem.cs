@@ -32,6 +32,7 @@ namespace Supervertaler.Trados.Core
             public const string AddTermDialog      = "features/termlens/adding-terms";
             public const string TermPickerDialog   = "features/termlens/term-picker";
             public const string AiAssistantChat    = "features/ai-assistant";
+            public const string QuickLauncher      = "features/quicklauncher";
             public const string BatchOperations    = "features/batch-operations";
             public const string BatchTranslate     = "features/batch-operations/batch-translate";
             public const string AiProofreader      = "features/batch-operations/ai-proofreader";
@@ -41,10 +42,12 @@ namespace Supervertaler.Trados.Core
             public const string GeneratePrompt      = "features/batch-operations/generate-prompt";
             public const string MultiTermSupport   = "features/multiterm-support";
             public const string TermbaseEditor     = "terminology/termbase-management";
+            public const string SettingsGeneral    = "settings/usage-statistics";
             public const string SettingsTermLens   = "settings/termlens";
             public const string SettingsAi         = "settings/ai-settings";
             public const string SettingsPrompts    = "settings/prompts";
             public const string SettingsBackup     = "settings/backup";
+            public const string SettingsUsageStats = "settings/usage-statistics";
             public const string Licensing          = "getting-started/licensing";
             public const string ProjectSettings    = "settings/project-settings";
             public const string KeyboardShortcuts  = "reference/keyboard-shortcuts";

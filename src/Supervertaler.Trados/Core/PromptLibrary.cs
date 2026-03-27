@@ -49,13 +49,28 @@ namespace Supervertaler.Trados.Core
 
             // Mark prompts that match built-in definitions as IsBuiltIn,
             // even if the file on disk was created by Workbench without that flag.
-            var builtInNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            // Only match prompts that are in a Default subfolder (or whose domain
+            // matches the built-in domain exactly) to avoid marking user clones.
+            var builtInLookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (var b in GetBuiltInPromptDefinitions())
-                builtInNames.Add(b.Name);
+                builtInLookup[b.Name] = b.Domain ?? "";
             foreach (var p in _cache)
             {
-                if (builtInNames.Contains(p.Name))
-                    p.IsBuiltIn = true;
+                string builtInDomain;
+                if (builtInLookup.TryGetValue(p.Name, out builtInDomain))
+                {
+                    // Match if the prompt is in the expected Default domain,
+                    // or if its file is inside a "Default" or legacy "Built-in" folder
+                    var pDomain = p.Domain ?? "";
+                    if (pDomain.Equals(builtInDomain, StringComparison.OrdinalIgnoreCase) ||
+                        pDomain.IndexOf("Default", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        pDomain.IndexOf("Built-in", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        (p.FilePath ?? "").IndexOf(Path.DirectorySeparatorChar + "Default" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        (p.FilePath ?? "").IndexOf(Path.DirectorySeparatorChar + "Built-in" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        p.IsBuiltIn = true;
+                    }
+                }
             }
         }
 
@@ -172,7 +187,7 @@ namespace Supervertaler.Trados.Core
             var result = new List<PromptTemplate>();
             foreach (var p in all)
             {
-                if (p.IsQuickLauncher)
+                if (p.IsQuickLauncher && !p.HiddenFromMenu)
                     result.Add(p);
             }
             result.Sort((a, b) =>
@@ -194,9 +209,29 @@ namespace Supervertaler.Trados.Core
 
             // Determine file path
             string filePath;
+            string oldFilePath = null;
             if (!string.IsNullOrEmpty(prompt.FilePath) && !prompt.IsReadOnly)
             {
                 filePath = prompt.FilePath;
+
+                // If the prompt was renamed, update the filename to match.
+                // Skip for built-in prompts — their filenames are managed by EnsureBuiltInPrompts.
+                if (!prompt.IsBuiltIn)
+                {
+                    var currentFileName = Path.GetFileNameWithoutExtension(filePath);
+                    var expectedFileName = SanitizeFileName(prompt.Name);
+                    if (!string.Equals(currentFileName, expectedFileName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var dir = Path.GetDirectoryName(filePath);
+                        var newPath = Path.Combine(dir, expectedFileName + ".md");
+                        if (!File.Exists(newPath))
+                        {
+                            oldFilePath = filePath;
+                            filePath = newPath;
+                        }
+                        // If a file with the new name already exists, keep the old filename
+                    }
+                }
             }
             else
             {
@@ -234,12 +269,20 @@ namespace Supervertaler.Trados.Core
                 sb.AppendLine("built_in: true");
             if (prompt.SortOrder != 100)
                 sb.AppendLine("sort_order: " + prompt.SortOrder);
+            if (prompt.HiddenFromMenu)
+                sb.AppendLine("hidden: true");
             sb.AppendLine("---");
             sb.AppendLine();
             sb.Append(prompt.Content ?? "");
 
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
             File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
+
+            // Delete old file after successfully writing the new one (rename scenario)
+            if (oldFilePath != null && File.Exists(oldFilePath))
+            {
+                try { File.Delete(oldFilePath); } catch { /* ignore */ }
+            }
 
             prompt.FilePath = filePath;
             prompt.RelativePath = GetRelativePath(filePath, PromptsDir);
@@ -291,12 +334,53 @@ namespace Supervertaler.Trados.Core
 
             foreach (var builtin in GetBuiltInPromptDefinitions())
             {
+                // builtin.Domain is now e.g. "QuickLauncher/Default"
                 var folder = string.IsNullOrEmpty(builtin.Domain)
                     ? PromptsDir
-                    : Path.Combine(PromptsDir, builtin.Domain);
+                    : Path.Combine(PromptsDir, builtin.Domain.Replace('/', Path.DirectorySeparatorChar));
                 Directory.CreateDirectory(folder);
 
                 var sanitisedName = SanitizeFileName(builtin.Name);
+
+                // ─── Migration: move files from old locations to Default subfolder ───
+                // Handles both the original flat layout (e.g. "QuickLauncher/Define.md")
+                // and the intermediate "Built-in" subfolder (e.g. "QuickLauncher/Built-in/Define.md").
+                var domainParts = builtin.Domain.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                if (domainParts.Length >= 2 && domainParts[domainParts.Length - 1].Equals("Default", StringComparison.OrdinalIgnoreCase))
+                {
+                    var newMdPath = Path.Combine(folder, sanitisedName + ".md");
+
+                    // Parent folder (e.g. "QuickLauncher") — flat layout migration
+                    var parentFolder = PromptsDir;
+                    for (int i = 0; i < domainParts.Length - 1; i++)
+                        parentFolder = Path.Combine(parentFolder, domainParts[i]);
+                    var flatPath = Path.Combine(parentFolder, sanitisedName + ".md");
+
+                    // Old "Built-in" subfolder migration
+                    var builtInFolder = Path.Combine(parentFolder, "Built-in");
+                    var builtInPath = Path.Combine(builtInFolder, sanitisedName + ".md");
+
+                    if (!File.Exists(newMdPath))
+                    {
+                        // Prefer Built-in folder (more recent), then flat
+                        string sourcePath = null;
+                        if (File.Exists(builtInPath))
+                            sourcePath = builtInPath;
+                        else if (File.Exists(flatPath))
+                            sourcePath = flatPath;
+
+                        if (sourcePath != null)
+                        {
+                            try
+                            {
+                                var content = File.ReadAllText(sourcePath);
+                                if (content.Contains("built_in: true"))
+                                    File.Move(sourcePath, newMdPath);
+                            }
+                            catch { /* ignore — file locked or permissions */ }
+                        }
+                    }
+                }
 
                 // Clean up old .svprompt version if it's still a built-in (not user-modified)
                 var oldSvpromptPath = Path.Combine(folder, sanitisedName + ".svprompt");
@@ -410,7 +494,7 @@ namespace Supervertaler.Trados.Core
             {
                 var folder = string.IsNullOrEmpty(builtin.Domain)
                     ? PromptsDir
-                    : Path.Combine(PromptsDir, builtin.Domain);
+                    : Path.Combine(PromptsDir, builtin.Domain.Replace('/', Path.DirectorySeparatorChar));
                 Directory.CreateDirectory(folder);
 
                 var sanitisedName = SanitizeFileName(builtin.Name);
@@ -583,7 +667,11 @@ namespace Supervertaler.Trados.Core
                 prompt.Domain = "QuickLauncher";
             }
 
-            if (prompt.Domain.Equals("QuickLauncher", StringComparison.OrdinalIgnoreCase))
+            // Mark as QuickLauncher if the domain is "QuickLauncher" or starts with "QuickLauncher/"
+            // (e.g. "QuickLauncher/Default")
+            if (prompt.Domain.Equals("QuickLauncher", StringComparison.OrdinalIgnoreCase) ||
+                prompt.Domain.StartsWith("QuickLauncher/", StringComparison.OrdinalIgnoreCase) ||
+                prompt.Domain.StartsWith("QuickLauncher\\", StringComparison.OrdinalIgnoreCase))
                 prompt.IsQuickLauncher = true;
         }
 
@@ -650,6 +738,9 @@ namespace Supervertaler.Trados.Core
                         if (int.TryParse(value, out order))
                             prompt.SortOrder = order;
                         break;
+                    case "hidden":
+                        prompt.HiddenFromMenu = value.Equals("true", StringComparison.OrdinalIgnoreCase);
+                        break;
                 }
             }
         }
@@ -706,7 +797,7 @@ namespace Supervertaler.Trados.Core
                 {
                     Name = "Default Translation Prompt",
                     Description = "General-purpose translation prompt — use as-is or as a starting point for your own prompts",
-                    Domain = "Translate",
+                    Domain = "Translate/Default",
                     IsBuiltIn = true,
                     Content = @"You are a professional translator working from {{SOURCE_LANGUAGE}} to {{TARGET_LANGUAGE}}. Translate the source text accurately and naturally, following these guidelines:
 
@@ -732,7 +823,7 @@ namespace Supervertaler.Trados.Core
                 {
                     Name = "Default Proofreading Prompt",
                     Description = "Reviews translations for accuracy, completeness, terminology, grammar, and style issues",
-                    Domain = "Proofread",
+                    Domain = "Proofread/Default",
                     IsBuiltIn = true,
                     Content = @"You are a professional translation proofreader. Your task is to review {{SOURCE_LANGUAGE}} to {{TARGET_LANGUAGE}} translation pairs and identify issues. You must check EVERY segment provided — do not skip any.
 
@@ -805,7 +896,7 @@ IMPORTANT RULES:
                 {
                     Name = "UK to US English Localization",
                     Description = "Flags British English spelling, vocabulary, and conventions that need changing to American English",
-                    Domain = "Proofread",
+                    Domain = "Proofread/Default",
                     IsBuiltIn = true,
                     Content = @"You are a professional English localizer specializing in adapting British English (BrE) text to American English (AmE). Your task is to review each segment and flag any British English forms that should be changed to their American English equivalents.
 
@@ -897,7 +988,7 @@ IMPORTANT RULES:
                 {
                     Name = "Assess how I translated the current segment",
                     Description = "Reviews your translation of the active segment and suggests improvements",
-                    Domain = "QuickLauncher",
+                    Domain = "QuickLauncher/Default",
                     IsBuiltIn = true,
                     Content = @"Source ({{SOURCE_LANGUAGE}}):
 {{SOURCE_TEXT}}
@@ -911,7 +1002,7 @@ Assess how I translated the current segment. Point out any inaccuracies, awkward
                 {
                     Name = "Define",
                     Description = "Defines the selected term and provides usage examples",
-                    Domain = "QuickLauncher",
+                    Domain = "QuickLauncher/Default",
                     IsBuiltIn = true,
                     Content = @"Define ""{{SELECTION}}"" and give practical examples showing how it's used."
                 },
@@ -919,7 +1010,7 @@ Assess how I translated the current segment. Point out any inaccuracies, awkward
                 {
                     Name = "Explain (in general)",
                     Description = "Explains the selected term in simple, clear language",
-                    Domain = "QuickLauncher",
+                    Domain = "QuickLauncher/Default",
                     IsBuiltIn = true,
                     Content = @"Explain ""{{SELECTION}}"" in simple, clear language. Include a practical example if helpful."
                 },
@@ -927,7 +1018,7 @@ Assess how I translated the current segment. Point out any inaccuracies, awkward
                 {
                     Name = "Explain (within project context)",
                     Description = "Explains the selected term using the full document as context",
-                    Domain = "QuickLauncher",
+                    Domain = "QuickLauncher/Default",
                     IsBuiltIn = true,
                     Content = @"PROJECT CONTEXT - The complete source text from the current translation project:
 
@@ -941,7 +1032,7 @@ Explain the term ""{{SELECTION}}"" in simple, clear language. If the project con
                 {
                     Name = "Translate segment using fuzzy matches as reference",
                     Description = "Translates the active segment, using TM fuzzy matches and surrounding context",
-                    Domain = "QuickLauncher",
+                    Domain = "QuickLauncher/Default",
                     IsBuiltIn = true,
                     Content = @"Translate the following from {{SOURCE_LANGUAGE}} to {{TARGET_LANGUAGE}}.
 
@@ -959,7 +1050,7 @@ Use the fuzzy matches and surrounding context as reference, but produce a fresh,
                 {
                     Name = "Translate selection in context of current project",
                     Description = "Suggests the best translation for a selected term using full document context",
-                    Domain = "QuickLauncher",
+                    Domain = "QuickLauncher/Default",
                     IsBuiltIn = true,
                     Content = @"PROJECT CONTEXT - The complete source text of the current translation project:
 
@@ -973,7 +1064,7 @@ Using the project context above, suggest the best translation for ""{{SELECTION}
                 {
                     Name = "Generate project brief",
                     Description = "Generates a comprehensive project summary in Markdown that you can paste into any AI tool for context while translating",
-                    Domain = "QuickLauncher",
+                    Domain = "QuickLauncher/Default",
                     IsBuiltIn = true,
                     Content = @"You are a senior translation project analyst. Your job is to produce a comprehensive briefing document that a professional translator (or an AI assistant helping a translator) can use as reference material throughout an entire translation project.
 

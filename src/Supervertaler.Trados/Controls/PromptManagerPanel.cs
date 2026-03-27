@@ -813,8 +813,10 @@ namespace Supervertaler.Trados.Controls
             foreach (var prompt in folderNode.Prompts)
             {
                 var displayName = prompt.Name;
-                if (prompt.IsBuiltIn)
-                    displayName += "  (built-in)";
+
+                // Show "(hidden)" suffix for QuickLauncher prompts hidden from the menu
+                if (prompt.IsQuickLauncher && prompt.HiddenFromMenu)
+                    displayName += "  (hidden)";
 
                 // Show shortcut suffix for QuickLauncher prompts
                 if (prompt.IsQuickLauncher)
@@ -832,8 +834,8 @@ namespace Supervertaler.Trados.Controls
                     Tag = prompt
                 };
 
-                // Slightly muted for built-in, dark for custom
-                node.ForeColor = prompt.IsBuiltIn
+                // Muted for built-in or hidden, dark for custom
+                node.ForeColor = (prompt.IsBuiltIn || prompt.HiddenFromMenu)
                     ? Color.FromArgb(80, 80, 80)
                     : Color.FromArgb(30, 30, 30);
 
@@ -928,7 +930,7 @@ namespace Supervertaler.Trados.Controls
         {
             _lblPromptName.Text = prompt.Name;
 
-            var source = prompt.IsReadOnly ? "Supervertaler" : (prompt.IsBuiltIn ? "Built-in" : "Custom");
+            var source = prompt.IsReadOnly ? "Supervertaler" : (prompt.IsBuiltIn ? "Default" : "Custom");
             var parts = new List<string>();
             if (!string.IsNullOrEmpty(prompt.Domain))
                 parts.Add(prompt.Domain);
@@ -1119,6 +1121,8 @@ namespace Supervertaler.Trados.Controls
                 return;
             }
 
+            // Built-in prompts open read-only (content immutable, but hidden checkbox editable).
+            // To modify a built-in prompt's content, use Clone.
             using (var dlg = new PromptEditorDialog(selected))
             {
                 if (dlg.ShowDialog(this) == DialogResult.OK)
@@ -1231,8 +1235,8 @@ namespace Supervertaler.Trados.Controls
         private void OnRestoreBuiltIn(object sender, EventArgs e)
         {
             var result = MessageBox.Show(
-                "Restore all built-in prompts?\n\nThis will overwrite any edits to built-in prompts and re-create deleted ones.",
-                "Restore Built-in Prompts",
+                "Restore all default prompts?\n\nThis will overwrite any edits to default prompts and re-create deleted ones.",
+                "Restore Default Prompts",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
 
             if (result == DialogResult.Yes)

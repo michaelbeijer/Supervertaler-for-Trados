@@ -344,9 +344,9 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine();
             sb.AppendLine("=== PROMPT GENERATION INSTRUCTIONS ===");
             sb.AppendLine();
-            sb.AppendLine($"Generate a COMPREHENSIVE translation prompt (2000-5000 words) that a senior {domain} translator");
-            sb.AppendLine("would consider authoritative and complete. The prompt must be SPECIFIC to THIS document and domain,");
-            sb.AppendLine("not generic. Use NON-NEGOTIABLE, LOCKED, and ABSOLUTE language for critical rules.");
+            sb.AppendLine($"Generate a comprehensive translation prompt (2000\u20135000 words) that a senior {domain} translator");
+            sb.AppendLine("would consider authoritative and complete. The prompt must be specific to this document and domain,");
+            sb.AppendLine("not generic. Use clear, firm language for critical rules (e.g. \"Required\", \"Must\", \"Always\").");
             sb.AppendLine();
             sb.AppendLine("THE PROMPT MUST CONTAIN THESE SECTIONS (in this order):");
             sb.Append(sectionsBuilder);
@@ -359,20 +359,20 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine();
 
             // Universal rules
-            sb.AppendLine("=== UNIVERSAL RULES (embed in EVERY prompt) ===");
+            sb.AppendLine("=== UNIVERSAL RULES (embed in every prompt) ===");
             sb.AppendLine();
-            sb.AppendLine("1. TRANSLATION MANDATE (NON-NEGOTIABLE):");
+            sb.AppendLine("1. TRANSLATION MANDATE:");
             sb.AppendLine("   \"This is a professional translation task. Every word, repetition, structure, and cross-reference");
-            sb.AppendLine("   in the source is intentional. You must perform PURE TRANSLATION ONLY. You are explicitly forbidden");
-            sb.AppendLine("   from: improving clarity, simplifying descriptions, harmonizing terminology, correcting perceived");
-            sb.AppendLine("   drafting issues, streamlining enumerations, removing redundancies. If the source is long, repetitive,");
-            sb.AppendLine("   or awkward, reproduce it faithfully.\"");
+            sb.AppendLine("   in the source is intentional. You must perform pure translation only. Do not: improve clarity,");
+            sb.AppendLine("   simplify descriptions, harmonise terminology, correct perceived drafting issues, streamline");
+            sb.AppendLine("   enumerations, or remove redundancies. If the source is long, repetitive, or awkward, reproduce");
+            sb.AppendLine("   it faithfully.\"");
             sb.AppendLine();
-            sb.AppendLine("2. HARD CONSTRAINT - NO HALLUCINATED TRUNCATION:");
-            sb.AppendLine("   \"You must assume that every element of the source text is deliberate. You are strictly forbidden from:");
-            sb.AppendLine("   omitting repetitive phrases, collapsing coordinated or parallel clauses, shortening component lists,");
-            sb.AppendLine("   simplifying enumerations or method steps, 'fixing' grammar or perceived defects. If uncertain,");
-            sb.AppendLine("   default to literal surface structure — never interpretation.\"");
+            sb.AppendLine("2. NO TRUNCATION OR OMISSION:");
+            sb.AppendLine("   \"Assume that every element of the source text is deliberate. Do not: omit repetitive phrases,");
+            sb.AppendLine("   collapse coordinated or parallel clauses, shorten component lists, simplify enumerations or");
+            sb.AppendLine("   method steps, or 'fix' grammar or perceived defects. If uncertain, default to literal surface");
+            sb.AppendLine("   structure rather than interpretation.\"");
             sb.AppendLine();
             sb.AppendLine("3. SUPERVERTALER INPUT HANDLING:");
             sb.AppendLine("   \"Text is supplied in controlled segments by Supervertaler. You must: translate only the provided");
@@ -380,19 +380,19 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine("   If a segment appears incomplete, translate exactly what is provided without comment.\"");
             sb.AppendLine();
             sb.AppendLine("4. TERMINOLOGY CONSISTENCY HIERARCHY:");
-            sb.AppendLine("   \"(1) Previous correct translations from TM (highest priority), (2) Project-specific glossary terms");
-            sb.AppendLine("   (LOCKED), (3) Domain-specific conventions, (4) General language knowledge. Never mix competing");
-            sb.AppendLine("   variants once established.\"");
+            sb.AppendLine("   \"(1) Previous correct translations from TM (highest priority), (2) Project-specific glossary");
+            sb.AppendLine("   terms (required), (3) Domain-specific conventions, (4) General language knowledge. Never mix");
+            sb.AppendLine("   competing variants once established.\"");
             sb.AppendLine();
-            sb.AppendLine("5. PREFLIGHT SELF-CHECK (MANDATORY INTERNAL STEP):");
+            sb.AppendLine("5. PREFLIGHT SELF-CHECK:");
             sb.AppendLine("   \"Before producing output, internally verify: every word and clause translated, no compression or");
-            sb.AppendLine("   optimization occurred, all values/references intact, no restructuring occurred, segment boundaries");
-            sb.AppendLine("   preserved. If any check fails, revise internally before output.\"");
+            sb.AppendLine("   optimisation occurred, all values/references intact, no restructuring occurred, segment boundaries");
+            sb.AppendLine("   preserved. If any check fails, revise before output.\"");
             sb.AppendLine();
-            sb.AppendLine("6. POST-TRANSLATION INTEGRITY ASSERTION (MANDATORY INTERNAL STEP):");
-            sb.AppendLine("   \"Before finalizing output, internally assert: 'This translation is complete, literal, and");
-            sb.AppendLine("   structurally faithful. No content has been omitted, merged, compressed, inferred, harmonized,");
-            sb.AppendLine("   corrected, or stylistically optimized.' If this cannot be truthfully asserted, revise internally.\"");
+            sb.AppendLine("6. POST-TRANSLATION INTEGRITY CHECK:");
+            sb.AppendLine("   \"Before finalising output, confirm that the translation is complete, literal, and structurally");
+            sb.AppendLine("   faithful. No content has been omitted, merged, compressed, inferred, harmonised, corrected, or");
+            sb.AppendLine("   stylistically optimised. If this is not the case, revise before output.\"");
             sb.AppendLine();
             sb.AppendLine($"7. Number/date/currency localization rules appropriate for {ctx.SourceLang} -> {ctx.TargetLang}:");
             sb.AppendLine("   - If translating FROM a European language (Dutch/French/German/etc.) TO English: convert decimal");
@@ -418,13 +418,12 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine();
 
             // Constraint language
-            sb.AppendLine("=== CONSTRAINT LANGUAGE REQUIREMENTS ===");
-            sb.AppendLine("Use strong, unambiguous language throughout the generated prompt:");
-            sb.AppendLine("- \"NON-NEGOTIABLE\" for translation mandate and core rules");
-            sb.AppendLine("- \"LOCKED\" and \"MANDATORY\" for glossary and style rules");
-            sb.AppendLine("- \"ABSOLUTE\" for formatting preservation requirements");
-            sb.AppendLine("- \"MUST\" and \"MUST NOT\" throughout (never \"should\", \"try to\", or \"consider\")");
-            sb.AppendLine("- Describe violations as critical errors");
+            sb.AppendLine("=== LANGUAGE STYLE ===");
+            sb.AppendLine("Use clear, firm language throughout the generated prompt:");
+            sb.AppendLine("- \"Required\" and \"Must\" for core translation rules");
+            sb.AppendLine("- \"Always\" and \"Never\" for glossary and style rules");
+            sb.AppendLine("- Use direct instructions (prefer \"Must\" over \"should\" or \"try to\")");
+            sb.AppendLine("- Be specific and unambiguous about expectations");
             sb.AppendLine();
 
             // Project context instruction

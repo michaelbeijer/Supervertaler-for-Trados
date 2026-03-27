@@ -14,10 +14,12 @@ namespace Supervertaler.Trados.Core
         private static readonly Dictionary<string, (decimal inputPer1M, decimal outputPer1M)> Pricing
             = new Dictionary<string, (decimal, decimal)>
         {
-            // OpenAI
+            // OpenAI (current)
+            { "gpt-5.4",                   (10.00m,  30.00m) },
+            { "gpt-5.4-mini",              (0.75m,   4.50m)  },
+            // OpenAI (legacy — kept for cost estimates if users still have these selected)
             { "gpt-4.1",                   (2.00m,   8.00m)  },
             { "gpt-4.1-mini",              (0.40m,   1.60m)  },
-            { "gpt-5.4",                   (10.00m,  30.00m) },
             { "o4-mini",                   (1.10m,   4.40m)  },
 
             // Claude (Anthropic)
@@ -88,6 +90,21 @@ namespace Supervertaler.Trados.Core
 
             return (inputTokens * rates.inputPer1M / 1_000_000m)
                  + (outputTokens * rates.outputPer1M / 1_000_000m);
+        }
+
+        /// <summary>
+        /// Estimates input-only cost in USD for a given model and token count.
+        /// Useful for pre-send cost warnings.
+        /// </summary>
+        public static decimal EstimateInputCost(string model, int inputTokens)
+        {
+            if (string.IsNullOrEmpty(model)) return 0m;
+
+            (decimal inputPer1M, decimal outputPer1M) rates;
+            if (!Pricing.TryGetValue(model, out rates))
+                return 0m;
+
+            return inputTokens * rates.inputPer1M / 1_000_000m;
         }
 
         /// <summary>

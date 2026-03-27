@@ -68,6 +68,13 @@ namespace Supervertaler.Trados.Models
         /// </summary>
         public int SortOrder { get; set; } = 100;
 
+        /// <summary>
+        /// When true, the prompt is hidden from the QuickLauncher right-click menu
+        /// but still visible in the Prompt Manager tree (shown with a "(hidden)" suffix).
+        /// From YAML 'hidden:' field.
+        /// </summary>
+        public bool HiddenFromMenu { get; set; }
+
         /// <summary>The label to display in the QuickLauncher menu (QuickLauncherLabel if set, else Name).</summary>
         public string MenuLabel => string.IsNullOrWhiteSpace(QuickLauncherLabel) ? Name : QuickLauncherLabel;
 

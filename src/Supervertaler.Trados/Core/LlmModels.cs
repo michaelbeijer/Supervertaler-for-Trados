@@ -42,30 +42,15 @@ namespace Supervertaler.Trados.Core
         {
             new LlmModelInfo
             {
-                Id = "gpt-4.1", DisplayName = "GPT-4.1",
-                Description = "Recommended for most tasks — fast, accurate, 1M context window for long documents",
-                Provider = LlmProvider.OpenAi
-            },
-            new LlmModelInfo
-            {
-                Id = "gpt-4.1-mini", DisplayName = "GPT-4.1 Mini",
-                Description = "Budget-friendly — same 1M context as GPT-4.1 at a fraction of the cost, ideal for large batch jobs",
-                Provider = LlmProvider.OpenAi
-            },
-            new LlmModelInfo
-            {
                 Id = "gpt-5.4", DisplayName = "GPT-5.4",
-                Description = "Premium quality — OpenAI's most advanced model for complex legal, medical, or technical translation",
+                Description = "Premium quality — OpenAI's most advanced model, ideal for AutoPrompt and complex translation tasks",
                 Provider = LlmProvider.OpenAi
             },
             new LlmModelInfo
             {
-                Id = "o4-mini", DisplayName = "o4-mini (Reasoning)",
-                Description = "Thinks step-by-step — use for AutoPrompt, not for translation",
-                Provider = LlmProvider.OpenAi,
-                IsReasoningModel = true,
-                DefaultTimeoutMs = 600_000,
-                DefaultMaxTokens = 32768
+                Id = "gpt-5.4-mini", DisplayName = "GPT-5.4 Mini",
+                Description = "Recommended for most tasks — fast, affordable, and high quality for everyday translation work",
+                Provider = LlmProvider.OpenAi
             }
         };
 

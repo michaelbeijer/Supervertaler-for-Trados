@@ -54,7 +54,7 @@ namespace Supervertaler.Trados.Core
                           string baseUrl = null, int maxTokens = 16384)
         {
             _provider = provider ?? LlmModels.ProviderOpenAi;
-            _model = model ?? "gpt-4.1";
+            _model = model ?? "gpt-5.4-mini";
             _apiKey = apiKey ?? "";
             _baseUrl = baseUrl;
             _maxTokens = maxTokens;
@@ -403,10 +403,12 @@ namespace Supervertaler.Trados.Core
             sb.Append("{\"role\":\"user\",\"content\":").Append(JsonString(prompt)).Append("}");
             sb.Append("]");
 
-            if (_isReasoningModel)
+            if (UsesMaxCompletionTokens(_model))
             {
                 sb.Append(",\"max_completion_tokens\":").Append(tokens);
                 // No temperature for reasoning models
+                if (!_isReasoningModel)
+                    sb.Append(",\"temperature\":0.3");
             }
             else
             {
@@ -428,7 +430,7 @@ namespace Supervertaler.Trados.Core
                     var body = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"{OpenAiProviderLabel()} API error {(int)response.StatusCode}: {TruncateError(body)}");
+                        throw new HttpRequestException(EnrichErrorMessage(OpenAiProviderLabel(), (int)response.StatusCode, body, _model));
 
                     return ExtractOpenAiContent(body);
                 }
@@ -476,7 +478,7 @@ namespace Supervertaler.Trados.Core
                     var body = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"Claude API error {(int)response.StatusCode}: {TruncateError(body)}");
+                        throw new HttpRequestException(EnrichErrorMessage("Claude", (int)response.StatusCode, body, _model));
 
                     return ExtractClaudeContent(body);
                 }
@@ -513,7 +515,7 @@ namespace Supervertaler.Trados.Core
                     var body = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"Gemini API error {(int)response.StatusCode}: {TruncateError(body)}");
+                        throw new HttpRequestException(EnrichErrorMessage("Gemini", (int)response.StatusCode, body, _model));
 
                     return ExtractGeminiContent(body);
                 }
@@ -557,7 +559,7 @@ namespace Supervertaler.Trados.Core
                     var body = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"Ollama API error {(int)response.StatusCode}: {TruncateError(body)}");
+                        throw new HttpRequestException(EnrichErrorMessage("Ollama", (int)response.StatusCode, body, _model));
 
                     return ExtractOllamaContent(body);
                 }
@@ -646,8 +648,12 @@ namespace Supervertaler.Trados.Core
 
             sb.Append("]");
 
-            if (_isReasoningModel)
+            if (UsesMaxCompletionTokens(_model))
+            {
                 sb.Append(",\"max_completion_tokens\":").Append(tokens);
+                if (!_isReasoningModel)
+                    sb.Append(",\"temperature\":0.3");
+            }
             else
             {
                 sb.Append(",\"max_tokens\":").Append(tokens);
@@ -668,7 +674,7 @@ namespace Supervertaler.Trados.Core
                     var body = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"{OpenAiProviderLabel()} API error {(int)response.StatusCode}: {TruncateError(body)}");
+                        throw new HttpRequestException(EnrichErrorMessage(OpenAiProviderLabel(), (int)response.StatusCode, body, _model));
 
                     return ExtractOpenAiContent(body);
                 }
@@ -742,7 +748,7 @@ namespace Supervertaler.Trados.Core
                     var body = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"Claude API error {(int)response.StatusCode}: {TruncateError(body)}");
+                        throw new HttpRequestException(EnrichErrorMessage("Claude", (int)response.StatusCode, body, _model));
 
                     return ExtractClaudeContent(body);
                 }
@@ -800,7 +806,7 @@ namespace Supervertaler.Trados.Core
                     var body = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"Gemini API error {(int)response.StatusCode}: {TruncateError(body)}");
+                        throw new HttpRequestException(EnrichErrorMessage("Gemini", (int)response.StatusCode, body, _model));
 
                     return ExtractGeminiContent(body);
                 }
@@ -864,7 +870,7 @@ namespace Supervertaler.Trados.Core
                     var body = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"Ollama API error {(int)response.StatusCode}: {TruncateError(body)}");
+                        throw new HttpRequestException(EnrichErrorMessage("Ollama", (int)response.StatusCode, body, _model));
 
                     return ExtractOllamaContent(body);
                 }
@@ -1091,6 +1097,46 @@ namespace Supervertaler.Trados.Core
             return body.Length > 500 ? body.Substring(0, 500) + "..." : body;
         }
 
+        /// <summary>
+        /// Enriches common API errors with user-friendly guidance.
+        /// </summary>
+        private static string EnrichErrorMessage(string provider, int statusCode, string body, string model)
+        {
+            var raw = $"{provider} API error {statusCode}: {TruncateError(body)}";
+
+            // OpenAI 403 "model_not_found" — model not enabled in project
+            if (statusCode == 403 && body != null &&
+                (body.Contains("model_not_found") || body.Contains("does not have access to model")))
+            {
+                return raw + $"\n\nThe model \"{model}\" is not enabled in your OpenAI project. " +
+                       "To fix this, go to platform.openai.com \u2192 Settings \u2192 your project \u2192 Model access, " +
+                       "and enable the model.";
+            }
+
+            // 401 Unauthorized — invalid or missing API key
+            if (statusCode == 401)
+            {
+                return raw + $"\n\nYour {provider} API key appears to be invalid or expired. " +
+                       "Check Settings \u2192 AI Settings to verify your API key.";
+            }
+
+            // 429 Rate limit
+            if (statusCode == 429)
+            {
+                return raw + "\n\nYou have hit the API rate limit. Wait a moment and try again, " +
+                       "or check your usage limits on your provider's dashboard.";
+            }
+
+            // 402 / insufficient funds
+            if (statusCode == 402 || (body != null && body.Contains("insufficient_quota")))
+            {
+                return raw + $"\n\nYour {provider} account has insufficient credit. " +
+                       "Add funds on your provider's billing page.";
+            }
+
+            return raw;
+        }
+
         private static bool IsReasoningModel(string model)
         {
             if (string.IsNullOrEmpty(model)) return false;
@@ -1099,6 +1145,18 @@ namespace Supervertaler.Trados.Core
             // Fallback heuristic for custom/unknown model IDs
             var lower = model.ToLowerInvariant();
             return lower.Contains("reasoning") || lower.StartsWith("o1") || lower.StartsWith("o3") || lower.StartsWith("o4");
+        }
+
+        /// <summary>
+        /// Returns true if the model requires max_completion_tokens instead of max_tokens.
+        /// GPT-5.x and reasoning models all use the newer parameter.
+        /// </summary>
+        private static bool UsesMaxCompletionTokens(string model)
+        {
+            if (string.IsNullOrEmpty(model)) return false;
+            if (IsReasoningModel(model)) return true;
+            var lower = model.ToLowerInvariant();
+            return lower.StartsWith("gpt-5");
         }
 
         private int GetOllamaTimeout()

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using Sdl.Desktop.IntegrationApi;
 using Sdl.Desktop.IntegrationApi.Extensions;
@@ -6,6 +7,7 @@ using Sdl.TranslationStudioAutomation.IntegrationApi;
 using Sdl.TranslationStudioAutomation.IntegrationApi.Presentation.DefaultLocations;
 using Supervertaler.Trados.Core;
 using Supervertaler.Trados.Licensing;
+using Supervertaler.Trados.Models;
 using Supervertaler.Trados.Settings;
 
 namespace Supervertaler.Trados
@@ -133,9 +135,48 @@ namespace Supervertaler.Trados
             var hasCustomSlots = settings?.AiSettings?.QuickLauncherSlots != null
                                  && settings.AiSettings.QuickLauncherSlots.Count > 0;
 
-            for (int idx = 0; idx < prompts.Count; idx++)
+            // Separate prompts into default (built-in) and custom groups
+            var defaultPrompts = new List<PromptTemplate>();
+            var customPrompts = new List<PromptTemplate>();
+            foreach (var p in prompts)
             {
-                var capturedPrompt = prompts[idx];
+                if (p.IsBuiltIn)
+                    defaultPrompts.Add(p);
+                else
+                    customPrompts.Add(p);
+            }
+
+            // Build the combined list: default first, then custom
+            var orderedPrompts = new List<PromptTemplate>();
+            orderedPrompts.AddRange(defaultPrompts);
+            orderedPrompts.AddRange(customPrompts);
+
+            // Add section headers
+            if (defaultPrompts.Count > 0)
+            {
+                var defaultHeader = new ToolStripMenuItem("Default");
+                defaultHeader.Enabled = false;
+                defaultHeader.Font = new System.Drawing.Font(defaultHeader.Font, System.Drawing.FontStyle.Italic);
+                menu.Items.Add(defaultHeader);
+            }
+
+            int customHeaderInserted = -1; // track where to insert custom header
+
+            for (int idx = 0; idx < orderedPrompts.Count; idx++)
+            {
+                // Insert "Custom" section header before the first custom prompt
+                if (customPrompts.Count > 0 && idx == defaultPrompts.Count && customHeaderInserted < 0)
+                {
+                    customHeaderInserted = idx;
+                    if (defaultPrompts.Count > 0)
+                        menu.Items.Add(new ToolStripSeparator());
+                    var customHeader = new ToolStripMenuItem("Custom");
+                    customHeader.Enabled = false;
+                    customHeader.Font = new System.Drawing.Font(customHeader.Font, System.Drawing.FontStyle.Italic);
+                    menu.Items.Add(customHeader);
+                }
+
+                var capturedPrompt = orderedPrompts[idx];
                 var capturedSourceText = sourceText;
                 var capturedTargetText = targetText;
                 var capturedSelection = selection;

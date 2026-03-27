@@ -2,7 +2,7 @@
 You are viewing help for **Supervertaler for Trados** — the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://help.supervertaler.com).
 {% endhint %}
 
-The plugin ships with built-in prompts organised into three categories:
+The plugin ships with default prompts organised into three categories:
 
 | Category          | Prompts                                                                                                                                                                      | Used in              |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |

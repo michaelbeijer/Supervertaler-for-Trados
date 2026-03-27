@@ -1592,19 +1592,50 @@ namespace Supervertaler.Trados.Settings
         {
             switch (_tabControl?.SelectedIndex)
             {
-                case 0:  return HelpSystem.Topics.SettingsTermLens;
-                case 1:  return HelpSystem.Topics.SettingsAi;
-                case 2:  return HelpSystem.Topics.SettingsPrompts;
-                case 3:  return HelpSystem.Topics.Licensing;
-                case 4:  return HelpSystem.Topics.SettingsBackup;
-                default: return HelpSystem.Topics.SettingsTermLens;
+                case 0:  return HelpSystem.Topics.SettingsGeneral;
+                case 1:  return HelpSystem.Topics.SettingsTermLens;
+                case 2:  return HelpSystem.Topics.SettingsAi;
+                case 3:  return HelpSystem.Topics.SettingsPrompts;
+                case 4:  return HelpSystem.Topics.Licensing;
+                case 5:  return HelpSystem.Topics.SettingsBackup;
+                default: return HelpSystem.Topics.SettingsGeneral;
+            }
+        }
+
+        private string GetCurrentHelpLabel()
+        {
+            switch (_tabControl?.SelectedIndex)
+            {
+                case 0:  return "General Settings Help";
+                case 1:  return "TermLens Settings Help";
+                case 2:  return "AI Settings Help";
+                case 3:  return "Prompts Help";
+                case 4:  return "Licensing Help";
+                case 5:  return "Backup Help";
+                default: return "Settings Help";
             }
         }
 
         private void OnHelpButtonClicked(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true; // prevent the "What's This?" cursor
-            HelpSystem.OpenHelp(GetCurrentHelpTopic());
+
+            var topic = GetCurrentHelpTopic();
+            var label = GetCurrentHelpLabel();
+
+            var menu = new ContextMenuStrip();
+            menu.Items.Add(label, null, (s, ev) =>
+                HelpSystem.OpenHelp(topic));
+            menu.Items.Add("-");
+            menu.Items.Add("About Supervertaler for Trados", null, (s, ev) =>
+            {
+                using (var dlg = new AboutDialog())
+                    dlg.ShowDialog(this);
+            });
+
+            // Show near the title bar help button (top-right area)
+            var btnLocation = new Point(ClientSize.Width - 60, 0);
+            menu.Show(this, btnLocation);
         }
 
         /// <summary>

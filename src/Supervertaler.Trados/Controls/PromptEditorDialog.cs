@@ -16,6 +16,7 @@ namespace Supervertaler.Trados.Controls
         private TextBox _txtDescription;
         private TextBox _txtDomain;
         private ComboBox _cboApp;
+        private CheckBox _chkShowInMenu;
         private TextBox _txtContent;
         private Button _btnOK;
         private Button _btnCancel;
@@ -124,7 +125,20 @@ namespace Supervertaler.Trados.Controls
             Controls.Add(_txtDomain);
             Controls.Add(lblApp);
             Controls.Add(_cboApp);
-            y += 34;
+            y += 30;
+
+            // ─── Show in QuickLauncher menu ─────────────
+            _chkShowInMenu = new CheckBox
+            {
+                Text = "Show in QuickLauncher menu",
+                Location = new Point(100, y),
+                AutoSize = true,
+                Checked = true,
+                ForeColor = labelColor,
+                Visible = false // shown only for QuickLauncher prompts
+            };
+            Controls.Add(_chkShowInMenu);
+            y += 26;
 
             // ─── Content label + variable hint ────────────
             var lblContent = new Label
@@ -238,20 +252,56 @@ namespace Supervertaler.Trados.Controls
             else
                 _cboApp.SelectedIndex = 0; // "Both"
 
+            // Show "Show in QuickLauncher menu" checkbox for QuickLauncher prompts
+            UpdateShowInMenuVisibility();
+            _chkShowInMenu.Checked = !_prompt.HiddenFromMenu;
+            _txtDomain.TextChanged += (s, ev) => UpdateShowInMenuVisibility();
+
             if (_prompt.IsReadOnly)
             {
                 _txtName.ReadOnly = true;
                 _txtDescription.ReadOnly = true;
                 _txtDomain.ReadOnly = true;
                 _cboApp.Enabled = false;
+                _chkShowInMenu.Enabled = false;
                 _txtContent.ReadOnly = true;
                 _btnOK.Enabled = false;
                 Text += " (read-only)";
             }
+            else if (_prompt.IsBuiltIn)
+            {
+                // Built-in prompts: content is immutable, but visibility can be changed.
+                // To modify content, use Clone.
+                _txtName.ReadOnly = true;
+                _txtDescription.ReadOnly = true;
+                _txtDomain.ReadOnly = true;
+                _cboApp.Enabled = false;
+                _txtContent.ReadOnly = true;
+                // _chkShowInMenu stays enabled — users can hide default prompts
+                Text += " (default \u2014 use Clone to modify)";
+            }
+        }
+
+        private void UpdateShowInMenuVisibility()
+        {
+            var domain = (_txtDomain.Text ?? "").Trim();
+            _chkShowInMenu.Visible =
+                domain.Equals("QuickLauncher", StringComparison.OrdinalIgnoreCase) ||
+                domain.StartsWith("QuickLauncher/", StringComparison.OrdinalIgnoreCase) ||
+                domain.StartsWith("QuickLauncher\\", StringComparison.OrdinalIgnoreCase);
         }
 
         private void OnOKClick(object sender, EventArgs e)
         {
+            // Built-in prompts: only the hidden checkbox is editable,
+            // so only update that field and leave everything else untouched.
+            if (_prompt.IsBuiltIn)
+            {
+                if (_chkShowInMenu.Visible)
+                    _prompt.HiddenFromMenu = !_chkShowInMenu.Checked;
+                return;
+            }
+
             var name = _txtName.Text.Trim();
             if (string.IsNullOrEmpty(name))
             {
@@ -273,6 +323,10 @@ namespace Supervertaler.Trados.Controls
                 case 2: _prompt.App = "workbench"; break;
                 default: _prompt.App = "both"; break;
             }
+
+            // Save QuickLauncher menu visibility
+            if (_chkShowInMenu.Visible)
+                _prompt.HiddenFromMenu = !_chkShowInMenu.Checked;
         }
 
         private void ShowVarMenu()

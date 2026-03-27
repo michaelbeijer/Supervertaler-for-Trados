@@ -31,7 +31,7 @@
 * [TermLens Settings](settings/termlens.md)
 * [AI Settings](settings/ai-settings.md)
 * [Prompts](settings/prompts.md)
-  * [Built-in Prompts](settings/prompts/built-in-prompts.md)
+  * [Default Prompts](settings/prompts/built-in-prompts.md)
   * [Prompt Variables](settings/prompts/prompt-variables.md)
   * [Writing Custom Prompts](settings/prompts/writing-custom-prompts.md)
   * [QuickLauncher Shortcuts](settings/prompts/quicklauncher-shortcuts.md)

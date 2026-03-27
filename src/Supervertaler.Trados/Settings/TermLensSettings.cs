@@ -243,6 +243,15 @@ namespace Supervertaler.Trados.Settings
                         s.AiSettings.SelectedPromptPath = "";
                     // CustomSystemPrompt is intentionally nullable (null = use default)
 
+                    // Migrate: retired OpenAI models → GPT-5.4 Mini
+                    var openAiModel = s.AiSettings.OpenAiModel;
+                    if (openAiModel == "gpt-4.1" || openAiModel == "gpt-4.1-mini" ||
+                        openAiModel == "o4-mini" || openAiModel == "gpt-4o" ||
+                        openAiModel == "gpt-4o-mini")
+                    {
+                        s.AiSettings.OpenAiModel = "gpt-5.4-mini";
+                    }
+
                     // Migrate: UI scale factor missing or invalid from older settings
                     if (s.UiScaleFactor <= 0f || s.UiScaleFactor > 3f)
                         s.UiScaleFactor = 1.0f;

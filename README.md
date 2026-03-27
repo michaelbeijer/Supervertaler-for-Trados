@@ -149,3 +149,7 @@ Source available — see [LICENSE](LICENSE) for details. Pre-built binaries are 
 ## Author
 
 Michael Beijer — [supervertaler.com](https://supervertaler.com/trados/)
+
+---
+
+If you are enjoying Supervertaler for Trados, please ⭐ star the project – it helps increase visibility!

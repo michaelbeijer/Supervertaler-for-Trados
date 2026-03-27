@@ -417,8 +417,23 @@ namespace Supervertaler.Trados
             };
             var systemPrompt = ChatPrompt.BuildSystemPrompt(chatCtx);
 
-            // 4. Build message window (last 10 messages for context)
-            var messagesToSend = BuildMessageWindow(_chatHistory, 10);
+            // 4. Build message window
+            // QuickLauncher prompts are standalone — send only the current message,
+            // not the chat history. This prevents accumulated history from inflating
+            // token costs (e.g. previous {{PROJECT}} expansions).
+            // AutoPrompt (showAsStatus) is also standalone.
+            List<ChatMessage> messagesToSend;
+            var isStandalone = !string.IsNullOrEmpty(args.PromptName) || args.ShowAsStatus;
+            if (isStandalone)
+            {
+                // Send only the current message — no history
+                messagesToSend = new List<ChatMessage> { _chatHistory[_chatHistory.Count - 1] };
+            }
+            else
+            {
+                // Regular chat: send last 10 messages for conversational context
+                messagesToSend = BuildMessageWindow(_chatHistory, 10);
+            }
 
             // 5. Resolve provider / API key
             var aiSettings = _settings?.AiSettings;
@@ -485,6 +500,31 @@ namespace Supervertaler.Trados
             foreach (var m in capturedMessages)
                 promptCharCount += m.Content?.Length ?? 0;
             promptCharCount += capturedSystemPrompt?.Length ?? 0;
+
+            // Cost guard: warn if estimated cost exceeds $0.50
+            var estimatedTokens = promptCharCount / 4; // rough: 1 token ≈ 4 chars
+            var estimatedCost = Core.TokenEstimator.EstimateInputCost(capturedModel, estimatedTokens);
+            if (estimatedCost > 0.50m)
+            {
+                var costStr = estimatedCost.ToString("F2");
+                var tokenStr = estimatedTokens.ToString("N0");
+                var result = System.Windows.Forms.MessageBox.Show(
+                    $"This request will send approximately {tokenStr} tokens to {capturedModel}.\n" +
+                    $"Estimated input cost: ~${costStr}\n\n" +
+                    "Tip: use GPT-5.4 Mini for everyday queries \u2014 it is much cheaper.\n" +
+                    "Use GPT-5.4 only for AutoPrompt or complex tasks.\n\n" +
+                    "Continue?",
+                    "Cost Warning",
+                    System.Windows.Forms.MessageBoxButtons.YesNo,
+                    System.Windows.Forms.MessageBoxIcon.Warning,
+                    System.Windows.Forms.MessageBoxDefaultButton.Button2);
+
+                if (result != System.Windows.Forms.DialogResult.Yes)
+                {
+                    _control.Value.SetThinking(false);
+                    return;
+                }
+            }
 
             Task.Run(async () =>
             {
@@ -2105,14 +2145,44 @@ namespace Supervertaler.Trados
         }
 
         /// <summary>
-        /// Returns the last N messages for the API context window.
+        /// Returns the last N messages for the API context window, constrained by
+        /// a character budget (~50K tokens ≈ 200K chars) to prevent runaway costs
+        /// from accumulated large prompts (e.g. {{PROJECT}} expansions).
+        /// Always includes at least the most recent message.
         /// </summary>
         private static List<ChatMessage> BuildMessageWindow(List<ChatMessage> history, int maxMessages)
         {
-            if (history.Count <= maxMessages)
-                return new List<ChatMessage>(history);
+            const int maxChars = 200_000; // ~50K tokens
 
-            return history.GetRange(history.Count - maxMessages, maxMessages);
+            if (history.Count == 0)
+                return new List<ChatMessage>();
+
+            // Start from the most recent message and work backwards
+            var result = new List<ChatMessage>();
+            var totalChars = 0;
+            var startIdx = Math.Max(0, history.Count - maxMessages);
+
+            for (int i = history.Count - 1; i >= startIdx; i--)
+            {
+                var msgLen = history[i].Content?.Length ?? 0;
+
+                // Always include the most recent message
+                if (i == history.Count - 1)
+                {
+                    result.Insert(0, history[i]);
+                    totalChars += msgLen;
+                    continue;
+                }
+
+                // Stop adding older messages if we'd exceed the budget
+                if (totalChars + msgLen > maxChars)
+                    break;
+
+                result.Insert(0, history[i]);
+                totalChars += msgLen;
+            }
+
+            return result;
         }
 
         // ─── Chat History Persistence ─────────────────────────────

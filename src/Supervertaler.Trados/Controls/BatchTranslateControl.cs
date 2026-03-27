@@ -44,6 +44,7 @@ namespace Supervertaler.Trados.Controls
         // Action
         private Button _btnTranslate;
         private CheckBox _chkAddComments;
+        private LinkLabel _lnkGeneratePrompt;
 
         // Log
         private Label _lblLog;
@@ -188,7 +189,7 @@ namespace Supervertaler.Trados.Controls
             Controls.Add(_cmbPrompt);
 
             // ─── Generate Prompt link ────────────────────────────
-            var lnkGeneratePrompt = new LinkLabel
+            _lnkGeneratePrompt = new LinkLabel
             {
                 Text = "AutoPrompt\u2026",
                 Location = new Point(_cmbPrompt.Right + 8, y + 2),
@@ -196,15 +197,15 @@ namespace Supervertaler.Trados.Controls
                 Font = bodyFont,
                 LinkColor = Color.FromArgb(0, 102, 204)
             };
-            lnkGeneratePrompt.LinkClicked += (s, ev) =>
+            _lnkGeneratePrompt.LinkClicked += (s, ev) =>
                 GeneratePromptRequested?.Invoke(this, EventArgs.Empty);
             var tip = new ToolTip();
-            tip.SetToolTip(lnkGeneratePrompt,
+            tip.SetToolTip(_lnkGeneratePrompt,
                 "AutoPrompt analyses your project\u2019s content, terminology (via TermScan),\r\n" +
                 "and TM data to generate a domain-specific translation prompt using AI.\r\n\r\n" +
                 "The result appears in the AI Assistant chat, where you can refine it.\r\n" +
                 "Right-click any assistant message \u2192 \u201cSave as Prompt\u2026\u201d to save it.");
-            Controls.Add(lnkGeneratePrompt);
+            Controls.Add(_lnkGeneratePrompt);
             y += 28;
 
             // ─── Provider ───────────────────────────────────────
@@ -369,8 +370,9 @@ namespace Supervertaler.Trados.Controls
             // Update action button text
             UpdateActionButtonText();
 
-            // Show/hide comments checkbox (only in Proofread mode)
+            // Show/hide mode-specific controls
             _chkAddComments.Visible = _currentMode == BatchMode.Proofread;
+            _lnkGeneratePrompt.Visible = _currentMode == BatchMode.Translate;
 
             // Notify listeners to refresh prompt dropdown
             BatchModeChanged?.Invoke(this, EventArgs.Empty);

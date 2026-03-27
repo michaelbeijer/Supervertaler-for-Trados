@@ -14,7 +14,7 @@ Choose one of the supported AI providers:
 
 | Provider | Description |
 |----------|-------------|
-| **OpenAI** | GPT-4.1, GPT-4.1 Mini, GPT-5.4, o4-mini (reasoning) |
+| **OpenAI** | GPT-5.4, GPT-5.4 Mini |
 | **Claude (Anthropic)** | Claude Sonnet 4.6, Claude Haiku 4.5, Claude Opus 4.6 |
 | **Gemini (Google)** | Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3.1 Pro (Preview) |
 | **Grok (xAI)** | Grok 4.20, Grok 4.1 Fast, Grok 4.20 (Reasoning) |

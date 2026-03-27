@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.18.16] — 2026-03-27
+
+### Added
+- **Cost protection** – QuickLauncher prompts are now standalone (no chat history sent), preventing accidental high costs from accumulated context; chat messages are constrained by a token budget that automatically trims old messages; a cost warning dialog appears when estimated input exceeds $0.50
+- **Enriched API error messages** – common errors (403 model not enabled, 401 invalid key, 429 rate limit, 402 insufficient funds) now show user-friendly guidance instead of raw JSON
+- **Help system improvements** – fixed off-by-one in Settings tab help links; Settings help button now shows a dropdown preview consistent with other panels; added help topics for General, QuickLauncher, and Usage Statistics
+
+### Changed
+- **OpenAI models streamlined** – replaced GPT-4.1, GPT-4.1 Mini, and o4-mini with GPT-5.4 and GPT-5.4 Mini; default model is now GPT-5.4 Mini; existing users are auto-migrated
+- **GPT-5.x API compatibility** – use `max_completion_tokens` instead of `max_tokens` for GPT-5.x models
+- **Default prompts** – "Built-in" renamed to "Default" throughout (folder, UI labels, docs); default prompts are now immutable (use Clone to modify); "Show in QuickLauncher menu" checkbox for hiding prompts
+- **QuickLauncher menu** – section headers ("Default" / "Custom") replace star indicators
+- **AutoPrompt hidden in Proofread mode** – the AutoPrompt link is no longer shown when Batch Operations is in Proofread mode
+- **AutoPrompt language softened** – replaced aggressive meta-prompt wording ("FORBIDDEN", "NON-NEGOTIABLE") with clearer, firmer alternatives to reduce LLM safety-filter refusals
+
+### Documentation
+- AI Cost Guide updated with GPT-5.4 / GPT-5.4 Mini pricing
+- Model lists updated across all docs
+- "Built-in Prompts" → "Default Prompts" in help navigation
+- Star note added to README
+
+---
+
 ## [4.18.15] — 2026-03-26
 
 ### Changed

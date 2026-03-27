@@ -109,6 +109,30 @@ Prices change regularly. Check your provider's pricing page for the latest rates
 * **Try Ollama for zero cost** — if you have a computer with 8+ GB of RAM, TranslateGemma 12B delivers surprisingly good results for free.
 * **Check your usage** — the [Usage Statistics](settings/usage-statistics.md) tab in Settings tracks your token consumption per provider.
 
+## Built-in cost protection
+
+Supervertaler includes several safeguards to help you avoid unexpected costs:
+
+### QuickLauncher prompts are standalone
+
+When you run a prompt from the QuickLauncher menu (Ctrl+Q), only the prompt itself is sent to the AI – **not the chat history**. This means a simple terminology query costs only what it needs to, even if you have a long conversation in the chat window.
+
+### Chat token budget
+
+Regular chat messages include recent conversation history so the AI can follow your discussion. However, Supervertaler automatically trims older messages when the history grows too large (~50,000 tokens). This prevents costs from spiralling when previous messages contained large context blocks (e.g. full document content).
+
+### Cost warning
+
+If a request is estimated to cost more than $0.50 in input tokens, a confirmation dialog appears showing the estimated token count and cost. You can cancel before the expensive request is sent.
+
+{% hint style="info" %}
+**Keep an eye on the cost indicators.** Every AI response in the chat shows the estimated token count and cost. You can also review all prompts and their costs in the **Reports** tab.
+{% endhint %}
+
+### Choosing the right model
+
+For everyday work — chat queries, terminology questions, QuickLauncher prompts — use **GPT-5.4 Mini** or another budget model. Reserve premium models like **GPT-5.4** or **Claude Opus** for AutoPrompt and complex tasks where the quality difference justifies the cost.
+
 ## See also
 
 * [AI Settings](settings/ai-settings.md) — configure your API keys and choose a model

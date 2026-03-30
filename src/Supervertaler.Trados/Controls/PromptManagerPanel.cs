@@ -292,6 +292,10 @@ namespace Supervertaler.Trados.Controls
             miDeleteFolder.Click += OnDeleteFolder;
             _treeContextMenu.Items.Add(miDeleteFolder);
 
+            var miFlatSection = new ToolStripMenuItem("Show as section in menu");
+            miFlatSection.Click += (s2, ev2) => ToggleFlatFolder();
+            _treeContextMenu.Items.Add(miFlatSection);
+
             _treeContextMenu.Opening += (s, ev) =>
             {
                 var node = _tvPrompts.SelectedNode;
@@ -300,12 +304,29 @@ namespace Supervertaler.Trados.Controls
                 var prompt = node.Tag as PromptTemplate;
                 var isFolder = node.Tag is string folderPath && folderPath != SystemPromptTag;
 
+                // Determine if this is a QuickLauncher folder
+                var isQlFolder = false;
+                if (isFolder && node.Tag is string fp)
+                {
+                    var normalised = fp.Replace('\\', '/');
+                    isQlFolder = normalised.StartsWith("QuickLauncher/")
+                                 || normalised == "QuickLauncher";
+                }
+
                 // Show/hide items based on whether a prompt or folder is selected
                 miEdit.Visible = prompt != null;
                 miClone.Visible = prompt != null;
                 miDelete.Visible = prompt != null;
                 miShortcut.Visible = prompt != null && prompt.IsQuickLauncher;
                 miDeleteFolder.Visible = isFolder;
+                miFlatSection.Visible = isQlFolder;
+
+                // Update checkmark for flat section toggle
+                if (isQlFolder && node.Tag is string folderRel)
+                {
+                    var flatList = _aiSettings?.QuickLauncherFlatFolders;
+                    miFlatSection.Checked = flatList != null && flatList.Contains(folderRel);
+                }
 
                 if (prompt != null)
                 {
@@ -666,6 +687,10 @@ namespace Supervertaler.Trados.Controls
                     slots[slotKey] = kvp.Key; // kvp.Key = FilePath
             }
             settings.QuickLauncherSlots = slots;
+
+            // Flat folder display preferences
+            settings.QuickLauncherFlatFolders = _aiSettings?.QuickLauncherFlatFolders
+                ?? new List<string>();
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -1230,6 +1255,22 @@ namespace Supervertaler.Trados.Controls
                 _library.DeleteFolder(folderPath);
                 RefreshTree();
             }
+        }
+
+        private void ToggleFlatFolder()
+        {
+            var node = _tvPrompts.SelectedNode;
+            if (node == null || !(node.Tag is string folderPath) || folderPath == SystemPromptTag)
+                return;
+
+            if (_aiSettings == null) return;
+            if (_aiSettings.QuickLauncherFlatFolders == null)
+                _aiSettings.QuickLauncherFlatFolders = new List<string>();
+
+            if (_aiSettings.QuickLauncherFlatFolders.Contains(folderPath))
+                _aiSettings.QuickLauncherFlatFolders.Remove(folderPath);
+            else
+                _aiSettings.QuickLauncherFlatFolders.Add(folderPath);
         }
 
         private void OnRestoreBuiltIn(object sender, EventArgs e)

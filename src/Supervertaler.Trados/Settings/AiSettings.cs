@@ -139,6 +139,15 @@ namespace Supervertaler.Trados.Settings
             = new Dictionary<string, string>();
 
         /// <summary>
+        /// Folder relative paths whose prompts should appear as a flat section
+        /// (with a bold header and separators) instead of an expandable submenu
+        /// in the QuickLauncher context menu.
+        /// </summary>
+        [DataMember(Name = "quickLauncherFlatFolders")]
+        public List<string> QuickLauncherFlatFolders { get; set; }
+            = new List<string>();
+
+        /// <summary>
         /// Whether to include term definitions, domains, and notes alongside
         /// matched terminology in the AI chat prompt.
         /// </summary>

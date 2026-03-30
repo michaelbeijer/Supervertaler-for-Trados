@@ -216,6 +216,8 @@ namespace Supervertaler.Trados.Controls
             y += 40;
 
             // === Ollama section ===
+            // Controls placed directly on the UserControl (not in a child Panel)
+            // to avoid clipping issues with right-anchored controls.
             _pnlOllama = new Panel
             {
                 Location = new Point(0, y),
@@ -234,7 +236,7 @@ namespace Supervertaler.Trados.Controls
             _txtOllamaEndpoint = new TextBox
             {
                 Location = new Point(120, 5),
-                Width = 260,
+                Size = new Size(_pnlOllama.Width - 120 - 20, 20),
                 Text = "http://localhost:11434",
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
@@ -248,16 +250,17 @@ namespace Supervertaler.Trados.Controls
             };
             _nudOllamaTimeout = new NumericUpDown
             {
-                Location = new Point(120, 35),
-                Width = 65,
+                Location = new Point(135, 37),
+                Width = 75,
                 Minimum = 0,
                 Maximum = 120,
-                Value = 0
+                Value = 0,
+                Margin = new Padding(0, 0, 5, 0)
             };
             _lblOllamaTimeoutHint = new Label
             {
                 Text = "0 = auto (3\u201310 min, based on model size)",
-                Location = new Point(192, 38),
+                Location = new Point(217, 40),
                 AutoSize = true,
                 ForeColor = Color.Gray,
                 Font = new Font("Segoe UI", 8f)

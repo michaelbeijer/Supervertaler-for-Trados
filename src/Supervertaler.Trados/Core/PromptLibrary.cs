@@ -485,6 +485,28 @@ namespace Supervertaler.Trados.Core
                     }
                 }
 
+                // Clean up duplicate when the sanitised filename differs from the
+                // original name stripped of invalid chars (e.g. "What file is this
+                // segment from?" → sanitised "from_" vs old "from" without the '?').
+                // Only delete the old file if the correctly sanitised version exists
+                // and the old file is still marked as built-in.
+                var strippedName = builtin.Name.TrimEnd('?', '!', '.', '_');
+                if (!string.Equals(sanitisedName, strippedName, StringComparison.OrdinalIgnoreCase))
+                {
+                    var sanitisedPath = Path.Combine(folder, sanitisedName + ".md");
+                    var strippedPath = Path.Combine(folder, strippedName + ".md");
+                    if (File.Exists(sanitisedPath) && File.Exists(strippedPath))
+                    {
+                        try
+                        {
+                            var oldContent = File.ReadAllText(strippedPath);
+                            if (oldContent.Contains("built_in: true"))
+                                File.Delete(strippedPath);
+                        }
+                        catch { /* ignore — file locked or permissions */ }
+                    }
+                }
+
                 // Clean up old .svprompt version if it's still a built-in (not user-modified)
                 var oldSvpromptPath = Path.Combine(folder, sanitisedName + ".svprompt");
                 if (File.Exists(oldSvpromptPath))

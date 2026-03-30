@@ -1,9 +1,14 @@
 # Changelog
 
-## [4.18.24] — 2026-03-30
+## [4.18.25] — 2026-03-30
 
 ### Added
 - **Customisable Ollama timeout** – new "Timeout (min)" setting in AI Settings lets users override the automatic timeout (3–10 min based on model size) with a custom value up to 120 minutes, useful for long-running jobs on hardware without a dedicated GPU
+- **QuickLauncher flat section display** – right-click any QuickLauncher folder in Settings → Prompts and choose "Show as section in menu" to display its prompts as a flat list with a bold header instead of an expandable submenu
+
+### Fixed
+- **Duplicate "What file is this segment from?" prompt** – old file variant (without trailing underscore) is now cleaned up on startup
+- **Ollama default timeout for 10–12B models** – models in the 10B–12B range (including TranslateGemma 12B) now default to 5 minutes instead of 3
 
 ---
 

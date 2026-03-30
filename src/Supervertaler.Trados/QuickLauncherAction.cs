@@ -147,17 +147,53 @@ namespace Supervertaler.Trados
             // Build folder tree and populate the menu recursively
             var folderTree = _library.GetQuickLauncherFolderStructure();
 
+            // Determine which folders should render as flat sections
+            var flatFolders = settings?.AiSettings?.QuickLauncherFlatFolders ?? new List<string>();
+
             // Add subfolders first (Default pinned first by GetQuickLauncherFolderStructure)
             foreach (var child in folderTree.Children)
             {
-                var subMenu = new ToolStripMenuItem(child.Name);
-                PopulateFolderMenu(subMenu.DropDownItems, child, slotPositions,
-                    hasCustomSlots, settings, doc, sourceText, targetText, selection,
-                    sourceLang, targetLang, projectName, documentName, surroundingCount);
+                // Tree node tags use the full relative path (e.g. "QuickLauncher/Default")
+                // while GetQuickLauncherFolderStructure strips the prefix (e.g. "Default").
+                // Check both forms so the setting always matches.
+                var rel = child.RelativePath ?? "";
+                var fullRel = "QuickLauncher/" + rel;
+                bool isFlat = flatFolders.Contains(rel) || flatFolders.Contains(fullRel);
 
-                // Only add non-empty submenus
-                if (subMenu.DropDownItems.Count > 0)
-                    menu.Items.Add(subMenu);
+                if (isFlat)
+                {
+                    // Flat section: separator, bold header, then items directly in the menu
+                    var items = new List<ToolStripItem>();
+                    PopulateFlatSection(items, child, flatFolders, slotPositions,
+                        hasCustomSlots, settings, doc, sourceText, targetText, selection,
+                        sourceLang, targetLang, projectName, documentName, surroundingCount);
+
+                    if (items.Count > 0)
+                    {
+                        // Only add separator if the last item isn't already one
+                        if (menu.Items.Count > 0 && !(menu.Items[menu.Items.Count - 1] is ToolStripSeparator))
+                            menu.Items.Add(new ToolStripSeparator());
+
+                        var sectionHeader = new ToolStripMenuItem(child.Name.ToUpperInvariant() + ":");
+                        sectionHeader.Font = new System.Drawing.Font(sectionHeader.Font, System.Drawing.FontStyle.Bold);
+                        sectionHeader.Enabled = false;
+                        menu.Items.Add(sectionHeader);
+
+                        foreach (var item in items)
+                            menu.Items.Add(item);
+                    }
+                }
+                else
+                {
+                    // Expandable submenu (existing behaviour)
+                    var subMenu = new ToolStripMenuItem(child.Name);
+                    PopulateFolderMenu(subMenu.DropDownItems, child, slotPositions,
+                        hasCustomSlots, settings, doc, sourceText, targetText, selection,
+                        sourceLang, targetLang, projectName, documentName, surroundingCount);
+
+                    if (subMenu.DropDownItems.Count > 0)
+                        menu.Items.Add(subMenu);
+                }
             }
 
             // Add top-level prompts (not in any subfolder)
@@ -176,6 +212,73 @@ namespace Supervertaler.Trados
             }
 
             menu.Show(Cursor.Position);
+        }
+
+        /// <summary>
+        /// Collects menu items from a folder (and its children) into a flat list
+        /// for rendering as a section with a bold header.
+        /// Child subfolders that are also marked as flat get their own section header;
+        /// others are rendered as expandable submenus.
+        /// </summary>
+        private void PopulateFlatSection(
+            List<ToolStripItem> items,
+            PromptFolderNode folder,
+            List<string> flatFolders,
+            Dictionary<string, int> slotPositions,
+            bool hasCustomSlots,
+            TermLensSettings settings,
+            Sdl.TranslationStudioAutomation.IntegrationApi.IStudioDocument doc,
+            string sourceText, string targetText, string selection,
+            string sourceLang, string targetLang,
+            string projectName, string documentName, int surroundingCount)
+        {
+            // Add prompts in this folder first
+            foreach (var p in folder.Prompts)
+            {
+                slotPositions.TryGetValue(p.FilePath ?? "", out var slotNum);
+                items.Add(CreatePromptMenuItem(p, slotNum, hasCustomSlots, settings,
+                    doc, sourceText, targetText, selection,
+                    sourceLang, targetLang, projectName, documentName, surroundingCount));
+            }
+
+            // Then child subfolders — flat children get their own section header
+            foreach (var child in folder.Children)
+            {
+                var childRel = child.RelativePath ?? "";
+                var childFullRel = "QuickLauncher/" + childRel;
+                bool childIsFlat = flatFolders.Contains(childRel) || flatFolders.Contains(childFullRel);
+
+                if (childIsFlat)
+                {
+                    var childItems = new List<ToolStripItem>();
+                    PopulateFlatSection(childItems, child, flatFolders, slotPositions,
+                        hasCustomSlots, settings, doc, sourceText, targetText, selection,
+                        sourceLang, targetLang, projectName, documentName, surroundingCount);
+
+                    if (childItems.Count > 0)
+                    {
+                        items.Add(new ToolStripSeparator());
+
+                        var childHeader = new ToolStripMenuItem(child.Name.ToUpperInvariant() + ":");
+                        childHeader.Font = new System.Drawing.Font(childHeader.Font, System.Drawing.FontStyle.Bold);
+                        childHeader.Enabled = false;
+                        items.Add(childHeader);
+
+                        foreach (var ci in childItems)
+                            items.Add(ci);
+                    }
+                }
+                else
+                {
+                    var subMenu = new ToolStripMenuItem(child.Name);
+                    PopulateFolderMenu(subMenu.DropDownItems, child, slotPositions,
+                        hasCustomSlots, settings, doc, sourceText, targetText, selection,
+                        sourceLang, targetLang, projectName, documentName, surroundingCount);
+
+                    if (subMenu.DropDownItems.Count > 0)
+                        items.Add(subMenu);
+                }
+            }
         }
 
         /// <summary>

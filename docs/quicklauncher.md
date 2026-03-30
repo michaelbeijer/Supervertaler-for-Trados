@@ -11,8 +11,10 @@ QuickLauncher gives you one-click access to your most-used AI prompts directly f
 3. Select a prompt from the list
 4. The prompt is filled in with the current segment context and submitted to the Supervertaler Assistant chat
 
+<figure><img src=".gitbook/assets/Supervertaler-QuickLauncher.png" alt="The QuickLauncher context menu showing folder sections and prompt shortcuts"><figcaption><p>The QuickLauncher context menu with folder sections and keyboard shortcuts.</p></figcaption></figure>
+
 {% hint style="info" %}
-The menu heading **Supervertaler QuickLauncher** is clickable — click it to open **Settings → Prompts**, where you can view, edit, and organise your QuickLauncher prompts.
+The menu heading **Supervertaler QuickLauncher** is clickable – click it to open **Settings → Prompts**, where you can view, edit, and organise your QuickLauncher prompts.
 {% endhint %}
 
 The expanded prompt appears as a user message bubble in the **Supervertaler Assistant** chat panel, and the AI response follows immediately below it. The conversation continues from there — you can ask follow-up questions in the chat input as normal.
@@ -201,6 +203,18 @@ translation of the source segment — do not simply copy a fuzzy match.
 {% endhint %}
 
 The plugin fills in all variables and sends the expanded prompt straight to the AI.
+
+## Folder display mode
+
+By default, subfolders in the QuickLauncher menu appear as **expandable submenus** (hover to open). You can change any folder to display as a **flat section** instead – its prompts appear directly in the main menu under a bold header, with separators between sections.
+
+To toggle the display mode:
+
+1. Open **Settings → Prompts**
+2. Right-click a QuickLauncher folder in the tree
+3. Click **Show as section in menu** (a checkmark indicates the current state)
+
+This setting is per-folder, so you can mix styles – for example, keep a large folder as an expandable submenu while showing a small one as a flat section.
 
 ## Setting up QuickLauncher prompts
 

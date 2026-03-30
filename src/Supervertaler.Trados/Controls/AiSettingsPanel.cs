@@ -48,6 +48,8 @@ namespace Supervertaler.Trados.Controls
         private NumericUpDown _nudMaxSegments;
         private CheckBox _chkIncludeTermMetadata;
         private CheckBox _chkLogPrompts;
+        private Label _lblBatchSize;
+        private NumericUpDown _nudBatchSize;
         private Label _lblAiTermbases;
         private LinkLabel _lnkSelectAll;
         private LinkLabel _lnkDeselectAll;
@@ -500,6 +502,30 @@ namespace Supervertaler.Trados.Controls
                 "Useful for monitoring costs and debugging prompt behaviour.");
             Controls.Add(_chkLogPrompts);
 
+            _lblBatchSize = new Label
+            {
+                Text = "Batch size:",
+                Location = new Point(16, 0),
+                AutoSize = true,
+                ForeColor = labelColor
+            };
+            Controls.Add(_lblBatchSize);
+
+            _nudBatchSize = new NumericUpDown
+            {
+                Minimum = 5,
+                Maximum = 100,
+                Value = 20,
+                Width = 60,
+                Location = new Point(160, 0)
+            };
+            var batchTip = new ToolTip { AutoPopDelay = 10000, InitialDelay = 300 };
+            batchTip.SetToolTip(_nudBatchSize,
+                "Number of segments sent to the AI provider per API call during\r\n" +
+                "Batch Translate and Batch Proofread. Lower values are safer;\r\n" +
+                "higher values reduce cost and improve cross-segment consistency.");
+            Controls.Add(_nudBatchSize);
+
             _lblAiTermbases = new Label
             {
                 Text = "Termbases included in AI prompts:",
@@ -677,6 +703,10 @@ namespace Supervertaler.Trados.Controls
             _chkLogPrompts.Location = new Point(16, y);
             y += 28;
 
+            _lblBatchSize.Location = new Point(16, y + 3);
+            _nudBatchSize.Location = new Point(160, y);
+            y += 30;
+
             _lblAiTermbases.Location = new Point(16, y);
             _lnkSelectAll.Location = new Point(_lblAiTermbases.Right + 8, y + 2);
             _lnkDeselectAll.Location = new Point(_lnkSelectAll.Right + 4, y + 2);
@@ -766,6 +796,8 @@ namespace Supervertaler.Trados.Controls
                 Math.Min(_nudSurroundingSegments.Maximum, settings.QuickLauncherSurroundingSegments));
             _chkIncludeTermMetadata.Checked = settings.IncludeTermMetadata;
             _chkLogPrompts.Checked = settings.LogPromptsToReports;
+            _nudBatchSize.Value = Math.Max(_nudBatchSize.Minimum,
+                Math.Min(_nudBatchSize.Maximum, settings.BatchSize > 0 ? settings.BatchSize : 20));
         }
 
         /// <summary>
@@ -858,6 +890,7 @@ namespace Supervertaler.Trados.Controls
             settings.QuickLauncherSurroundingSegments = (int)_nudSurroundingSegments.Value;
             settings.IncludeTermMetadata = _chkIncludeTermMetadata.Checked;
             settings.LogPromptsToReports = _chkLogPrompts.Checked;
+            settings.BatchSize = (int)_nudBatchSize.Value;
 
             // Build disabled AI termbase IDs from unchecked items
             var disabledIds = new List<long>();

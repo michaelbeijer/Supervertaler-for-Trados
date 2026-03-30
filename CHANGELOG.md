@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.18.26] — 2026-03-30
+
+### Added
+- **Batch size spinner in AI Settings** – new "Batch size" control lets users adjust the number of segments sent per API call during Batch Translate and Batch Proofread (range 5–100, default 20)
+
+### Fixed
+- **InDesign U+2028/U+2029 line separators no longer corrupt AI translations** – Unicode line and paragraph separators (used by InDesign IDML as forced line breaks) are now replaced with spaces before sending to the AI provider, preventing spurious line breaks in translations
+
+---
+
 ## [4.18.25] — 2026-03-30
 
 ### Added

@@ -363,6 +363,14 @@ namespace Supervertaler.Trados
 
             // 2. Gather current context
             var sourceText = _activeDocument?.ActiveSegmentPair?.Source?.ToString();
+            // Strip Unicode line/paragraph separators (U+2028, U+2029).
+            // These are used by InDesign (IDML) as forced line breaks and by some
+            // PDF converters as layout artifacts. They're invisible in Trados but
+            // cause the AI to introduce spurious line breaks in the translation.
+            // The break position is a layout concern, not a linguistic one — it
+            // almost never belongs in the same place in the target language.
+            if (sourceText != null)
+                sourceText = sourceText.Replace("\u2028", " ").Replace("\u2029", " ");
             var targetText = _activeDocument?.ActiveSegmentPair?.Target != null
                 ? SegmentTagHandler.GetFinalText(_activeDocument.ActiveSegmentPair.Target)
                 : null;
@@ -1455,6 +1463,8 @@ namespace Supervertaler.Trados
                     }
 
                     var sourceText = pair.Source?.ToString() ?? "";
+                    // Strip Unicode line/paragraph separators — see comment in SendChatMessage
+                    sourceText = sourceText.Replace("\u2028", " ").Replace("\u2029", " ");
                     if (string.IsNullOrWhiteSpace(sourceText))
                     {
                         index++;
@@ -1550,6 +1560,9 @@ namespace Supervertaler.Trados
                     var sourceText = serialization.HasTags
                         ? serialization.SerializedText
                         : (sourceSegment?.ToString() ?? "");
+
+                    // Strip Unicode line/paragraph separators — see comment in SendChatMessage
+                    sourceText = sourceText.Replace("\u2028", " ").Replace("\u2029", " ");
 
                     if (string.IsNullOrWhiteSpace(SegmentTagHandler.StripTagPlaceholders(sourceText)))
                     {

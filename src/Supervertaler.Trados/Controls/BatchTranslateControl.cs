@@ -46,6 +46,11 @@ namespace Supervertaler.Trados.Controls
         private CheckBox _chkAddComments;
         private LinkLabel _lnkGeneratePrompt;
 
+        // Clipboard Mode
+        private CheckBox _chkClipboardMode;
+        private Button _btnCopyToClipboard;
+        private Button _btnPasteFromClipboard;
+
         // Log
         private Label _lblLog;
         private TextBox _txtLog;
@@ -74,8 +79,17 @@ namespace Supervertaler.Trados.Controls
         /// <summary>Fired when user clicks "AutoPrompt".</summary>
         public event EventHandler GeneratePromptRequested;
 
+        /// <summary>Fired when user clicks "Copy to Clipboard" in Clipboard Mode.</summary>
+        public event EventHandler CopyToClipboardRequested;
+
+        /// <summary>Fired when user clicks "Paste from Clipboard" in Clipboard Mode.</summary>
+        public event EventHandler PasteFromClipboardRequested;
+
         /// <summary>Gets the current batch mode.</summary>
         public BatchMode CurrentMode => _currentMode;
+
+        /// <summary>Whether Clipboard Mode is active.</summary>
+        public bool IsClipboardMode => _chkClipboardMode?.Checked ?? false;
 
         /// <summary>Whether proofreading issues should also be added as Trados comments.</summary>
         public bool AddAsComments => _chkAddComments?.Checked ?? false;
@@ -143,7 +157,25 @@ namespace Supervertaler.Trados.Controls
             _modePanel.Controls.Add(_rbTranslate);
             _modePanel.Controls.Add(_rbProofread);
             Controls.Add(_modePanel);
-            y += 30;
+            y += 28;
+
+            // ─── Clipboard Mode ──────────────────────────────────
+            _chkClipboardMode = new CheckBox
+            {
+                Text = "Clipboard Mode",
+                Location = new Point(12, y),
+                AutoSize = true,
+                Font = bodyFont,
+                ForeColor = labelColor,
+                Checked = false
+            };
+            _chkClipboardMode.CheckedChanged += OnClipboardModeChanged;
+            var clipTip = new ToolTip { AutoPopDelay = 10000, InitialDelay = 300 };
+            clipTip.SetToolTip(_chkClipboardMode,
+                "Copy segments to clipboard for use with any web-based AI\r\n" +
+                "(ChatGPT, Claude, Gemini, etc.). Paste translations back when done.");
+            Controls.Add(_chkClipboardMode);
+            y += 24;
 
             // ─── Scope ─────────────────────────────────────────
             _lblScopeLabel = new Label
@@ -305,6 +337,41 @@ namespace Supervertaler.Trados.Controls
                 Visible = false // only shown in Proofread mode
             };
             Controls.Add(_chkAddComments);
+
+            // ─── Clipboard Mode buttons (hidden by default) ─────
+            _btnCopyToClipboard = new Button
+            {
+                Text = "\uD83D\uDCCB  Copy to Clipboard",
+                Location = new Point(12, y),
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowOnly,
+                MinimumSize = new Size(140, 28),
+                Height = 28,
+                FlatStyle = FlatStyle.System,
+                Font = bodyFont,
+                Visible = false
+            };
+            _btnCopyToClipboard.Click += (s, ev) =>
+                CopyToClipboardRequested?.Invoke(this, EventArgs.Empty);
+            Controls.Add(_btnCopyToClipboard);
+
+            _btnPasteFromClipboard = new Button
+            {
+                Text = "\uD83D\uDCCB  Paste from Clipboard",
+                Location = new Point(170, y),
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowOnly,
+                MinimumSize = new Size(150, 28),
+                Height = 28,
+                FlatStyle = FlatStyle.System,
+                Font = bodyFont,
+                Visible = false,
+                Enabled = false
+            };
+            _btnPasteFromClipboard.Click += (s, ev) =>
+                PasteFromClipboardRequested?.Invoke(this, EventArgs.Empty);
+            Controls.Add(_btnPasteFromClipboard);
+
             y += 38;
 
             // ─── Log ────────────────────────────────────────────
@@ -413,6 +480,38 @@ namespace Supervertaler.Trados.Controls
                     ? "\u25B6  Translate"
                     : "\u25B6  Proofread";
             }
+        }
+
+        // ─── Clipboard Mode ───────────────────────────────────────
+
+        private void OnClipboardModeChanged(object sender, EventArgs e)
+        {
+            var clip = _chkClipboardMode.Checked;
+
+            // Toggle visibility: API controls vs clipboard buttons
+            _lblProviderLabel.Visible = !clip;
+            _lblProvider.Visible = !clip;
+            _lnkAiSettings.Visible = !clip;
+            _btnTranslate.Visible = !clip;
+
+            _btnCopyToClipboard.Visible = clip;
+            _btnPasteFromClipboard.Visible = clip;
+
+            // Proofread comments checkbox stays visible in proofread mode regardless
+            if (clip)
+                _chkAddComments.Visible = false;
+            else
+                _chkAddComments.Visible = _currentMode == BatchMode.Proofread;
+        }
+
+        /// <summary>
+        /// Enables or disables the "Paste from Clipboard" button.
+        /// Called by the ViewPart after a successful copy operation.
+        /// </summary>
+        public void EnablePasteButton(bool enabled)
+        {
+            if (_btnPasteFromClipboard != null)
+                _btnPasteFromClipboard.Enabled = enabled;
         }
 
         // ─── Event Handlers ──────────────────────────────────────
@@ -612,6 +711,9 @@ namespace Supervertaler.Trados.Controls
             _cmbPrompt.Enabled = !running;
             _rbTranslate.Enabled = !running;
             _rbProofread.Enabled = !running;
+            _chkClipboardMode.Enabled = !running;
+            if (_btnCopyToClipboard != null)
+                _btnCopyToClipboard.Enabled = !running;
 
             if (!running)
             {

@@ -61,6 +61,9 @@ namespace Supervertaler.Trados
         private CancellationTokenSource _proofreadCts;
         private ProofreadingReport _currentReport;
 
+        // Clipboard Mode state
+        private List<BatchSegment> _clipboardSegments;
+
         // Prompt library
         private PromptLibrary _promptLibrary;
 
@@ -136,6 +139,8 @@ namespace Supervertaler.Trados
             batchControl.OpenAiSettingsRequested += OnSettingsRequested;
             batchControl.BatchModeChanged += (s, e) => PopulateBatchPromptDropdown();
             batchControl.GeneratePromptRequested += OnGeneratePromptRequested;
+            batchControl.CopyToClipboardRequested += OnCopyToClipboardRequested;
+            batchControl.PasteFromClipboardRequested += OnPasteFromClipboardRequested;
 
             // Wire reports control events
             var reportsControl = _control.Value.ReportsControl;
@@ -1163,6 +1168,243 @@ namespace Supervertaler.Trados
 
             _batchCts?.Dispose();
             _batchCts = null;
+        }
+
+        // ─── Clipboard Mode ──────────────────────────────────────
+
+        private void OnCopyToClipboardRequested(object sender, EventArgs e)
+        {
+            SafeInvoke(() =>
+            {
+                var batchControl = _control.Value.BatchTranslateControl;
+
+                if (_activeDocument == null)
+                {
+                    batchControl.AppendLog("No document open.", true);
+                    return;
+                }
+
+                var sourceLang = GetDocumentSourceLanguage();
+                var targetLang = GetDocumentTargetLanguage();
+
+                if (string.IsNullOrEmpty(sourceLang) || string.IsNullOrEmpty(targetLang))
+                {
+                    batchControl.AppendLog("Cannot determine source/target language from document.", true);
+                    return;
+                }
+
+                var aiSettings = _settings?.AiSettings;
+
+                // Collect segments based on mode and scope
+                List<BatchSegment> segments;
+                if (batchControl.CurrentMode == BatchMode.Proofread)
+                {
+                    var proofScope = batchControl.GetSelectedProofreadScope();
+                    segments = CollectProofreadSegments(proofScope);
+                }
+                else
+                {
+                    var scope = batchControl.GetSelectedScope();
+                    segments = CollectSegments(scope);
+                }
+
+                if (segments.Count == 0)
+                {
+                    batchControl.AppendLog("No segments to copy.", true);
+                    return;
+                }
+
+                // Get termbase terms (filtered by AI-disabled list)
+                var allTerms = TermLensEditorViewPart.GetCurrentTermbaseTerms();
+                var batchDisabledIds = aiSettings?.DisabledAiTermbaseIds ?? new List<long>();
+                var termbaseTerms = batchDisabledIds.Count > 0
+                    ? allTerms.Where(t => !batchDisabledIds.Contains(t.TermbaseId)).ToList()
+                    : allTerms;
+
+                // Resolve custom prompt
+                var customPromptContent = ResolveCustomPromptContent(sourceLang, targetLang);
+                var customSystemPrompt = aiSettings?.CustomSystemPrompt;
+
+                // Collect document context
+                List<string> docSegments = null;
+                if (aiSettings != null && aiSettings.IncludeDocumentContext)
+                {
+                    var docCtx = CollectDocumentContext();
+                    docSegments = docCtx.Item1;
+                }
+
+                var maxDocSegs = aiSettings?.DocumentContextMaxSegments ?? 500;
+                var includeTermMeta = aiSettings?.IncludeTermMetadata ?? true;
+
+                // Format for clipboard
+                string clipboardText;
+                if (batchControl.CurrentMode == BatchMode.Proofread)
+                {
+                    clipboardText = ClipboardRelay.FormatForProofreading(
+                        segments, sourceLang, targetLang,
+                        customPromptContent, termbaseTerms, customSystemPrompt,
+                        docSegments, maxDocSegs, includeTermMeta);
+                }
+                else
+                {
+                    clipboardText = ClipboardRelay.FormatForTranslation(
+                        segments, sourceLang, targetLang,
+                        customPromptContent, termbaseTerms, customSystemPrompt,
+                        docSegments, maxDocSegs, includeTermMeta);
+                }
+
+                // Copy to clipboard
+                System.Windows.Forms.Clipboard.SetText(clipboardText);
+
+                // Store segments for paste
+                _clipboardSegments = segments;
+
+                // Enable paste button
+                batchControl.EnablePasteButton(true);
+
+                var mode = batchControl.CurrentMode == BatchMode.Proofread
+                    ? "proofreading" : "translation";
+                batchControl.AppendLog(
+                    $"Copied {segments.Count} segments to clipboard for {mode}. " +
+                    $"Paste into your LLM, then copy the response and click \u201cPaste from Clipboard\u201d.");
+            });
+        }
+
+        private void OnPasteFromClipboardRequested(object sender, EventArgs e)
+        {
+            SafeInvoke(() =>
+            {
+                var batchControl = _control.Value.BatchTranslateControl;
+
+                if (_clipboardSegments == null || _clipboardSegments.Count == 0)
+                {
+                    batchControl.AppendLog("No segments pending \u2013 click \u201cCopy to Clipboard\u201d first.", true);
+                    return;
+                }
+
+                if (_activeDocument == null)
+                {
+                    batchControl.AppendLog("No document open.", true);
+                    return;
+                }
+
+                var text = System.Windows.Forms.Clipboard.GetText();
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    batchControl.AppendLog("Clipboard is empty \u2013 copy the LLM response first.", true);
+                    return;
+                }
+
+                var targetLang = GetDocumentTargetLanguage();
+
+                if (batchControl.CurrentMode == BatchMode.Translate)
+                {
+                    // Parse translations
+                    var parsed = ClipboardRelay.ParseTranslationResponse(
+                        text, _clipboardSegments.Count, targetLang);
+
+                    if (parsed.Count == 0)
+                    {
+                        batchControl.AppendLog(
+                            "Could not parse any translations from the clipboard. " +
+                            "Make sure the LLM response uses the numbered segment format.", true);
+                        return;
+                    }
+
+                    // Write translations back to Trados
+                    int success = 0;
+                    int failed = 0;
+                    int tagWarnings = 0;
+
+                    foreach (var pt in parsed)
+                    {
+                        // Map 1-based segment number to 0-based index
+                        var segIdx = pt.Number - 1;
+                        if (segIdx < 0 || segIdx >= _clipboardSegments.Count)
+                        {
+                            failed++;
+                            continue;
+                        }
+
+                        var seg = _clipboardSegments[segIdx];
+                        var pair = seg.SegmentPairRef as ISegmentPair;
+                        if (pair == null)
+                        {
+                            failed++;
+                            continue;
+                        }
+
+                        try
+                        {
+                            _activeDocument.ProcessSegmentPair(pair, "Supervertaler",
+                                (sp, cancel) =>
+                                {
+                                    if (seg.HasTags && seg.TagMap != null && seg.TagMap.Count > 0)
+                                    {
+                                        // Validate tags
+                                        if (!SegmentTagHandler.ValidateTagsPresent(pt.Translation, seg.TagMap))
+                                            tagWarnings++;
+
+                                        bool reconstructed = SegmentTagHandler.ReconstructTarget(
+                                            sp.Target, sp.Source, pt.Translation, seg.TagMap);
+
+                                        if (!reconstructed)
+                                        {
+                                            var plainTranslation = SegmentTagHandler.StripTagPlaceholders(pt.Translation);
+                                            var textTemplate = SegmentTagHandler.FindFirstText(sp.Source);
+                                            if (textTemplate != null && !string.IsNullOrEmpty(plainTranslation))
+                                            {
+                                                sp.Target.Clear();
+                                                var textClone = (IText)textTemplate.Clone();
+                                                textClone.Properties.Text = plainTranslation;
+                                                sp.Target.Add(textClone);
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        var textTpl = SegmentTagHandler.FindFirstText(sp.Source);
+                                        if (textTpl != null && !string.IsNullOrEmpty(pt.Translation))
+                                        {
+                                            sp.Target.Clear();
+                                            var textClone = (IText)textTpl.Clone();
+                                            textClone.Properties.Text = pt.Translation;
+                                            sp.Target.Add(textClone);
+                                        }
+                                    }
+                                });
+                            success++;
+                        }
+                        catch (Exception ex)
+                        {
+                            batchControl.AppendLog(
+                                $"Failed to write segment {pt.Number}: {ex.Message}", true);
+                            failed++;
+                        }
+                    }
+
+                    // Report results
+                    var msg = $"Imported {success} translation{(success != 1 ? "s" : "")}";
+                    if (failed > 0) msg += $", {failed} failed";
+                    if (tagWarnings > 0) msg += $", {tagWarnings} tag warning{(tagWarnings != 1 ? "s" : "")}";
+                    var missing = _clipboardSegments.Count - parsed.Count;
+                    if (missing > 0) msg += $", {missing} segment{(missing != 1 ? "s" : "")} not found in response";
+                    batchControl.AppendLog(msg + ".");
+                }
+                else
+                {
+                    // Proofread mode: log the response for manual review
+                    batchControl.AppendLog(
+                        "Proofreading response received. Review the results in your LLM.");
+                }
+
+                // Clear clipboard segments and disable paste
+                _clipboardSegments = null;
+                batchControl.EnablePasteButton(false);
+
+                // Update segment counts
+                UpdateBatchSegmentCounts();
+            });
         }
 
         // ─── Proofreading ─────────────────────────────────────────

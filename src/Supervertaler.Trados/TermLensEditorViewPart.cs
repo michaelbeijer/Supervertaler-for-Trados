@@ -140,12 +140,9 @@ namespace Supervertaler.Trados
             // unlicensed so users can open Settings → License to activate.
             _mainPanel.Value.SettingsRequested += OnSettingsRequested;
 
-            if (!LicenseManager.Instance.HasTier1Access)
-            {
-                _control.Value.ShowLicenseRequired();
-                return;
-            }
-
+            // Wire up editor controller and load termbases regardless of tier —
+            // AssistantOnly users need termbase terms for AI prompt context even
+            // though the TermLens UI panel is locked.
             _editorController = SdlTradosStudio.Application.GetController<EditorController>();
 
             if (_editorController != null)
@@ -163,6 +160,20 @@ namespace Supervertaler.Trados
                 }
             }
 
+            // Load termbase: prefer saved setting, fall back to auto-detect
+            LoadTermbase();
+
+            // Load MultiTerm termbases from the active Trados project (if any)
+            LoadMultiTermTermbases();
+
+            if (!LicenseManager.Instance.HasTier1Access)
+            {
+                _control.Value.ShowLicenseRequired();
+                return;
+            }
+
+            // ─── TermLens UI wiring (Tier1+ only) ──────────────────────
+
             // Wire up term insertion — when user clicks a translation in the panel
             _control.Value.TermInsertRequested += OnTermInsertRequested;
 
@@ -179,12 +190,6 @@ namespace Supervertaler.Trados
 
             // Apply shortcut style to badge rendering
             TermBlock.UseRepeatedDigitBadges = _settings.TermShortcutStyle == "repeated";
-
-            // Load termbase: prefer saved setting, fall back to auto-detect
-            LoadTermbase();
-
-            // Load MultiTerm termbases from the active Trados project (if any)
-            LoadMultiTermTermbases();
 
             // Display the current segment immediately (even without a termbase, show all words)
             UpdateFromActiveSegment();

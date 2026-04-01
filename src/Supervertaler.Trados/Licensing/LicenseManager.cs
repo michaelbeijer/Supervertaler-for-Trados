@@ -42,6 +42,7 @@ namespace Supervertaler.Trados.Licensing
         /// </summary>
         private const string VariantTier1 = "TermLens";
         private const string VariantTier2 = "TermLens + Supervertaler Assistant";
+        private const string VariantAssistant = "Supervertaler Assistant";
 
         // ─── State ──────────────────────────────────────────────────
 
@@ -92,7 +93,7 @@ namespace Supervertaler.Trados.Licensing
             }
         }
 
-        /// <summary>True if the user has Tier 2 (TermLens + Assistant) access.</summary>
+        /// <summary>True if the user has Tier 2 (TermLens + Assistant) access – the full bundle.</summary>
         public bool HasTier2Access
         {
             get
@@ -103,13 +104,25 @@ namespace Supervertaler.Trados.Licensing
             }
         }
 
+        /// <summary>True if the user has access to AI features (Trial, AssistantOnly, or Tier2).</summary>
+        public bool HasAssistantAccess
+        {
+            get
+            {
+                var tier = CurrentTier;
+                return tier == LicenseTier.Trial
+                    || tier == LicenseTier.AssistantOnly
+                    || tier == LicenseTier.Tier2;
+            }
+        }
+
         /// <summary>Days remaining in the trial (0 if expired or licensed).</summary>
         public int TrialDaysRemaining => _info?.TrialDaysRemaining ?? 0;
 
         /// <summary>Whether the user is currently on a trial (no license key entered).</summary>
         public bool IsOnTrial => CurrentTier == LicenseTier.Trial;
 
-        /// <summary>The variant name for display ("TermLens" or "TermLens + Supervertaler Assistant").</summary>
+        /// <summary>The variant name for display ("TermLens", "Supervertaler Assistant", or "TermLens + Supervertaler Assistant").</summary>
         public string VariantName => _info?.VariantName ?? "";
 
         /// <summary>The license status string ("active", "expired", etc.).</summary>
@@ -344,9 +357,14 @@ namespace Supervertaler.Trados.Licensing
             if (string.IsNullOrWhiteSpace(variantName))
                 return LicenseTier.Tier1; // Default to Tier 1 if variant is unknown
 
-            // Case-insensitive comparison
-            if (variantName.IndexOf("Assistant", StringComparison.OrdinalIgnoreCase) >= 0)
+            // Order matters: check the combined tier BEFORE the standalone Assistant tier,
+            // because "TermLens + Supervertaler Assistant" also contains "Assistant".
+            if (variantName.IndexOf("TermLens", StringComparison.OrdinalIgnoreCase) >= 0
+                && variantName.IndexOf("Assistant", StringComparison.OrdinalIgnoreCase) >= 0)
                 return LicenseTier.Tier2;
+
+            if (variantName.IndexOf("Assistant", StringComparison.OrdinalIgnoreCase) >= 0)
+                return LicenseTier.AssistantOnly;
 
             return LicenseTier.Tier1;
         }
@@ -438,7 +456,7 @@ namespace Supervertaler.Trados.Licensing
         public static void ShowUpgradeMessage()
         {
             MessageBox.Show(
-                "The Supervertaler Assistant requires a \"TermLens + Supervertaler Assistant\" license.\n\n" +
+                "The Supervertaler Assistant requires a \"Supervertaler Assistant\" or \"TermLens + Supervertaler Assistant\" license.\n\n" +
                 "You can upgrade your subscription at supervertaler.com/trados/ or in Settings \u2192 License.",
                 "Upgrade Required",
                 MessageBoxButtons.OK,

@@ -18,7 +18,7 @@ namespace Supervertaler.Trados
 
         protected override void Execute()
         {
-            if (!LicenseManager.Instance.HasTier2Access)
+            if (!LicenseManager.Instance.HasAssistantAccess)
             {
                 LicenseManager.ShowUpgradeMessage();
                 return;

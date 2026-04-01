@@ -140,7 +140,7 @@ namespace Supervertaler.Trados
             // unlicensed so users can open Settings → License to activate.
             _mainPanel.Value.SettingsRequested += OnSettingsRequested;
 
-            if (LicenseManager.Instance.CurrentTier == LicenseTier.None)
+            if (!LicenseManager.Instance.HasTier1Access)
             {
                 _control.Value.ShowLicenseRequired();
                 return;

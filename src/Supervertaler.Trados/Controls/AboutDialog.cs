@@ -142,6 +142,10 @@ namespace Supervertaler.Trados.Controls
                     licenseText = "License: TermLens + Supervertaler Assistant (active)";
                     licenseColor = Color.FromArgb(40, 120, 40);
                     break;
+                case LicenseTier.AssistantOnly:
+                    licenseText = "License: Supervertaler Assistant (active)";
+                    licenseColor = Color.FromArgb(40, 120, 40);
+                    break;
                 default:
                     licenseText = "License: No active license";
                     licenseColor = Color.FromArgb(180, 40, 40);

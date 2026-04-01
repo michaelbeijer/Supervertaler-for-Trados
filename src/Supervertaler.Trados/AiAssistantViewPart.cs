@@ -81,7 +81,7 @@ namespace Supervertaler.Trados
             {
                 _control.Value.BeginInvoke(new Action(() =>
                 {
-                    if (LicenseManager.Instance.HasTier2Access)
+                    if (LicenseManager.Instance.HasAssistantAccess)
                         _control.Value.HideUpgradeRequired();
                     else
                         _control.Value.ShowUpgradeRequired();
@@ -95,7 +95,7 @@ namespace Supervertaler.Trados
             _promptLibrary.EnsureDefaultPrompts();
             _control.Value.SettingsRequested += OnSettingsRequested;
 
-            if (!LicenseManager.Instance.HasTier2Access)
+            if (!LicenseManager.Instance.HasAssistantAccess)
             {
                 _control.Value.ShowUpgradeRequired();
                 return;

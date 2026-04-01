@@ -35,7 +35,7 @@ namespace Supervertaler.Trados.Licensing
 
         /// <summary>
         /// Variant name from Lemon Squeezy (meta.variant_name).
-        /// Maps to a <see cref="LicenseTier"/>: "TermLens" → Tier1, "TermLens + Supervertaler Assistant" → Tier2.
+        /// Maps to a <see cref="LicenseTier"/>: "TermLens" → Tier1, "Supervertaler Assistant" → AssistantOnly, "TermLens + Supervertaler Assistant" → Tier2.
         /// </summary>
         [DataMember(Name = "variantName")]
         public string VariantName { get; set; } = "";

@@ -320,6 +320,7 @@ namespace Supervertaler.Trados.Licensing
 
                 case LicenseTier.Tier1:
                 case LicenseTier.Tier2:
+                case LicenseTier.AssistantOnly:
                     ShowLicensedState(mgr);
                     break;
 
@@ -374,8 +375,10 @@ namespace Supervertaler.Trados.Licensing
                 _lblValidatedValue.Text = "Never";
             }
 
-            // Show upgrade link for Tier 1 users
-            _lnkUpgrade.Visible = mgr.CurrentTier == LicenseTier.Tier1;
+            // Show upgrade link for users on partial tiers
+            var currentTier = mgr.CurrentTier;
+            _lnkUpgrade.Visible = currentTier == LicenseTier.Tier1
+                               || currentTier == LicenseTier.AssistantOnly;
 
             _activationPanel.Visible = false;
             _licensedPanel.Visible = true;

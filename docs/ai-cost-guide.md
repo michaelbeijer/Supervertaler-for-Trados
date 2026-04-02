@@ -68,6 +68,25 @@ These are estimates for a representative document. Actual usage varies with segm
 | **Mistral Small**               | $0.01     | $0.02     | < $0.01    |
 | **Mistral Nemo**                | $0.02     | $0.02     | < $0.01    |
 
+#### OpenRouter
+
+[OpenRouter](https://openrouter.ai) lets you access models from all major providers with a single API key. Prices are the same as the provider's own rates plus a **5.5% platform fee**. The curated models in the Supervertaler dropdown include:
+
+| Model                                | Translate | Proofread | AutoPrompt |
+| ------------------------------------ | --------- | --------- | ---------- |
+| **Claude Sonnet 4.6** (recommended)  | ~$0.53    | ~$0.57    | ~$0.06     |
+| **Claude Opus 4.6**                  | ~$0.88    | ~$0.95    | ~$0.11     |
+| **GPT-5.4**                          | ~$1.57    | ~$1.73    | ~$0.17     |
+| **GPT-5.4 Mini**                     | ~$0.14    | ~$0.16    | ~$0.02     |
+| **Gemini 3.1 Pro**                   | ~$0.37    | ~$0.40    | ~$0.04     |
+| **Gemini 3 Flash**                   | ~$0.06    | ~$0.07    | ~$0.01     |
+| **Mistral Small 4**                  | ~$0.01    | ~$0.01    | < $0.01    |
+| **Qwen 3.6 Plus (Free)**            | Free      | Free      | Free       |
+
+{% hint style="info" %}
+OpenRouter prices are approximate (base provider price + 5.5% fee). You can also type **any** OpenRouter model ID into the model dropdown — browse all 200+ models at [openrouter.ai/models](https://openrouter.ai/models).
+{% endhint %}
+
 #### Ollama (local)
 
 | Model                  | Translate | Proofread | AutoPrompt |
@@ -111,7 +130,7 @@ For reference, these are the per-token rates used in the calculations above:
 | Mistral Nemo             | $0.15                 | $0.15                  |
 
 {% hint style="warning" %}
-Prices change regularly. Check your provider's pricing page for the latest rates: [OpenAI](https://openai.com/api/pricing/) · [Anthropic](https://www.anthropic.com/pricing#anthropic-api) · [Google Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [xAI](https://docs.x.ai/developers/models) · [Mistral](https://mistral.ai/technology/)
+Prices change regularly. Check your provider's pricing page for the latest rates: [OpenAI](https://openai.com/api/pricing/) · [Anthropic](https://www.anthropic.com/pricing#anthropic-api) · [Google Gemini](https://ai.google.dev/gemini-api/docs/pricing) · [xAI](https://docs.x.ai/developers/models) · [Mistral](https://mistral.ai/technology/) · [OpenRouter](https://openrouter.ai/models)
 {% endhint %}
 
 ### Tips for managing costs

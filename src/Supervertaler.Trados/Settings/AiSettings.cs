@@ -29,6 +29,9 @@ namespace Supervertaler.Trados.Settings
         [DataMember(Name = "mistralModel")]
         public string MistralModel { get; set; } = LlmModels.MistralModels[0].Id;
 
+        [DataMember(Name = "openRouterModel")]
+        public string OpenRouterModel { get; set; } = LlmModels.OpenRouterModels[0].Id;
+
         [DataMember(Name = "ollamaModel")]
         public string OllamaModel { get; set; } = LlmModels.OllamaModels[0].Id;
 
@@ -174,6 +177,7 @@ namespace Supervertaler.Trados.Settings
                 case "gemini": GeminiModel = modelId; break;
                 case "grok": GrokModel = modelId; break;
                 case "mistral": MistralModel = modelId; break;
+                case "openrouter": OpenRouterModel = modelId; break;
                 case "ollama": OllamaModel = modelId; break;
                 case "custom_openai": SelectedCustomProfileName = modelId; break;
             }
@@ -191,6 +195,7 @@ namespace Supervertaler.Trados.Settings
                 case "gemini": return GeminiModel;
                 case "grok": return GrokModel;
                 case "mistral": return MistralModel;
+                case "openrouter": return OpenRouterModel;
                 case "ollama": return OllamaModel;
                 case "custom_openai":
                     var profile = GetActiveCustomProfile();
@@ -234,6 +239,9 @@ namespace Supervertaler.Trados.Settings
 
         [DataMember(Name = "mistral")]
         public string Mistral { get; set; } = "";
+
+        [DataMember(Name = "openrouter")]
+        public string OpenRouter { get; set; } = "";
 
         [DataMember(Name = "custom_openai")]
         public string CustomOpenAi { get; set; } = "";

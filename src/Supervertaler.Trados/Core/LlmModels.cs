@@ -10,6 +10,7 @@ namespace Supervertaler.Trados.Core
         Gemini,
         Grok,
         Mistral,
+        OpenRouter,
         Ollama,
         CustomOpenAi
     }
@@ -38,6 +39,7 @@ namespace Supervertaler.Trados.Core
         public const string ProviderOllama = "ollama";
         public const string ProviderGrok = "grok";
         public const string ProviderMistral = "mistral";
+        public const string ProviderOpenRouter = "openrouter";
         public const string ProviderCustomOpenAi = "custom_openai";
 
         public static readonly LlmModelInfo[] OpenAiModels =
@@ -175,6 +177,58 @@ namespace Supervertaler.Trados.Core
             }
         };
 
+        public static readonly LlmModelInfo[] OpenRouterModels =
+        {
+            new LlmModelInfo
+            {
+                Id = "anthropic/claude-sonnet-4.6", DisplayName = "Claude Sonnet 4.6",
+                Description = "Recommended — best balance of speed, quality, and cost",
+                Provider = LlmProvider.OpenRouter
+            },
+            new LlmModelInfo
+            {
+                Id = "anthropic/claude-opus-4.6", DisplayName = "Claude Opus 4.6",
+                Description = "Highest quality — best for specialized legal/technical translation",
+                Provider = LlmProvider.OpenRouter
+            },
+            new LlmModelInfo
+            {
+                Id = "openai/gpt-5.4", DisplayName = "GPT-5.4",
+                Description = "Premium quality — OpenAI's most advanced model",
+                Provider = LlmProvider.OpenRouter
+            },
+            new LlmModelInfo
+            {
+                Id = "openai/gpt-5.4-mini", DisplayName = "GPT-5.4 Mini",
+                Description = "Fast, affordable, and high quality for everyday translation",
+                Provider = LlmProvider.OpenRouter
+            },
+            new LlmModelInfo
+            {
+                Id = "google/gemini-3.1-pro-preview", DisplayName = "Gemini 3.1 Pro",
+                Description = "Google's most advanced model, large context",
+                Provider = LlmProvider.OpenRouter
+            },
+            new LlmModelInfo
+            {
+                Id = "google/gemini-3-flash-preview", DisplayName = "Gemini 3 Flash",
+                Description = "Fast and affordable — great for large batch jobs",
+                Provider = LlmProvider.OpenRouter
+            },
+            new LlmModelInfo
+            {
+                Id = "mistralai/mistral-small-2603", DisplayName = "Mistral Small 4",
+                Description = "Very fast and cheap — good multilingual support",
+                Provider = LlmProvider.OpenRouter
+            },
+            new LlmModelInfo
+            {
+                Id = "qwen/qwen3.6-plus:free", DisplayName = "Qwen 3.6 Plus (Free)",
+                Description = "Free — no API costs, good general-purpose quality",
+                Provider = LlmProvider.OpenRouter
+            }
+        };
+
         /// <summary>
         /// Returns the model array for a given provider key string.
         /// </summary>
@@ -187,6 +241,7 @@ namespace Supervertaler.Trados.Core
                 case ProviderGemini: return GeminiModels;
                 case ProviderGrok: return GrokModels;
                 case ProviderMistral: return MistralModels;
+                case ProviderOpenRouter: return OpenRouterModels;
                 case ProviderOllama: return OllamaModels;
                 case ProviderCustomOpenAi: return new LlmModelInfo[0]; // Custom models are user-defined
                 default: return new LlmModelInfo[0];
@@ -200,7 +255,7 @@ namespace Supervertaler.Trados.Core
         {
             if (string.IsNullOrEmpty(modelId)) return null;
 
-            var allArrays = new[] { OpenAiModels, ClaudeModels, GeminiModels, GrokModels, MistralModels, OllamaModels };
+            var allArrays = new[] { OpenAiModels, ClaudeModels, GeminiModels, GrokModels, MistralModels, OpenRouterModels, OllamaModels };
             foreach (var arr in allArrays)
             {
                 foreach (var m in arr)
@@ -224,6 +279,7 @@ namespace Supervertaler.Trados.Core
                 case LlmProvider.Gemini: return ProviderGemini;
                 case LlmProvider.Grok: return ProviderGrok;
                 case LlmProvider.Mistral: return ProviderMistral;
+                case LlmProvider.OpenRouter: return ProviderOpenRouter;
                 case LlmProvider.Ollama: return ProviderOllama;
                 case LlmProvider.CustomOpenAi: return ProviderCustomOpenAi;
                 default: return ProviderOpenAi;
@@ -242,6 +298,7 @@ namespace Supervertaler.Trados.Core
                 case ProviderGemini: return "Gemini (Google)";
                 case ProviderGrok: return "Grok (xAI)";
                 case ProviderMistral: return "Mistral AI";
+                case ProviderOpenRouter: return "OpenRouter";
                 case ProviderOllama: return "Ollama (Local)";
                 case ProviderCustomOpenAi: return "Custom (OpenAI-compatible)";
                 default: return providerKey;
@@ -253,7 +310,7 @@ namespace Supervertaler.Trados.Core
         /// </summary>
         public static readonly string[] AllProviderKeys =
         {
-            ProviderOpenAi, ProviderClaude, ProviderGemini, ProviderGrok, ProviderMistral, ProviderOllama, ProviderCustomOpenAi
+            ProviderOpenAi, ProviderClaude, ProviderGemini, ProviderGrok, ProviderMistral, ProviderOpenRouter, ProviderOllama, ProviderCustomOpenAi
         };
     }
 }

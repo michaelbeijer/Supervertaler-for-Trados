@@ -86,6 +86,10 @@ namespace Supervertaler.Trados.Controls
             BackColor = Color.White;
             AutoScroll = true;
 
+            // Set a reasonable initial size so anchor margins are computed correctly
+            // (the panel will be resized to fill the TabPage via Dock = Fill)
+            Size = new Size(530, 800);
+
             var y = 16;
             var labelColor = Color.FromArgb(80, 80, 80);
             var labelFont = Font;
@@ -115,8 +119,7 @@ namespace Supervertaler.Trados.Controls
             {
                 Location = new Point(120, y),
                 Width = 260,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+                DropDownStyle = ComboBoxStyle.DropDownList
             };
             foreach (var key in LlmModels.AllProviderKeys)
                 _cmbProvider.Items.Add(new ProviderItem(key));
@@ -137,8 +140,7 @@ namespace Supervertaler.Trados.Controls
             {
                 Location = new Point(120, y),
                 Width = 260,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+                DropDownStyle = ComboBoxStyle.DropDownList
             };
             Controls.Add(lblModel);
             Controls.Add(_cmbModel);
@@ -666,6 +668,7 @@ namespace Supervertaler.Trados.Controls
             {
                 LayoutApiKeyRow();
                 LayoutTermbasesList();
+                LayoutProviderModelRows();
             };
             LayoutApiKeyRow();
         }
@@ -747,6 +750,33 @@ namespace Supervertaler.Trados.Controls
             _clbAiTermbases.Width = w;
         }
 
+        private void LayoutProviderModelRows()
+        {
+            if (_cmbProvider == null || _cmbModel == null) return;
+            var rightMargin = 16;
+            var w = Math.Max(120, Width - _cmbProvider.Left - rightMargin);
+            _cmbProvider.Width = w;
+            _cmbModel.Width = w;
+        }
+
+        /// <summary>
+        /// Sets the DropDownWidth of a ComboBox to fit the widest item text,
+        /// so long model descriptions are fully visible in the dropdown list.
+        /// </summary>
+        private static void AutoSizeDropDown(ComboBox cmb)
+        {
+            var maxWidth = cmb.Width;
+            using (var g = cmb.CreateGraphics())
+            {
+                foreach (var item in cmb.Items)
+                {
+                    var w = (int)g.MeasureString(item.ToString(), cmb.Font).Width + 20;
+                    if (w > maxWidth) maxWidth = w;
+                }
+            }
+            cmb.DropDownWidth = maxWidth;
+        }
+
         // ─── Settings Population ─────────────────────────────────────
 
         public void PopulateFromSettings(AiSettings settings)
@@ -760,6 +790,7 @@ namespace Supervertaler.Trados.Controls
             _providerApiKeys[LlmModels.ProviderGemini] = keys.Gemini ?? "";
             _providerApiKeys[LlmModels.ProviderGrok] = keys.Grok ?? "";
             _providerApiKeys[LlmModels.ProviderMistral] = keys.Mistral ?? "";
+            _providerApiKeys[LlmModels.ProviderOpenRouter] = keys.OpenRouter ?? "";
             _providerApiKeys[LlmModels.ProviderCustomOpenAi] = keys.CustomOpenAi ?? "";
             _providerApiKeys[LlmModels.ProviderOllama] = ""; // Ollama doesn't use API keys
 
@@ -857,6 +888,11 @@ namespace Supervertaler.Trados.Controls
                 case LlmModels.ProviderMistral:
                     settings.MistralModel = selectedModel?.Id ?? "mistral-large-latest";
                     break;
+                case LlmModels.ProviderOpenRouter:
+                    // OpenRouter allows typed-in custom model IDs
+                    settings.OpenRouterModel = selectedModel?.Id
+                        ?? (_cmbModel.Text?.Trim().Length > 0 ? _cmbModel.Text.Trim() : "anthropic/claude-sonnet-4.6");
+                    break;
                 case LlmModels.ProviderOllama:
                     settings.OllamaModel = selectedModel?.Id ?? "translategemma:12b";
                     break;
@@ -873,6 +909,7 @@ namespace Supervertaler.Trados.Controls
             settings.ApiKeys.Gemini = _providerApiKeys.TryGetValue(LlmModels.ProviderGemini, out val) ? val : "";
             settings.ApiKeys.Grok = _providerApiKeys.TryGetValue(LlmModels.ProviderGrok, out val) ? val : "";
             settings.ApiKeys.Mistral = _providerApiKeys.TryGetValue(LlmModels.ProviderMistral, out val) ? val : "";
+            settings.ApiKeys.OpenRouter = _providerApiKeys.TryGetValue(LlmModels.ProviderOpenRouter, out val) ? val : "";
             settings.ApiKeys.CustomOpenAi = _providerApiKeys.TryGetValue(LlmModels.ProviderCustomOpenAi, out val) ? val : "";
 
             // Ollama endpoint + timeout
@@ -917,6 +954,14 @@ namespace Supervertaler.Trados.Controls
             var models = LlmModels.GetModelsForProvider(providerKey);
             foreach (var m in models)
                 _cmbModel.Items.Add(new ModelItem(m));
+
+            // Auto-size the dropdown to fit the longest model description
+            AutoSizeDropDown(_cmbModel);
+
+            // OpenRouter: allow typing any model ID; other providers: pick from list only
+            _cmbModel.DropDownStyle = providerKey == LlmModels.ProviderOpenRouter
+                ? ComboBoxStyle.DropDown
+                : ComboBoxStyle.DropDownList;
 
             if (_cmbModel.Items.Count > 0)
                 _cmbModel.SelectedIndex = 0;
@@ -1071,7 +1116,12 @@ namespace Supervertaler.Trados.Controls
             var provider = GetSelectedProviderKey();
             if (provider == LlmModels.ProviderCustomOpenAi)
                 return _txtCustomModel.Text.Trim();
-            return (_cmbModel.SelectedItem as ModelItem)?.Id ?? "gpt-5.4-mini";
+            // For OpenRouter, the user may have typed a custom model ID
+            var modelItem = _cmbModel.SelectedItem as ModelItem;
+            if (modelItem != null) return modelItem.Id;
+            if (provider == LlmModels.ProviderOpenRouter && !string.IsNullOrWhiteSpace(_cmbModel.Text))
+                return _cmbModel.Text.Trim();
+            return "gpt-5.4-mini";
         }
 
         private string GetEffectiveApiKey()
@@ -1094,6 +1144,7 @@ namespace Supervertaler.Trados.Controls
                 case LlmModels.ProviderGemini: targetId = settings.GeminiModel; break;
                 case LlmModels.ProviderGrok: targetId = settings.GrokModel; break;
                 case LlmModels.ProviderMistral: targetId = settings.MistralModel; break;
+                case LlmModels.ProviderOpenRouter: targetId = settings.OpenRouterModel; break;
                 case LlmModels.ProviderOllama: targetId = settings.OllamaModel; break;
                 default: return;
             }
@@ -1105,6 +1156,13 @@ namespace Supervertaler.Trados.Controls
                     _cmbModel.SelectedIndex = i;
                     return;
                 }
+            }
+
+            // For OpenRouter: if the saved model isn't in the curated list, show it as typed text
+            if (settings.SelectedProvider == LlmModels.ProviderOpenRouter
+                && !string.IsNullOrEmpty(targetId))
+            {
+                _cmbModel.Text = targetId;
             }
         }
 

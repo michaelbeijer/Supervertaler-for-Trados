@@ -31,7 +31,7 @@ Supervertaler for Trados uses the same `.db` termbase format as Supervertaler Wo
 
 On the **AI Settings** tab:
 
-1. Select a **provider** (OpenAI, Anthropic, Google, Ollama, or Custom)
+1. Select a **provider** (OpenAI, Anthropic, Google, OpenRouter, Ollama, or others)
 2. Enter your **API key** for the selected provider
 3. Choose a **model**
 

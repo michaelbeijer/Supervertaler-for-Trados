@@ -81,7 +81,7 @@ If you can no longer access the old machine, the activation slot will be freed a
 
 The plugin makes **no network calls** except to:
 
-1. **Your chosen AI provider** (OpenAI, Anthropic, Google Gemini, or local Ollama) — only when you use AI features
+1. **Your chosen AI provider** (OpenAI, Anthropic, Google Gemini, OpenRouter, or local Ollama) — only when you use AI features
 2. **Lemon Squeezy licence API** (`api.lemonsqueezy.com`) — for licence activation and periodic validation
 3. **Anonymous usage statistics** (strictly opt-in) — if you consent, a single ping on startup sends only: plugin version, OS version, Trados version, and system locale. See [Usage Statistics](settings/usage-statistics.md) for details.
 

@@ -112,6 +112,7 @@ namespace Supervertaler.Trados.Core
                     case LlmModels.ProviderOpenAi:
                     case LlmModels.ProviderGrok:
                     case LlmModels.ProviderMistral:
+                    case LlmModels.ProviderOpenRouter:
                     case LlmModels.ProviderCustomOpenAi:
                         result = await CallOpenAiAsync(prompt, systemPrompt, maxTokens, cancellationToken);
                         break;
@@ -179,6 +180,7 @@ namespace Supervertaler.Trados.Core
                     case LlmModels.ProviderOpenAi:
                     case LlmModels.ProviderGrok:
                     case LlmModels.ProviderMistral:
+                    case LlmModels.ProviderOpenRouter:
                     case LlmModels.ProviderCustomOpenAi:
                         result = await CallOpenAiChatAsync(messages, systemPrompt, maxTokens, cancellationToken);
                         break;
@@ -318,6 +320,7 @@ namespace Supervertaler.Trados.Core
                 case LlmModels.ProviderGemini: return keys.Gemini;
                 case LlmModels.ProviderGrok: return keys.Grok;
                 case LlmModels.ProviderMistral: return keys.Mistral;
+                case LlmModels.ProviderOpenRouter: return keys.OpenRouter;
                 case LlmModels.ProviderCustomOpenAi: return keys.CustomOpenAi;
                 default: return null;
             }
@@ -402,9 +405,22 @@ namespace Supervertaler.Trados.Core
                 return "https://api.x.ai/v1";
             if (_provider == LlmModels.ProviderMistral)
                 return "https://api.mistral.ai/v1";
+            if (_provider == LlmModels.ProviderOpenRouter)
+                return "https://openrouter.ai/api/v1";
             if (_provider == LlmModels.ProviderCustomOpenAi && !string.IsNullOrEmpty(_baseUrl))
                 return _baseUrl.TrimEnd('/');
             return "https://api.openai.com/v1";
+        }
+
+        /// <summary>
+        /// Adds HTTP-Referer and X-Title headers required by OpenRouter's ToS.
+        /// No-op for other providers.
+        /// </summary>
+        private void AddOpenRouterHeaders(HttpRequestMessage request)
+        {
+            if (_provider != LlmModels.ProviderOpenRouter) return;
+            request.Headers.Add("HTTP-Referer", "https://supervertaler.com");
+            request.Headers.Add("X-Title", "Supervertaler for Trados");
         }
 
         // ─── Provider Implementations ────────────────────────────────
@@ -450,6 +466,7 @@ namespace Supervertaler.Trados.Core
             {
                 request.Content = new StringContent(sb.ToString(), Encoding.UTF8, "application/json");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+                AddOpenRouterHeaders(request);
 
                 using (var cts = CancellationTokenSource.CreateLinkedTokenSource(ct))
                 {
@@ -695,6 +712,7 @@ namespace Supervertaler.Trados.Core
             {
                 request.Content = new StringContent(sb.ToString(), Encoding.UTF8, "application/json");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+                AddOpenRouterHeaders(request);
 
                 using (var cts = CancellationTokenSource.CreateLinkedTokenSource(ct))
                 {

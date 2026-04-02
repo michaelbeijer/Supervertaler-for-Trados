@@ -63,7 +63,7 @@ After the 14-day trial ends, features are locked based on your plan:
 
 - **No licence** — both TermLens and Supervertaler Assistant show a "licence required" overlay
 - **TermLens plan** — TermLens panel is fully functional; Supervertaler Assistant shows an "upgrade required" overlay
-- **Supervertaler Assistant plan** — AI features are fully functional (including termbases for AI context); TermLens panel shows a "licence required" overlay
+- **Supervertaler Assistant plan** — AI features are fully functional; termbases (including [MultiTerm](multiterm-support.md)) are loaded for AI context so your terminology is injected into AI prompts. The TermLens panel (chips, shortcuts, Term Picker) shows a "licence required" overlay
 - **TermLens + Supervertaler Assistant plan** — all features unlocked
 
 Your termbases, settings, and prompt library are preserved regardless of plan. Activating or upgrading a licence immediately unlocks the corresponding features.

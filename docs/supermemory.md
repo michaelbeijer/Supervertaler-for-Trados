@@ -6,7 +6,7 @@ description: Self-organizing, AI-maintained translation knowledge base
 
 SuperMemory is a self-organizing translation knowledge base that replaces traditional translation memories and term bases with a living, AI-maintained wiki. Instead of rigid fuzzy matching, SuperMemory gives the AI full contextual understanding of your clients, terminology decisions, domain conventions, and style preferences.
 
-<figure><img src=".gitbook/assets/Sv_SuperMemory-Graph.png" alt="SuperMemory knowledge graph in Obsidian"><figcaption>SuperMemory knowledge graph showing interconnected clients, terminology, and domain knowledge</figcaption></figure>
+<figure><img src=".gitbook/assets/Sv_SuperMemory-Graph.png" alt="SuperMemory knowledge graph in Obsidian"><figcaption><p>SuperMemory knowledge graph showing interconnected clients, terminology, and domain knowledge</p></figcaption></figure>
 
 ## How it works
 
@@ -35,26 +35,26 @@ SuperMemory periodically scans itself for inconsistencies: conflicting terminolo
 
 ## Why SuperMemory?
 
-| Traditional TM/TB | SuperMemory |
-|---|---|
-| Fuzzy matching on surface text | Contextual understanding of _why_ terms were chosen |
-| Static — requires manual updates | Self-healing — AI maintains and interlinks |
-| Opaque — hard to audit decisions | Every decision traceable to a readable `.md` file |
-| Locked to one tool | Portable Markdown — works with any editor |
-| Segments in isolation | Connected knowledge graph |
+| Traditional TM/TB                | SuperMemory                                         |
+| -------------------------------- | --------------------------------------------------- |
+| Fuzzy matching on surface text   | Contextual understanding of _why_ terms were chosen |
+| Static — requires manual updates | Self-healing — AI maintains and interlinks          |
+| Opaque — hard to audit decisions | Every decision traceable to a readable `.md` file   |
+| Locked to one tool               | Portable Markdown — works with any editor           |
+| Segments in isolation            | Connected knowledge graph                           |
 
 ## Folder structure
 
 SuperMemory organises knowledge into six folders:
 
-| Folder | Contents |
-|---|---|
-| `00_INBOX` | Raw material — drop zone for unprocessed content |
-| `01_CLIENTS` | Client profiles and preferences |
+| Folder           | Contents                                                     |
+| ---------------- | ------------------------------------------------------------ |
+| `00_INBOX`       | Raw material — drop zone for unprocessed content             |
+| `01_CLIENTS`     | Client profiles and preferences                              |
 | `02_TERMINOLOGY` | Term articles with translations, alternatives, and reasoning |
-| `03_DOMAINS` | Domain-specific conventions and pitfalls |
-| `04_STYLE` | Style guides and formatting rules |
-| `05_INDICES` | Auto-generated indexes and maps of content |
+| `03_DOMAINS`     | Domain-specific conventions and pitfalls                     |
+| `04_STYLE`       | Style guides and formatting rules                            |
+| `05_INDICES`     | Auto-generated indexes and maps of content                   |
 
 ## Getting started
 
@@ -71,7 +71,9 @@ C:\Users\{you}\Supervertaler\supermemory\
 
 ## Quick Add (Ctrl+Alt+M)
 
-While translating in Trados, you can instantly add a term or correction to your SuperMemory vault — and optionally inject it into your active translation prompt so the next Ctrl+T picks it up immediately.
+While translating in Trados, you can instantly add a term or correction to your SuperMemory vault – and optionally inject it into your active translation prompt so the next Ctrl+T picks it up immediately.
+
+<figure><img src=".gitbook/assets/image (10).png" alt=""><figcaption></figcaption></figure>
 
 ### How to use
 
@@ -81,7 +83,7 @@ While translating in Trados, you can instantly add a term or correction to your 
    * **Term / pattern (what's wrong)** — the incorrect or ambiguous term (pre-filled from your selection)
    * **Correction** — the correct translation (pre-filled from target selection, if any). The label adapts to your target language (e.g. "Correct Dutch form")
    * **Notes** — optional context or explanation
-   * **Also append to active translation prompt** — when ticked, a row is added to the TERMINOLOGY table in your [active prompt](#active-prompt) so the correction takes effect immediately
+   * **Also append to active translation prompt** — when ticked, a row is added to the TERMINOLOGY table in your [active prompt](supermemory.md#active-prompt) so the correction takes effect immediately
 4. Click **Add**
 
 ### What happens
@@ -163,10 +165,11 @@ This means every translation is informed by your accumulated project knowledge �
 SuperMemory stores all knowledge as Markdown files, which you can browse and edit with any text editor. For the best experience, we recommend [Obsidian](https://obsidian.md/) — a free knowledge-base app that visualises the links between your articles as an interactive graph.
 
 1. Download Obsidian from [https://obsidian.md/download](https://obsidian.md/download) (available for Windows, Mac, and Linux)
-2. Install and open it — choose **Open folder as vault** and select your SuperMemory folder:
-   ```
-   C:\Users\{you}\Supervertaler\supermemory\
-   ```
+2.  Install and open it — choose **Open folder as vault** and select your SuperMemory folder:
+
+    ```
+    C:\Users\{you}\Supervertaler\supermemory\
+    ```
 3. The free version of Obsidian includes everything you need — no subscription required. (The paid Sync and Publish add-ons are not needed for SuperMemory.)
 
 ## Learn more

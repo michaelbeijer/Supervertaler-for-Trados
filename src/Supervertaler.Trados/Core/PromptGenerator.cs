@@ -417,6 +417,20 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine(tmInstruction);
             sb.AppendLine();
 
+            // SuperMemory KB context
+            if (!string.IsNullOrWhiteSpace(ctx.KbContext))
+            {
+                sb.AppendLine("=== KNOWLEDGE BASE (SuperMemory) ===");
+                sb.AppendLine("The translator maintains a structured knowledge base with established conventions,");
+                sb.AppendLine("terminology reasoning, client preferences, and style guides. Incorporate these into");
+                sb.AppendLine("the generated prompt where relevant — they represent hard-won translation decisions");
+                sb.AppendLine("and client-specific rules that should be baked into the prompt's glossary, style");
+                sb.AppendLine("rules, and domain instructions rather than being rediscovered from scratch.");
+                sb.AppendLine();
+                sb.AppendLine(ctx.KbContext);
+                sb.AppendLine();
+            }
+
             // Constraint language
             sb.AppendLine("=== LANGUAGE STYLE ===");
             sb.AppendLine("Use clear, firm language throughout the generated prompt:");
@@ -501,6 +515,9 @@ namespace Supervertaler.Trados.Core
 
             if (ctx.TmPairs != null && ctx.TmPairs.Count > 0)
                 sb.AppendLine($"TM reference pairs: {ctx.TmPairs.Count:N0}");
+
+            if (!string.IsNullOrWhiteSpace(ctx.KbContext))
+                sb.AppendLine("SuperMemory: knowledge base included");
 
             return sb.ToString().TrimEnd();
         }
@@ -674,5 +691,13 @@ namespace Supervertaler.Trados.Core
         /// Zero means no filtering was applied.
         /// </summary>
         public int TotalTermCount { get; set; }
+
+        /// <summary>
+        /// Optional SuperMemory knowledge base context (formatted text).
+        /// When present, included in the meta-prompt so the generated prompt
+        /// reflects established client conventions, terminology reasoning,
+        /// and style guides.
+        /// </summary>
+        public string KbContext { get; set; }
     }
 }

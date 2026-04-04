@@ -77,7 +77,10 @@ def bump_plugin_xml(new_four):
     if raw[:2] == b'\xff\xfe':
         text = raw[2:].decode("utf-16-le")
     else:
-        text = raw.decode("utf-16-le")
+        try:
+            text = raw.decode("utf-16-le")
+        except UnicodeDecodeError:
+            text = raw.decode("utf-8")
 
     # Plugin version attribute (e.g. version="4.18.2.0")
     ver_pattern = re.compile(r'(<plugin\s[^>]*?)version="[^"]+"')

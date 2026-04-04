@@ -48,6 +48,7 @@ namespace Supervertaler.Trados.Controls
         private NumericUpDown _nudMaxSegments;
         private CheckBox _chkIncludeTermMetadata;
         private CheckBox _chkIncludeSuperMemory;
+        private CheckBox _chkIncludeSuperMemoryAutoPrompt;
         private CheckBox _chkLogPrompts;
         private Label _lblBatchSize;
         private NumericUpDown _nudBatchSize;
@@ -503,7 +504,27 @@ namespace Supervertaler.Trados.Controls
                 "When enabled, relevant SuperMemory articles (client profiles, domain\r\n" +
                 "knowledge, style guides, terminology decisions) are automatically\r\n" +
                 "loaded and included in AI prompts for translations and chat.");
+            _chkIncludeSuperMemory.CheckedChanged += (s, ev) =>
+            {
+                _chkIncludeSuperMemoryAutoPrompt.Enabled = _chkIncludeSuperMemory.Checked;
+            };
             Controls.Add(_chkIncludeSuperMemory);
+
+            _chkIncludeSuperMemoryAutoPrompt = new CheckBox
+            {
+                Text = "Use knowledge base when generating prompts (AutoPrompt)",
+                Location = new Point(36, 0), // indented, positioned dynamically
+                AutoSize = true,
+                ForeColor = labelColor,
+                Checked = true
+            };
+            var apTip = new ToolTip { AutoPopDelay = 10000, InitialDelay = 300 };
+            apTip.SetToolTip(_chkIncludeSuperMemoryAutoPrompt,
+                "When enabled, AutoPrompt includes your SuperMemory articles\r\n" +
+                "(client conventions, terminology reasoning, style guides) in\r\n" +
+                "the meta-prompt so that generated prompts reflect your\r\n" +
+                "established knowledge base from the start.");
+            Controls.Add(_chkIncludeSuperMemoryAutoPrompt);
 
             _chkLogPrompts = new CheckBox
             {
@@ -720,6 +741,9 @@ namespace Supervertaler.Trados.Controls
             y += 24;
 
             _chkIncludeSuperMemory.Location = new Point(16, y);
+            y += 24;
+
+            _chkIncludeSuperMemoryAutoPrompt.Location = new Point(36, y);
             y += 28;
 
             _chkLogPrompts.Location = new Point(16, y);
@@ -846,6 +870,8 @@ namespace Supervertaler.Trados.Controls
                 Math.Min(_nudSurroundingSegments.Maximum, settings.QuickLauncherSurroundingSegments));
             _chkIncludeTermMetadata.Checked = settings.IncludeTermMetadata;
             _chkIncludeSuperMemory.Checked = settings.IncludeSuperMemoryContext;
+            _chkIncludeSuperMemoryAutoPrompt.Checked = settings.IncludeSuperMemoryInAutoPrompt;
+            _chkIncludeSuperMemoryAutoPrompt.Enabled = settings.IncludeSuperMemoryContext;
             _chkLogPrompts.Checked = settings.LogPromptsToReports;
             _nudBatchSize.Value = Math.Max(_nudBatchSize.Minimum,
                 Math.Min(_nudBatchSize.Maximum, settings.BatchSize > 0 ? settings.BatchSize : 20));
@@ -947,6 +973,7 @@ namespace Supervertaler.Trados.Controls
             settings.QuickLauncherSurroundingSegments = (int)_nudSurroundingSegments.Value;
             settings.IncludeTermMetadata = _chkIncludeTermMetadata.Checked;
             settings.IncludeSuperMemoryContext = _chkIncludeSuperMemory.Checked;
+            settings.IncludeSuperMemoryInAutoPrompt = _chkIncludeSuperMemoryAutoPrompt.Checked;
             settings.LogPromptsToReports = _chkLogPrompts.Checked;
             settings.BatchSize = (int)_nudBatchSize.Value;
 

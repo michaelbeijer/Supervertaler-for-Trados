@@ -27,6 +27,8 @@ namespace Supervertaler.Trados.Controls
         // Configuration
         private ComboBox _cmbScope;
         private Label _lblScopeLabel;
+        private Label _lblMaxSegLabel;
+        private NumericUpDown _nudMaxSegments;
         private ComboBox _cmbPrompt;
         private Label _lblPromptLabel;
         private LinkLabel _lblProvider;
@@ -208,6 +210,35 @@ namespace Supervertaler.Trados.Controls
             _cmbScope.SelectedIndexChanged += (s, e) => ScopeChanged?.Invoke(this, EventArgs.Empty);
             Controls.Add(_lblScopeLabel);
             Controls.Add(_cmbScope);
+
+            _lblMaxSegLabel = new Label
+            {
+                Text = "Limit:",
+                Location = new Point(_cmbScope.Right + 12, y + 3),
+                AutoSize = true,
+                Font = bodyFont,
+                ForeColor = labelColor
+            };
+            _nudMaxSegments = new NumericUpDown
+            {
+                Location = new Point(_lblMaxSegLabel.Right + 4, y),
+                Width = 60,
+                Minimum = 0,
+                Maximum = 99999,
+                Value = 0,
+                Font = bodyFont
+            };
+            var limitTip = new ToolTip { AutoPopDelay = 8000, InitialDelay = 300 };
+            limitTip.SetToolTip(_nudMaxSegments,
+                "Maximum number of segments to process.\r\n" +
+                "0 = no limit (process all matching segments).\r\n" +
+                "Useful for testing prompts on a small subset.");
+            limitTip.SetToolTip(_lblMaxSegLabel,
+                "Maximum number of segments to process.\r\n" +
+                "0 = no limit (process all matching segments).\r\n" +
+                "Useful for testing prompts on a small subset.");
+            Controls.Add(_lblMaxSegLabel);
+            Controls.Add(_nudMaxSegments);
             y += 28;
 
             // ─── Prompt ──────────────────────────────────────────
@@ -743,6 +774,11 @@ namespace Supervertaler.Trados.Controls
                 default: return BatchScope.EmptyOnly;
             }
         }
+
+        /// <summary>
+        /// Returns the segment limit (0 = no limit).
+        /// </summary>
+        public int GetMaxSegments() => (int)_nudMaxSegments.Value;
 
         /// <summary>
         /// Returns the selected proofread scope (for Proofread mode).

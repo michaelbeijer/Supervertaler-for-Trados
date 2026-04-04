@@ -6,22 +6,17 @@ There are several ways to get help with Supervertaler for Trados.
 
 ---
 
-## Supervertaler forum
+## GitHub Discussions
 
-The **Supervertaler forum** is the official community forum for both Supervertaler for Trados and Supervertaler Workbench. It is hosted as a dedicated category on the [TranslationTech](https://translationtech.io) forums — a community forum for translators and localisers who work with CAT tools, AI, automation, and terminology.
-
-<figure><img src=".gitbook/assets/Supervertaler-forum.png" alt="The Supervertaler forum on TranslationTech"><figcaption><p>The Supervertaler forum on TranslationTech</p></figcaption></figure>
-
-The forum is free to join and is the best place to:
+[GitHub Discussions](https://github.com/orgs/Supervertaler/discussions) is the main community hub for both Supervertaler for Trados and Supervertaler Workbench. It is the best place to:
 
 - Ask questions and get help from other users
 - Share tips, workflows, and best practices
 - Suggest features and improvements
-- Read release announcements and changelogs
 - Discuss anything related to Supervertaler
 
 {% hint style="success" %}
-**[Visit the Supervertaler forum →](https://translationtech.io/c/cat-ai-tools/supervertaler/6)**
+**[Visit GitHub Discussions →](https://github.com/orgs/Supervertaler/discussions)**
 {% endhint %}
 
 ---

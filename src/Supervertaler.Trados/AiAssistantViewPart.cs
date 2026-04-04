@@ -204,6 +204,7 @@ namespace Supervertaler.Trados
                 GetDocumentTargetLanguage();
                 SafeInvoke(UpdateContextDisplay);
                 UpdateBatchSegmentCounts();
+                PopulateBatchPromptDropdown();
             }
             else
             {
@@ -754,6 +755,14 @@ namespace Supervertaler.Trados
                 var includeTm = aiSettings.IncludeTmMatches;
                 var tmPairs = includeTm ? CollectTmReferencePairs() : new List<TmMatch>();
 
+                // Phase 4b: SuperMemory KB context (if enabled)
+                string kbContext = null;
+                if (aiSettings.IncludeSuperMemoryContext && aiSettings.IncludeSuperMemoryInAutoPrompt)
+                {
+                    var projectName = TermLensEditorViewPart.GetCurrentProjectName();
+                    kbContext = LoadKbContextForPrompt(projectName, sourceLang, targetLang)?.Trim();
+                }
+
                 // Phase 5: Build meta-prompt
                 var ctx = new PromptGenerationContext
                 {
@@ -765,7 +774,8 @@ namespace Supervertaler.Trados
                     SourceSegments = sourceSegments,
                     TermbaseTerms = termbaseTerms,
                     TotalTermCount = totalTermCount,
-                    TmPairs = tmPairs
+                    TmPairs = tmPairs,
+                    KbContext = kbContext
                 };
 
                 var metaPrompt = PromptGenerator.BuildMetaPrompt(ctx);
@@ -1642,6 +1652,14 @@ namespace Supervertaler.Trados
                 var scope = batchControl.GetSelectedScope();
                 var segments = CollectSegments(scope);
 
+                // Apply segment limit if set
+                var maxSeg = batchControl.GetMaxSegments();
+                if (maxSeg > 0 && segments.Count > maxSeg)
+                {
+                    batchControl.AppendLog($"Limit: processing first {maxSeg} of {segments.Count} segments.");
+                    segments = segments.GetRange(0, maxSeg);
+                }
+
                 if (segments.Count == 0)
                 {
                     batchControl.AppendLog("No segments to translate.", true);
@@ -2147,6 +2165,14 @@ namespace Supervertaler.Trados
                 // Collect segments based on proofread scope
                 var proofScope = batchControl.GetSelectedProofreadScope();
                 var segments = CollectProofreadSegments(proofScope);
+
+                // Apply segment limit if set
+                var maxSeg = batchControl.GetMaxSegments();
+                if (maxSeg > 0 && segments.Count > maxSeg)
+                {
+                    batchControl.AppendLog($"Limit: proofreading first {maxSeg} of {segments.Count} segments.");
+                    segments = segments.GetRange(0, maxSeg);
+                }
 
                 if (segments.Count == 0)
                 {

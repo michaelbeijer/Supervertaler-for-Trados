@@ -166,6 +166,15 @@ namespace Supervertaler.Trados.Settings
         public bool IncludeSuperMemoryContext { get; set; } = true;
 
         /// <summary>
+        /// When enabled, SuperMemory knowledge base articles are included in the
+        /// AutoPrompt meta-prompt so that generated translation prompts reflect
+        /// established client conventions, terminology reasoning, and style guides.
+        /// Only effective when <see cref="IncludeSuperMemoryContext"/> is also true.
+        /// </summary>
+        [DataMember(Name = "includeSuperMemoryInAutoPrompt")]
+        public bool IncludeSuperMemoryInAutoPrompt { get; set; } = true;
+
+        /// <summary>
         /// When enabled, every AI API call is logged to the Reports tab with
         /// the full prompt, response, estimated token counts, and cost.
         /// </summary>

@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.18.40] — 2026-04-04
+
+### Added
+- **SuperMemory** — a self-organizing, AI-maintained translation knowledge base that replaces traditional TMs and term bases with a living wiki of interlinked Markdown files. Stores client profiles, terminology decisions, domain conventions, and style preferences in a human-readable vault that the AI consults when translating. Inspired by Andrej Karpathy's LLM knowledge base architecture
+- **SuperMemory Quick Add (Ctrl+Alt+M)** — capture terms and corrections from the Trados editor into your SuperMemory vault. Also available via right-click in the editor grid. Pre-fills from source/target selection, adapts the correction label to the target language (e.g. "Correct Dutch form"), and optionally appends the term to the active translation prompt's terminology table for immediate effect on the next Ctrl+T
+- **Per-project active prompt** — right-click any translation prompt in the Prompt Manager and choose "Set as active prompt for this project". Shown with a pin icon and bold blue text in the Prompt Manager, and with a checkmark in the Batch Translate dropdown. Saved per project so different projects can use different prompts
+- **Active prompt auto-selection in Batch Translate** — opening a project with an active prompt set automatically selects it in the dropdown
+
+### Improved
+- **Selectable and copyable proofreading report text** — issue descriptions and suggestions in the Reports tab are now selectable text with right-click context menu (Copy issue description, Copy suggestion, Copy all). Clicking the segment number or card background still navigates to the segment
+- **Batch Translate prompt dropdown layout** — fixed the AutoPrompt button disappearing off-screen when long prompt names were selected; the dropdown and button now resize properly with the panel width
+- **Updated help documentation** — SuperMemory, keyboard shortcuts, batch translate, prompts, and project settings pages updated
+
+### Fixed
+- **Active prompt indicator path comparison** — normalised path separators so the active prompt checkmark displays correctly regardless of stored path format
+
+---
+
 ## [4.18.39] — 2026-04-04
 
 ### Fixed

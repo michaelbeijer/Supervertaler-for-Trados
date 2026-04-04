@@ -4,10 +4,6 @@ description: Self-organizing, AI-maintained translation knowledge base
 
 # SuperMemory
 
-{% hint style="warning" %}
-SuperMemory is an upcoming feature currently in early development. This page describes the intended functionality.
-{% endhint %}
-
 SuperMemory is a self-organizing translation knowledge base that replaces traditional translation memories and term bases with a living, AI-maintained wiki. Instead of rigid fuzzy matching, SuperMemory gives the AI full contextual understanding of your clients, terminology decisions, domain conventions, and style preferences.
 
 <figure><img src=".gitbook/assets/Sv_SuperMemory-Graph.png" alt="SuperMemory knowledge graph in Obsidian"><figcaption>SuperMemory knowledge graph showing interconnected clients, terminology, and domain knowledge</figcaption></figure>
@@ -73,6 +69,48 @@ C:\Users\{you}\Supervertaler\supermemory\
 3. Run the compilation agent to process your inbox into structured articles
 4. Watch your knowledge graph grow as connections form between clients, terms, and domains
 
+## Quick Add (Ctrl+Alt+M)
+
+While translating in Trados, you can instantly add a term or correction to your SuperMemory vault — and optionally inject it into your active translation prompt so the next Ctrl+T picks it up immediately.
+
+### How to use
+
+1. In the Trados editor, select the source text you want to capture (optional — the full source segment is used if nothing is selected)
+2. Press **Ctrl+Alt+M** or right-click and choose **Add to SuperMemory**
+3. Fill in the dialog:
+   * **Term / pattern (what's wrong)** — the incorrect or ambiguous term (pre-filled from your selection)
+   * **Correction** — the correct translation (pre-filled from target selection, if any). The label adapts to your target language (e.g. "Correct Dutch form")
+   * **Notes** — optional context or explanation
+   * **Also append to active translation prompt** — when ticked, a row is added to the TERMINOLOGY table in your [active prompt](#active-prompt) so the correction takes effect immediately
+4. Click **Add**
+
+### What happens
+
+* A Markdown article is created in your vault's `02_TERMINOLOGY` folder with YAML frontmatter (source term, target term, domain, status, date)
+* If the "append to prompt" option is ticked, a new row is inserted into the active prompt's terminology table — the prompt is read fresh from disk on every Ctrl+T, so the change is instant
+
+{% hint style="success" %}
+**Tip:** Quick Add is the fastest way to build up your knowledge base while translating. Spotted a Dunglish pattern? Ctrl+Alt+M, type the correction, and carry on — your future translations automatically avoid that mistake.
+{% endhint %}
+
+## Active Prompt
+
+Each Trados project can have an **active prompt** — the prompt that Quick Add appends terminology to. This is also the prompt that is auto-selected in the [Batch Translate](batch-translate.md) dropdown when you open the project.
+
+### Setting the active prompt
+
+1. Open **Settings → Prompts**
+2. Right-click a translation prompt in the tree
+3. Choose **Set as active prompt for this project**
+
+The active prompt is shown with a pin icon and bold blue text in the Prompt Manager. In the Batch Translate dropdown, a checkmark appears next to the active prompt name.
+
+To clear the active prompt, right-click it again and choose the same menu item (it toggles).
+
+{% hint style="info" %}
+The active prompt is saved [per project](settings/project-settings.md). Different Trados projects can have different active prompts.
+{% endhint %}
+
 ## Integration with Supervertaler
 
 When translating, the AI consults your SuperMemory knowledge base before producing a translation. It checks:
@@ -83,6 +121,17 @@ When translating, the AI consults your SuperMemory knowledge base before produci
 * **Style guides** for formatting and register
 
 This means every translation is informed by your accumulated project knowledge — not just pattern matching, but real understanding.
+
+## Installing Obsidian
+
+SuperMemory stores all knowledge as Markdown files, which you can browse and edit with any text editor. For the best experience, we recommend [Obsidian](https://obsidian.md/) — a free knowledge-base app that visualises the links between your articles as an interactive graph.
+
+1. Download Obsidian from [https://obsidian.md/download](https://obsidian.md/download) (available for Windows, Mac, and Linux)
+2. Install and open it — choose **Open folder as vault** and select your SuperMemory folder:
+   ```
+   C:\Users\{you}\Supervertaler\supermemory\
+   ```
+3. The free version of Obsidian includes everything you need — no subscription required. (The paid Sync and Publish add-ons are not needed for SuperMemory.)
 
 ## Learn more
 

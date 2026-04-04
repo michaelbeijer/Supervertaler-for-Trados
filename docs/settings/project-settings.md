@@ -28,6 +28,7 @@ If no project-specific settings exist yet (first time opening a project), the cu
 | Project termbase (pink highlighting) | Yes | Different project termbase per project |
 | MultiTerm visibility | Yes | Different MultiTerm termbases enabled per project |
 | AI context termbase filters | Yes | Different termbases in AI prompts per project |
+| Active prompt | Yes | Each project remembers its [active prompt](../supermemory.md#active-prompt) for Quick Add and Batch Translate |
 | API keys and provider settings | No | Shared across all projects |
 | Panel font size | No | UI preference, shared |
 | Term shortcut style | No | UI preference, shared |
@@ -35,13 +36,13 @@ If no project-specific settings exist yet (first time opening a project), the cu
 
 ## Storage location
 
-Per-project settings are stored as individual JSON files in:
+Per-project settings are stored as individual JSON files inside your [user data folder](../data-folder.md):
 
 ```
-%LocalAppData%\Supervertaler.Trados\projects\
+C:\Users\{you}\Supervertaler\trados\projects\
 ```
 
-Each file is named with a hash derived from the Trados project file path (e.g., `a1b2c3d4e5f6.json`). The JSON file also contains the original project path and name for reference.
+Each file is named with a hash and the project name (e.g., `a1b2c3d4 - MyProject.json`). The JSON file also contains the original project path for reference.
 
 {% hint style="warning" %}
 **Moving a Trados project** to a different folder creates a new project key. The plugin will treat it as a new project and use global defaults until you reconfigure. The old project settings file remains in the `projects` folder and can be safely deleted.

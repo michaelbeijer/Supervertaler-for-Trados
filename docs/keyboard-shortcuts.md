@@ -45,6 +45,12 @@ All keyboard shortcuts available in Supervertaler for Trados, with Mac equivalen
 Assign prompts to slots in **Settings → Prompts**. Select a QuickLauncher prompt and choose a shortcut from the dropdown in the detail pane. If no slots are assigned, the shortcuts default to menu position order.
 {% endhint %}
 
+## SuperMemory
+
+| Shortcut (Windows) | Shortcut (Mac) | Action |
+|---------------------|----------------|--------|
+| `Ctrl+Alt+M` | `Control+Option+M` | Add to SuperMemory — quick-add a term or correction to your knowledge base |
+
 ## Navigation and Display
 
 | Shortcut (Windows) | Shortcut (Mac) | Action |
@@ -96,3 +102,4 @@ Terms beyond 45 have no keyboard shortcut. Use the **Term Picker** (`Ctrl+Alt+Do
 - [TermLens](termlens.md)
 - [Supervertaler Assistant](ai-assistant.md)
 - [Batch Translate](batch-translate.md)
+- [SuperMemory](supermemory.md)

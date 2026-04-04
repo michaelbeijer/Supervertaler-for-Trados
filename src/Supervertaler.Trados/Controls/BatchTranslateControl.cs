@@ -36,6 +36,7 @@ namespace Supervertaler.Trados.Controls
 
         // Prompt list (aligned with ComboBox indices; index 0 = "None")
         private List<PromptTemplate> _promptList = new List<PromptTemplate>();
+        private string _activePromptPath; // per-project active prompt for visual indicator
 
         // Progress
         private ProgressBar _progressBar;
@@ -105,6 +106,7 @@ namespace Supervertaler.Trados.Controls
         public BatchTranslateControl()
         {
             BuildUI();
+            Resize += (s, e) => LayoutPromptRow();
         }
 
         private void BuildUI()
@@ -222,7 +224,7 @@ namespace Supervertaler.Trados.Controls
                 Location = new Point(100, y),
                 Width = 200,
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = bodyFont
+                Font = bodyFont,
             };
             _cmbPrompt.Items.Add("(None \u2014 default)");
             _cmbPrompt.SelectedIndex = 0;
@@ -632,8 +634,9 @@ namespace Supervertaler.Trados.Controls
         /// the dropdown auto-selects the first prompt whose name contains the project name.
         /// </summary>
         public void SetPrompts(List<PromptTemplate> prompts, string selectedRelativePath,
-            string categoryFilter = null, string projectName = null)
+            string categoryFilter = null, string projectName = null, string activePromptPath = null)
         {
+            _activePromptPath = activePromptPath;
             _cmbPrompt.Items.Clear();
             _cmbPrompt.Items.Add("(None \u2014 default)");
             _promptList.Clear();
@@ -650,7 +653,14 @@ namespace Supervertaler.Trados.Controls
                         continue;
 
                     _promptList.Add(p);
-                    _cmbPrompt.Items.Add(p.Name);
+
+                    // Append visual marker to active prompt name
+                    var isActive = !string.IsNullOrEmpty(activePromptPath)
+                        && string.Equals(
+                            (p.RelativePath ?? "").Replace('/', '\\'),
+                            (activePromptPath ?? "").Replace('/', '\\'),
+                            StringComparison.OrdinalIgnoreCase);
+                    _cmbPrompt.Items.Add(isActive ? p.Name + "  \u2714" : p.Name);
 
                     if (!string.IsNullOrEmpty(selectedRelativePath) &&
                         string.Equals(p.RelativePath, selectedRelativePath, StringComparison.OrdinalIgnoreCase))
@@ -672,6 +682,18 @@ namespace Supervertaler.Trados.Controls
                 selectedIdx = projectMatchIdx;
 
             _cmbPrompt.SelectedIndex = selectedIdx;
+
+            // Auto-size dropdown width to fit longest item
+            int maxWidth = _cmbPrompt.Width;
+            using (var g = _cmbPrompt.CreateGraphics())
+            {
+                foreach (var item in _cmbPrompt.Items)
+                {
+                    var w = (int)g.MeasureString(item.ToString(), _cmbPrompt.Font).Width + 24;
+                    if (w > maxWidth) maxWidth = w;
+                }
+            }
+            _cmbPrompt.DropDownWidth = maxWidth;
         }
 
         /// <summary>
@@ -692,6 +714,20 @@ namespace Supervertaler.Trados.Controls
         {
             var prompt = GetSelectedPrompt();
             return prompt?.RelativePath ?? "";
+        }
+
+        /// <summary>
+        /// Lays out the prompt combo and AutoPrompt link so the combo fills
+        /// available width minus space reserved for the link.
+        /// </summary>
+        private void LayoutPromptRow()
+        {
+            if (_cmbPrompt == null || _lnkGeneratePrompt == null) return;
+            var linkWidth = _lnkGeneratePrompt.PreferredWidth + 8; // 8px gap
+            var availableWidth = ClientSize.Width - _cmbPrompt.Left - linkWidth - 8; // 8px right margin
+            if (availableWidth < 100) availableWidth = 100;
+            _cmbPrompt.Width = availableWidth;
+            _lnkGeneratePrompt.Left = _cmbPrompt.Right + 8;
         }
 
         /// <summary>

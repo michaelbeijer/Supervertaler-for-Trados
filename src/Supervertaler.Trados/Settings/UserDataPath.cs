@@ -74,6 +74,9 @@ namespace Supervertaler.Trados.Settings
         /// <summary>Shared resources folder (supervertaler.db lives here).</summary>
         public static string ResourcesDir => Path.Combine(Root, "resources");
 
+        /// <summary>SuperMemory vault folder (Obsidian-compatible Markdown KB).</summary>
+        public static string SuperMemoryDir => Path.Combine(Root, "supermemory");
+
         // ── Trados-specific sub-directory ────────────────────────────
 
         /// <summary>Trados-specific sub-folder inside the shared root.</summary>

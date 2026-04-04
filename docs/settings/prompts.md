@@ -12,6 +12,10 @@ Open the plugin **Settings** dialogue and switch to the **Prompts** tab.
 
 <figure><img src="../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
 
+#### Active prompt
+
+Right-click any translation prompt in the tree and choose **Set as active prompt for this project** to designate it as the active prompt. The active prompt is shown with a pin icon and bold blue text. It is used by [SuperMemory Quick Add](../supermemory.md#quick-add-ctrlaltm) when appending terminology, and is auto-selected in the [Batch Translate](../batch-translate.md) dropdown. The active prompt is saved [per project](project-settings.md).
+
 #### What's in this section
 
 * [**Built-in Prompts**](prompts/built-in-prompts.md) — the prompts that ship with the plugin, organised by category
@@ -28,4 +32,5 @@ Open the plugin **Settings** dialogue and switch to the **Prompts** tab.
 * [AI Settings](ai-settings.md)
 * [Batch Translate](../batch-translate.md)
 * [AI Proofreader](../ai-proofreader.md)
+* [SuperMemory](../supermemory.md)
 * [Keyboard Shortcuts](../keyboard-shortcuts.md)

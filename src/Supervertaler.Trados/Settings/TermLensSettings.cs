@@ -295,6 +295,10 @@ namespace Supervertaler.Trados.Settings
 
             if (AiSettings != null && ps.DisabledAiTermbaseIds != null)
                 AiSettings.DisabledAiTermbaseIds = ps.DisabledAiTermbaseIds;
+
+            // Per-project active prompt (overrides global SelectedPromptPath)
+            if (AiSettings != null && !string.IsNullOrEmpty(ps.ActivePromptPath))
+                AiSettings.SelectedPromptPath = ps.ActivePromptPath;
         }
 
         /// <summary>
@@ -317,6 +321,7 @@ namespace Supervertaler.Trados.Settings
                     ? new List<long>(DisabledMultiTermIds) : new List<long>(),
                 DisabledAiTermbaseIds = AiSettings?.DisabledAiTermbaseIds != null
                     ? new List<long>(AiSettings.DisabledAiTermbaseIds) : new List<long>(),
+                ActivePromptPath = AiSettings?.SelectedPromptPath ?? "",
             };
         }
 

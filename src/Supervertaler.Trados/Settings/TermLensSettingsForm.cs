@@ -964,8 +964,16 @@ namespace Supervertaler.Trados.Settings
             _aiSettingsPanel.SetAvailableTermbases(GetCombinedTermbaseList(),
                 _settings.AiSettings?.DisabledAiTermbaseIds);
 
-            // Prompts
-            _promptManagerPanel.PopulateFromSettings(_settings.AiSettings, _promptLibrary);
+            // Prompts — pass per-project active prompt if available
+            string projectActivePrompt = null;
+            var projPath = TermLensEditorViewPart.GetCurrentProjectPath();
+            if (!string.IsNullOrEmpty(projPath))
+            {
+                var ps = ProjectSettings.Load(projPath);
+                if (ps != null && !string.IsNullOrEmpty(ps.ActivePromptPath))
+                    projectActivePrompt = ps.ActivePromptPath;
+            }
+            _promptManagerPanel.PopulateFromSettings(_settings.AiSettings, _promptLibrary, projectActivePrompt);
         }
 
         private void OnBrowseClick(object sender, EventArgs e)

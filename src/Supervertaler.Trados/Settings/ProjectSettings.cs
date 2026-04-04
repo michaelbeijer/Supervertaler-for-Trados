@@ -74,6 +74,16 @@ namespace Supervertaler.Trados.Settings
         [DataMember(Name = "disabledAiTermbaseIds")]
         public List<long> DisabledAiTermbaseIds { get; set; } = new List<long>();
 
+        // ─── Per-project prompt settings ────────────────────────────
+
+        /// <summary>
+        /// Relative path (from prompt_library/) of the active translation prompt
+        /// for this project. Empty string means no project-specific override
+        /// (falls back to the global SelectedPromptPath).
+        /// </summary>
+        [DataMember(Name = "activePromptPath")]
+        public string ActivePromptPath { get; set; } = "";
+
         // ─── Static helpers ─────────────────────────────────────────
 
         /// <summary>

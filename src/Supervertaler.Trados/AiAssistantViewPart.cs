@@ -902,12 +902,30 @@ namespace Supervertaler.Trados
             {
                 _promptLibrary?.Refresh();
                 var prompts = _promptLibrary?.GetAllPrompts();
+
+                // Use per-project active prompt if set, else global
                 var selectedPath = _settings?.AiSettings?.SelectedPromptPath ?? "";
+                string activePromptPath = null;
+                var projectPath = TermLensEditorViewPart.GetCurrentProjectPath();
+                if (!string.IsNullOrEmpty(projectPath))
+                {
+                    try
+                    {
+                        var ps = Settings.ProjectSettings.Load(projectPath);
+                        if (ps != null && !string.IsNullOrEmpty(ps.ActivePromptPath))
+                        {
+                            activePromptPath = ps.ActivePromptPath;
+                            selectedPath = activePromptPath;
+                        }
+                    }
+                    catch { }
+                }
+
                 var mode = _control.Value.BatchTranslateControl.CurrentMode;
                 var categoryFilter = mode == BatchMode.Proofread ? "Proofread" : "Translate";
                 var projectName = TermLensEditorViewPart.GetCurrentProjectName();
                 _control.Value.BatchTranslateControl.SetPrompts(
-                    prompts, selectedPath, categoryFilter, projectName);
+                    prompts, selectedPath, categoryFilter, projectName, activePromptPath);
             });
         }
 

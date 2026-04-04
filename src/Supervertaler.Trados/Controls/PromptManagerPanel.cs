@@ -61,6 +61,7 @@ namespace Supervertaler.Trados.Controls
         private Dictionary<string, string> _shortcutAssignments; // FilePath -> shortcut display string
 
         private const string SystemPromptTag = "__SYSTEM_PROMPT__";
+        private string _activePromptPath; // per-project active prompt relative path
 
         public PromptManagerPanel()
         {
@@ -288,6 +289,10 @@ namespace Supervertaler.Trados.Controls
             }
             _treeContextMenu.Items.Add(miShortcut);
 
+            var miSetActive = new ToolStripMenuItem("Set as active prompt for this project");
+            miSetActive.Click += (s, ev) => SetActivePromptFromTree();
+            _treeContextMenu.Items.Add(miSetActive);
+
             var miDeleteFolder = new ToolStripMenuItem("Delete Folder");
             miDeleteFolder.Click += OnDeleteFolder;
             _treeContextMenu.Items.Add(miDeleteFolder);
@@ -318,6 +323,12 @@ namespace Supervertaler.Trados.Controls
                 miClone.Visible = prompt != null;
                 miDelete.Visible = prompt != null;
                 miShortcut.Visible = prompt != null && prompt.IsQuickLauncher;
+                miSetActive.Visible = prompt != null && !prompt.IsQuickLauncher;
+                if (prompt != null && miSetActive.Visible)
+                {
+                    miSetActive.Checked = !string.IsNullOrEmpty(_activePromptPath)
+                        && string.Equals(prompt.RelativePath, _activePromptPath, StringComparison.OrdinalIgnoreCase);
+                }
                 miDeleteFolder.Visible = isFolder;
                 miFlatSection.Visible = isQlFolder;
 
@@ -634,11 +645,16 @@ namespace Supervertaler.Trados.Controls
         /// <summary>
         /// Populates the panel from current settings and prompt library.
         /// </summary>
-        public void PopulateFromSettings(AiSettings settings, PromptLibrary library)
+        public void PopulateFromSettings(AiSettings settings, PromptLibrary library, string projectActivePromptPath = null)
         {
             _library = library ?? new PromptLibrary();
             _aiSettings = settings;
             _customSystemPrompt = settings?.CustomSystemPrompt;
+
+            // Per-project active prompt — use project override if set, else global
+            _activePromptPath = !string.IsNullOrEmpty(projectActivePromptPath)
+                ? projectActivePromptPath
+                : settings?.SelectedPromptPath ?? "";
 
             // Build shortcut assignments from settings
             _shortcutAssignments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -664,10 +680,16 @@ namespace Supervertaler.Trados.Controls
         /// <summary>
         /// Applies changes back to AI settings.
         /// </summary>
+        /// <summary>
+        /// Returns the active prompt path set by the user (for saving to project settings).
+        /// </summary>
+        public string ActivePromptPath => _activePromptPath ?? "";
+
         public void ApplyToSettings(AiSettings settings)
         {
             if (settings == null) return;
             settings.CustomSystemPrompt = _customSystemPrompt;
+            settings.SelectedPromptPath = _activePromptPath ?? "";
 
             // Save shortcut slot assignments from _shortcutAssignments
             var slots = new Dictionary<string, string>();
@@ -854,15 +876,30 @@ namespace Supervertaler.Trados.Controls
                     }
                 }
 
+                // Mark the active prompt for this project
+                var isActive = !string.IsNullOrEmpty(_activePromptPath)
+                    && string.Equals(prompt.RelativePath, _activePromptPath, StringComparison.OrdinalIgnoreCase);
+                if (isActive)
+                    displayName = "\U0001F4CC " + displayName; // 📌 pin emoji
+
                 var node = new TreeNode(displayName)
                 {
                     Tag = prompt
                 };
 
-                // Muted for default or hidden, dark for custom
-                node.ForeColor = (prompt.IsDefault || prompt.HiddenFromMenu)
-                    ? Color.FromArgb(80, 80, 80)
-                    : Color.FromArgb(30, 30, 30);
+                // Active prompt gets bold + accent color
+                if (isActive)
+                {
+                    node.NodeFont = new Font(_tvPrompts.Font, FontStyle.Bold);
+                    node.ForeColor = Color.FromArgb(0, 90, 158); // Supervertaler blue
+                }
+                else
+                {
+                    // Muted for default or hidden, dark for custom
+                    node.ForeColor = (prompt.IsDefault || prompt.HiddenFromMenu)
+                        ? Color.FromArgb(80, 80, 80)
+                        : Color.FromArgb(30, 30, 30);
+                }
 
                 parentNodes.Add(node);
             }
@@ -1481,6 +1518,25 @@ namespace Supervertaler.Trados.Controls
                 _shortcutAssignments.Remove(keyToRemove);
 
             _shortcutAssignments[prompt.FilePath] = display;
+
+            RefreshTree();
+        }
+
+        private void SetActivePromptFromTree()
+        {
+            var prompt = GetSelectedPrompt();
+            if (prompt == null) return;
+
+            // Toggle: if already active, clear it; otherwise set it
+            if (!string.IsNullOrEmpty(_activePromptPath)
+                && string.Equals(prompt.RelativePath, _activePromptPath, StringComparison.OrdinalIgnoreCase))
+            {
+                _activePromptPath = "";
+            }
+            else
+            {
+                _activePromptPath = prompt.RelativePath;
+            }
 
             RefreshTree();
         }

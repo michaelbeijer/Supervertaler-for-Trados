@@ -284,45 +284,61 @@ namespace Supervertaler.Trados.Controls
                     AutoSize = true
                 };
 
-                // Issue description
-                var lblDesc = new Label
+                // Issue description (TextBox so users can select and copy text)
+                var txtDesc = new TextBox
                 {
                     Text = issue.IssueDescription ?? "",
                     Font = bodyFont,
                     ForeColor = TextColor,
+                    BackColor = CardColor,
                     Location = new Point(8, 24),
-                    AutoSize = false,
-                    MaximumSize = new Size(0, 0),  // will be set on resize
-                    AutoEllipsis = false
+                    ReadOnly = true,
+                    BorderStyle = BorderStyle.None,
+                    Multiline = true,
+                    WordWrap = true,
+                    TabStop = false,
+                    Tag = "desc"
                 };
 
-                // Suggestion (if available)
-                Label lblSugg = null;
+                // Suggestion (if available, also a selectable TextBox)
+                TextBox txtSugg = null;
                 if (!string.IsNullOrEmpty(issue.Suggestion))
                 {
-                    lblSugg = new Label
+                    txtSugg = new TextBox
                     {
                         Text = "Suggestion: " + issue.Suggestion,
                         Font = suggFont,
                         ForeColor = SuggColor,
+                        BackColor = CardColor,
                         Location = new Point(8, 44),
-                        AutoSize = false,
-                        MaximumSize = new Size(0, 0),
-                        AutoEllipsis = false
+                        ReadOnly = true,
+                        BorderStyle = BorderStyle.None,
+                        Multiline = true,
+                        WordWrap = true,
+                        TabStop = false,
+                        Tag = "sugg"
                     };
                 }
 
                 card.Controls.Add(chk);
                 card.Controls.Add(lblSegNum);
-                card.Controls.Add(lblDesc);
-                if (lblSugg != null)
-                    card.Controls.Add(lblSugg);
+                card.Controls.Add(txtDesc);
+                if (txtSugg != null)
+                    card.Controls.Add(txtSugg);
+
+                // Right-click context menu for copying text
+                var ctxMenu = BuildIssueContextMenu(issue, txtSugg != null);
+                card.ContextMenuStrip = ctxMenu;
+                lblSegNum.ContextMenuStrip = ctxMenu;
+                txtDesc.ContextMenuStrip = ctxMenu;
+                if (txtSugg != null)
+                    txtSugg.ContextMenuStrip = ctxMenu;
 
                 // Checkbox toggle — change card colour and text when checked
                 var capturedCard = card;
                 var capturedSegNum = lblSegNum;
-                var capturedDesc = lblDesc;
-                var capturedSugg = lblSugg;
+                var capturedDesc = txtDesc;
+                var capturedSugg = txtSugg;
                 chk.CheckedChanged += (s, e) =>
                 {
                     if (!chk.Checked) return;
@@ -348,22 +364,32 @@ namespace Supervertaler.Trados.Controls
                     }
                 };
 
-                // Hover effect — apply to card and all children (except checkbox)
+                // Hover effect — apply to card and all children
+                // TextBox controls keep IBeam cursor for text selection;
+                // navigation on click only for non-checkbox, non-textbox controls
                 Action<Control> applyHover = null;
                 applyHover = (ctrl) =>
                 {
                     ctrl.MouseEnter += (s, e) =>
                     {
                         capturedCard.BackColor = HoverColor;
+                        // Update TextBox BackColor so selected text looks right
+                        foreach (Control c in capturedCard.Controls)
+                            if (c is TextBox tb) tb.BackColor = HoverColor;
                     };
                     ctrl.MouseLeave += (s, e) =>
                     {
                         capturedCard.BackColor = CardColor;
+                        foreach (Control c in capturedCard.Controls)
+                            if (c is TextBox tb) tb.BackColor = CardColor;
                     };
-                    // Only navigate on click for non-checkbox controls
-                    if (!(ctrl is CheckBox))
+                    // TextBox: let users select text — don't hijack click for navigation
+                    // CheckBox: has its own click handler
+                    if (!(ctrl is CheckBox) && !(ctrl is TextBox))
+                    {
                         ctrl.Click += (s, e) => OnIssueCardClick(capturedCard.Tag as ProofreadingIssue);
-                    ctrl.Cursor = Cursors.Hand;
+                        ctrl.Cursor = Cursors.Hand;
+                    }
                 };
                 applyHover(card);
                 foreach (Control child in card.Controls)
@@ -372,7 +398,7 @@ namespace Supervertaler.Trados.Controls
                 _resultsPanel.Controls.Add(card);
 
                 // Layout the card — need to measure text height
-                LayoutCard(card, lblSegNum, lblDesc, lblSugg);
+                LayoutCard(card, lblSegNum, txtDesc, txtSugg);
 
                 yPos += card.Height + 4;
             }
@@ -696,6 +722,46 @@ namespace Supervertaler.Trados.Controls
             _lblIssueCount.Parent?.PerformLayout();
         }
 
+        private ContextMenuStrip BuildIssueContextMenu(ProofreadingIssue issue, bool hasSuggestion)
+        {
+            var menu = new ContextMenuStrip();
+            var menuFont = new Font("Segoe UI", 9f);
+
+            var miCopyIssue = new ToolStripMenuItem("Copy issue description", null, (s, e) =>
+            {
+                try { if (!string.IsNullOrEmpty(issue.IssueDescription)) Clipboard.SetText(issue.IssueDescription); }
+                catch { }
+            }) { Font = menuFont };
+            menu.Items.Add(miCopyIssue);
+
+            if (hasSuggestion)
+            {
+                var miCopySugg = new ToolStripMenuItem("Copy suggestion", null, (s, e) =>
+                {
+                    try { if (!string.IsNullOrEmpty(issue.Suggestion)) Clipboard.SetText(issue.Suggestion); }
+                    catch { }
+                }) { Font = menuFont };
+                menu.Items.Add(miCopySugg);
+            }
+
+            menu.Items.Add(new ToolStripSeparator());
+
+            var miCopyAll = new ToolStripMenuItem("Copy all", null, (s, e) =>
+            {
+                try
+                {
+                    var text = $"Segment {issue.SegmentNumber}\n{issue.IssueDescription}";
+                    if (!string.IsNullOrEmpty(issue.Suggestion))
+                        text += $"\nSuggestion: {issue.Suggestion}";
+                    Clipboard.SetText(text);
+                }
+                catch { }
+            }) { Font = menuFont };
+            menu.Items.Add(miCopyAll);
+
+            return menu;
+        }
+
         private void OnIssueCardClick(ProofreadingIssue issue)
         {
             if (issue == null) return;
@@ -706,7 +772,7 @@ namespace Supervertaler.Trados.Controls
             });
         }
 
-        private void LayoutCard(Panel card, Label lblSegNum, Label lblDesc, Label lblSugg)
+        private void LayoutCard(Panel card, Label lblSegNum, Control txtDesc, Control txtSugg)
         {
             var availableWidth = _resultsPanel.ClientSize.Width
                 - SystemInformation.VerticalScrollBarWidth - 24;
@@ -715,18 +781,25 @@ namespace Supervertaler.Trados.Controls
             card.Width = availableWidth;
             var textWidth = availableWidth - 20;
 
-            lblDesc.MaximumSize = new Size(textWidth, 0);
-            lblDesc.AutoSize = true;
-            lblDesc.Location = new Point(8, lblSegNum.Bottom + 2);
+            // Size the description TextBox to fit its content
+            txtDesc.Location = new Point(8, lblSegNum.Bottom + 2);
+            txtDesc.Width = textWidth;
+            var descSize = TextRenderer.MeasureText(txtDesc.Text, txtDesc.Font,
+                new Size(textWidth, int.MaxValue),
+                TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl);
+            txtDesc.Height = Math.Max(16, descSize.Height + 4);
 
-            int cardHeight = lblDesc.Bottom + 6;
+            int cardHeight = txtDesc.Bottom + 6;
 
-            if (lblSugg != null)
+            if (txtSugg != null)
             {
-                lblSugg.MaximumSize = new Size(textWidth, 0);
-                lblSugg.AutoSize = true;
-                lblSugg.Location = new Point(8, lblDesc.Bottom + 2);
-                cardHeight = lblSugg.Bottom + 6;
+                txtSugg.Location = new Point(8, txtDesc.Bottom + 2);
+                txtSugg.Width = textWidth;
+                var suggSize = TextRenderer.MeasureText(txtSugg.Text, txtSugg.Font,
+                    new Size(textWidth, int.MaxValue),
+                    TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl);
+                txtSugg.Height = Math.Max(16, suggSize.Height + 4);
+                cardHeight = txtSugg.Bottom + 6;
             }
 
             card.Height = Math.Max(40, cardHeight);
@@ -763,22 +836,21 @@ namespace Supervertaler.Trados.Controls
                     continue;
                 }
 
-                // Find labels inside card (skip CheckBox controls)
-                Label lblSegNum = null, lblDesc = null, lblSugg = null;
+                // Find controls inside card by Tag
+                Label lblSegNum = null;
+                Control txtDesc = null, txtSugg = null;
                 foreach (Control child in card.Controls)
                 {
-                    var lbl = child as Label;
-                    if (lbl == null) continue;
-                    if (lbl.Font.Bold)
+                    if (child is Label lbl && lbl.Font.Bold)
                         lblSegNum = lbl;
-                    else if (lbl.ForeColor == SuggColor)
-                        lblSugg = lbl;
-                    else
-                        lblDesc = lbl;
+                    else if (child is TextBox tb && (string)tb.Tag == "desc")
+                        txtDesc = tb;
+                    else if (child is TextBox ts && (string)ts.Tag == "sugg")
+                        txtSugg = ts;
                 }
 
-                if (lblSegNum != null && lblDesc != null)
-                    LayoutCard(card, lblSegNum, lblDesc, lblSugg);
+                if (lblSegNum != null && txtDesc != null)
+                    LayoutCard(card, lblSegNum, txtDesc, txtSugg);
 
                 yPos += card.Height + 4;
             }

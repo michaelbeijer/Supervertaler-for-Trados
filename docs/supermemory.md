@@ -73,7 +73,7 @@ C:\Users\{you}\Supervertaler\supermemory\
 
 While translating in Trados, you can instantly add a term or correction to your SuperMemory vault – and optionally inject it into your active translation prompt so the next Ctrl+T picks it up immediately.
 
-<figure><img src=".gitbook/assets/image (10).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
 
 ### How to use
 

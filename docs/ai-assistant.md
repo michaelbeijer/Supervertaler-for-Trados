@@ -1,26 +1,30 @@
 # Supervertaler Assistant
 
 {% hint style="info" %}
-You are viewing help for **Supervertaler for Trados** – the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://help.supervertaler.com).
+You are viewing help for **Supervertaler for Trados** -- the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://help.supervertaler.com).
 {% endhint %}
 
 The Supervertaler Assistant is a conversational chat panel that runs inside Trados Studio as a separate dockable panel. It is context-aware: it automatically includes your current source and target text, matched terminology, and TM matches in every request, so the AI can give you informed answers about the segment you are working on.
 
 <figure><img src=".gitbook/assets/Sv_Supervertaler-Assistant.png" alt=""><figcaption></figcaption></figure>
 
-### Opening the Panel
+## Opening the Panel
 
 The Supervertaler Assistant lives in its own dockable panel. To open it, go to **View > Supervertaler Assistant**.
 
 You can dock the panel on the right side, bottom, or as a floating window. Trados remembers the panel position between sessions.
 
-### Chat Tab
+## Chat
 
-The Chat tab is the main interface. Type a message in the input field at the bottom and press **Enter** to send.
+Type a message in the input field at the bottom and press **Enter** to send. The AI will consider your current source text, target text, matched terminology from your termbases, and TM fuzzy matches when responding.
 
-<figure><img src=".gitbook/assets/Supervertaler-Assistant.png" alt=""><figcaption></figcaption></figure>
+| Action                      | How                       |
+| --------------------------- | ------------------------- |
+| Send a message              | Press **Enter**           |
+| Insert a line break         | Press **Shift+Enter**     |
+| Stop a response in progress | Click the **Stop** button |
 
-#### What You Can Ask
+### What You Can Ask
 
 Because the assistant has access to your current segment context, you can ask things like:
 
@@ -30,111 +34,14 @@ Because the assistant has access to your current segment context, you can ask th
 * "Suggest a more formal alternative"
 * "Explain this source text"
 
-The AI will consider your current source text, target text, matched terminology from your termbases, and TM fuzzy matches when responding.
-
-When using **Claude** as your AI provider, the assistant can also query your Trados Studio installation directly. Try asking about your projects, translation memories, or project templates. See [Studio Tools](studio-tools.md) for details and more examples.
-
-#### Sending Messages
-
-| Action                      | How                       |
-| --------------------------- | ------------------------- |
-| Send a message              | Press **Enter**           |
-| Insert a line break         | Press **Shift+Enter**     |
-| Stop a response in progress | Click the **Stop** button |
-
-#### Chat History
+### Chat History
 
 The conversation is saved automatically after every message and restored the next time Trados starts. Your history persists until you explicitly clear it.
 
-To clear the history, click the **Clear** button in the chat toolbar. This removes all messages from both the display and the saved file.
+To clear the history, click the **Clear** button in the chat toolbar.
 
 {% hint style="info" %}
-Chat history is stored in `~/Supervertaler/trados/chat_history.json`. It is a single global history – not per project or per file.
-{% endhint %}
-
-### Context Awareness
-
-The Supervertaler Assistant is deeply integrated with your Trados project. Every time you send a message, the assistant automatically receives a rich snapshot of your current work so it can give you informed, project-specific answers. This context is assembled fresh on each message, so the AI always sees the latest state.
-
-#### Project and file information
-
-The assistant knows which project and file you are working in, the language pair (e.g. Dutch → English), and your current position in the document (e.g. "Segment 42 of 318").
-
-#### Full document content
-
-When enabled, all source segments in the current document are included in the AI prompt. This allows the assistant to analyse the document and determine its type – legal, medical, technical, marketing, financial, scientific, etc. – and use that assessment to inform its advice on terminology, style, and translation choices.
-
-For very large documents, the content is automatically truncated to the configured maximum (default: 500 segments). The truncation preserves the first 80% and the last 20% so the AI still sees both the beginning and the end of the document.
-
-#### Current segment
-
-The source text you are translating and any target translation you have already entered.
-
-#### Surrounding segments
-
-Two segments before and two segments after your current position are included, with their translations where available. This gives the AI local context for cohesion and consistency.
-
-#### Translation Memory matches
-
-TM fuzzy matches for the current segment are included, showing the match percentage, source text, and target text. This gives the AI reference material from your previous translations.
-
-#### Terminology
-
-Matched terms from your active termbases are included with their approved translations and synonyms. Optionally, term definitions, domains, and usage notes are also included, giving the AI deeper understanding of your terminology requirements.
-
-Terms marked as non-translatable or forbidden are flagged so the AI can respect those constraints.
-
-{% hint style="info" %}
-You can control exactly what context the assistant receives. In the settings dialogue on the **AI Settings** tab, you can toggle document content, TM matches, term metadata, and select which termbases contribute to the AI prompt.
-{% endhint %}
-
-{% hint style="success" %}
-**Tip:** For the best results, keep document content and term metadata enabled. The more context the AI has, the more accurate and consistent its suggestions will be. The document type analysis is especially valuable – it helps the AI understand that "consideration" means something different in a legal contract than in a marketing brochure.
-{% endhint %}
-
-### File Attachments
-
-The Supervertaler Assistant supports attaching both images and documents to your messages. Use the **paperclip button** (📎) next to the chat input, or drag and drop files directly onto the chat area.
-
-#### Images
-
-Attach images for visual context – for example, a screenshot of the source document layout, a reference image, or a table that is hard to describe in text. Images are sent to the AI using each provider's native vision API.
-
-| Method        | How                                                 |
-| ------------- | --------------------------------------------------- |
-| Paste         | Press **Ctrl+V** with an image on the clipboard     |
-| Drag and drop | Drag an image file into the chat input area         |
-| Browse        | Click the **📎** button and select an image file     |
-
-Supported image formats: PNG, JPEG, GIF, WebP, BMP. Up to **5 images** per message, **10 MB** maximum per image.
-
-#### Documents
-
-Attach documents to provide the AI with additional reference material – for example, a client style guide, a glossary in spreadsheet form, a reference PDF, or a translation memory export. The text content is automatically extracted from the document and included in your message as context.
-
-| Method        | How                                                 |
-| ------------- | --------------------------------------------------- |
-| Drag and drop | Drag a document file into the chat input area       |
-| Browse        | Click the **📎** button and select a document file   |
-
-The chat bubble shows a compact summary (file name and size) instead of the full extracted text, keeping the conversation readable.
-
-**Supported document formats:**
-
-| Category           | Formats                            |
-| ------------------ | ---------------------------------- |
-| Documents          | DOCX, DOC, PDF, RTF                |
-| Presentations      | PPTX, PPT                         |
-| Spreadsheets       | XLSX, XLS, CSV, TSV                |
-| Translation files  | TMX, SDLXLIFF, XLIFF/XLF, TBX     |
-| Text and markup    | TXT, Markdown, HTML, JSON, XML     |
-
-{% hint style="info" %}
-Up to **5 documents** per message, **20 MB** maximum per file. Very large documents are automatically truncated to avoid exceeding AI context limits. Legacy binary formats (DOC, XLS, PPT) use best-effort text extraction – for best results, save as the modern format (DOCX, XLSX, PPTX) first.
-{% endhint %}
-
-{% hint style="success" %}
-**Tip:** Attaching a client style guide or reference document alongside your translation question gives the AI much better context for providing accurate, style-consistent suggestions.
+Chat history is stored in `~/Supervertaler/trados/chat_history.json`. It is a single global history -- not per project or per file.
 {% endhint %}
 
 ### Right-Click Menu
@@ -145,37 +52,22 @@ Right-click any assistant response bubble to access:
 | ------------------- | --------------------------------------------------------------------------- |
 | **Copy**            | Copies the raw Markdown to the clipboard, preserving tables and formatting  |
 | **Apply to target** | Inserts the plain text (Markdown stripped) into the active target segment    |
-| **Save as Prompt…** | Saves the response as a reusable prompt template                            |
+| **Save as Prompt...** | Saves the response as a reusable prompt template                          |
 
 If you select text within a bubble before right-clicking, **Copy** and **Apply to target** operate on the selection only.
 
-### Provider and Model
+## Features
 
-The current provider and model are shown in the status area at the bottom of the chat panel. You can switch models in two ways:
+| Feature | Description |
+|---------|-------------|
+| **[Context Awareness](ai-assistant/context-awareness.md)** | Automatic project, segment, terminology, TM, and document context in every request |
+| **[File Attachments](ai-assistant/file-attachments.md)** | Attach images and documents (PDF, DOCX, XLSX, TMX, etc.) for additional context |
+| **[Studio Tools](ai-assistant/studio-tools.md)** | Query your Trados Studio projects, TMs, termbases, and statistics using natural language (Claude only) |
+| **[Providers and Models](ai-assistant/providers.md)** | Supports 7 AI providers including OpenAI, Claude, Gemini, Grok, Mistral, Ollama, and custom endpoints |
 
-* **Quick switch** – click the provider/model label directly. A dropdown menu appears with all available models grouped by provider. The current model is marked with a tick. Select a different model to switch instantly.
-* **Settings** – open the settings dialogueue (gear icon) and switch to the **AI Settings** tab for full configuration including API keys, endpoints, and advanced options.
+## See Also
 
-#### Supported Providers
-
-| Provider      | Models                                                         |
-| ------------- | -------------------------------------------------------------- |
-| **OpenAI**    | GPT-5.4, GPT-5.4 Mini                                          |
-| **Anthropic** | Claude Sonnet 4.6, Claude Haiku 4.5, Claude Opus 4.6           |
-| **Google**    | Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3.1 Pro (Preview)     |
-| **Grok**      | Grok 4.20, Grok 4.1 Fast, Grok 4.20 (Reasoning)               |
-| **Mistral**   | Mistral Large, Mistral Small, Mistral Nemo                     |
-| **Ollama**    | TranslateGemma, Qwen 3, Aya Expanse (local, no API key needed) |
-| **Custom**    | Any OpenAI-compatible API endpoint                             |
-
-{% hint style="info" %}
-You only need one provider to get started. If you want privacy or offline use, try [Ollama](https://supervertaler.gitbook.io/supervertaler/ai-translation/ollama) with a local model.
-{% endhint %}
-
-***
-
-### See Also
-
-* [Batch Translate](batch-translate.md)
-* [Getting Started](getting-started.md)
+* [QuickLauncher](quicklauncher.md) -- One-click prompt shortcuts
+* [Batch Translate](batch-translate.md) -- Translate multiple segments at once
+* [AI Settings](settings/ai-settings.md) -- API keys, model selection, context options
 * [Keyboard Shortcuts](keyboard-shortcuts.md)

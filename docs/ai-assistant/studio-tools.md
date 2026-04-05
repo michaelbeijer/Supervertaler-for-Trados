@@ -106,5 +106,5 @@ Studio Tools currently provides **read-only** access to your Trados data. It can
 
 ## See Also
 
-* [Supervertaler Assistant](ai-assistant.md) -- The chat interface where Studio Tools is available
-* [AI Settings](settings/ai-settings.md) -- Configure your AI provider (must be set to Claude for tool use)
+* [Supervertaler Assistant](../ai-assistant.md) -- The chat interface where Studio Tools is available
+* [AI Settings](../settings/ai-settings.md) -- Configure your AI provider (must be set to Claude for tool use)

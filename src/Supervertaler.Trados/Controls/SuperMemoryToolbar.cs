@@ -50,7 +50,7 @@ namespace Supervertaler.Trados.Controls
             // ─── Heading label ───────────────────────────────────────
             _lblHeading = new Label
             {
-                Text = "SuperMemory",
+                Text = "Memory Bank",
                 Font = new Font("Segoe UI Semibold", UiScale.FontSize(7f)),
                 ForeColor = Color.FromArgb(90, 90, 90),
                 AutoSize = true,

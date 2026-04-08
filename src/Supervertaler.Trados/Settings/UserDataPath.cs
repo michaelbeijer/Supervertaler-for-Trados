@@ -74,8 +74,37 @@ namespace Supervertaler.Trados.Settings
         /// <summary>Shared resources folder (supervertaler.db lives here).</summary>
         public static string ResourcesDir => Path.Combine(Root, "resources");
 
-        /// <summary>SuperMemory vault folder (Obsidian-compatible Markdown KB).</summary>
-        public static string SuperMemoryDir => Path.Combine(Root, "supermemory");
+        /// <summary>
+        /// Memory-bank folder (Obsidian-compatible Markdown, shared format with the
+        /// standalone Supervertaler Assistant). Default location is
+        /// <c>&lt;Root&gt;/memory-bank/</c>. For backward compatibility with the original
+        /// "SuperMemory" name, if an old <c>&lt;Root&gt;/supermemory/</c> folder exists and
+        /// the new location does not, the old path is returned so existing installations
+        /// keep working without manual migration.
+        /// </summary>
+        public static string MemoryBankDir
+        {
+            get
+            {
+                var newPath = Path.Combine(Root, "memory-bank");
+                if (Directory.Exists(newPath)) return newPath;
+
+                var legacyPath = Path.Combine(Root, "supermemory");
+                if (Directory.Exists(legacyPath)) return legacyPath;
+
+                // Neither exists yet – return the new canonical path so callers that
+                // create the folder on first use get the new name.
+                return newPath;
+            }
+        }
+
+        /// <summary>
+        /// Legacy alias for <see cref="MemoryBankDir"/>. Kept so existing callers compile
+        /// unchanged during the gradual SuperMemory → memory bank rename. New code should
+        /// use <see cref="MemoryBankDir"/>.
+        /// </summary>
+        [Obsolete("Use MemoryBankDir instead. This alias exists for the SuperMemory → memory bank rename transition.")]
+        public static string SuperMemoryDir => MemoryBankDir;
 
         // ── Trados-specific sub-directory ────────────────────────────
 

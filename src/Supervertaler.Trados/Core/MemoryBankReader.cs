@@ -8,26 +8,31 @@ using Supervertaler.Trados.Settings;
 namespace Supervertaler.Trados.Core
 {
     /// <summary>
-    /// Reads and queries the SuperMemory Obsidian vault.
+    /// Reads and queries a Supervertaler memory bank (Obsidian-compatible Markdown folder).
     /// Scans frontmatter for lightweight indexing, then loads full articles on demand.
+    /// Wire format: see SPEC.md in the supervertaler-assistant repo.
     /// </summary>
-    public class SuperMemoryReader
+    public class MemoryBankReader
     {
+        // NOTE: internal field and property names (_vaultDir, VaultExists) are kept as-is
+        // in this commit to minimise churn. A follow-up commit will rename them to
+        // _memoryBankDir / MemoryBankExists alongside a fuller sweep of the SuperMemory
+        // vocabulary in the Trados plugin (docs, help pages, action IDs, etc.).
         private readonly string _vaultDir;
         private List<KbArticleIndex> _index;
         private DateTime _indexBuiltAt;
 
-        // Folders to scan for KB articles (skip 00_INBOX, 05_INDICES, 06_TEMPLATES)
+        // Folders to scan for memory-bank articles (skip 00_INBOX, 05_INDICES, 06_TEMPLATES)
         private static readonly string[] ContentFolders =
             { "01_CLIENTS", "02_TERMINOLOGY", "03_DOMAINS", "04_STYLE" };
 
-        public SuperMemoryReader(string vaultDir)
+        public MemoryBankReader(string memoryBankDir)
         {
-            _vaultDir = vaultDir;
+            _vaultDir = memoryBankDir;
         }
 
         /// <summary>
-        /// Returns true if the SuperMemory vault exists and has content folders.
+        /// Returns true if the memory bank exists on disk and has content folders.
         /// </summary>
         public bool VaultExists =>
             Directory.Exists(_vaultDir) &&
@@ -429,6 +434,17 @@ namespace Supervertaler.Trados.Core
             if (string.IsNullOrEmpty(text)) return fm;
 
             var trimmed = text.TrimStart();
+
+            // Tolerate files that were pasted from an LLM reply wrapped in a
+            // ```markdown code fence. Strip a leading fence line so the real
+            // frontmatter below it can still be parsed.
+            if (trimmed.StartsWith("```"))
+            {
+                var nl = trimmed.IndexOf('\n');
+                if (nl < 0) return fm;
+                trimmed = trimmed.Substring(nl + 1).TrimStart();
+            }
+
             if (!trimmed.StartsWith("---")) return fm;
 
             var idx1 = trimmed.IndexOf("---", StringComparison.Ordinal);
@@ -584,7 +600,7 @@ namespace Supervertaler.Trados.Core
                     (TerminologyArticles.Count != 1 ? "s" : ""));
 
             if (parts.Count == 0) return null;
-            return "SuperMemory: " + string.Join(", ", parts) +
+            return "Memory bank: " + string.Join(", ", parts) +
                 " (~" + EstimatedTokens + " tokens)";
         }
     }

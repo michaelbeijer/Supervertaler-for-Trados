@@ -67,11 +67,11 @@ namespace Supervertaler.Trados
         // Prompt library
         private PromptLibrary _promptLibrary;
 
-        // SuperMemory inbox watcher
+        // Memory-bank inbox watcher
         private FileSystemWatcher _inboxWatcher;
 
-        // SuperMemory KB reader (lazy: created once, cached for the session)
-        private SuperMemoryReader _kbReader;
+        // Memory-bank reader (lazy: created once, cached for the session)
+        private MemoryBankReader _kbReader;
 
         protected override IUIControl GetContentControl()
         {
@@ -1007,12 +1007,12 @@ namespace Supervertaler.Trados
         {
             try
             {
-                // Check if SuperMemory context is enabled in settings
+                // Check if memory-bank context is enabled in settings
                 if (_settings?.AiSettings?.IncludeSuperMemoryContext == false)
                     return null;
 
                 if (_kbReader == null)
-                    _kbReader = new SuperMemoryReader(UserDataPath.SuperMemoryDir);
+                    _kbReader = new MemoryBankReader(UserDataPath.MemoryBankDir);
 
                 if (!_kbReader.VaultExists) return null;
 
@@ -1038,7 +1038,7 @@ namespace Supervertaler.Trados
 
                 if (ctx == null) return null;
 
-                return SuperMemoryReader.FormatForPrompt(ctx);
+                return MemoryBankReader.FormatForPrompt(ctx);
             }
             catch
             {
@@ -1050,7 +1050,7 @@ namespace Supervertaler.Trados
         {
             try
             {
-                var inboxDir = Path.Combine(UserDataPath.SuperMemoryDir, "00_INBOX");
+                var inboxDir = Path.Combine(UserDataPath.MemoryBankDir, "00_INBOX");
                 if (!Directory.Exists(inboxDir))
                 {
                     _control.Value.UpdateInboxCount(0);
@@ -1085,7 +1085,7 @@ namespace Supervertaler.Trados
         {
             try
             {
-                var inboxDir = Path.Combine(UserDataPath.SuperMemoryDir, "00_INBOX");
+                var inboxDir = Path.Combine(UserDataPath.MemoryBankDir, "00_INBOX");
                 if (!Directory.Exists(inboxDir)) return;
 
                 _inboxWatcher = new FileSystemWatcher(inboxDir, "*.md")
@@ -1134,7 +1134,7 @@ namespace Supervertaler.Trados
 
         private void OnProcessInbox(object sender, EventArgs e)
         {
-            var inboxDir = Path.Combine(UserDataPath.SuperMemoryDir, "00_INBOX");
+            var inboxDir = Path.Combine(UserDataPath.MemoryBankDir, "00_INBOX");
             if (!Directory.Exists(inboxDir))
             {
                 ShowSuperMemoryMessage("Your SuperMemory inbox folder does not exist yet.\n\n" +
@@ -1164,7 +1164,7 @@ namespace Supervertaler.Trados
             }
 
             // Read the compile template
-            var templatePath = Path.Combine(UserDataPath.SuperMemoryDir, "06_TEMPLATES", "compile.md");
+            var templatePath = Path.Combine(UserDataPath.MemoryBankDir, "06_TEMPLATES", "compile.md");
             if (!File.Exists(templatePath))
             {
                 ShowSuperMemoryMessage("Could not find the compilation template at:\n" +
@@ -1198,7 +1198,7 @@ namespace Supervertaler.Trados
 
         private void OnHealthCheck(object sender, EventArgs e)
         {
-            var vaultDir = UserDataPath.SuperMemoryDir;
+            var vaultDir = UserDataPath.MemoryBankDir;
             if (!Directory.Exists(vaultDir))
             {
                 ShowSuperMemoryMessage("Your SuperMemory vault folder does not exist yet.\n\n" +
@@ -1415,7 +1415,7 @@ namespace Supervertaler.Trados
         {
             if (string.IsNullOrEmpty(response)) return;
 
-            var vaultDir = UserDataPath.SuperMemoryDir;
+            var vaultDir = UserDataPath.MemoryBankDir;
             var writtenFiles = new List<string>();
 
             // Parse "### FILE: path" markers
@@ -1510,7 +1510,7 @@ namespace Supervertaler.Trados
         {
             if (string.IsNullOrEmpty(response)) return;
 
-            var vaultDir = UserDataPath.SuperMemoryDir;
+            var vaultDir = UserDataPath.MemoryBankDir;
             // Track files with their status (new vs updated)
             var fileResults = new List<Tuple<string, bool>>(); // (path, isNew)
 
@@ -1670,7 +1670,7 @@ date: <today's date YYYY-MM-DD>
                 selectedFiles = dlg.FileNames;
             }
 
-            var vaultDir = UserDataPath.SuperMemoryDir;
+            var vaultDir = UserDataPath.MemoryBankDir;
             if (!Directory.Exists(vaultDir))
             {
                 ShowSuperMemoryMessage("Your SuperMemory vault folder does not exist yet.\n\n" +
@@ -1742,7 +1742,7 @@ date: <today's date YYYY-MM-DD>
         /// </summary>
         public void DistillTermbase(string termbaseName, string formattedTerms)
         {
-            var vaultDir = UserDataPath.SuperMemoryDir;
+            var vaultDir = UserDataPath.MemoryBankDir;
             if (!Directory.Exists(vaultDir))
             {
                 ShowSuperMemoryMessage("Your SuperMemory vault folder does not exist yet.\n\n" +
@@ -1774,7 +1774,7 @@ date: <today's date YYYY-MM-DD>
         {
             if (string.IsNullOrEmpty(response)) return;
 
-            var vaultDir = UserDataPath.SuperMemoryDir;
+            var vaultDir = UserDataPath.MemoryBankDir;
             var writtenFiles = new List<string>();
 
             // Parse "### FILE: path" markers (same format as compile)

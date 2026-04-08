@@ -517,7 +517,7 @@ namespace Supervertaler.Trados.Core
                 sb.AppendLine($"TM reference pairs: {ctx.TmPairs.Count:N0}");
 
             if (!string.IsNullOrWhiteSpace(ctx.KbContext))
-                sb.AppendLine("SuperMemory: knowledge base included");
+                sb.AppendLine("Memory bank: included");
 
             return sb.ToString().TrimEnd();
         }

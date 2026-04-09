@@ -286,10 +286,21 @@ namespace Supervertaler.Trados.Controls
         }
 
         /// <summary>
+        /// Last inbox count reported by <see cref="UpdateInboxCount"/>.
+        /// Tracked so <see cref="SetBusy"/>(false) can restore the correct
+        /// Process Inbox button state after a busy operation completes —
+        /// without this, the button would be unconditionally re-enabled
+        /// even when the inbox is empty, which is a confusing dead-end
+        /// click for the user.
+        /// </summary>
+        private int _lastInboxCount;
+
+        /// <summary>
         /// Updates the inbox file count display and enables/disables the Process Inbox button.
         /// </summary>
         public void UpdateInboxCount(int count)
         {
+            _lastInboxCount = count;
             if (_lblInboxCount == null) return;
             _lblInboxCount.Text = count > 0
                 ? $"{count} file{(count != 1 ? "s" : "")} in inbox"
@@ -301,13 +312,29 @@ namespace Supervertaler.Trados.Controls
         }
 
         /// <summary>
-        /// Enables or disables both buttons (e.g. during processing).
+        /// Enables or disables the SuperMemory action buttons (e.g. during
+        /// long-running operations like Health Check or Distill). When
+        /// un-busying, Process Inbox is only re-enabled if the last known
+        /// inbox count is non-zero — it does not make sense to offer a
+        /// clickable "Process Inbox" button when there is nothing to
+        /// process, and the previous implementation's unconditional
+        /// <c>_btnProcessInbox.Enabled = !busy</c> overrode the count-based
+        /// decision that <see cref="UpdateInboxCount"/> had made.
         /// </summary>
         public void SetBusy(bool busy)
         {
-            _btnProcessInbox.Enabled = !busy;
+            // Process Inbox: respects both the busy flag AND the current
+            // inbox count. Disabled while busy; after busy, only enabled
+            // if the inbox has at least one file.
+            _btnProcessInbox.Enabled = !busy && _lastInboxCount > 0;
+
+            // Health Check and Distill: available whenever not busy.
+            // Health Check handles the "bank is empty" case gracefully
+            // with a chat message; Distill always needs to be clickable
+            // because the user picks files via a dialog.
             _btnHealthCheck.Enabled = !busy;
             _btnDistill.Enabled = !busy;
+
             if (!busy)
             {
                 _btnProcessInbox.ForeColor = _btnProcessInbox.Enabled

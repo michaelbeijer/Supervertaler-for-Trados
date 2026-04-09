@@ -4,7 +4,7 @@ description: Extract knowledge from translation files using AI
 
 # Distill
 
-**Distill** extracts knowledge from professional translation files and creates structured knowledge base articles in your SuperMemory inbox. Instead of manually reading through a 50,000-segment translation memory or a 30-page client style guide, the AI analyses the content and distils it into actionable articles: terminology decisions, style conventions, client preferences, and domain knowledge.
+**Distill** extracts knowledge from professional translation files and creates structured knowledge base articles in the active memory bank's inbox. Instead of manually reading through a 50,000-segment translation memory or a 30-page client style guide, the AI analyses the content and distils it into actionable articles: terminology decisions, style conventions, client preferences, and domain knowledge.
 
 ## Supported formats
 
@@ -20,22 +20,24 @@ description: Extract knowledge from translation files using AI
 
 ## How to use
 
-### From the SuperMemory toolbar
+### From the Memory banks toolbar
 
-1. Click the **Distill** button (⚗) on the SuperMemory toolbar in the Supervertaler Assistant panel
+1. Click the **Distill** button (⚗) on the Memory banks toolbar in the Supervertaler Assistant panel
 2. Select one or more files in the file picker dialogue
-3. The AI analyses the content and creates draft articles in your `00_INBOX` folder
-4. Review the draft articles in Obsidian, then click **[Process Inbox](process-inbox.md)** to compile them into your knowledge base
+3. The AI analyses the content and creates draft articles in the active memory bank's `00_INBOX` folder
+4. Review the draft articles in Obsidian, then click **[Process Inbox](process-inbox.md)** to compile them into the knowledge base
+
+Distill always writes into the **active** memory bank – the one currently selected in the toolbar dropdown. To distil into a different bank, switch the dropdown first.
 
 ### From the termbase list (shortcut)
 
-You can distil a termbase directly from the [termbase settings](../termbase-management.md) without exporting it first:
+You can distil a termbase directly from the [termbase settings](../../termbase-management.md) without exporting it first:
 
 1. Open **Settings → TermLens** to see your termbase list
 2. Right-click any Supervertaler or MultiTerm termbase
-3. Select **⚗ Distill to SuperMemory** from the context menu
+3. Select **⚗ Distill into memory bank** from the context menu
 
-The plugin reads all terms from the termbase, formats them as a structured table, and sends them straight to the Distill pipeline. Draft articles appear in your `00_INBOX` folder – review them in Obsidian, then run **[Process Inbox](process-inbox.md)** as usual.
+The plugin reads all terms from the termbase, formats them as a structured table, and sends them straight to the Distill pipeline. Draft articles appear in the active memory bank's `00_INBOX` folder – review them in Obsidian, then run **[Process Inbox](process-inbox.md)** as usual.
 
 {% hint style="info" %}
 This shortcut is especially useful for MultiTerm termbases attached to your Trados project. Instead of exporting to a file first, you can distil them in one click.
@@ -77,4 +79,4 @@ A 20-page Word document from a client might produce:
 
 * [Process Inbox](process-inbox.md)
 * [Quick Add](quick-add.md)
-* [AI Settings](../settings/ai-settings.md)
+* [AI Settings](../../settings/ai-settings.md)

@@ -54,12 +54,16 @@ namespace Supervertaler.Trados.Core
             public const string ProjectSettings    = "settings/project-settings";
             public const string KeyboardShortcuts  = "reference/keyboard-shortcuts";
             public const string Troubleshooting    = "reference/troubleshooting";
-            public const string SuperMemory        = "features/supermemory";
-            public const string SuperMemoryQuickAdd = "features/supermemory/quick-add";
-            public const string SuperMemoryInbox    = "features/supermemory/process-inbox";
-            public const string SuperMemoryHealth   = "features/supermemory/health-check";
-            public const string SuperMemoryDistill  = "features/supermemory/distill";
-            public const string SuperMemoryObsidian = "features/supermemory/obsidian-setup";
+            // Memory banks (formerly "SuperMemory") — now nested under the Supervertaler
+            // Assistant section in the GitBook SUMMARY. C# identifier names kept as
+            // SuperMemory* for backwards-compat with existing call sites; rename when the
+            // Trados UI strings are updated to match the new memory bank terminology.
+            public const string SuperMemory        = "features/ai-assistant/memory-banks";
+            public const string SuperMemoryQuickAdd = "features/ai-assistant/memory-banks/quick-add";
+            public const string SuperMemoryInbox    = "features/ai-assistant/memory-banks/process-inbox";
+            public const string SuperMemoryHealth   = "features/ai-assistant/memory-banks/health-check";
+            public const string SuperMemoryDistill  = "features/ai-assistant/memory-banks/distill";
+            public const string SuperMemoryObsidian = "features/ai-assistant/memory-banks/obsidian-setup";
             public const string SuperSearch         = "features/supersearch";
         }
 

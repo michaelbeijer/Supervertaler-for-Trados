@@ -1,10 +1,10 @@
 ---
-description: Scan and repair the knowledge base
+description: Scan and repair a memory bank
 ---
 
 # Health Check
 
-The **Health Check** button scans your entire knowledge base for problems and fixes what it can -- like a librarian who keeps the shelves organised.
+The **Health Check** button scans the active memory bank for problems and fixes what it can -- like a librarian who keeps the shelves organised.
 
 ## What it checks
 
@@ -20,11 +20,13 @@ The **Health Check** button scans your entire knowledge base for problems and fi
 
 The AI produces a detailed report in the chat and automatically applies safe fixes (creating stub articles, updating indexes, fixing broken references). Changes that need human judgement are flagged for review.
 
-{% hint style="warning" %}
-**Important:** The AI can and will create, update, and reorganise your vault files when you run Health Check. To stay safe:
+Health Check runs against the **active** memory bank only. If you keep several banks side by side, run it once per bank.
 
-* **Keep originals elsewhere.** Don't put your only copy of a glossary or style guide in the vault -- keep the original in its own folder.
-* **Back up your vault regularly.** Copy the entire `supermemory` folder to a backup location before running Health Check for the first time, and periodically after that. If something goes wrong, you can simply replace the vault folder with your backup.
+{% hint style="warning" %}
+**Important:** The AI can and will create, update, and reorganise files in the active memory bank when you run Health Check. To stay safe:
+
+* **Keep originals elsewhere.** Don't put your only copy of a glossary or style guide in a memory bank -- keep the original in its own folder.
+* **Back up your memory banks regularly.** Copy the entire `memory-banks` folder to a backup location before running Health Check for the first time, and periodically after that. If something goes wrong, you can simply replace the bank folder with your backup.
 * **Review changes in Obsidian.** After running Health Check, open Obsidian and browse the recently modified files to verify the AI made sensible changes. Obsidian's search and graph view make this easy.
 {% endhint %}
 
@@ -32,4 +34,4 @@ The AI produces a detailed report in the chat and automatically applies safe fix
 
 * [Process Inbox](process-inbox.md)
 * [Distill](distill.md)
-* [SuperMemory](../supermemory.md)
+* [Memory banks](../memory-banks.md)

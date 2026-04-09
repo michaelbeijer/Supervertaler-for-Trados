@@ -6,7 +6,7 @@ Supervertaler for Trados uses a simple subscription model: one product, one pric
 
 ## Free Trial
 
-When you first install Supervertaler for Trados, a **14-day free trial** starts automatically. During the trial, all features are unlocked – TermLens, AI Assistant, SuperSearch, SuperMemory, Studio Tools, and everything else.
+When you first install Supervertaler for Trados, a **14-day free trial** starts automatically. During the trial, all features are unlocked – TermLens, AI Assistant, SuperSearch, memory banks, Studio Tools, and everything else.
 
 No sign-up or credit card is required to start the trial. The remaining days are shown in the **Licence** tab in Settings and in the About dialogue.
 
@@ -16,7 +16,7 @@ No sign-up or credit card is required to start the trial. The remaining days are
 |---|---------|--------|
 | **Supervertaler for Trados** | €20/month | €200/year |
 
-One plan, all features included: TermLens inline terminology, AI Assistant & Batch Translate, SuperSearch cross-file search & replace, SuperMemory knowledge base, Studio Tools, Clipboard Mode, QuickLauncher, Prompt Library, MultiTerm support, Incognito Mode, and all future features.
+One plan, all features included: TermLens inline terminology, AI Assistant & Batch Translate, SuperSearch cross-file search & replace, AI-maintained memory banks, Studio Tools, Clipboard Mode, QuickLauncher, Prompt Library, MultiTerm support, Incognito Mode, and all future features.
 
 {% hint style="info" %}
 Annual plans include **2 months free** compared to monthly billing.

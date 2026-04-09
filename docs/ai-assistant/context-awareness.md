@@ -48,4 +48,4 @@ You can control exactly what context the assistant receives. In the settings dia
 
 * [Supervertaler Assistant](../ai-assistant.md) -- Overview
 * [AI Settings](../settings/ai-settings.md) -- Configure context options
-* [SuperMemory AI Integration](../supermemory/ai-integration.md) -- Knowledge base context
+* [Memory banks – AI Integration](memory-banks/ai-integration.md) -- Knowledge base context

@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.19.3] — 2026-04-11
+
+### Changed
+
+- **SuperMemory help URL updated.** The GitBook page for SuperMemory moved from `/features/ai-assistant/memory-banks` to `/features/ai-assistant/super-memory`. In-plugin help links (the `?` button on SuperMemory features) updated to match.
+
+---
+
 ## [4.19.2] — 2026-04-11
 
 ### Added

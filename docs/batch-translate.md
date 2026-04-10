@@ -81,6 +81,48 @@ Batch Translate uses several context sources from your [AI Settings](settings/ai
 
 TM matches and surrounding segments are **not** included in Batch Translate – these are Chat & QuickLauncher features only. See the [AI Settings](settings/ai-settings.md) page for a full comparison table.
 
+## Backup TMX
+
+The **Auto-backup translations to TMX** checkbox is ticked by default. When enabled, Supervertaler writes every translated segment to a TMX file as it arrives from the AI. If Trados crashes mid-run, you can recover the completed translations without re-running the batch.
+
+The TMX files are also useful outside of crash recovery — you can import them into any TM in Trados, memoQ, Wordfast, or any other CAT tool that accepts standard TMX.
+
+Click **Open folder…** next to the checkbox to open the backup folder directly in Windows Explorer.
+
+To disable backups for a particular run, simply untick the checkbox before clicking Translate.
+
+### How it works
+
+* A new `.tmx` file is created at the start of each batch run.
+* Every **10 translated segments**, the file is rewritten in full – so at most 10 segments are lost in a crash.
+* The file is written atomically (via a temp file + rename) so it is always a valid, complete TMX – never a partial or corrupt file.
+* At the end of a completed or cancelled run, the file is flushed one final time.
+
+### Where the files are saved
+
+```
+C:\Users\<YourName>\Supervertaler\trados\batch_backups\
+```
+
+Files are named by timestamp and project name, for example:
+
+```
+batch_2026-04-10_14-23-01_YAXINCHENG.tmx
+```
+
+The exact path is also printed to the **Batch Translate log** at the start of each run.
+
+### Recovering after a crash
+
+1. Reopen Trados Studio and your project.
+2. Open your TM in **Trados Translation Memories** (or via the project's TM settings).
+3. Use **Import** → browse to the backup `.tmx` file → import.
+4. Run **Pre-translate** on your project to apply the recovered translations from the TM.
+
+{% hint style="info" %}
+Backup files are **not deleted automatically**. Tidy up the `batch_backups` folder occasionally if disk space is a concern, or keep them as a translation archive.
+{% endhint %}
+
 ## Clipboard Mode
 
 If you prefer to use a web-based AI (ChatGPT, Claude, Gemini, etc.) instead of an API, tick the **Clipboard Mode** checkbox. This replaces the Provider and Translate button with **Copy to Clipboard** and **Paste from Clipboard** buttons. Supervertaler builds a complete, ready-to-use prompt – including your selected prompt, terminology, document context, and numbered bilingual segments – and copies it to your clipboard. See [Clipboard Mode](clipboard-mode.md) for full details.

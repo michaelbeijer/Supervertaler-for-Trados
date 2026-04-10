@@ -327,6 +327,9 @@ namespace Supervertaler.Trados.Settings
                     ? new List<long>(DisabledMultiTermIds) : new List<long>(),
                 DisabledAiTermbaseIds = AiSettings?.DisabledAiTermbaseIds != null
                     ? new List<long>(AiSettings.DisabledAiTermbaseIds) : new List<long>(),
+                // Always true when extracted — the settings are considered initialised once
+                // the plugin has loaded and applied them at least once.
+                AiTermbaseIdsInitialized = true,
                 ActivePromptPath = AiSettings?.SelectedPromptPath ?? "",
             };
         }

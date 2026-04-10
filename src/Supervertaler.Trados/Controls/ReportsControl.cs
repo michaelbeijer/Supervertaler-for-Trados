@@ -574,26 +574,14 @@ namespace Supervertaler.Trados.Controls
             foreach (Control child in card.Controls)
                 applyHover(child);
 
-            // Insert at top (after _lblEmpty which is index 0)
-            int insertIndex = 0;
-            for (int i = 0; i < _resultsPanel.Controls.Count; i++)
-            {
-                if (_resultsPanel.Controls[i] == _lblEmpty)
-                {
-                    insertIndex = i + 1;
-                    break;
-                }
-            }
             _resultsPanel.Controls.Add(card);
-            _resultsPanel.Controls.SetChildIndex(card, insertIndex);
-
             _promptLogCount++;
 
-            // Re-flow all cards
+            // Re-flow all cards (sorts prompt log entries by timestamp descending)
             RelayoutCards();
             _resultsPanel.ResumeLayout(true);
 
-            // Scroll to top
+            // Scroll to top so the newest entry is visible
             _resultsPanel.AutoScrollPosition = new Point(0, 0);
         }
 
@@ -815,12 +803,31 @@ namespace Supervertaler.Trados.Controls
             if (_resultsPanel == null) return;
             _resultsPanel.SuspendLayout();
 
-            int yPos = 4;
+            // Collect all card panels so we can sort prompt log entries by timestamp
+            // before assigning y-positions (newest entry at top).
+            var allCards = new List<Panel>();
             foreach (Control ctrl in _resultsPanel.Controls)
             {
-                if (ctrl == _lblEmpty) continue;
-                var card = ctrl as Panel;
-                if (card == null) continue;
+                if (ctrl == _lblEmpty || !(ctrl is Panel p)) continue;
+                allCards.Add(p);
+            }
+
+            // Stable sort: prompt log cards newest-first, issue cards stay in their
+            // original insertion order (they're already ordered by segment number).
+            allCards.Sort((a, b) =>
+            {
+                var ea = a.Tag as PromptLogEntry;
+                var eb = b.Tag as PromptLogEntry;
+                if (ea != null && eb != null)
+                    return eb.Timestamp.CompareTo(ea.Timestamp); // newest first
+                if (ea != null) return -1; // prompt logs before issue cards
+                if (eb != null) return 1;
+                return 0; // both issue cards — preserve original order
+            });
+
+            int yPos = 4;
+            foreach (var card in allCards)
+            {
 
                 card.Location = new Point(4, yPos);
 

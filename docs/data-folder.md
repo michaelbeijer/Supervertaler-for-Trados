@@ -46,7 +46,8 @@ Supervertaler/
     │   ├── settings.json
     │   ├── license.json
     │   └── chat_history.json
-    └── projects/
+    ├── projects/
+    └── batch_backups/
 ```
 
 ### Shared resources
@@ -56,6 +57,8 @@ The **prompt library** and **resources** folders are shared between both program
 ### Program-specific folders
 
 Each program stores its own settings, projects, and runtime data in a dedicated subfolder (`workbench/` or `trados/`). This keeps configuration separate so the two programs never interfere with each other.
+
+The `trados/batch_backups/` folder contains automatic TMX backup files created during Batch Translate runs. One file is written per run, named by timestamp and project name. These files are not deleted automatically – you can remove old ones manually once your project is safely delivered, or keep them as a translation archive for use in other CAT tools. See [Batch Translate – Backup TMX](batch-translate.md#backup-tmx) for details.
 
 ## Automatic Migration
 

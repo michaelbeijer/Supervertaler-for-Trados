@@ -69,6 +69,7 @@ namespace Supervertaler.Trados.Core
     public class BatchSegmentResultEventArgs : EventArgs
     {
         public int SegmentIndex { get; set; }
+        public string SourceText { get; set; }
         public string Translation { get; set; }
         public object SegmentPairRef { get; set; }
 
@@ -238,6 +239,7 @@ namespace Supervertaler.Trados.Core
                                 SegmentTranslated?.Invoke(this, new BatchSegmentResultEventArgs
                                 {
                                     SegmentIndex = segments[i].Index,
+                                    SourceText = segments[i].SourceText,
                                     Translation = translation,
                                     SegmentPairRef = segments[i].SegmentPairRef,
                                     HasTags = segments[i].HasTags,

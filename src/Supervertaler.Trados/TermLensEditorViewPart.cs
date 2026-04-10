@@ -977,6 +977,23 @@ namespace Supervertaler.Trados
                 if (ps != null)
                 {
                     System.Diagnostics.Debug.WriteLine($"[TermLens] Loaded project settings: db={ps.TermbasePath}, write={ps.WriteTermbaseIds?.Count ?? 0}, disabled={ps.DisabledTermbaseIds?.Count ?? 0}");
+
+                    // One-time migration: older project files have an empty DisabledAiTermbaseIds
+                    // which was interpreted as "include all termbases". New projects default to
+                    // "disable all termbases" (opt-in). Migrate existing projects on first load
+                    // to match the new opt-in default.
+                    // Condition: flag is false AND the disabled list is empty. A non-empty
+                    // list means the user has already made deliberate AI termbase choices
+                    // (even if the flag was reset by an earlier bug in ExtractProjectSettings).
+                    if (!ps.AiTermbaseIdsInitialized && ps.DisabledAiTermbaseIds.Count == 0)
+                    {
+                        var allIds = GetAllTermbaseIds(ps.TermbasePath ?? _settings.TermbasePath);
+                        ps.DisabledAiTermbaseIds = new List<long>(allIds);
+                        ps.AiTermbaseIdsInitialized = true;
+                        ProjectSettings.Save(projectPath, ps);
+                        System.Diagnostics.Debug.WriteLine($"[TermLens] Migrated AI termbase IDs for existing project: disabled {allIds.Count} termbases");
+                    }
+
                     _settings.ApplyProjectOverlay(ps);
 
                     // Reload termbase with the project-specific path
@@ -988,6 +1005,9 @@ namespace Supervertaler.Trados
                     // We must NOT snapshot _settings here because it still carries
                     // the previous project's overlay (write IDs, project termbase, etc.).
                     System.Diagnostics.Debug.WriteLine($"[TermLens] No project settings found — creating clean defaults");
+
+                    // Default: all termbases disabled for new projects; user opts in per project.
+                    var allIds = GetAllTermbaseIds(_settings.TermbasePath);
                     var newPs = new ProjectSettings
                     {
                         ProjectPath = projectPath ?? "",
@@ -995,9 +1015,10 @@ namespace Supervertaler.Trados
                         TermbasePath = _settings.TermbasePath ?? "",
                         WriteTermbaseIds = new List<long>(),
                         ProjectTermbaseId = -1,
-                        DisabledTermbaseIds = new List<long>(),
+                        DisabledTermbaseIds = allIds,
                         DisabledMultiTermIds = new List<long>(),
-                        DisabledAiTermbaseIds = new List<long>(),
+                        DisabledAiTermbaseIds = new List<long>(allIds),
+                        AiTermbaseIdsInitialized = true,
                     };
                     _settings.ApplyProjectOverlay(newPs);
                     ProjectSettings.Save(projectPath, newPs);
@@ -1009,6 +1030,41 @@ namespace Supervertaler.Trados
             catch
             {
                 // Never crash on project detection — fall back to global settings
+            }
+        }
+
+        /// <summary>
+        /// Opens the termbase database briefly and returns all termbase IDs.
+        /// Used to pre-populate the disabled list when creating new project defaults.
+        /// </summary>
+        private List<long> GetAllTermbaseIds(string termbasePath)
+        {
+            var dbPath = termbasePath;
+            if (string.IsNullOrEmpty(dbPath) || !File.Exists(dbPath))
+            {
+                var candidates = new[]
+                {
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                        "Supervertaler_Data", "resources", "supervertaler.db"),
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        "Supervertaler", "resources", "supervertaler.db"),
+                };
+                dbPath = Array.Find(candidates, p => File.Exists(p));
+            }
+
+            if (string.IsNullOrEmpty(dbPath)) return new List<long>();
+
+            try
+            {
+                using (var reader = new TermbaseReader(dbPath))
+                {
+                    if (!reader.Open()) return new List<long>();
+                    return reader.GetTermbases().ConvertAll(tb => tb.Id);
+                }
+            }
+            catch
+            {
+                return new List<long>();
             }
         }
 

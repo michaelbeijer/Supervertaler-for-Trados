@@ -10,6 +10,7 @@ using Sdl.Desktop.IntegrationApi;
 using Sdl.Desktop.IntegrationApi.Extensions;
 using Sdl.Desktop.IntegrationApi.Interfaces;
 using Sdl.FileTypeSupport.Framework.BilingualApi;
+using Sdl.ProjectAutomation.FileBased;
 using Sdl.TranslationStudioAutomation.IntegrationApi;
 using Supervertaler.Trados.Controls;
 using Supervertaler.Trados.Core;
@@ -55,6 +56,7 @@ namespace Supervertaler.Trados
         // Batch translate state
         private BatchTranslator _batchTranslator;
         private CancellationTokenSource _batchCts;
+        private BatchTranslationBackup _batchBackup;
 
         // Proofreading state
         private BatchProofreader _batchProofreader;
@@ -175,6 +177,7 @@ namespace Supervertaler.Trados
             batchControl.OpenAiSettingsRequested += OnSettingsRequested;
             batchControl.BatchModeChanged += (s, e) => PopulateBatchPromptDropdown();
             batchControl.GeneratePromptRequested += OnGeneratePromptRequested;
+            batchControl.OpenBackupFolderRequested += OnOpenBackupFolderRequested;
             batchControl.CopyToClipboardRequested += OnCopyToClipboardRequested;
             batchControl.PasteFromClipboardRequested += OnPasteFromClipboardRequested;
             batchControl.ModelChangeRequested += OnModelChangeRequested;
@@ -729,9 +732,26 @@ namespace Supervertaler.Trados
 
         private void OnClearRequested(object sender, EventArgs e)
         {
+            // Archive the current session before wiping it, so it can be recovered.
+            if (_chatHistory.Count > 0)
+                ArchiveChatHistory();
+
             _chatHistory.Clear();
             _control.Value.ClearMessages();
             SaveChatHistory();
+        }
+
+        private void ArchiveChatHistory()
+        {
+            try
+            {
+                var archivePath = UserDataPath.ChatArchiveFilePath(DateTime.Now);
+                Directory.CreateDirectory(Path.GetDirectoryName(archivePath));
+                var serializer = new DataContractJsonSerializer(typeof(List<ChatMessage>));
+                using (var fs = new FileStream(archivePath, FileMode.Create, FileAccess.Write))
+                    serializer.WriteObject(fs, _chatHistory);
+            }
+            catch { /* archive is best-effort — never block the clear */ }
         }
 
         private void OnStopRequested(object sender, EventArgs e)
@@ -1106,7 +1126,7 @@ namespace Supervertaler.Trados
 
                 var ctx = _kbReader.LoadContext(
                     projectName, domain, sourceLang, targetLang,
-                    tokenBudget: 4000);
+                    tokenBudget: 24000);
 
                 if (ctx == null) return null;
 
@@ -2693,6 +2713,17 @@ date: <today's date YYYY-MM-DD>
                     $"Starting: {segments.Count} segments, provider={provider}, model={model}, " +
                     $"batch size={batchSize}{kbSummary}");
 
+                // Start backup TMX — written every 10 segments so translations survive a crash
+                if (batchControl.IsTmxBackupEnabled)
+                {
+                    var backupPath = Settings.UserDataPath.BatchBackupFilePath(
+                        DateTime.Now, TermLensEditorViewPart.GetCurrentProjectName());
+                    _batchBackup = new BatchTranslationBackup(
+                        backupPath, sourceLang, targetLang,
+                        GetType().Assembly.GetName().Version?.ToString());
+                    batchControl.AppendLog($"Backup TMX: {backupPath}");
+                }
+
                 _batchCts = new CancellationTokenSource();
                 _batchTranslator = new BatchTranslator();
 
@@ -2722,6 +2753,17 @@ date: <today's date YYYY-MM-DD>
                     }
                 });
             });
+        }
+
+        private void OnOpenBackupFolderRequested(object sender, EventArgs e)
+        {
+            try
+            {
+                var dir = Settings.UserDataPath.BatchBackupsDir;
+                System.IO.Directory.CreateDirectory(dir);
+                System.Diagnostics.Process.Start("explorer.exe", dir);
+            }
+            catch { }
         }
 
         private void OnBatchStopRequested(object sender, EventArgs e)
@@ -2797,6 +2839,9 @@ date: <today's date YYYY-MM-DD>
                                 sp.Target.Add(textClone);
                             }
                         });
+
+                    // Back up to TMX regardless of tag complexity
+                    _batchBackup?.AddSegment(e.SourceText, e.Translation);
                 }
                 catch (Exception ex)
                 {
@@ -2808,11 +2853,22 @@ date: <today's date YYYY-MM-DD>
 
         private void OnBatchCompleted(object sender, BatchCompletedEventArgs e)
         {
+            // Flush any remaining segments to the backup TMX before reporting completion
+            var backup = _batchBackup;
+            _batchBackup = null;
+            backup?.Flush();
+
             SafeInvoke(() =>
             {
                 _control.Value.BatchTranslateControl.ReportCompleted(
                     e.Translated, e.Failed, e.Skipped,
                     e.TotalTime, e.WasCancelled);
+
+                if (backup != null && backup.Count > 0)
+                {
+                    _control.Value.BatchTranslateControl.AppendLog(
+                        $"✓ Backup TMX saved: {backup.Count} segments → {backup.FilePath}");
+                }
 
                 // Update segment counts (some may now be filled)
                 UpdateBatchSegmentCounts();
@@ -4533,29 +4589,10 @@ date: <today's date YYYY-MM-DD>
         {
             try
             {
-                var file = _activeDocument?.ActiveFile;
-                if (file != null)
-                {
-                    // Try to get the project name from the source file path
-                    var sourceFile = file.SourceFile;
-                    if (sourceFile != null)
-                    {
-                        // The project name is typically available via the file's project reference
-                        // Fall back to extracting from the file path
-                        var filePath = sourceFile.LocalFilePath;
-                        if (!string.IsNullOrEmpty(filePath))
-                        {
-                            // Trados project files are typically in a folder named after the project
-                            var dir = System.IO.Path.GetDirectoryName(filePath);
-                            if (!string.IsNullOrEmpty(dir))
-                            {
-                                var projectDir = System.IO.Path.GetDirectoryName(dir);
-                                if (!string.IsNullOrEmpty(projectDir))
-                                    return System.IO.Path.GetFileName(projectDir);
-                            }
-                        }
-                    }
-                }
+                var project = _activeDocument?.Project as FileBasedProject;
+                var name = project?.GetProjectInfo()?.Name;
+                if (!string.IsNullOrEmpty(name))
+                    return name;
             }
             catch (Exception) { }
             return null;

@@ -54,6 +54,10 @@ namespace Supervertaler.Trados.Controls
         private Button _btnCopyToClipboard;
         private Button _btnPasteFromClipboard;
 
+        // TMX backup
+        private CheckBox _chkTmxBackup;
+        private LinkLabel _lnkOpenBackupFolder;
+
         // Log
         private Label _lblLog;
         private TextBox _txtLog;
@@ -104,6 +108,12 @@ namespace Supervertaler.Trados.Controls
 
         /// <summary>Whether proofreading issues should also be added as Trados comments.</summary>
         public bool AddAsComments => _chkAddComments?.Checked ?? false;
+
+        /// <summary>Whether the user wants translated segments auto-backed-up to a TMX file.</summary>
+        public bool IsTmxBackupEnabled => _chkTmxBackup?.Checked ?? true;
+
+        /// <summary>Fired when user clicks "Open folder…" next to the TMX backup checkbox.</summary>
+        public event EventHandler OpenBackupFolderRequested;
 
         public BatchTranslateControl()
         {
@@ -419,6 +429,39 @@ namespace Supervertaler.Trados.Controls
 
             y += 38;
 
+            // ─── TMX Backup ──────────────────────────────────────
+            _chkTmxBackup = new CheckBox
+            {
+                Text = "Auto-backup translations to TMX",
+                Location = new Point(12, y),
+                AutoSize = true,
+                Font = bodyFont,
+                ForeColor = Color.FromArgb(80, 80, 80),
+                Checked = true
+            };
+            var tmxTip = new ToolTip { AutoPopDelay = 12000, InitialDelay = 300 };
+            tmxTip.SetToolTip(_chkTmxBackup,
+                "Saves every translated segment to a TMX file as it arrives.\r\n" +
+                "If Trados crashes mid-run, you can import the backup TMX into\r\n" +
+                "any TM and recover the completed translations.\r\n\r\n" +
+                "The file is also useful for populating TMs in other CAT tools.");
+            Controls.Add(_chkTmxBackup);
+
+            _lnkOpenBackupFolder = new LinkLabel
+            {
+                Text = "Open folder\u2026",
+                AutoSize = true,
+                Font = bodyFont,
+                LinkColor = Color.FromArgb(0, 102, 204)
+            };
+            _lnkOpenBackupFolder.Location = new Point(_chkTmxBackup.Right + 8, y + 2);
+            _lnkOpenBackupFolder.LinkClicked += (s, ev) =>
+                OpenBackupFolderRequested?.Invoke(this, EventArgs.Empty);
+            tmxTip.SetToolTip(_lnkOpenBackupFolder,
+                "Opens the folder where backup TMX files are stored.");
+            Controls.Add(_lnkOpenBackupFolder);
+            y += 24;
+
             // ─── Log ────────────────────────────────────────────
             _lblLog = new Label
             {
@@ -485,6 +528,9 @@ namespace Supervertaler.Trados.Controls
             // Show/hide mode-specific controls
             _chkAddComments.Visible = _currentMode == BatchMode.Proofread;
             _lnkGeneratePrompt.Visible = _currentMode == BatchMode.Translate;
+            var isTranslateMode = _currentMode == BatchMode.Translate && !(_chkClipboardMode?.Checked ?? false);
+            _chkTmxBackup.Visible = isTranslateMode;
+            _lnkOpenBackupFolder.Visible = isTranslateMode;
 
             // Notify listeners to refresh prompt dropdown
             BatchModeChanged?.Invoke(this, EventArgs.Empty);
@@ -547,6 +593,11 @@ namespace Supervertaler.Trados.Controls
                 _chkAddComments.Visible = false;
             else
                 _chkAddComments.Visible = _currentMode == BatchMode.Proofread;
+
+            // TMX backup only applies to non-clipboard translate mode
+            var showTmx = !clip && _currentMode == BatchMode.Translate;
+            _chkTmxBackup.Visible = showTmx;
+            _lnkOpenBackupFolder.Visible = showTmx;
         }
 
         /// <summary>

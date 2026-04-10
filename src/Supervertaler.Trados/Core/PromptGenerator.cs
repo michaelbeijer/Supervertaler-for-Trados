@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Supervertaler.Trados.Models;
 
 namespace Supervertaler.Trados.Core
@@ -555,7 +556,7 @@ namespace Supervertaler.Trados.Core
         {
             // Check primary source term
             if (!string.IsNullOrEmpty(term.SourceTerm) &&
-                combinedUpper.Contains(term.SourceTerm.ToUpperInvariant()))
+                MatchesWholeWord(term.SourceTerm.ToUpperInvariant(), combinedUpper))
                 return true;
 
             // Check source abbreviation variants
@@ -564,7 +565,7 @@ namespace Supervertaler.Trados.Core
                 foreach (var variant in term.GetSourceAbbreviationVariants())
                 {
                     if (!string.IsNullOrEmpty(variant) &&
-                        combinedUpper.Contains(variant.Trim().ToUpperInvariant()))
+                        MatchesWholeWord(variant.Trim().ToUpperInvariant(), combinedUpper))
                         return true;
                 }
             }
@@ -575,12 +576,36 @@ namespace Supervertaler.Trados.Core
                 foreach (var syn in term.SourceSynonyms)
                 {
                     if (!string.IsNullOrEmpty(syn.Text) &&
-                        combinedUpper.Contains(syn.Text.ToUpperInvariant()))
+                        MatchesWholeWord(syn.Text.ToUpperInvariant(), combinedUpper))
                         return true;
                 }
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Returns true if <paramref name="termUpper"/> appears in <paramref name="textUpper"/>
+        /// as a whole word (bounded by non-alphanumeric characters or string edges).
+        /// Multi-word terms (e.g. "PRIOR ART") are matched as a whole phrase.
+        /// Falls back to substring match if the term contains regex-special characters
+        /// that cannot be safely escaped (extremely rare in practice).
+        /// </summary>
+        private static bool MatchesWholeWord(string termUpper, string textUpper)
+        {
+            if (string.IsNullOrEmpty(termUpper)) return false;
+            try
+            {
+                // \b matches between \w and \W. For multi-word terms the spaces inside
+                // are already non-\w, so \b…\b around the whole phrase is sufficient.
+                var pattern = @"\b" + Regex.Escape(termUpper) + @"\b";
+                return Regex.IsMatch(textUpper, pattern, RegexOptions.None);
+            }
+            catch
+            {
+                // Fallback for pathological term text
+                return textUpper.Contains(termUpper);
+            }
         }
 
         // ─── Private helpers ─────────────────────────────────────────

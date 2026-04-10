@@ -74,6 +74,14 @@ namespace Supervertaler.Trados.Settings
         [DataMember(Name = "disabledAiTermbaseIds")]
         public List<long> DisabledAiTermbaseIds { get; set; } = new List<long>();
 
+        /// <summary>
+        /// True once the AI termbase selection has been explicitly initialised for this project.
+        /// False (or absent in older project files) triggers a one-time migration that disables
+        /// all termbases from AI context, matching the opt-in default for new projects.
+        /// </summary>
+        [DataMember(Name = "aiTermbaseIdsInitialized")]
+        public bool AiTermbaseIdsInitialized { get; set; } = false;
+
         // ─── Per-project prompt settings ────────────────────────────
 
         /// <summary>

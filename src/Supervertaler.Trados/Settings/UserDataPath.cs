@@ -519,8 +519,37 @@ namespace Supervertaler.Trados.Settings
         /// <summary>Path to the persisted AI Assistant chat history file.</summary>
         public static string ChatHistoryFilePath => Path.Combine(TradosSettingsDir, "chat_history.json");
 
+        /// <summary>Folder where cleared chat sessions are archived (one JSON file per clear).</summary>
+        public static string ChatArchiveDir => Path.Combine(TradosSettingsDir, "chat_archive");
+
+        /// <summary>Returns a timestamped archive path for the current moment.</summary>
+        public static string ChatArchiveFilePath(DateTime timestamp) =>
+            Path.Combine(ChatArchiveDir, $"chat_{timestamp:yyyy-MM-dd_HH-mm-ss}.json");
+
         /// <summary>Folder containing per-project settings overlays.</summary>
         public static string ProjectsDir => Path.Combine(TradosDir, "projects");
+
+        /// <summary>
+        /// Folder where in-progress batch translation backups are written as TMX files.
+        /// One .tmx file is created per batch translate run. If Trados crashes mid-run,
+        /// the last-written TMX can be imported into a TM to recover the translations.
+        /// </summary>
+        public static string BatchBackupsDir => Path.Combine(TradosDir, "batch_backups");
+
+        /// <summary>
+        /// Returns a timestamped TMX backup path for a batch translate run.
+        /// The project name is embedded in the filename for easy identification.
+        /// </summary>
+        public static string BatchBackupFilePath(DateTime timestamp, string projectName = null)
+        {
+            var safe = string.IsNullOrEmpty(projectName)
+                ? ""
+                : "_" + string.Concat(projectName.Split(Path.GetInvalidFileNameChars()));
+            // Trim to keep the filename reasonable
+            if (safe.Length > 40) safe = safe.Substring(0, 40);
+            return Path.Combine(BatchBackupsDir,
+                $"batch_{timestamp:yyyy-MM-dd_HH-mm-ss}{safe}.tmx");
+        }
 
         // ── Configuration ────────────────────────────────────────────
 

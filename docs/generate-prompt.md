@@ -36,6 +36,10 @@ This dramatically reduces the glossary size – for example, a general patent te
 The filtering is case-insensitive and checks all variants of each term (source term, abbreviation forms, and synonyms). Terms that do not appear anywhere in the source text are excluded entirely.
 
 {% hint style="warning" %}
+**TermScan filters by content, not by domain.** A patent termbase contains many common technical words – "system", "board", "fan", "screen", "installation" – that will match nearly any engineering document. TermScan will include those entries even though they belong to a completely different translation context, and the AI will be forced to follow them. **Before running AutoPrompt, disable every termbase that does not belong to the current project's domain.** Use [AI Settings](settings/ai-settings.md) → *Termbases included in AI prompts* to control which termbases contribute to the generated prompt without affecting your TermLens display.
+{% endhint %}
+
+{% hint style="warning" %}
 **Termbase quality matters.** Only enable termbases in [AI Settings](settings/ai-settings.md) if you are confident they contain accurate, high-quality terminology for your project. A poorly maintained termbase with incorrect or outdated translations will constrain the AI and produce worse results. Modern LLMs – especially Opus-class and GPT-4-class models – are often better at choosing the right translation on their own than when forced to follow a low-quality glossary. When in doubt, disable termbases and let the AI translate freely, then add terms incrementally as you review.
 {% endhint %}
 
@@ -96,6 +100,16 @@ A generated prompt follows the structure of professional translation prompts use
 The generator includes **confirmed** segments (Translated, Approved, or Signed-off status) as reference pairs – up to 50, sampled evenly across the document. This gives the AI concrete examples of your preferred style and terminology, resulting in a more accurate prompt. Unconfirmed segments (e.g. from a previous AI batch translation that you haven't reviewed yet) are excluded to avoid feeding unverified output back as "correct" references.
 
 **Tip:** Before generating a prompt, confirm a handful of segments you are happy with. Even 10–20 confirmed segments give the AI meaningful style anchors to work from.
+
+#### Only enable termbases that belong to this project
+
+Before clicking AutoPrompt, go to **AI Settings → Termbases included in AI prompts** and enable only termbases that are directly relevant to the current project. Disable everything else – including large general-purpose termbases, termbases from other clients or domains, and any termbase you are not actively maintaining for this project.
+
+This setting is independent of your TermLens display: disabling a termbase for AI context does not hide its chips in the editor. You can keep a termbase visible for reference while excluding it from the generated prompt.
+
+{% hint style="info" %}
+**Prefer compact, project-specific termbases.** A small termbase of 50–200 carefully curated entries for this client will produce a far better glossary than a general termbase of 2,000 entries, even after TermScan filtering. Large termbases increase the chance of incorrect or misleading entries being injected into the prompt.
+{% endhint %}
 
 #### Review the glossary section
 

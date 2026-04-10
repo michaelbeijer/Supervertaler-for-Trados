@@ -53,6 +53,16 @@ namespace Supervertaler.Trados.Controls
         private readonly string _plainContent;
         private readonly string _markdownContent;
         private readonly RichTextBox _rtb;
+
+        /// <summary>
+        /// When set by the parent control (via <see cref="AiAssistantControl.AddMessage"/>),
+        /// holds the full original markdown content of a message that was truncated
+        /// for display. The Copy context menu item uses this instead of the truncated
+        /// <see cref="_markdownContent"/> so the user always gets the complete text
+        /// on Ctrl+C / right-click → Copy, even though only the first ~1000 characters
+        /// are rendered in the bubble.
+        /// </summary>
+        internal string FullMarkdownContent { get; set; }
         private readonly List<PictureBox> _imageThumbs = new List<PictureBox>();
 
         private int _bubbleWidth;
@@ -428,10 +438,16 @@ namespace Supervertaler.Trados.Controls
                 {
                     _rtb.Copy();
                 }
-                else if (!string.IsNullOrEmpty(_markdownContent))
+                else
                 {
-                    // Copy raw markdown so tables, formatting etc. are preserved
-                    Clipboard.SetText(_markdownContent);
+                    // Copy raw markdown so tables, formatting etc. are preserved.
+                    // Use FullMarkdownContent when available — this is the complete
+                    // text of a response that was truncated for display. The user
+                    // always gets the full version on Copy even though the bubble
+                    // only renders the first ~1000 characters.
+                    var textToCopy = FullMarkdownContent ?? _markdownContent;
+                    if (!string.IsNullOrEmpty(textToCopy))
+                        Clipboard.SetText(textToCopy);
                 }
             };
             menu.Items.Add(copyItem);

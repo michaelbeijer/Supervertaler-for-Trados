@@ -1469,10 +1469,57 @@ namespace Supervertaler.Trados.Controls
         /// <summary>
         /// Adds a message bubble to the chat panel and scrolls to it.
         /// </summary>
+        /// <summary>
+        /// Maximum characters to display in a single chat bubble before
+        /// truncating. Long AI responses (Health Check reports, Distill
+        /// output, AutoPrompt drafts) can easily exceed 3000–5000 characters,
+        /// which creates a bubble tall enough to break the WinForms scroll
+        /// math in various subtle ways. Truncating to a manageable display
+        /// size while preserving the full text for Copy keeps the chat
+        /// responsive and the scroll deterministic.
+        /// </summary>
+        private const int BubbleTruncateThreshold = 1500;
+
+        /// <summary>
+        /// How many characters of the original message to show when a bubble
+        /// is truncated. Enough to see the gist (~200 words / ~15 lines)
+        /// without creating an oversized bubble.
+        /// </summary>
+        private const int BubbleTruncateDisplayChars = 1000;
+
         public void AddMessage(ChatMessage message)
         {
+            // ── Truncate long assistant responses for display ────────
+            // The full text is preserved for Copy (via bubble.FullMarkdownContent)
+            // and is always stored in the chat history by the caller. Only the
+            // rendered bubble is shortened.
+            var displayMessage = message;
+            string fullMarkdown = null;
+
+            if (message.Role != ChatRole.User &&
+                message.Content != null &&
+                message.Content.Length > BubbleTruncateThreshold)
+            {
+                fullMarkdown = message.Content;
+                var truncated = message.Content.Substring(0, BubbleTruncateDisplayChars);
+                var remaining = message.Content.Length - BubbleTruncateDisplayChars;
+                var displayContent = truncated +
+                    $"\n\n---\n*Response truncated ({remaining:N0} more characters). Right-click \u2192 **Copy** for the full text.*";
+
+                displayMessage = new ChatMessage
+                {
+                    Role = message.Role,
+                    Content = displayContent
+                };
+            }
+
             var bubbleWidth = _chatPanel.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 2;
-            var bubble = new ChatBubble(message, Math.Max(200, bubbleWidth), _chatFontSize);
+            var bubble = new ChatBubble(displayMessage, Math.Max(200, bubbleWidth), _chatFontSize);
+
+            // Preserve the full text for Copy when the bubble was truncated
+            if (fullMarkdown != null)
+                bubble.FullMarkdownContent = fullMarkdown;
+
             bubble.ApplyRequested += (s, text) =>
                 ApplyToTargetRequested?.Invoke(this, text);
             bubble.SaveAsPromptRequested += (s, text) =>

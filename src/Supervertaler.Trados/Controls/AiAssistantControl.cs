@@ -107,6 +107,9 @@ namespace Supervertaler.Trados.Controls
         /// <summary>Raised when the user clicks "Save as Prompt" on a message.</summary>
         public event EventHandler<string> SaveAsPromptRequested;
 
+        /// <summary>Raised when the user clicks "Save to memory bank" on a message.</summary>
+        public event EventHandler<string> SaveToMemoryBankRequested;
+
         /// <summary>Raised when the user clicks Stop during a chat request.</summary>
         public event EventHandler StopRequested;
 
@@ -1478,14 +1481,14 @@ namespace Supervertaler.Trados.Controls
         /// size while preserving the full text for Copy keeps the chat
         /// responsive and the scroll deterministic.
         /// </summary>
-        private const int BubbleTruncateThreshold = 1500;
+        private const int BubbleTruncateThreshold = 3000;
 
         /// <summary>
         /// How many characters of the original message to show when a bubble
-        /// is truncated. Enough to see the gist (~200 words / ~15 lines)
+        /// is truncated. Enough to see the gist (~350 words / ~25 lines)
         /// without creating an oversized bubble.
         /// </summary>
-        private const int BubbleTruncateDisplayChars = 1000;
+        private const int BubbleTruncateDisplayChars = 2000;
 
         public void AddMessage(ChatMessage message)
         {
@@ -1502,28 +1505,37 @@ namespace Supervertaler.Trados.Controls
             {
                 fullMarkdown = message.Content;
                 var truncated = message.Content.Substring(0, BubbleTruncateDisplayChars);
-                var remaining = message.Content.Length - BubbleTruncateDisplayChars;
-                var displayContent = truncated +
-                    $"\n\n---\n*Response truncated ({remaining:N0} more characters). Right-click \u2192 **Copy** for the full text.*";
 
                 displayMessage = new ChatMessage
                 {
                     Role = message.Role,
-                    Content = displayContent
+                    Content = truncated
                 };
             }
 
             var bubbleWidth = _chatPanel.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 2;
             var bubble = new ChatBubble(displayMessage, Math.Max(200, bubbleWidth), _chatFontSize);
 
-            // Preserve the full text for Copy when the bubble was truncated
+            // Preserve the full text for Copy when the bubble was truncated,
+            // and add a clickable "Show full response" link
             if (fullMarkdown != null)
+            {
                 bubble.FullMarkdownContent = fullMarkdown;
+                var remaining = fullMarkdown.Length - BubbleTruncateDisplayChars;
+                bubble.SetTruncationSource(fullMarkdown, remaining);
+                bubble.ExpandedChanged += (s, e) =>
+                {
+                    UpdateChatScrollRange();
+                    ScrollChatToBottom();
+                };
+            }
 
             bubble.ApplyRequested += (s, text) =>
                 ApplyToTargetRequested?.Invoke(this, text);
             bubble.SaveAsPromptRequested += (s, text) =>
                 SaveAsPromptRequested?.Invoke(this, text);
+            bubble.SaveToMemoryBankRequested += (s, text) =>
+                SaveToMemoryBankRequested?.Invoke(this, text);
 
             _messageFlow.Controls.Add(bubble);
 

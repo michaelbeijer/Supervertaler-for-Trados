@@ -63,6 +63,15 @@ namespace Supervertaler.Trados.Controls
         /// are rendered in the bubble.
         /// </summary>
         internal string FullMarkdownContent { get; set; }
+
+        /// <summary>Raised when the bubble is expanded or collapsed so the parent can update scroll.</summary>
+        internal event EventHandler ExpandedChanged;
+
+        private LinkLabel _expandLink;
+        private bool _isExpanded;
+        private string _fullMarkdownForExpand;
+        private int _expandLinkHeight;
+
         private readonly List<PictureBox> _imageThumbs = new List<PictureBox>();
 
         private int _bubbleWidth;
@@ -95,6 +104,82 @@ namespace Supervertaler.Trados.Controls
             Invalidate();
         }
 
+        /// <summary>
+        /// Enables the expand/collapse link on a truncated bubble.
+        /// Call after construction, before the bubble is displayed.
+        /// </summary>
+        internal void SetTruncationSource(string fullMarkdown, int remainingChars)
+        {
+            _fullMarkdownForExpand = fullMarkdown;
+
+            _expandLink = new LinkLabel
+            {
+                AutoSize = false,
+                Text = $"Show full response ({remainingChars:N0} more characters)",
+                LinkColor = ColorTranslator.FromHtml("#4A90D9"),
+                ActiveLinkColor = ColorTranslator.FromHtml("#2A70B9"),
+                VisitedLinkColor = ColorTranslator.FromHtml("#4A90D9"),
+                Font = _timestampFont,
+                BackColor = AssistantBg,
+                Cursor = Cursors.Hand,
+                Padding = Padding.Empty,
+                Margin = Padding.Empty,
+            };
+            _expandLink.LinkClicked += OnExpandLinkClicked;
+
+            // Forward mouse wheel to scrollable parent (same as RTB)
+            _expandLink.MouseWheel += (s, e) =>
+            {
+                if (e is HandledMouseEventArgs hme)
+                    hme.Handled = true;
+                var scrollParent = Parent?.Parent;
+                if (scrollParent != null)
+                {
+                    const int WM_MOUSEWHEEL = 0x020A;
+                    SendMessage(scrollParent.Handle, WM_MOUSEWHEEL,
+                        (IntPtr)((e.Delta << 16) | (int)Control.ModifierKeys),
+                        IntPtr.Zero);
+                }
+            };
+
+            Controls.Add(_expandLink);
+            _expandLinkHeight = UiScale.Pixels(18);
+
+            // Recalculate to accommodate the link
+            CalculateSize(Width);
+        }
+
+        private void OnExpandLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (_isExpanded)
+            {
+                // Collapse: not implemented — one-way expand is simpler and
+                // avoids the complexity of re-truncating markdown mid-stream.
+                return;
+            }
+
+            _isExpanded = true;
+
+            // Re-render the RTB with the full markdown content
+            try
+            {
+                var fullRtf = MarkdownToRtf.Convert(_fullMarkdownForExpand);
+                _rtb.Rtf = fullRtf;
+            }
+            catch
+            {
+                _rtb.Text = _fullMarkdownForExpand;
+            }
+
+            // Hide the expand link
+            _expandLink.Visible = false;
+
+            // Recalculate and notify parent
+            CalculateSize(Width);
+            Invalidate();
+            ExpandedChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         // Scaled pixel helpers — apply UiScale to base constants
         private static int BubblePadding => UiScale.Pixels(BaseBubblePadding);
         private static int BubbleRadius => UiScale.Pixels(BaseBubbleRadius);
@@ -111,6 +196,9 @@ namespace Supervertaler.Trados.Controls
 
         /// <summary>Raised when user clicks "Save as Prompt" on an assistant bubble.</summary>
         public event EventHandler<string> SaveAsPromptRequested;
+
+        /// <summary>Raised when user clicks "Save to memory bank" on an assistant bubble.</summary>
+        public event EventHandler<string> SaveToMemoryBankRequested;
 
         public ChatBubble(ChatMessage message, int maxWidth, float fontSize = 9f)
         {
@@ -280,8 +368,11 @@ namespace Supervertaler.Trados.Controls
             // Measure content height using the RichTextBox
             var contentHeight = MeasureRtbHeight(textWidth);
 
+            // Extra height for the "Show full response" link when visible
+            var linkAreaHeight = (_expandLink != null && _expandLink.Visible) ? _expandLinkHeight + 4 : 0;
+
             _bubbleWidth = maxBubble;
-            _bubbleHeight = _imageAreaHeight + contentHeight + BubblePadding * 2 + TimestampHeight;
+            _bubbleHeight = _imageAreaHeight + contentHeight + linkAreaHeight + BubblePadding * 2 + TimestampHeight;
 
             // Position the bubble rectangle (below avatar header)
             var topOffset = 4 + AvatarHeaderHeight;
@@ -315,6 +406,15 @@ namespace Supervertaler.Trados.Controls
             _rtb.Location = new Point(_bubbleRect.X + BubblePadding,
                 _bubbleRect.Y + BubblePadding + _imageAreaHeight);
             _rtb.Size = new Size(textWidth, contentHeight);
+
+            // Position the expand link below the RTB
+            if (_expandLink != null && _expandLink.Visible)
+            {
+                _expandLink.Location = new Point(
+                    _bubbleRect.X + BubblePadding,
+                    _rtb.Bottom + 2);
+                _expandLink.Size = new Size(textWidth, _expandLinkHeight);
+            }
 
             Size = new Size(maxWidth, _bubbleHeight + AvatarHeaderHeight + 8);
         }
@@ -472,11 +572,28 @@ namespace Supervertaler.Trados.Controls
                 var savePromptItem = new ToolStripMenuItem("Save as Prompt\u2026");
                 savePromptItem.Click += (s, e) =>
                 {
-                    var textToSave = _plainContent;
+                    // Use FullMarkdownContent when available — same as Copy — so that
+                    // truncated bubbles save the complete prompt, not just the display excerpt.
+                    var fullText = FullMarkdownContent ?? _markdownContent;
+                    var textToSave = string.IsNullOrEmpty(fullText)
+                        ? _plainContent
+                        : MarkdownToRtf.StripMarkdown(fullText);
                     if (!string.IsNullOrEmpty(textToSave))
                         SaveAsPromptRequested?.Invoke(this, textToSave);
                 };
                 menu.Items.Add(savePromptItem);
+
+                var saveToKbItem = new ToolStripMenuItem("Save to memory bank");
+                saveToKbItem.Click += (s, e) =>
+                {
+                    var fullText = FullMarkdownContent ?? _markdownContent;
+                    var textToSave = string.IsNullOrEmpty(fullText)
+                        ? _plainContent
+                        : MarkdownToRtf.StripMarkdown(fullText);
+                    if (!string.IsNullOrEmpty(textToSave))
+                        SaveToMemoryBankRequested?.Invoke(this, textToSave);
+                };
+                menu.Items.Add(saveToKbItem);
             }
 
             // Apply context menu to both the bubble and the RTB

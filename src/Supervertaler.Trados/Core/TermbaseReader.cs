@@ -1490,7 +1490,7 @@ namespace Supervertaler.Trados.Core
         /// </summary>
         /// <returns>Number of terms imported/updated.</returns>
         public static int ImportTsv(string dbPath, long termbaseId, string tsvPath,
-            string sourceLang, string targetLang)
+            string sourceLang, string targetLang, IProgress<int> progress = null)
         {
             // Read all lines
             string[] lines;
@@ -1664,9 +1664,16 @@ namespace Supervertaler.Trados.Core
                         }
 
                         count++;
+
+                        // Report progress every 50 rows to avoid UI overhead
+                        if (progress != null && count % 50 == 0)
+                            progress.Report(count);
                     }
 
                     tx.Commit();
+
+                    // Final progress report
+                    progress?.Report(count);
                 }
             }
 
@@ -1754,26 +1761,11 @@ namespace Supervertaler.Trados.Core
                     }
                 }
 
-                // Look up the termbase's language pair for the header
-                string srcHeader = "Source Term";
-                string tgtHeader = "Target Term";
-                using (var langCmd = new SqliteCommand(
-                    "SELECT source_lang, target_lang FROM termbases WHERE id = @tbId", conn))
-                {
-                    langCmd.Parameters.AddWithValue("@tbId", termbaseId);
-                    using (var lr = langCmd.ExecuteReader())
-                    {
-                        if (lr.Read())
-                        {
-                            var sl = lr.IsDBNull(0) ? null : lr.GetString(0);
-                            var tl = lr.IsDBNull(1) ? null : lr.GetString(1);
-                            if (!string.IsNullOrEmpty(sl))
-                                srcHeader = LanguageUtils.ShortenLanguageName(sl);
-                            if (!string.IsNullOrEmpty(tl))
-                                tgtHeader = LanguageUtils.ShortenLanguageName(tl);
-                        }
-                    }
-                }
+                // Fixed headers — language-neutral so the exported TSV can
+                // always be reimported regardless of the target termbase's
+                // language pair.
+                const string srcHeader = "Source";
+                const string tgtHeader = "Target";
 
                 // Write TSV
                 using (var sw = new StreamWriter(tsvPath, false, new UTF8Encoding(true)))
@@ -1922,7 +1914,52 @@ namespace Supervertaler.Trados.Core
         {
             if (string.IsNullOrEmpty(langCode)) return false;
             var lc = langCode.ToLowerInvariant();
-            return header == lc || lc.StartsWith(header) || header.StartsWith(lc.Split('-')[0]);
+
+            // Direct match: header is the code itself (e.g., "en-us")
+            if (header == lc) return true;
+
+            // Code starts with header (e.g., header "en", code "en-us")
+            if (lc.StartsWith(header)) return true;
+
+            // Header starts with the code's language part (e.g., header "english", code "en")
+            if (header.StartsWith(lc.Split('-')[0])) return true;
+
+            // Strip parenthesised region from header for matching — handles
+            // export headers like "Dutch (BE)" or "English (US)" produced by
+            // LanguageUtils.ShortenLanguageName().
+            var baseName = StripParenthesisedRegion(header);
+
+            // Try resolving the display name to a culture code via .NET
+            try
+            {
+                var culture = System.Globalization.CultureInfo.GetCultures(
+                    System.Globalization.CultureTypes.AllCultures);
+                foreach (var ci in culture)
+                {
+                    if (string.Equals(ci.EnglishName, baseName, System.StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(ci.NativeName, baseName, System.StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(ci.TwoLetterISOLanguageName, baseName, System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Check if this culture matches the target language code
+                        var ciCode = ci.Name.ToLowerInvariant();
+                        if (ciCode == lc || lc.StartsWith(ciCode) || ciCode.StartsWith(lc.Split('-')[0]))
+                            return true;
+                    }
+                }
+            }
+            catch { }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Strips a parenthesised suffix from a header, e.g. "Dutch (BE)" → "dutch".
+        /// Returns the input unchanged if no parenthesis is found.
+        /// </summary>
+        private static string StripParenthesisedRegion(string header)
+        {
+            var parenIdx = header.IndexOf('(');
+            return parenIdx > 0 ? header.Substring(0, parenIdx).Trim() : header;
         }
 
         private static readonly HashSet<string> KnownLanguages = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -1936,9 +1973,15 @@ namespace Supervertaler.Trados.Core
             "nederlands", "engels", "duits", "frans", "spaans", "italiaans", "portugees"
         };
 
+        /// <summary>
+        /// Checks if a header looks like a language name. Handles parenthesised
+        /// region suffixes (e.g., "Dutch (BE)") by stripping them before lookup.
+        /// </summary>
         private static bool IsKnownLanguage(string header)
         {
-            return KnownLanguages.Contains(header);
+            if (KnownLanguages.Contains(header)) return true;
+            var baseName = StripParenthesisedRegion(header);
+            return baseName != header && KnownLanguages.Contains(baseName);
         }
 
         private static string GetField(string[] fields, Dictionary<string, int> colMap, string key)

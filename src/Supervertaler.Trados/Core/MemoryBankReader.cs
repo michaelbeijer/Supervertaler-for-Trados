@@ -23,7 +23,7 @@ namespace Supervertaler.Trados.Core
         private DateTime _indexBuiltAt;
 
         // Folders to scan for memory-bank articles (skip 00_INBOX, 05_INDICES, 06_TEMPLATES)
-        private static readonly string[] ContentFolders =
+        internal static readonly string[] ContentFolders =
             { "01_CLIENTS", "02_TERMINOLOGY", "03_DOMAINS", "04_STYLE" };
 
         public MemoryBankReader(string memoryBankDir)
@@ -103,7 +103,7 @@ namespace Supervertaler.Trados.Core
             string domain,
             string sourceLang,
             string targetLang,
-            int tokenBudget = 4000,
+            int tokenBudget = 24000,
             string manualClientProfile = null)
         {
             if (!VaultExists) return null;
@@ -406,7 +406,7 @@ namespace Supervertaler.Trados.Core
             return upper.Length >= 2 ? upper.Substring(0, 2) : upper;
         }
 
-        private static string ReadHead(string path, int maxChars)
+        internal static string ReadHead(string path, int maxChars)
         {
             using (var sr = new StreamReader(path, Encoding.UTF8))
             {
@@ -428,7 +428,7 @@ namespace Supervertaler.Trados.Core
             }
         }
 
-        private static Dictionary<string, string> ParseFrontmatter(string text)
+        internal static Dictionary<string, string> ParseFrontmatter(string text)
         {
             var fm = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (string.IsNullOrEmpty(text)) return fm;

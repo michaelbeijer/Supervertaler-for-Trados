@@ -1,7 +1,7 @@
 ---
 name: "SuperMemory — Process Inbox"
 description: "Reads raw material from 00_INBOX and produces structured knowledge base entries"
-version: "1.1"
+version: "1.2"
 ---
 
 # SuperMemory — Process Inbox
@@ -16,6 +16,7 @@ You will be given one or more files from the `00_INBOX/` folder. These may conta
 - Feedback or correction notes from clients or reviewers
 - Domain-specific reference articles or documentation
 - Previous translation projects or excerpts
+- Chat Q&A pairs saved from the Supervertaler Assistant
 - Any other material relevant to translation work
 
 ## Task
@@ -27,11 +28,17 @@ If the input contains information about a specific client (preferences, style ru
 **Required frontmatter:**
 ```yaml
 ---
+title: "Client Name"
+type: client
 client: "Client Name"
-languages: ["source → target"]
-domains: ["[[Domain]]"]
-last_updated: YYYY-MM-DD
-compiled_from: "source file path"
+domain: <primary domain>
+language_pair: <e.g. nl-BE → en-US>
+confidence: high|medium|low
+sources:
+  - <source inbox file(s)>
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+tldr: <one-sentence summary — max 150 characters>
 ---
 ```
 
@@ -44,18 +51,26 @@ If the input contains terminology decisions, glossary entries, or term discussio
 **Required frontmatter:**
 ```yaml
 ---
+title: "source term → target term"
+type: terminology
 term_source: "source term"
 term_target: "target term"
-source_lang: "xx-XX"
-target_lang: "xx-XX"
 domain: "[[Domain]]"
-clients: ["[[Client]]"]
-status: "approved|proposed|rejected"
-last_updated: YYYY-MM-DD
+client: "[[Client]]"
+language_pair: <e.g. nl-BE → en-US>
+confidence: high|medium|low
+status: approved|proposed|rejected
+sources:
+  - <source inbox file(s)>
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+tldr: <one-sentence summary — max 150 characters>
 ---
 ```
 
 **Required sections:** Preferred translation, Rejected alternatives (with reasons), Context and usage, Client-specific overrides (if any), Sources.
+
+**Important:** Always quote the exact source and target terms verbatim. Do not paraphrase or generalise term pairs.
 
 ### 3. Domain articles → `03_DOMAINS/`
 If the input contains domain-specific knowledge (conventions, pitfalls, reference material), create or update a domain article.
@@ -63,10 +78,17 @@ If the input contains domain-specific knowledge (conventions, pitfalls, referenc
 **Required frontmatter:**
 ```yaml
 ---
+title: "Domain Name"
+type: domain
 domain: "Domain Name"
-languages: ["source → target"]
+language_pair: <e.g. nl-BE → en-US>
+confidence: high|medium|low
 related_domains: ["[[Domain]]"]
-last_updated: YYYY-MM-DD
+sources:
+  - <source inbox file(s)>
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+tldr: <one-sentence summary — max 150 characters>
 ---
 ```
 
@@ -75,13 +97,21 @@ last_updated: YYYY-MM-DD
 ### 4. Style guides → `04_STYLE/`
 If the input contains style rules, formatting conventions, or register decisions, create or update a style guide.
 
+## Confidence scoring
+
+Assign a confidence level to every article based on the quality and authority of the source material:
+- **high** — derived from an authoritative source: official client glossary, published style guide, confirmed by multiple corroborating sources, or explicit client instructions.
+- **medium** — derived from a single source of reasonable quality: a feedback note with context, a short reference document, a single article.
+- **low** — derived from a single brief note, an ambiguous correction, or when the compilation required significant inference. Flag uncertain decisions explicitly.
+
 ## Rules
 1. **Always use `[[backlinks]]`** for client names, domain names, terminology entries, and other KB articles. This is what makes the knowledge base navigable.
 2. **Be specific and actionable.** Every entry should help a translator make a concrete decision. "Use formal register" is too vague. "Use 'u' form, never 'je/jij'" is actionable.
 3. **Record the WHY.** When a terminology choice was made, record why alternatives were rejected. This prevents future re-litigation of the same decision.
-4. **Preserve source attribution.** Always note where the information came from in the frontmatter (`compiled_from`) and in a Sources section.
-5. **Flag conflicts.** If new information contradicts an existing KB entry, do not silently overwrite. Create a note in the relevant article's Notes section flagging the conflict for human review.
-6. **Archive the inbox file.** After compilation, add `compiled: true`, `compiled_date: YYYY-MM-DD`, and `compiled_to: [list of output files]` to the source file's frontmatter, then move it to `00_INBOX/_archive/`. This keeps the inbox clean — only unprocessed files remain visible.
+4. **Preserve source attribution.** Always list source files in the `sources:` frontmatter field AND in a Sources section at the end of the article.
+5. **Flag conflicts.** If new information contradicts an existing KB entry, do not silently overwrite. Create a note in the relevant article's Notes section flagging the conflict for human review. Set `confidence: low` on the conflicting article.
+6. **Always include a `tldr:`** — this is used for fast scanning during context loading. Keep it under 150 characters.
+7. **Archive the inbox file.** After compilation, add `compiled: true`, `compiled_date: YYYY-MM-DD`, and `compiled_to: [list of output files]` to the source file's frontmatter, then move it to `00_INBOX/_archive/`. This keeps the inbox clean — only unprocessed files remain visible.
 
 ## Output format
 Return the full content of each file to be created, clearly indicating the target path:

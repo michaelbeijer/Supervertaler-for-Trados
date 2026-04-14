@@ -105,7 +105,7 @@ namespace Supervertaler.Trados.Licensing
 
             var lblEnterKey = new Label
             {
-                Text = "License key",
+                Text = "Licence key",
                 Location = new Point(0, 0),
                 AutoSize = true,
                 Font = headingFont,
@@ -139,7 +139,7 @@ namespace Supervertaler.Trados.Licensing
 
             _lnkBuy = new LinkLabel
             {
-                Text = "Buy a license \u2192",
+                Text = "Buy a licence \u2192",
                 Location = new Point(100, 62),
                 AutoSize = true,
                 Font = font,
@@ -190,7 +190,7 @@ namespace Supervertaler.Trados.Licensing
 
             _lblKeyLabel = new Label
             {
-                Text = "License key:",
+                Text = "Licence key:",
                 Location = new Point(labelX, ly),
                 AutoSize = true,
                 Font = smallFont,
@@ -328,7 +328,7 @@ namespace Supervertaler.Trados.Licensing
         {
             _statusBanner.BackColor = Color.FromArgb(230, 245, 230);
             _statusBanner.Invalidate();
-            _statusText.Text = "\u2705  License active";
+            _statusText.Text = "\u2705  Licence active";
             _statusText.ForeColor = Color.FromArgb(40, 120, 40);
 
             // Show the Lemon Squeezy variant name if available, otherwise generic label
@@ -366,7 +366,7 @@ namespace Supervertaler.Trados.Licensing
         {
             _statusBanner.BackColor = Color.FromArgb(255, 230, 230);
             _statusBanner.Invalidate();
-            _statusText.Text = "\u274c  License expired";
+            _statusText.Text = "\u274c  Licence expired";
             _statusText.ForeColor = Color.FromArgb(180, 40, 40);
 
             _activationPanel.Visible = true;
@@ -420,9 +420,9 @@ namespace Supervertaler.Trados.Licensing
             if (_isProcessing) return;
 
             var confirm = MessageBox.Show(
-                "Are you sure you want to deactivate this license?\n\n" +
+                "Are you sure you want to deactivate this licence?\n\n" +
                 "This will free up one of your activation slots.",
-                "Deactivate License",
+                "Deactivate Licence",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 

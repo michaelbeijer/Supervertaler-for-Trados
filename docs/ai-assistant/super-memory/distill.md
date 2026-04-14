@@ -23,7 +23,9 @@ description: Extract knowledge from translation files using AI
 ### From the SuperMemory toolbar
 
 1. Click the **Distill** button (⚗) on the SuperMemory toolbar in the Supervertaler Assistant panel
-2. Select one or more files in the file picker dialogue
+2. A choice dialog appears with two options:
+   * **Distill inbox** – automatically distils all non-Markdown files (TMX, DOCX, PDF, XLSX, etc.) currently sitting in the active memory bank's `00_INBOX` folder. The button shows how many files are available and lists their names. Disabled when the inbox has no distillable files.
+   * **Select files…** – opens a file picker to choose files from anywhere on disk.
 3. The AI analyses the content and creates draft articles in the active memory bank's `00_INBOX` folder
 4. Review the draft articles in Obsidian, then click **[Process Inbox](process-inbox.md)** to compile them into the knowledge base
 

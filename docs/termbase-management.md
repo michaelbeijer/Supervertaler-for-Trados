@@ -54,21 +54,39 @@ You can import terminology from a tab-separated values file:
 1. Select the target termbase in the list
 2. Click **Import from TSV**
 3. Select your `.tsv` file
+4. A confirmation dialog shows the filename, row count, termbase name, and language pair -- check that you are importing into the right termbase
+5. A progress bar tracks the import (useful for large glossaries with thousands of terms)
 
 **File format:**
 
-- Two columns separated by a tab: `source<TAB>target`
-- For terms with multiple synonyms, use pipe-delimited values: `source<TAB>translation1|translation2|translation3`
-- One term per line
-- UTF-8 encoding recommended
+The first row must be a header row. Recognised column headers (case-insensitive):
+
+| Column | Required | Recognised headers |
+|--------|----------|-------------------|
+| **Source** | Yes | `Source`, `Source Term`, `Src`, or a language name (e.g., `English`) |
+| **Target** | Yes | `Target`, `Target Term`, `Tgt`, or a language name (e.g., `Dutch`) |
+| Term UUID | No | `Term UUID`, `UUID`, `Term ID`, `ID` |
+| Priority | No | `Priority`, `Prio`, `Rank` |
+| Domain | No | `Domain`, `Subject`, `Field`, `Category` |
+| Notes | No | `Notes`, `Note`, `Definition`, `Comment` |
+| Project | No | `Project` |
+| Client | No | `Client`, `Customer` |
+| Forbidden | No | `Forbidden`, `Do not use` |
+
+For terms with multiple synonyms, use pipe-delimited values: `main|synonym1|synonym2`. Forbidden synonyms are wrapped as `[!term]`.
 
 **Example:**
 
 ```
-database	databank|gegevensbank
-software	software
-user interface	gebruikersinterface|gebruikersomgeving
+Source	Target	Domain	Notes
+database	databank|gegevensbank		
+software	software		Non-translatable
+user interface	gebruikersinterface|gebruikersomgeving	IT	
 ```
+
+{% hint style="info" %}
+TSV files exported from Supervertaler (both the Trados plugin and Workbench) can always be reimported without any changes. Files from other tools are also supported as long as they have recognisable column headers.
+{% endhint %}
 
 ## Export to TSV
 
@@ -78,7 +96,7 @@ To export all terms from a termbase:
 2. Click **Export to TSV**
 3. Choose a save location
 
-The exported file uses the same tab-separated format described above.
+The exported file uses tab-separated columns with a header row: `Term UUID`, `Source`, `Target`, `Priority`, `Domain`, `Notes`, `Project`, `Client`, `Forbidden`. Synonyms are pipe-delimited and forbidden synonyms are marked with `[!term]`. The file is UTF-8 encoded with BOM for Excel compatibility.
 
 ## Termbase Editor
 

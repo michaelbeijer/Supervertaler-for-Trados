@@ -147,7 +147,7 @@ namespace Supervertaler.Trados.Licensing
         public async Task<(bool Success, string Message)> ActivateAsync(string licenseKey)
         {
             if (string.IsNullOrWhiteSpace(licenseKey))
-                return (false, "Please enter a license key.");
+                return (false, "Please enter a licence key.");
 
             try
             {
@@ -179,15 +179,15 @@ namespace Supervertaler.Trados.Licensing
                     }
 
                     OnLicenseStateChanged();
-                    return (true, "License activated successfully.");
+                    return (true, "Licence activated successfully.");
                 }
 
                 // Activation failed — return the error from Lemon Squeezy
-                return (false, result.Error ?? "Activation failed. Please check your license key.");
+                return (false, result.Error ?? "Activation failed. Please check your licence key.");
             }
             catch (HttpRequestException ex)
             {
-                return (false, "Could not reach the license server. Please check your internet connection.\n\n" + ex.Message);
+                return (false, "Could not reach the licence server. Please check your internet connection.\n\n" + ex.Message);
             }
             catch (Exception ex)
             {
@@ -204,7 +204,7 @@ namespace Supervertaler.Trados.Licensing
         public async Task<(bool Success, string Message)> DeactivateAsync()
         {
             if (!_info.IsActivated)
-                return (false, "No active license to deactivate.");
+                return (false, "No active licence to deactivate.");
 
             try
             {
@@ -228,7 +228,7 @@ namespace Supervertaler.Trados.Licensing
             }
 
             OnLicenseStateChanged();
-            return (true, "License deactivated. This machine's activation slot has been freed.");
+            return (true, "Licence deactivated. This machine's activation slot has been freed.");
         }
 
         // ─── Validation ─────────────────────────────────────────────
@@ -241,7 +241,7 @@ namespace Supervertaler.Trados.Licensing
         public async Task<(bool Success, string Message)> ValidateOnlineAsync()
         {
             if (!_info.IsActivated)
-                return (false, "No active license to validate.");
+                return (false, "No active licence to validate.");
 
             try
             {
@@ -271,14 +271,14 @@ namespace Supervertaler.Trados.Licensing
                     OnLicenseStateChanged();
 
                 if (result.Valid)
-                    return (true, "License is valid.");
+                    return (true, "Licence is valid.");
                 else
-                    return (false, result.Error ?? "License validation failed.");
+                    return (false, result.Error ?? "Licence validation failed.");
             }
             catch (HttpRequestException)
             {
                 // Network error — offline mode, trust cached state
-                return (false, "Could not reach the license server. Using cached license state.");
+                return (false, "Could not reach the licence server. Using cached licence state.");
             }
             catch (Exception ex)
             {
@@ -394,7 +394,7 @@ namespace Supervertaler.Trados.Licensing
             }
             catch
             {
-                result.Error = "Failed to parse license server response.";
+                result.Error = "Failed to parse licence server response.";
             }
 
             return result;
@@ -413,9 +413,9 @@ namespace Supervertaler.Trados.Licensing
         public static void ShowLicenseRequiredMessage()
         {
             MessageBox.Show(
-                "Your trial has expired. Please enter a license key in Settings \u2192 License to continue using Supervertaler for Trados.\n\n" +
+                "Your trial has expired. Please enter a licence key in Settings \u2192 Licence to continue using Supervertaler for Trados.\n\n" +
                 "Visit supervertaler.com/trados/ for pricing and purchase options.",
-                "License Required",
+                "Licence Required",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
         }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Supervertaler.Trados.Controls;
 using Supervertaler.Trados.Core;
@@ -167,8 +168,8 @@ namespace Supervertaler.Trados.Settings
             promptsPage.Controls.Add(_promptManagerPanel);
             _tabControl.TabPages.Add(promptsPage);
 
-            // --- License tab ---
-            var licensePage = new TabPage("License") { BackColor = Color.White };
+            // --- Licence tab ---
+            var licensePage = new TabPage("Licence") { BackColor = Color.White };
             var licensePanel = new LicensePanel { Dock = DockStyle.Fill };
             licensePage.Controls.Add(licensePanel);
             _tabControl.TabPages.Add(licensePage);
@@ -1378,25 +1379,103 @@ namespace Supervertaler.Trados.Settings
 
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
 
+                // Count data rows and show confirmation before importing.
+                int rowCount;
                 try
                 {
-                    Cursor = Cursors.WaitCursor;
-                    int count = TermbaseReader.ImportTsv(dbPath, selected.Id, dlg.FileName,
-                        selected.SourceLang, selected.TargetLang);
-                    Cursor = Cursors.Default;
-
-                    MessageBox.Show($"Imported {count:N0} terms into \"{selected.Name}\".",
-                        "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    UpdateTermbaseInfo(dbPath);
-                    PopulateTermbaseList(dbPath);
+                    var allLines = File.ReadAllLines(dlg.FileName);
+                    rowCount = allLines.Length > 1 ? allLines.Length - 1 : 0;
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Cursor = Cursors.Default;
-                    MessageBox.Show($"Import failed:\n{ex.Message}",
+                    rowCount = 0;
+                }
+
+                var langPair = $"{LanguageUtils.ShortenLanguageName(selected.SourceLang)} \u2192 " +
+                               $"{LanguageUtils.ShortenLanguageName(selected.TargetLang)}";
+                var fileName = Path.GetFileName(dlg.FileName);
+                var confirmMsg = rowCount > 0
+                    ? $"Import {rowCount:N0} row{(rowCount == 1 ? "" : "s")} from \"{fileName}\" " +
+                      $"into \"{selected.Name}\" ({langPair})?"
+                    : $"Import \"{fileName}\" into \"{selected.Name}\" ({langPair})?";
+
+                if (MessageBox.Show(confirmMsg, "TermLens",
+                    MessageBoxButtons.OKCancel, MessageBoxIcon.Question) != DialogResult.OK)
+                    return;
+
+                // Run import on a background thread with a progress dialog.
+                var tsvFilePath = dlg.FileName;
+                var progressDlg = new Form
+                {
+                    Text = "Importing…",
+                    Font = new Font("Segoe UI", 9f),
+                    FormBorderStyle = FormBorderStyle.FixedDialog,
+                    MaximizeBox = false,
+                    MinimizeBox = false,
+                    StartPosition = FormStartPosition.CenterParent,
+                    ClientSize = new Size(400, 90),
+                    BackColor = Color.White,
+                    ControlBox = false
+                };
+                var lblProgress = new Label
+                {
+                    Text = $"Importing into \"{selected.Name}\"…",
+                    Location = new Point(16, 12),
+                    AutoSize = true,
+                    ForeColor = Color.FromArgb(80, 80, 80)
+                };
+                var progressBar = new ProgressBar
+                {
+                    Location = new Point(16, 38),
+                    Width = 368,
+                    Height = 22,
+                    Minimum = 0,
+                    Maximum = Math.Max(rowCount, 1),
+                    Style = ProgressBarStyle.Continuous
+                };
+                progressDlg.Controls.Add(lblProgress);
+                progressDlg.Controls.Add(progressBar);
+
+                int importedCount = 0;
+                Exception importError = null;
+
+                var progress = new Progress<int>(imported =>
+                {
+                    if (progressDlg.IsDisposed) return;
+                    progressBar.Value = Math.Min(imported, progressBar.Maximum);
+                    lblProgress.Text = $"Importing into \"{selected.Name}\"… {imported:N0} / {rowCount:N0} terms";
+                });
+
+                progressDlg.Shown += async (s2, e2) =>
+                {
+                    try
+                    {
+                        importedCount = await Task.Run(() =>
+                            TermbaseReader.ImportTsv(dbPath, selected.Id, tsvFilePath,
+                                selected.SourceLang, selected.TargetLang, progress));
+                    }
+                    catch (Exception ex)
+                    {
+                        importError = ex;
+                    }
+                    progressDlg.Close();
+                };
+
+                progressDlg.ShowDialog(this);
+
+                if (importError != null)
+                {
+                    MessageBox.Show($"Import failed:\n{importError.Message}",
                         "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+                else
+                {
+                    MessageBox.Show($"Imported {importedCount:N0} terms into \"{selected.Name}\".",
+                        "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+
+                UpdateTermbaseInfo(dbPath);
+                PopulateTermbaseList(dbPath);
             }
         }
 

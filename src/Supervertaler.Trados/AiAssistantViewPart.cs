@@ -71,6 +71,7 @@ namespace Supervertaler.Trados
 
         // Memory-bank inbox watcher
         private FileSystemWatcher _inboxWatcher;
+        private bool _fullyInitialized;
 
         // Memory-bank reader (lazy: created once, cached for the session).
         // Cached against _kbReaderBankName so that switching the active memory
@@ -114,15 +115,24 @@ namespace Supervertaler.Trados
         {
             _currentInstance = this;
 
-            // License check — show/hide upgrade overlay based on tier
+            // License check — show/hide upgrade overlay based on tier.
+            // When the user activates a licence mid-session (after Initialize
+            // returned early due to no access), run the deferred full init so
+            // event handlers, memory-bank dropdown, inbox watcher, etc. are
+            // all wired up without requiring a Trados restart.
             LicenseManager.Instance.LicenseStateChanged += (s, e) =>
             {
                 _control.Value.BeginInvoke(new Action(() =>
                 {
                     if (LicenseManager.Instance.HasAssistantAccess)
+                    {
                         _control.Value.HideUpgradeRequired();
+                        InitializeFullIfNeeded();
+                    }
                     else
+                    {
                         _control.Value.ShowUpgradeRequired();
+                    }
                 }));
             };
 
@@ -138,6 +148,23 @@ namespace Supervertaler.Trados
                 _control.Value.ShowUpgradeRequired();
                 return;
             }
+
+            InitializeFullIfNeeded();
+        }
+
+        /// <summary>
+        /// Performs the full initialisation that requires a valid licence:
+        /// wires event handlers, populates the memory-bank dropdown, starts
+        /// the inbox watcher, and restores chat history.  Guarded by
+        /// <see cref="_fullyInitialized"/> so it runs at most once per
+        /// ViewPart lifetime — either from <see cref="Initialize"/> (when
+        /// licensed at startup) or from the <c>LicenseStateChanged</c>
+        /// handler (when the user activates mid-session).
+        /// </summary>
+        private void InitializeFullIfNeeded()
+        {
+            if (_fullyInitialized) return;
+            _fullyInitialized = true;
 
             _editorController = SdlTradosStudio.Application.GetController<EditorController>();
             if (_editorController != null)
@@ -159,6 +186,7 @@ namespace Supervertaler.Trados
             _control.Value.ClearRequested += OnClearRequested;
             _control.Value.ApplyToTargetRequested += OnApplyToTargetRequested;
             _control.Value.SaveAsPromptRequested += OnSaveAsPromptRequested;
+            _control.Value.SaveToMemoryBankRequested += OnSaveToMemoryBank;
             _control.Value.StopRequested += OnStopRequested;
 
             // Wire remaining buttons (SettingsRequested already wired above)
@@ -1028,6 +1056,71 @@ namespace Supervertaler.Trados
                     _control.Value.AddMessage(confirmMsg);
                     SaveChatHistory();
                 }
+            });
+        }
+
+        private void OnSaveToMemoryBank(object sender, string assistantContent)
+        {
+            SafeInvoke(() =>
+            {
+                if (string.IsNullOrWhiteSpace(assistantContent))
+                    return;
+
+                var vaultDir = ActiveMemoryBankDir;
+                var bankName = ActiveMemoryBankName;
+
+                if (!Directory.Exists(vaultDir))
+                {
+                    ShowSuperMemoryMessage(
+                        $"Memory bank **{bankName}** does not exist yet.\n\n" +
+                        $"Expected location:\n`{vaultDir}`");
+                    return;
+                }
+
+                // Find the preceding user message in chat history
+                string userQuestion = null;
+                for (int i = _chatHistory.Count - 1; i >= 0; i--)
+                {
+                    if (_chatHistory[i].Role == ChatRole.User)
+                    {
+                        userQuestion = _chatHistory[i].Content;
+                        break;
+                    }
+                }
+
+                // Write inbox note
+                var inboxDir = Path.Combine(vaultDir, "00_INBOX");
+                Directory.CreateDirectory(inboxDir);
+
+                var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+                var fileName = $"chat-save-{stamp}.md";
+                var filePath = Path.Combine(inboxDir, fileName);
+
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("# Chat – saved to memory bank");
+                sb.AppendLine($"*Saved on {DateTime.Now:yyyy-MM-dd HH:mm} from Supervertaler Assistant*");
+                sb.AppendLine();
+
+                if (!string.IsNullOrWhiteSpace(userQuestion))
+                {
+                    sb.AppendLine("## Question");
+                    sb.AppendLine();
+                    sb.AppendLine(userQuestion);
+                    sb.AppendLine();
+                }
+
+                sb.AppendLine("## Answer");
+                sb.AppendLine();
+                sb.AppendLine(assistantContent);
+
+                File.WriteAllText(filePath, sb.ToString(), new System.Text.UTF8Encoding(false));
+
+                // Confirmation in chat
+                ShowSuperMemoryMessage(
+                    $"Saved to memory bank **{bankName}** \u2014 " +
+                    "run **Process Inbox** to compile it into the knowledge base.");
+
+                RefreshSuperMemoryInboxCount();
             });
         }
 
@@ -2112,6 +2205,9 @@ namespace Supervertaler.Trados
                 SaveChatHistory();
             }
 
+            // Rebuild master indices after every successful Process Inbox run
+            RebuildIndices(vaultDir);
+
             RefreshSuperMemoryInboxCount();
         }
 
@@ -2196,6 +2292,211 @@ namespace Supervertaler.Trados
             _chatHistory.Add(msg);
             _control.Value.AddMessage(msg);
             SaveChatHistory();
+
+            // Rebuild master indices after Health Check (it may have restructured articles)
+            RebuildIndices(vaultDir);
+        }
+
+        // ─── Auto-indexing ──────────────────────────────────────────
+
+        /// <summary>
+        /// Rebuilds the master index files in <c>05_INDICES/</c> by scanning
+        /// all content folders for article frontmatter. No LLM call — this is
+        /// a pure file-scan operation and completes in under a second even on
+        /// large banks.
+        /// </summary>
+        private void RebuildIndices(string vaultDir)
+        {
+            try
+            {
+                var indicesDir = Path.Combine(vaultDir, "05_INDICES");
+                Directory.CreateDirectory(indicesDir);
+
+                var today = DateTime.Now.ToString("yyyy-MM-dd");
+
+                // ── Master Terminology Index ───────────────────────
+                var termDir = Path.Combine(vaultDir, "02_TERMINOLOGY");
+                var termSb = new System.Text.StringBuilder();
+                termSb.AppendLine("---");
+                termSb.AppendLine("title: Master Terminology Index");
+                termSb.AppendLine("type: index");
+                termSb.AppendLine($"updated: {today}");
+                termSb.AppendLine("---");
+                termSb.AppendLine();
+                termSb.AppendLine("# Master Terminology Index");
+                termSb.AppendLine();
+                termSb.AppendLine("| Source | Target | Domain | Client | Confidence | Status |");
+                termSb.AppendLine("|--------|--------|--------|--------|------------|--------|");
+
+                if (Directory.Exists(termDir))
+                {
+                    foreach (var file in Directory.GetFiles(termDir, "*.md", SearchOption.AllDirectories))
+                    {
+                        var fn = Path.GetFileName(file);
+                        if (fn.StartsWith("_EXAMPLE_", System.StringComparison.OrdinalIgnoreCase)) continue;
+                        if (file.Contains("_archive")) continue;
+
+                        var head = MemoryBankReader.ReadHead(file, 2048);
+                        var fm = MemoryBankReader.ParseFrontmatter(head);
+
+                        var src = fm.ContainsKey("term_source") ? fm["term_source"] : "";
+                        var tgt = fm.ContainsKey("term_target") ? fm["term_target"] : "";
+                        var domain = fm.ContainsKey("domain") ? fm["domain"] : "";
+                        var client = fm.ContainsKey("client") ? fm["client"] : "";
+                        var confidence = fm.ContainsKey("confidence") ? fm["confidence"] : "";
+                        var status = fm.ContainsKey("status") ? fm["status"] : "";
+
+                        if (string.IsNullOrWhiteSpace(src) && string.IsNullOrWhiteSpace(tgt))
+                        {
+                            // Fall back to title if term_source/term_target are missing
+                            var title = fm.ContainsKey("title") ? fm["title"] : Path.GetFileNameWithoutExtension(fn);
+                            src = title;
+                        }
+
+                        termSb.AppendLine($"| {Escape(src)} | {Escape(tgt)} | {Escape(domain)} | {Escape(client)} | {confidence} | {status} |");
+                    }
+                }
+
+                File.WriteAllText(Path.Combine(indicesDir, "master-terminology.md"),
+                    termSb.ToString(), new System.Text.UTF8Encoding(false));
+
+                // ── Client Summary ─────────────────────────────────
+                var clientDir = Path.Combine(vaultDir, "01_CLIENTS");
+                var clientSb = new System.Text.StringBuilder();
+                clientSb.AppendLine("---");
+                clientSb.AppendLine("title: Client Summary");
+                clientSb.AppendLine("type: index");
+                clientSb.AppendLine($"updated: {today}");
+                clientSb.AppendLine("---");
+                clientSb.AppendLine();
+                clientSb.AppendLine("# Client Summary");
+                clientSb.AppendLine();
+
+                if (Directory.Exists(clientDir))
+                {
+                    foreach (var file in Directory.GetFiles(clientDir, "*.md", SearchOption.AllDirectories))
+                    {
+                        var fn = Path.GetFileName(file);
+                        if (fn.StartsWith("_EXAMPLE_", System.StringComparison.OrdinalIgnoreCase)) continue;
+                        if (file.Contains("_archive")) continue;
+
+                        var head = MemoryBankReader.ReadHead(file, 2048);
+                        var fm = MemoryBankReader.ParseFrontmatter(head);
+
+                        var title = fm.ContainsKey("title") ? fm["title"]
+                            : fm.ContainsKey("client") ? fm["client"]
+                            : Path.GetFileNameWithoutExtension(fn);
+                        var tldr = fm.ContainsKey("tldr") ? fm["tldr"] : null;
+
+                        // If no tldr, extract the first non-frontmatter, non-heading paragraph
+                        if (string.IsNullOrWhiteSpace(tldr))
+                            tldr = ExtractFirstParagraph(head);
+
+                        clientSb.AppendLine($"## {title}");
+                        clientSb.AppendLine();
+                        if (!string.IsNullOrWhiteSpace(tldr))
+                            clientSb.AppendLine(tldr);
+                        else
+                            clientSb.AppendLine("*(No summary available)*");
+                        clientSb.AppendLine();
+                    }
+                }
+
+                File.WriteAllText(Path.Combine(indicesDir, "client-summary.md"),
+                    clientSb.ToString(), new System.Text.UTF8Encoding(false));
+
+                // ── Domain Summary ─────────────────────────────────
+                var domainDir = Path.Combine(vaultDir, "03_DOMAINS");
+                var domainSb = new System.Text.StringBuilder();
+                domainSb.AppendLine("---");
+                domainSb.AppendLine("title: Domain Summary");
+                domainSb.AppendLine("type: index");
+                domainSb.AppendLine($"updated: {today}");
+                domainSb.AppendLine("---");
+                domainSb.AppendLine();
+                domainSb.AppendLine("# Domain Summary");
+                domainSb.AppendLine();
+
+                if (Directory.Exists(domainDir))
+                {
+                    foreach (var file in Directory.GetFiles(domainDir, "*.md", SearchOption.AllDirectories))
+                    {
+                        var fn = Path.GetFileName(file);
+                        if (fn.StartsWith("_EXAMPLE_", System.StringComparison.OrdinalIgnoreCase)) continue;
+                        if (file.Contains("_archive")) continue;
+
+                        var head = MemoryBankReader.ReadHead(file, 2048);
+                        var fm = MemoryBankReader.ParseFrontmatter(head);
+
+                        var title = fm.ContainsKey("title") ? fm["title"]
+                            : fm.ContainsKey("domain") ? fm["domain"]
+                            : Path.GetFileNameWithoutExtension(fn);
+                        var tldr = fm.ContainsKey("tldr") ? fm["tldr"] : null;
+
+                        if (string.IsNullOrWhiteSpace(tldr))
+                            tldr = ExtractFirstParagraph(head);
+
+                        domainSb.AppendLine($"## {title}");
+                        domainSb.AppendLine();
+                        if (!string.IsNullOrWhiteSpace(tldr))
+                            domainSb.AppendLine(tldr);
+                        else
+                            domainSb.AppendLine("*(No summary available)*");
+                        domainSb.AppendLine();
+                    }
+                }
+
+                File.WriteAllText(Path.Combine(indicesDir, "domain-summary.md"),
+                    domainSb.ToString(), new System.Text.UTF8Encoding(false));
+            }
+            catch
+            {
+                // Non-critical — indices are a convenience, not a requirement
+            }
+        }
+
+        /// <summary>Escapes pipe characters for Markdown table cells.</summary>
+        private static string Escape(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "";
+            return value.Replace("|", "\\|");
+        }
+
+        /// <summary>
+        /// Extracts the first non-empty paragraph after the frontmatter block
+        /// and any heading lines. Used as a fallback when no <c>tldr:</c> is
+        /// available in the frontmatter.
+        /// </summary>
+        private static string ExtractFirstParagraph(string head)
+        {
+            if (string.IsNullOrEmpty(head)) return null;
+
+            var lines = head.Split('\n');
+            bool pastFrontmatter = false;
+            bool inFrontmatter = false;
+
+            foreach (var rawLine in lines)
+            {
+                var line = rawLine.Trim();
+
+                if (!pastFrontmatter)
+                {
+                    if (line == "---" && !inFrontmatter)
+                    { inFrontmatter = true; continue; }
+                    if (line == "---" && inFrontmatter)
+                    { pastFrontmatter = true; continue; }
+                    continue;
+                }
+
+                // Skip headings and empty lines
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                if (line.StartsWith("#")) continue;
+
+                // Found a content line — return it (trimmed to ~200 chars)
+                return line.Length > 200 ? line.Substring(0, 200) + "…" : line;
+            }
+
+            return null;
         }
 
         private void WriteVaultFileTracked(string vaultDir, string relativePath,
@@ -2269,12 +2570,32 @@ Each article must have this frontmatter structure:
 ```
 ---
 title: <descriptive title>
+type: terminology|domain|style|client|reference
+domain: <subject area, e.g. medical-imaging, patent-law, legal, marketing>
+client: <client name if known, omit if generic>
+language_pair: <e.g. nl-BE → en-US>
+confidence: high|medium|low
 tags: [<relevant tags>]
 source: distilled
-distilled_from: <original filename(s)>
-date: <today's date YYYY-MM-DD>
+sources:
+  - <original filename 1>
+  - <original filename 2>
+created: <today's date YYYY-MM-DD>
+updated: <today's date YYYY-MM-DD>
+tldr: <one-sentence summary of what this article covers — max 150 characters>
 ---
 ```
+
+### Confidence scoring
+
+Assign a confidence level based on the quality and authority of the source material:
+- **high** — derived from an authoritative source: official client glossary, published style guide, large TMX with consistent patterns, or confirmed by multiple corroborating sources.
+- **medium** — derived from a single source of reasonable quality: a short PDF, a single reference document, a small TMX.
+- **low** — derived from ambiguous or incomplete material, or when the extraction required significant inference. Flag uncertain terminology decisions explicitly.
+
+### Source traceability
+
+Always list the original source filename(s) in the `sources:` frontmatter field. When recording terminology decisions, **always quote the exact source and target terms verbatim** — do not paraphrase or generalise term pairs.
 
 ## Guidelines
 
@@ -2283,24 +2604,14 @@ date: <today's date YYYY-MM-DD>
 - Include the *reasoning* behind translation choices, not just the choices themselves.
 - When in doubt, create separate articles rather than one huge article.
 - Write in English (the knowledge base language), but include source/target examples in their original languages.
-- If the source material is too large to fully process, prioritise the most valuable and non-obvious knowledge.";
+- If the source material is too large to fully process, prioritise the most valuable and non-obvious knowledge.
+- Always include a `tldr:` — this is used for fast scanning during context loading.";
 
         private void OnDistill(object sender, EventArgs e)
         {
             // User-initiated action — re-engage auto-scroll so the progress
             // bubble and the response land in view.
             _control.Value.ReengageAutoScroll();
-
-            string[] selectedFiles;
-            using (var dlg = new OpenFileDialog())
-            {
-                dlg.Title = "Select files to distill into knowledge base articles";
-                dlg.Filter = "Translation files|*.tmx;*.docx;*.pdf;*.xlsx;*.csv;*.tsv;*.tbx;*.xml;*.txt|All files|*.*";
-                dlg.Multiselect = true;
-                if (dlg.ShowDialog() != DialogResult.OK || dlg.FileNames.Length == 0)
-                    return;
-                selectedFiles = dlg.FileNames;
-            }
 
             var vaultDir = ActiveMemoryBankDir;
             var bankName = ActiveMemoryBankName;
@@ -2309,6 +2620,44 @@ date: <today's date YYYY-MM-DD>
                 ShowSuperMemoryMessage($"Memory bank **{bankName}** does not exist yet.\n\n" +
                     $"Expected location:\n`{vaultDir}`");
                 return;
+            }
+
+            // Scan inbox for non-Markdown files that can be distilled.
+            var inboxDir = Path.Combine(vaultDir, "00_INBOX");
+            var inboxDistillable = new List<string>();
+            if (Directory.Exists(inboxDir))
+            {
+                foreach (var f in Directory.GetFiles(inboxDir, "*", SearchOption.TopDirectoryOnly))
+                {
+                    var ext = Path.GetExtension(f);
+                    if (!string.Equals(ext, ".md", System.StringComparison.OrdinalIgnoreCase))
+                        inboxDistillable.Add(f);
+                }
+            }
+
+            // Show choice dialog: distill inbox or pick files from disk.
+            string[] selectedFiles;
+            using (var choiceDlg = new Controls.DistillChoiceDialog(inboxDistillable))
+            {
+                if (choiceDlg.ShowDialog() != DialogResult.OK)
+                    return;
+
+                if (choiceDlg.Choice == Controls.DistillChoice.DistillInbox)
+                {
+                    selectedFiles = inboxDistillable.ToArray();
+                }
+                else // SelectFiles
+                {
+                    using (var dlg = new OpenFileDialog())
+                    {
+                        dlg.Title = "Select files to distill into knowledge base articles";
+                        dlg.Filter = "Translation files|*.tmx;*.docx;*.pdf;*.xlsx;*.csv;*.tsv;*.tbx;*.xml;*.txt|All files|*.*";
+                        dlg.Multiselect = true;
+                        if (dlg.ShowDialog() != DialogResult.OK || dlg.FileNames.Length == 0)
+                            return;
+                        selectedFiles = dlg.FileNames;
+                    }
+                }
             }
 
             // Extract text from each file. We track full source paths in

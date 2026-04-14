@@ -522,7 +522,7 @@ namespace Supervertaler.Trados.Controls
 
             var lbl = new Label
             {
-                Text = "Your trial has expired.\nClick the \u2699 button above to open Settings \u2192 License\nand enter a license key.",
+                Text = "Your trial has expired.\nClick the \u2699 button above to open Settings \u2192 Licence\nand enter a licence key.",
                 AutoSize = false,
                 TextAlign = ContentAlignment.MiddleCenter,
                 Dock = DockStyle.Fill,

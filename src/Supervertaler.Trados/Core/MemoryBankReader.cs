@@ -26,6 +26,30 @@ namespace Supervertaler.Trados.Core
         internal static readonly string[] ContentFolders =
             { "01_CLIENTS", "02_TERMINOLOGY", "03_DOMAINS", "04_STYLE" };
 
+        /// <summary>
+        /// File extensions that appear inside memory banks but are NOT knowledge
+        /// content — Obsidian plugin sidecars, editor metadata, etc. Callers that
+        /// enumerate inbox files for Process Inbox or Distill must filter these
+        /// out, otherwise Distill tries to hand them to DocumentTextExtractor and
+        /// fails with "Unsupported file format".
+        /// </summary>
+        public static readonly HashSet<string> IgnoredSidecarExtensions =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ".edtz"  // Obsidian plugin edit-metadata sidecar (one per .md)
+            };
+
+        /// <summary>
+        /// True if the file is a bank-internal sidecar that should be ignored by
+        /// any feature that enumerates bank content (Process Inbox, Distill,
+        /// article counts, merge planners, …).
+        /// </summary>
+        public static bool IsIgnoredSidecar(string filePath)
+        {
+            var ext = Path.GetExtension(filePath);
+            return !string.IsNullOrEmpty(ext) && IgnoredSidecarExtensions.Contains(ext);
+        }
+
         public MemoryBankReader(string memoryBankDir)
         {
             _vaultDir = memoryBankDir;

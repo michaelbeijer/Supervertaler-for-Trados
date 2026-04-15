@@ -1720,6 +1720,11 @@ namespace Supervertaler.Trados
 
             foreach (var f in allFiles)
             {
+                // Skip bank-internal sidecars (.edtz etc.) entirely — they are
+                // neither Markdown to compile nor material to hand to Distill.
+                if (Core.MemoryBankReader.IsIgnoredSidecar(f))
+                    continue;
+
                 var ext = Path.GetExtension(f);
                 if (string.Equals(ext, ".md", StringComparison.OrdinalIgnoreCase))
                 {
@@ -2622,13 +2627,18 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                 return;
             }
 
-            // Scan inbox for non-Markdown files that can be distilled.
+            // Scan inbox for non-Markdown files that can be distilled. Skip
+            // bank-internal sidecars (.edtz etc.) — DocumentTextExtractor will
+            // throw "Unsupported file format" on those, and they aren't
+            // knowledge content anyway.
             var inboxDir = Path.Combine(vaultDir, "00_INBOX");
             var inboxDistillable = new List<string>();
             if (Directory.Exists(inboxDir))
             {
                 foreach (var f in Directory.GetFiles(inboxDir, "*", SearchOption.TopDirectoryOnly))
                 {
+                    if (Core.MemoryBankReader.IsIgnoredSidecar(f))
+                        continue;
                     var ext = Path.GetExtension(f);
                     if (!string.Equals(ext, ".md", System.StringComparison.OrdinalIgnoreCase))
                         inboxDistillable.Add(f);

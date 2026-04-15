@@ -31,6 +31,10 @@ description: Extract knowledge from translation files using AI
 
 Distill always writes into the **active** memory bank – the one currently selected in the toolbar dropdown. To distil into a different bank, switch the dropdown first.
 
+{% hint style="info" %}
+**Ignored sidecar files.** Distill automatically skips Obsidian plugin sidecar files (currently `.edtz`) sitting in the inbox. These are editor metadata that accompany Markdown notes, not knowledge content, so they are neither sent to the AI nor counted in the "Distill inbox" file count.
+{% endhint %}
+
 ### From the termbase list (shortcut)
 
 You can distil a termbase directly from the [termbase settings](../../termbase-management.md) without exporting it first:

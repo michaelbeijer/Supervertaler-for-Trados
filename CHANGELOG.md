@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.19.11] — 2026-04-15
+
+### Fixed
+
+- **Distill and Process Inbox now ignore Obsidian plugin sidecar files (`.edtz`)** in the SuperMemory inbox. Previously, a `.edtz` sidecar sitting next to a Markdown note would be handed to Distill as "raw material", and Distill would fail with *"Unsupported file format: .edtz"*. The inbox scanners in both Distill and Process Inbox now filter these out silently — they are editor metadata, not knowledge content. Other bank-enumeration code paths (article counts, future bank-management features) share the same filter via a new `MemoryBankReader.IsIgnoredSidecar` helper.
+
+---
+
 ## [4.19.10] — 2026-04-13
 
 ### Changed

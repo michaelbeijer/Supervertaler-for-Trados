@@ -30,6 +30,8 @@ Process Inbox is a Markdown compiler. It reads `.md` files and writes structured
 
 If you drop a non-Markdown file (e.g. a `.tmx` or `.pdf`) into the inbox folder by mistake, the inbox count still includes it – so the Process Inbox button lights up – but clicking the button shows a message pointing you at Distill instead. Process Inbox will not silently ignore your file, and it will not crash trying to compile a binary blob as Markdown.
 
+Obsidian plugin sidecar files (currently `.edtz`) are a special case: they are editor metadata, not knowledge content, so they are skipped silently by both Process Inbox and Distill. They do not count towards the inbox total and they do not trigger the "non-Markdown files" warning.
+
 | You have… | Use this |
 |---|---|
 | A Markdown brief, glossary, feedback note, or anything plain-text you wrote yourself | **Process Inbox** |

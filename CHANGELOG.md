@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.19.13] — 2026-04-17
+
+### Fixed (critical — termbase data integrity)
+
+- **Wrong-direction entries were silently being written to write termbases with mixed declared directions.** `QuickAddTermAction` (Alt+Down / Ctrl+Alt+Shift+T) made a single swap decision using only the **first** write termbase's declared direction, then applied that same swap to **every** termbase in the batch. If you had two or more write termbases with different declared directions (e.g. one EN→NL and one NL→EN), the text for roughly half of them ended up in the wrong source/target columns. The rot compounded on every Alt+Down press. Existing already-wrong entries remain in the DB — clean them up row-by-row with the existing ⇄ reverse button in the Term Entry Editor. Prevention is now in place:
+  - `TermbaseReader.InsertTermBatch` takes a new optional `projectSourceLang` parameter and makes a **per-termbase** swap decision inside its loop. Each termbase now stores the text in its own declared direction regardless of the mix of directions in the batch.
+  - `QuickAddTermAction` no longer does a global pre-swap; it always passes the project-direction texts through and lets `InsertTermBatch` handle the per-termbase decision.
+- **Duplicate check now detects reverse-direction matches.** `InsertTerm` and `InsertTermBatch` used to consider a term "new" if the same pair existed but was stored in the opposite direction (source↔target). That meant users whose termbases already contained wrong-direction entries from the bug above would end up with the concept stored **twice**, once in each direction, on re-add. The check now matches either `(source=A ∧ target=B)` or `(source=B ∧ target=A)` in the same termbase and rejects both as duplicates.
+
+---
+
 ## [4.19.12] — 2026-04-16
 
 ### Fixed

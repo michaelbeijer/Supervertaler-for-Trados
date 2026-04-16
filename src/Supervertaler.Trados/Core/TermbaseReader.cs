@@ -755,12 +755,21 @@ namespace Supervertaler.Trados.Core
                 conn.Open();
                 MigrateSchema(conn);
 
-                // Skip if an entry with the same source+target already exists in this termbase
+                // Skip if an entry representing the same concept already exists in this
+                // termbase — check BOTH directions, so a term stored as
+                // source=A target=B is detected when the user tries to add B→A too.
+                // Handles the case where the same concept was previously stored with
+                // source/target swapped (e.g. due to a direction-mismatched termbase).
                 const string checkSql = @"
                     SELECT id FROM termbase_terms
                     WHERE CAST(termbase_id AS INTEGER) = @tbId
-                      AND LOWER(TRIM(source_term)) = LOWER(@source)
-                      AND LOWER(TRIM(target_term)) = LOWER(@target)
+                      AND (
+                        (LOWER(TRIM(source_term)) = LOWER(@source)
+                         AND LOWER(TRIM(target_term)) = LOWER(@target))
+                        OR
+                        (LOWER(TRIM(source_term)) = LOWER(@target)
+                         AND LOWER(TRIM(target_term)) = LOWER(@source))
+                      )
                     LIMIT 1";
 
                 using (var check = new SqliteCommand(checkSql, conn))
@@ -771,7 +780,7 @@ namespace Supervertaler.Trados.Core
 
                     var existing = check.ExecuteScalar();
                     if (existing != null)
-                        return -1; // duplicate — already exists
+                        return -1; // duplicate — already exists (either direction)
                 }
 
                 const string sql = @"
@@ -816,8 +825,20 @@ namespace Supervertaler.Trados.Core
         public static List<(long termbaseId, long newId)> InsertTermBatch(
             string dbPath, string sourceTerm, string targetTerm,
             string definition, List<TermbaseInfo> termbases,
-            bool isNonTranslatable = false)
+            bool isNonTranslatable = false,
+            string projectSourceLang = null)
         {
+            // projectSourceLang: language of `sourceTerm` as supplied by the caller.
+            //   When provided, this method makes a PER-TERMBASE decision about
+            //   whether the text needs to be swapped to match that termbase's
+            //   stored direction. This fixes the long-standing bug where the
+            //   caller (QuickAddTermAction) made ONE swap decision based on the
+            //   first termbase and applied it to every termbase in the batch —
+            //   which corrupted any write termbases whose direction happened
+            //   to differ from the first one's.
+            //
+            //   When null (legacy callers), no per-termbase swap is done and the
+            //   caller's pre-swap semantics are preserved.
             var results = new List<(long, long)>();
 
             var connStr = new SqliteConnectionStringBuilder
@@ -833,11 +854,19 @@ namespace Supervertaler.Trados.Core
 
                 using (var txn = conn.BeginTransaction())
                 {
+                    // Check BOTH directions when deduping. A concept already stored
+                    // in the reverse direction (e.g. from an older buggy insert)
+                    // counts as a duplicate and must not be added a second time.
                     const string checkSql = @"
                         SELECT id FROM termbase_terms
                         WHERE CAST(termbase_id AS INTEGER) = @tbId
-                          AND LOWER(TRIM(source_term)) = LOWER(@source)
-                          AND LOWER(TRIM(target_term)) = LOWER(@target)
+                          AND (
+                            (LOWER(TRIM(source_term)) = LOWER(@source)
+                             AND LOWER(TRIM(target_term)) = LOWER(@target))
+                            OR
+                            (LOWER(TRIM(source_term)) = LOWER(@target)
+                             AND LOWER(TRIM(target_term)) = LOWER(@source))
+                          )
                         LIMIT 1";
 
                     const string sql = @"
@@ -853,12 +882,32 @@ namespace Supervertaler.Trados.Core
 
                     foreach (var tb in termbases)
                     {
-                        // Skip if duplicate already exists in this termbase
+                        // Decide per-termbase whether to swap so the text lands in the
+                        // right columns FOR THIS termbase's declared direction.
+                        string termForSourceColumn = sourceTerm;
+                        string termForTargetColumn = targetTerm;
+                        if (!string.IsNullOrEmpty(projectSourceLang)
+                            && !string.IsNullOrEmpty(tb.SourceLang))
+                        {
+                            var projNorm = LanguageUtils.ShortenLanguageName(projectSourceLang);
+                            var tbNorm = LanguageUtils.ShortenLanguageName(tb.SourceLang);
+                            bool directionMatches =
+                                !string.IsNullOrEmpty(projNorm) && !string.IsNullOrEmpty(tbNorm) &&
+                                (projNorm.StartsWith(tbNorm, StringComparison.OrdinalIgnoreCase) ||
+                                 tbNorm.StartsWith(projNorm, StringComparison.OrdinalIgnoreCase));
+                            if (!directionMatches)
+                            {
+                                termForSourceColumn = targetTerm;
+                                termForTargetColumn = sourceTerm;
+                            }
+                        }
+
+                        // Skip if duplicate already exists in this termbase (either direction).
                         using (var check = new SqliteCommand(checkSql, conn, txn))
                         {
                             check.Parameters.AddWithValue("@tbId", tb.Id);
-                            check.Parameters.AddWithValue("@source", sourceTerm.Trim());
-                            check.Parameters.AddWithValue("@target", targetTerm.Trim());
+                            check.Parameters.AddWithValue("@source", termForSourceColumn.Trim());
+                            check.Parameters.AddWithValue("@target", termForTargetColumn.Trim());
 
                             if (check.ExecuteScalar() != null)
                                 continue; // duplicate — skip this termbase
@@ -866,8 +915,8 @@ namespace Supervertaler.Trados.Core
 
                         using (var cmd = new SqliteCommand(sql, conn, txn))
                         {
-                            cmd.Parameters.AddWithValue("@source", sourceTerm.Trim());
-                            cmd.Parameters.AddWithValue("@target", targetTerm.Trim());
+                            cmd.Parameters.AddWithValue("@source", termForSourceColumn.Trim());
+                            cmd.Parameters.AddWithValue("@target", termForTargetColumn.Trim());
                             cmd.Parameters.AddWithValue("@tbId", tb.Id);
                             cmd.Parameters.AddWithValue("@srcLang", tb.SourceLang);
                             cmd.Parameters.AddWithValue("@tgtLang", tb.TargetLang);

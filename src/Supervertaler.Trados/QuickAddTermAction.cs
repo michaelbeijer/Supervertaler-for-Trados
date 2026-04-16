@@ -149,36 +149,48 @@ namespace Supervertaler.Trados
                     return;
                 }
 
-                // If the project translation direction is the inverse of the write termbase's
-                // language direction (e.g. project is NL→EN but termbase is EN→NL), swap
-                // source and target so the text lands in the correct termbase columns.
-                // Keep the original project-direction texts for the in-memory index update.
-                var indexSourceText = sourceText;
-                var indexTargetText = targetText;
+                // Capture the project source language — TermbaseReader.InsertTermBatch
+                // uses it to decide PER-TERMBASE whether to swap source/target so
+                // each write termbase gets its text in the right columns regardless
+                // of the mix of declared directions in the batch.
+                //
+                // HISTORY: Previously this method swapped sourceText/targetText ONCE,
+                // based on writeTermbases[0]. That meant any write termbase in the
+                // batch with a direction different from the first one ended up with
+                // text in the wrong columns — which corrupted the PATENTS termbase
+                // for a user who had other write termbases of the opposite direction
+                // active at various times. The per-termbase swap now happens inside
+                // InsertTermBatch itself.
+                //
+                // We still need a best-guess "isInverted" flag for the merge dialog's
+                // explanatory text and for TermEntry objects we build in memory —
+                // that reflects whether the project direction matches the FIRST write
+                // termbase, which is good enough for UI-level labeling.
+                string projSrcLang = "";
+                try { projSrcLang = doc.ActiveFile?.SourceFile?.Language?.DisplayName ?? ""; }
+                catch { /* leave empty if unavailable */ }
+
                 bool isInverted = false;
                 try
                 {
-                    var projSrcLang = doc.ActiveFile?.SourceFile?.Language?.DisplayName ?? "";
                     var tbSrcLang = writeTermbases[0].SourceLang ?? "";
                     if (!string.IsNullOrEmpty(projSrcLang) && !string.IsNullOrEmpty(tbSrcLang))
                     {
-                        // Normalize both to shortened form so that "English (United States)"
-                        // and "English (US)" compare correctly.
                         var projNorm = LanguageUtils.ShortenLanguageName(projSrcLang);
                         var tbNorm = LanguageUtils.ShortenLanguageName(tbSrcLang);
                         bool match =
                             projNorm.StartsWith(tbNorm, StringComparison.OrdinalIgnoreCase) ||
                             tbNorm.StartsWith(projNorm, StringComparison.OrdinalIgnoreCase);
-                        if (!match)
-                        {
-                            isInverted = true;
-                            var tmp = sourceText;
-                            sourceText = targetText;
-                            targetText = tmp;
-                        }
+                        isInverted = !match;
                     }
                 }
-                catch { /* leave sourceText/targetText as-is if language info unavailable */ }
+                catch { /* leave isInverted=false if language info unavailable */ }
+
+                // sourceText / targetText are always kept in project direction from
+                // here on. InsertTermBatch will per-termbase decide whether to flip
+                // them into the termbase's storage direction.
+                var indexSourceText = sourceText;
+                var indexTargetText = targetText;
 
                 // Check for existing entries with matching source or target
                 try
@@ -221,7 +233,8 @@ namespace Supervertaler.Trados
                                 {
                                     TermbaseReader.InsertTermBatch(
                                         settings.TermbasePath, sourceText, targetText,
-                                        "", unmatchedTbs);
+                                        "", unmatchedTbs,
+                                        projectSourceLang: projSrcLang);
                                 }
 
                                 // Full reload to pick up synonym changes
@@ -251,9 +264,12 @@ namespace Supervertaler.Trados
                         }
                     }
 
-                    // Normal insert into all write termbases
+                    // Normal insert into all write termbases. InsertTermBatch makes
+                    // a per-termbase swap decision using projectSourceLang — each
+                    // termbase's declared direction is respected independently.
                     var batchResults = TermbaseReader.InsertTermBatch(
-                        settings.TermbasePath, sourceText, targetText, "", writeTermbases);
+                        settings.TermbasePath, sourceText, targetText, "", writeTermbases,
+                        projectSourceLang: projSrcLang);
 
                     if (batchResults.Count > 0)
                     {

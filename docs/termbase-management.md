@@ -105,7 +105,32 @@ For full editing capabilities, double-click a termbase in the list to open the *
 - **Search** for terms by source or target text
 - **Edit** individual term entries
 - **Delete** terms
-- Perform **bulk operations** (e.g., bulk delete, bulk edit)
+- Perform **bulk operations** (e.g. bulk delete, bulk reverse)
+
+### Right-click menu
+
+Right-clicking any row in the grid opens a context menu with the following actions:
+
+- **Copy cell** – copies the content of the clicked cell to the clipboard.
+- **Edit term…** – opens the full term entry editor for the clicked row.
+- **Reverse source/target** – swaps the source and target for the selected rows (see below).
+- **Delete term** – deletes the selected rows after confirmation.
+
+Multi-row selection is preserved: if you select several rows first and then right-click on one of them, the selection stays intact so actions apply to all selected entries. If you right-click on a row that wasn't already selected, the selection collapses to just that row.
+
+### Reversing source/target
+
+If you have term entries that were added in the wrong direction – for example, English text in the Dutch column because they were entered during a reverse-direction project – you can correct them with **Reverse source/target**:
+
+1. Select one or more rows in the grid (Shift-click or Ctrl-click for multi-select).
+2. Right-click → **Reverse source/target (N entries)**.
+3. Confirm.
+
+The operation swaps the source and target text, language tags, abbreviations, and flips the direction of every linked synonym. It runs in a single database transaction, so a partial failure leaves the termbase untouched.
+
+{% hint style="info" %}
+**Edit dialog field order is always in termbase direction.** Regardless of your current Trados project's language direction, the **Edit term…** dialog shows the termbase's declared source language on the left and target language on the right (e.g. an EN→NL termbase always opens with English on the left). This matches the column order in the Termbase Editor grid and keeps field positions predictable across projects.
+{% endhint %}
 
 ## Sharing termbases
 

@@ -89,11 +89,15 @@ namespace Supervertaler.Trados.Controls
         /// </summary>
         /// <remarks>
         /// Fields are always shown in termbase-declared direction (source on the left,
-        /// target on the right). The <paramref name="projectSourceLang"/> parameter is
-        /// retained for source compatibility but ignored — previously it triggered a
-        /// flip of the field layout when the project direction differed from the
-        /// termbase's, which made dialogs inconsistent depending on entry point and
-        /// magnified confusion around reversed-direction termbases.
+        /// target on the right). The entry is re-fetched from the database by ID so
+        /// the values displayed are guaranteed to be in termbase direction even when
+        /// the caller passes a TermEntry that has been swapped to project direction
+        /// by TermbaseReader's load-time inversion handling for inverted-direction
+        /// termbases. Reading the values straight from the in-memory matcher entry
+        /// was the root cause of edits silently writing into the wrong DB columns.
+        /// The <paramref name="projectSourceLang"/> parameter is retained for source
+        /// compatibility but is no longer consulted — the database row is the single
+        /// source of truth for direction.
         /// </remarks>
         public TermEntryEditorDialog(TermEntry entry, string dbPath, TermbaseInfo termbase,
             string projectSourceLang = null)
@@ -103,13 +107,21 @@ namespace Supervertaler.Trados.Controls
             _termId = entry?.Id ?? -1;
             _isInverted = false;
 
+            var loadEntry = ReloadEntryInTermbaseDirection(entry, dbPath, _termId);
+
             BuildUI(termbase);
-            PopulateFromEntry(entry);
+            PopulateFromEntry(loadEntry);
             LoadSynonymsFromDb();
         }
 
         /// <summary>
-        /// Add mode — creates a new term entry.
+        /// Add mode — creates a new term entry. Pre-fills are passed in PROJECT
+        /// direction (e.g. <paramref name="sourceTerm"/> contains the project source
+        /// word, <paramref name="targetTerm"/> contains the project target word).
+        /// The dialog displays labels and saves to the DB in TERMBASE direction, so
+        /// when the termbase's declared direction is the inverse of the project's
+        /// the pre-fills are swapped here so they land in the correctly-labelled
+        /// fields and are written to the correct DB columns on save.
         /// </summary>
         public TermEntryEditorDialog(string sourceTerm, string targetTerm,
             string dbPath, TermbaseInfo termbase, string projectSourceLang = null)
@@ -119,13 +131,22 @@ namespace Supervertaler.Trados.Controls
             _termId = -1;
             _isInverted = false;
 
+            if (IsProjectDirectionInverted(termbase, projectSourceLang))
+            {
+                var tmp = sourceTerm;
+                sourceTerm = targetTerm;
+                targetTerm = tmp;
+            }
+
             BuildUI(termbase);
             _txtSource.Text = sourceTerm ?? "";
             _txtTarget.Text = targetTerm ?? "";
         }
 
         /// <summary>
-        /// Multi-entry edit mode — opens with a termbase switcher for entries from multiple termbases.
+        /// Multi-entry edit mode — opens with a termbase switcher for entries from
+        /// multiple termbases. Each entry is re-fetched from the database by ID so
+        /// values are in termbase direction (see Edit ctor for rationale).
         /// </summary>
         public TermEntryEditorDialog(List<KeyValuePair<TermEntry, TermbaseInfo>> entries, string dbPath,
             string projectSourceLang = null)
@@ -134,7 +155,7 @@ namespace Supervertaler.Trados.Controls
 
             foreach (var kv in entries)
             {
-                var entry = kv.Key;
+                var entry = ReloadEntryInTermbaseDirection(kv.Key, dbPath, kv.Key?.Id ?? -1);
                 _allEntryData.Add(new EntryData
                 {
                     Entry = entry,
@@ -167,6 +188,46 @@ namespace Supervertaler.Trados.Controls
             primary.SourceSyns = new List<SynonymEntry>(_sourceSyns);
             primary.TargetSyns = new List<SynonymEntry>(_targetSyns);
             primary.SynonymsLoaded = true;
+        }
+
+        /// <summary>
+        /// Re-reads an entry from the database by ID so the dialog operates on
+        /// termbase-direction values (source_term column → left field, target_term
+        /// column → right field). Falls back to the supplied <paramref name="entry"/>
+        /// if the database read fails or no usable ID is available.
+        /// </summary>
+        private static TermEntry ReloadEntryInTermbaseDirection(TermEntry entry, string dbPath, long termId)
+        {
+            if (termId <= 0 || string.IsNullOrEmpty(dbPath)) return entry;
+            try
+            {
+                var dbEntry = TermbaseReader.GetTermById(dbPath, termId);
+                return dbEntry ?? entry;
+            }
+            catch
+            {
+                return entry;
+            }
+        }
+
+        /// <summary>
+        /// Returns true when the termbase's declared source language is the inverse
+        /// of the project's source language (e.g. project NL→EN, termbase EN→NL).
+        /// Mirrors the comparison in TermbaseReader so add-mode pre-fills line up
+        /// with the dialog's termbase-direction labels and DB columns.
+        /// </summary>
+        private static bool IsProjectDirectionInverted(TermbaseInfo termbase, string projectSourceLang)
+        {
+            if (termbase == null) return false;
+            if (string.IsNullOrEmpty(projectSourceLang)) return false;
+            if (string.IsNullOrEmpty(termbase.SourceLang)) return false;
+
+            var projNorm = LanguageUtils.ShortenLanguageName(projectSourceLang) ?? "";
+            var tbNorm = LanguageUtils.ShortenLanguageName(termbase.SourceLang) ?? "";
+            if (projNorm.Length == 0 || tbNorm.Length == 0) return false;
+
+            return !projNorm.StartsWith(tbNorm, StringComparison.OrdinalIgnoreCase)
+                && !tbNorm.StartsWith(projNorm, StringComparison.OrdinalIgnoreCase);
         }
 
         private void BuildUI(TermbaseInfo termbase)

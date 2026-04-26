@@ -13,6 +13,7 @@
 
 * [TermLens](termlens.md)
   * [Adding & Editing Terms](termlens/adding-terms.md)
+  * [TermLens popup](termlens/termlens-popup.md)
   * [Term Picker](termlens/term-picker.md)
 * [MultiTerm Support](multiterm-support.md)
 * [Supervertaler Assistant](ai-assistant.md)

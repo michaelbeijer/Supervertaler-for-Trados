@@ -80,12 +80,16 @@ For terms numbered 10 and above, TermLens supports two shortcut styles (configur
 The badge on each term chip shows exactly which key combination to use. See [Keyboard Shortcuts](keyboard-shortcuts.md) for details on both modes.
 
 {% hint style="info" %}
-Terms beyond 45 have no keyboard shortcut. Use the **Term Picker** to insert them.
+Terms beyond 45 have no keyboard shortcut. Use the **TermLens popup** or the **Term Picker** dialogue to insert them.
 {% endhint %}
 
-#### Term Picker (Ctrl tap)
+#### TermLens popup (Ctrl tap)
 
-For segments with many matches, tap **Ctrl** (press and release without any other key) to open the **Term Picker** dialogue. This is the same behaviour as memoQ. Alternatively, press **Ctrl+Alt+G**. It shows all matched terms in a searchable list and lets you insert any term with a double-click or Enter.
+Tap **Ctrl** (press and release without any other key) to open the [**TermLens popup**](termlens/termlens-popup.md) — a borderless floating version of this panel for the active segment. Alternatively, press **Ctrl+Alt+G**. Designed for keyboard-only term selection on small screens where keeping the docked panel always-visible costs too much vertical space. Tap **Ctrl** again to close. Inside, **Right / Down / Tab** cycle the highlighted match, **Enter** inserts and closes, **Escape** dismisses without inserting.
+
+#### Term Picker (Ctrl+Shift+L)
+
+For segments with many matches and when a sortable list view is preferable, press **Ctrl+Shift+L** to open the [**Term Picker**](termlens/term-picker.md) dialogue. It shows all matched terms in a searchable list and lets you insert any term with a double-click or Enter.
 
 <figure><img src=".gitbook/assets/Sv_Term-Picker.png" alt=""><figcaption></figcaption></figure>
 

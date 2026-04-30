@@ -1,7 +1,7 @@
 # Providers and Models
 
 {% hint style="info" %}
-You are viewing help for **Supervertaler for Trados** -- the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://help.supervertaler.com).
+You are viewing help for **Supervertaler for Trados** -- the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://supervertaler.gitbook.io/help/workbench/).
 {% endhint %}
 
 The Supervertaler Assistant supports multiple AI providers. You only need one to get started.

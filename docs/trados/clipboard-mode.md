@@ -1,5 +1,5 @@
 {% hint style="info" %}
-You are viewing help for **Supervertaler for Trados** – the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://help.supervertaler.com).
+You are viewing help for **Supervertaler for Trados** – the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://supervertaler.gitbook.io/help/workbench/).
 {% endhint %}
 
 Clipboard Mode lets you translate or proofread segments using **any web-based AI** – ChatGPT, Claude, Gemini, DeepSeek, or any other LLM with a chat interface – without needing an API key. Instead of sending segments to an AI provider via API, Supervertaler builds a ready-to-use prompt and copies it to your clipboard. You paste it into the AI of your choice, copy the response, and paste it back.

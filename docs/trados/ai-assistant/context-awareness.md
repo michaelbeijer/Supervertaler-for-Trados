@@ -1,7 +1,7 @@
 # Context Awareness
 
 {% hint style="info" %}
-You are viewing help for **Supervertaler for Trados** – the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://help.supervertaler.com).
+You are viewing help for **Supervertaler for Trados** – the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://supervertaler.gitbook.io/help/workbench/).
 {% endhint %}
 
 The Supervertaler Assistant is deeply integrated with your Trados project. Every time you send a chat message, translate a batch of segments, or ask AutoPrompt to draft a prompt, the assistant assembles a fresh snapshot of your current work and hands it to the AI. This snapshot is the **context** – everything the AI sees before it produces a reply.

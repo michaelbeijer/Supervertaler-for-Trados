@@ -28,7 +28,7 @@ Start here: [Quick Start Guide](get-started/quick-start.md)
 
 Looking for the **Trados Studio plugin**? It has its own help center:
 
-[**Supervertaler for Trados Help →**](https://supervertaler.gitbook.io/supervertaler-for-trados/)
+[**Supervertaler for Trados Help →**](https://supervertaler.gitbook.io/help/trados/)
 
 Both tools share the same SQLite-based termbase format (`.db`) — termbases created in one work in the other.
 

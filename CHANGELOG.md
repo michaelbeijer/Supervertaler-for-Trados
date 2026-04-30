@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.19.44] – 2026-04-30
+
+### Changed (Help system — base URL now includes `/help` slug)
+
+- **`HelpSystem.DocsBaseUrl` updated to `https://supervertaler.gitbook.io/help`** to match the renamed GitBook site slug. (GitBook's free plan requires a non-empty slug, so the merged Supervertaler help site uses `/help` as its path; full URLs are now `…/help/trados/<page>` for Trados topics and `…/help/workbench/<page>` for Workbench topics.) Topic constants in `HelpSystem.Topics` are unchanged from v4.19.43 — they continue to start with `trados/`, just appended to the new base. Existing call-sites unaffected.
+
+---
+
 ## [4.19.43] – 2026-04-30
 
 ### Changed (Help system — unified GitBook site for both products)

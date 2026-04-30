@@ -10,12 +10,14 @@ namespace Supervertaler.Trados.Core
     {
         /// <summary>
         /// Base URL for the unified Supervertaler GitBook documentation site.
-        /// Trados Plugin pages live under <c>/trados/</c>; Workbench pages live
-        /// under <c>/workbench/</c>. The site previously used a <c>/trados</c>
-        /// slug; that slug has been renamed to root so both products coexist
-        /// at the same level.
+        /// Trados Plugin pages live under <c>/help/trados/</c>; Workbench pages
+        /// live under <c>/help/workbench/</c>. The <c>/help</c> slug is the
+        /// site path on GitBook (free plan requires a non-empty slug, so root
+        /// publishing isn't available — <c>help</c> is the cleanest choice and
+        /// pairs nicely with a future <c>help.supervertaler.com</c> custom
+        /// domain.
         /// </summary>
-        private const string DocsBaseUrl = "https://supervertaler.gitbook.io";
+        private const string DocsBaseUrl = "https://supervertaler.gitbook.io/help";
 
         /// <summary>
         /// Help topic identifiers. Each maps to a documentation page path

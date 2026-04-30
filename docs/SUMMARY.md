@@ -3,12 +3,9 @@
 * [Supervertaler — Welcome](README.md)
 
 
-## 🧩 Trados — Overview
-
-* [About Supervertaler for Trados](trados/README.md)
-
 ## 🧩 Trados — Get Started
 
+* [Supervertaler for Trados](trados/README.md)
 * [Installation](trados/installation.md)
 * [Getting Started](trados/getting-started.md)
 * [Licensing & Pricing](trados/licensing.md)
@@ -72,12 +69,9 @@
 * [Privacy Policy](trados/privacy.md)
 
 
-## 🖥️ Workbench — Overview
-
-* [About Supervertaler Workbench](workbench/README.md)
-
 ## 🖥️ Workbench — Get Started
 
+* [Supervertaler Workbench](workbench/README.md)
 * [Installation](workbench/get-started/installation.md)
 * [Quick Start Guide](workbench/get-started/quick-start.md)
 * [Setting Up API Keys](workbench/get-started/api-keys.md)

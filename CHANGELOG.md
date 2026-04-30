@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.19.43] – 2026-04-30
+
+### Changed (Help system — unified GitBook site for both products)
+
+- **The Supervertaler GitBook site now hosts documentation for both Supervertaler for Trados and Supervertaler Workbench in a single space**, with content organised under `/trados/` and `/workbench/` URL prefixes. Previously the Workbench shipped its own separate VitePress site at `help.supervertaler.com` which had drifted out of sync with reality; the Trados plugin's own GitBook (`supervertaler.gitbook.io/trados`) was the up-to-date one. Rather than maintain two parallel docs systems on two different toolchains, the Workbench docs were imported alongside the Trados docs in the existing GitBook space. The merged `SUMMARY.md` uses GitBook's `# Part` headings to give each product its own visually-divided sidebar section ("Trados Plugin" and "Workbench") so the two product surfaces don't visually compete.
+- **`HelpSystem.cs` topic paths now carry a `trados/` prefix** to match the new file-path layout. Existing call-sites (`HelpSystem.OpenHelp(Topics.TermLensPanel)` etc.) are unchanged — the indirection through the `Topics` constants insulates them from the path rename. The `DocsBaseUrl` constant is now `https://supervertaler.gitbook.io` (root) rather than `…/trados`; the trailing `/trados/` is part of every topic path. **Important: this assumes the GitBook space slug has been renamed from `/trados` to `/` (root) on the GitBook admin side** — if you keep the old slug, every help link will resolve to `…/trados/trados/<page>` (broken). Rename the slug before publishing this version.
+- **Documentation site title** to be renamed from "Supervertaler for Trados Help" to "Supervertaler Help" in the GitBook admin (cosmetic; no code change required).
+
+---
+
+## [4.19.42] – 2026-04-30
+
+### Fixed (NullReferenceException when switching projects during batch translation)
+
+- **Switching to a different Trados project while batch translation is running no longer throws "object reference not set to an instance of an object".** Root cause: `OnBatchSegmentTranslated` checked `_activeDocument != null` at the top of the method, but `OnActiveDocumentChanged` could null the field between that check and the subsequent `ProcessSegmentPair` call if the user switched projects at that moment. Fixed by capturing `_activeDocument` in a local variable before the null check so the reference cannot change mid-method. Reported by a user.
+
+---
+
 ## [4.19.41] – 2026-04-29
 
 ### Fixed (TermLens popup – stayed visible behind editor dialog when E pressed)

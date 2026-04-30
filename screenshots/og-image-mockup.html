@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #1a8fc4 0%, #3ab0e2 40%, #45bfee 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+  .container {
+    text-align: center;
+    max-width: 900px;
+    padding: 0 40px;
+  }
+  .logo-text {
+    font-size: 72px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 24px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .tagline {
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.5;
+    opacity: 0.92;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .divider {
+    width: 80px;
+    height: 3px;
+    background: rgba(255,255,255,0.5);
+    margin: 32px auto;
+    border-radius: 2px;
+  }
+  .topics {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 36px;
+    flex-wrap: wrap;
+  }
+  .topic {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+  .domain {
+    font-size: 20px;
+    opacity: 0.7;
+    margin-top: 36px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-text">TranslationTech</div>
+    <div class="divider"></div>
+    <div class="tagline">A community forum for translators &amp; localisers<br>who love the technical side</div>
+    <div class="topics">
+      <span class="topic">CAT Tools</span>
+      <span class="topic">AI</span>
+      <span class="topic">Automation</span>
+      <span class="topic">Terminology</span>
+    </div>
+    <div class="domain">translationtech.io</div>
+  </div>
+</body>
+</html>

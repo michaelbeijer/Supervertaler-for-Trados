@@ -42,7 +42,7 @@ namespace Supervertaler.Trados.Controls
         private TextBox _txtCustomApiKey;
         private Button _btnShowCustomKey;
 
-        // AI Context section — shared (all AI features)
+        // AI Context section – shared (all AI features)
         private Label _lblAiContextHeader;
         private CheckBox _chkIncludeDocumentContext;
         private Label _lblMaxSegments;
@@ -58,7 +58,7 @@ namespace Supervertaler.Trados.Controls
         private LinkLabel _lnkDeselectAll;
         private CheckedListBox _clbAiTermbases;
 
-        // AI Context section — Chat & QuickLauncher only
+        // AI Context section – Chat & QuickLauncher only
         private Label _lblChatContextHeader;
         private Label _lblChatContextNote;
         private CheckBox _chkIncludeTmMatches;
@@ -437,7 +437,7 @@ namespace Supervertaler.Trados.Controls
             // Store base Y for dynamic repositioning
             _providerSectionY = y;
 
-            // === AI Context section — all AI features ===
+            // === AI Context section – all AI features ===
             _lblAiContextHeader = new Label
             {
                 Text = "AI context (Batch operations, Chat and QuickLauncher)",
@@ -630,7 +630,7 @@ namespace Supervertaler.Trados.Controls
             {
                 Location = new Point(16, 0), // positioned dynamically
                 Size = new Size(360, 350),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left,  // no Right — fixed width, horizontal scrollbar handles overflow
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,  // no Right – fixed width, horizontal scrollbar handles overflow
                 CheckOnClick = true,
                 BorderStyle = BorderStyle.FixedSingle,
                 IntegralHeight = false,
@@ -638,7 +638,7 @@ namespace Supervertaler.Trados.Controls
             };
             Controls.Add(_clbAiTermbases);
 
-            // === AI Context section — Chat & QuickLauncher only ===
+            // === AI Context section – Chat & QuickLauncher only ===
             _lblChatContextHeader = new Label
             {
                 Text = "AI context (Chat and QuickLauncher)",
@@ -703,7 +703,7 @@ namespace Supervertaler.Trados.Controls
 
             _nudSurroundingSegments = new NumericUpDown
             {
-                Location = new Point(210, 0), // positioned dynamically — label is wider than "Max segments:"
+                Location = new Point(210, 0), // positioned dynamically – label is wider than "Max segments:"
                 Width = 60,
                 Minimum = 1,
                 Maximum = 20,
@@ -1000,7 +1000,7 @@ namespace Supervertaler.Trados.Controls
             settings.OllamaEndpoint = _txtOllamaEndpoint.Text.Trim();
             settings.OllamaTimeoutMinutes = (int)_nudOllamaTimeout.Value;
 
-            // Custom OpenAI profiles — save current profile values first
+            // Custom OpenAI profiles – save current profile values first
             SaveCurrentCustomProfile(settings);
             settings.SelectedCustomProfileName = (_cmbCustomProfile.SelectedItem as CustomProfileItem)?.Name ?? "";
 
@@ -1460,7 +1460,7 @@ namespace Supervertaler.Trados.Controls
             public ModelItem(LlmModelInfo info)
             {
                 Id = info.Id;
-                _display = $"{info.DisplayName}  —  {info.Description}";
+                _display = $"{info.DisplayName}  –  {info.Description}";
             }
             public override string ToString() => _display;
         }

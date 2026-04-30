@@ -86,10 +86,10 @@ namespace Supervertaler.Trados.Controls
                 var result = MessageBox.Show(this,
                     "The folder you selected is on the Mac side of Parallels (a shared network folder). " +
                     "Supervertaler uses SQLite databases for termbases, and SQLite does not work " +
-                    "reliably on network-mounted filesystems — you may experience database errors or data loss.\r\n\r\n" +
+                    "reliably on network-mounted filesystems – you may experience database errors or data loss.\r\n\r\n" +
                     "We strongly recommend using a Windows-side path instead (e.g., C:\\Users\\<username>\\Supervertaler).\r\n\r\n" +
                     "Use this Mac-side path anyway?",
-                    "Supervertaler Setup — Mac Path Warning",
+                    "Supervertaler Setup – Mac Path Warning",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (result != DialogResult.Yes) return;
             }
@@ -151,7 +151,7 @@ namespace Supervertaler.Trados.Controls
             SuspendLayout();
 
             // ── Form ──────────────────────────────────────────────────
-            Text            = "Supervertaler for Trados — First-Run Setup";
+            Text            = "Supervertaler for Trados – First-Run Setup";
             FormBorderStyle = FormBorderStyle.FixedDialog;
             StartPosition   = FormStartPosition.CenterScreen;
             MaximizeBox     = false;
@@ -237,8 +237,8 @@ namespace Supervertaler.Trados.Controls
             };
             var parallelsText = new Label
             {
-                Text      = "Parallels detected — you're running on a Mac. Keep the data folder on " +
-                            "the Windows side (C:\\ drive). Do not use a Mac-side path like \\\\Mac\\Home\\... — " +
+                Text      = "Parallels detected – you're running on a Mac. Keep the data folder on " +
+                            "the Windows side (C:\\ drive). Do not use a Mac-side path like \\\\Mac\\Home\\... – " +
                             "SQLite databases do not work reliably on shared network folders.",
                 Font      = new Font("Segoe UI", 8.25f),
                 ForeColor = Color.FromArgb(120, 80, 0),

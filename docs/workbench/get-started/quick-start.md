@@ -93,9 +93,9 @@ For CAT tool workflows, always export the matching return format (for example, S
 
 ### Recommended next steps
 
-* [Setting Up API Keys](api-keys.md) — enable AI translation
-* [Installation](installation.md) — verify dependencies and optional components
-* [CAT Tool Integration](../cat-tools/overview.md) — memoQ/Trados/Phrase/CafeTran workflows
-* [Keyboard Shortcuts](../editor/keyboard-shortcuts.md) — faster editing and navigation
+* [Setting Up API Keys](api-keys.md) – enable AI translation
+* [Installation](installation.md) – verify dependencies and optional components
+* [CAT Tool Integration](../cat-tools/overview.md) – memoQ/Trados/Phrase/CafeTran workflows
+* [Keyboard Shortcuts](../editor/keyboard-shortcuts.md) – faster editing and navigation
 
 <table data-view="cards"><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>Set up AI Translation</strong></td><td><a href="api-keys.md">Configure API keys →</a></td></tr><tr><td><strong>Learn Keyboard Shortcuts</strong></td><td><a href="../editor/keyboard-shortcuts.md">View all shortcuts →</a></td></tr><tr><td><strong>Work with CAT Tools</strong></td><td><a href="../cat-tools/overview.md">CAT tool integration →</a></td></tr></tbody></table>

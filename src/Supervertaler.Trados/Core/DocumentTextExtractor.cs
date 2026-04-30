@@ -12,7 +12,7 @@ namespace Supervertaler.Trados.Core
 {
     /// <summary>
     /// Extracts plain text from various document formats for use as AI context.
-    /// Dependency-free — uses only .NET Framework built-in classes.
+    /// Dependency-free – uses only .NET Framework built-in classes.
     /// </summary>
     public static class DocumentTextExtractor
     {
@@ -84,7 +84,7 @@ namespace Supervertaler.Trados.Core
 
             switch (ext)
             {
-                // Plain text formats — read as-is
+                // Plain text formats – read as-is
                 case ".txt":
                 case ".md":
                 case ".csv":
@@ -93,14 +93,14 @@ namespace Supervertaler.Trados.Core
                     text = ReadTextFile(filePath);
                     break;
 
-                // XML-based text formats — strip tags
+                // XML-based text formats – strip tags
                 case ".xml":
                 case ".htm":
                 case ".html":
                     text = ReadAndStripXmlTags(filePath);
                     break;
 
-                // Translation interchange formats — extract source/target text
+                // Translation interchange formats – extract source/target text
                 case ".tmx":
                     text = ExtractTmx(filePath);
                     break;
@@ -113,7 +113,7 @@ namespace Supervertaler.Trados.Core
                     text = ExtractTbx(filePath);
                     break;
 
-                // Office Open XML formats — extract from ZIP
+                // Office Open XML formats – extract from ZIP
                 case ".docx":
                     text = ExtractDocx(filePath);
                     break;
@@ -129,7 +129,7 @@ namespace Supervertaler.Trados.Core
                     text = ExtractRtf(filePath);
                     break;
 
-                // PDF — best-effort text extraction
+                // PDF – best-effort text extraction
                 case ".pdf":
                     text = ExtractPdf(filePath);
                     break;
@@ -151,7 +151,7 @@ namespace Supervertaler.Trados.Core
 
             // Truncate if too long
             if (text.Length > MaxExtractedLength)
-                text = text.Substring(0, MaxExtractedLength) + "\n\n[... text truncated — file too large for full extraction ...]";
+                text = text.Substring(0, MaxExtractedLength) + "\n\n[... text truncated – file too large for full extraction ...]";
 
             return text.Trim();
         }
@@ -651,7 +651,7 @@ namespace Supervertaler.Trados.Core
                     $"{(ext == ".doc" ? ".docx" : ext == ".xls" ? ".xlsx" : ".pptx")} first, " +
                     "then attach the converted file.");
 
-            return $"[Note: Legacy {formatName} format — text extraction is approximate. " +
+            return $"[Note: Legacy {formatName} format – text extraction is approximate. " +
                    $"For best results, save as {(ext == ".doc" ? ".docx" : ext == ".xls" ? ".xlsx" : ".pptx")} first.]\n\n" +
                    sb.ToString();
         }

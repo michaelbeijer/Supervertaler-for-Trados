@@ -290,7 +290,7 @@ namespace Supervertaler.Trados.Controls
                 _txtDomain.ReadOnly = true;
                 _cboApp.Enabled = false;
                 _txtContent.ReadOnly = true;
-                // _chkShowInMenu stays enabled — users can hide default prompts
+                // _chkShowInMenu stays enabled – users can hide default prompts
                 _lblDefault.Visible = true;
                 Text += " (default \u2014 use Clone to modify)";
             }

@@ -10,7 +10,7 @@ namespace Supervertaler.Trados.Licensing
     /// <summary>
     /// Persisted license state, stored in the shared Supervertaler data folder
     /// under trados/license.json (resolved via UserDataPath).
-    /// Separate from settings.json — license state has a different lifecycle than user preferences.
+    /// Separate from settings.json – license state has a different lifecycle than user preferences.
     /// </summary>
     [DataContract]
     public class LicenseInfo
@@ -124,7 +124,7 @@ namespace Supervertaler.Trados.Licensing
         }
 
         /// <summary>
-        /// Trial duration in days. Single source of truth — referenced by LicenseManager.
+        /// Trial duration in days. Single source of truth – referenced by LicenseManager.
         /// </summary>
         internal const int TrialDays = 14;
 
@@ -140,7 +140,7 @@ namespace Supervertaler.Trados.Licensing
             {
                 if (!File.Exists(LicenseFile))
                 {
-                    // First launch — start the trial
+                    // First launch – start the trial
                     var fresh = new LicenseInfo
                     {
                         TrialStartedAt = DateTime.UtcNow,
@@ -169,7 +169,7 @@ namespace Supervertaler.Trados.Licensing
             }
             catch (Exception ex)
             {
-                // File exists but is corrupt — warn the user instead of silently
+                // File exists but is corrupt – warn the user instead of silently
                 // resetting to trial (which would lock out a paid user).
                 try
                 {
@@ -184,7 +184,7 @@ namespace Supervertaler.Trados.Licensing
                 }
                 catch
                 {
-                    // UI not available yet — continue silently
+                    // UI not available yet – continue silently
                 }
 
                 var fresh = new LicenseInfo

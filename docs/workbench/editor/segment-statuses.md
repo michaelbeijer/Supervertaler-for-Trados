@@ -2,10 +2,10 @@
 
 Every segment in Supervertaler carries two independent pieces of information:
 
-1. **Match origin** — how the translation got there (TM match, machine translation, manual typing)
-2. **Workflow status** — where the segment is in the review cycle (draft, confirmed, approved)
+1. **Match origin** – how the translation got there (TM match, machine translation, manual typing)
+2. **Workflow status** – where the segment is in the review cycle (draft, confirmed, approved)
 
-These are two separate dimensions. A segment can be a 100% TM match *and* confirmed — the match tells you where the translation came from, and the workflow status tells you whether a human has signed off on it.
+These are two separate dimensions. A segment can be a 100% TM match *and* confirmed – the match tells you where the translation came from, and the workflow status tells you whether a human has signed off on it.
 
 ---
 

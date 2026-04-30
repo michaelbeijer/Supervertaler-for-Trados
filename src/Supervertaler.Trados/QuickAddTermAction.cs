@@ -126,7 +126,7 @@ namespace Supervertaler.Trados
                 }
 
                 // Get write termbase metadata for all configured write targets,
-                // excluding the project termbase — Alt+Up handles that exclusively.
+                // excluding the project termbase – Alt+Up handles that exclusively.
                 var writeTermbases = new List<Models.TermbaseInfo>();
                 using (var reader = new TermbaseReader(settings.TermbasePath))
                 {
@@ -151,7 +151,7 @@ namespace Supervertaler.Trados
                     return;
                 }
 
-                // Capture the project source language — TermbaseReader.InsertTermBatch
+                // Capture the project source language – TermbaseReader.InsertTermBatch
                 // and TermMergeChecker.FindMergeMatches both use it to decide
                 // PER-TERMBASE whether to swap source/target so each write termbase
                 // gets its text in (and gets searched on) the right columns
@@ -160,7 +160,7 @@ namespace Supervertaler.Trados
                 // HISTORY: Previously this method swapped sourceText/targetText ONCE,
                 // based on writeTermbases[0]. That meant any write termbase in the
                 // batch with a direction different from the first one ended up with
-                // text in the wrong columns — which corrupted the PATENTS termbase
+                // text in the wrong columns – which corrupted the PATENTS termbase
                 // for a user who had other write termbases of the opposite direction
                 // active at various times. The per-termbase swap now happens inside
                 // InsertTermBatch and FindMergeMatches themselves.
@@ -176,7 +176,7 @@ namespace Supervertaler.Trados
 
                 // Check for existing entries with matching source or target.
                 // Pass projSrcLang so FindMergeMatches can per-termbase swap the
-                // search columns to match each termbase's storage direction —
+                // search columns to match each termbase's storage direction –
                 // without this, reverse-direction termbases silently miss every
                 // match (the SQL would compare DB English columns against project
                 // Dutch text and vice versa). Mirrors the per-termbase swap that
@@ -201,7 +201,7 @@ namespace Supervertaler.Trados
                             {
                                 // Add as synonym to each matched entry. The "source"/
                                 // "target" language tag on AddSynonym refers to the
-                                // termbase's storage direction, not the project's —
+                                // termbase's storage direction, not the project's –
                                 // when the termbase is inverted relative to the project,
                                 // the project source text belongs in the target column
                                 // and vice versa.
@@ -237,7 +237,7 @@ namespace Supervertaler.Trados
                                 // Full reload to pick up synonym changes
                                 TermLensEditorViewPart.NotifyTermAdded();
 
-                                // "Add & Edit" — open the term entry editor on the first matched entry
+                                // "Add & Edit" – open the term entry editor on the first matched entry
                                 if (mergeResult == DialogResult.Retry)
                                 {
                                     var firstMatch = mergeMatches[0];
@@ -257,12 +257,12 @@ namespace Supervertaler.Trados
                                 }
                                 return;
                             }
-                            // DialogResult.No = "Keep Both" — fall through to normal insert
+                            // DialogResult.No = "Keep Both" – fall through to normal insert
                         }
                     }
 
                     // Normal insert into all write termbases. InsertTermBatch makes
-                    // a per-termbase swap decision using projectSourceLang — each
+                    // a per-termbase swap decision using projectSourceLang – each
                     // termbase's declared direction is respected independently.
                     var batchResults = TermbaseReader.InsertTermBatch(
                         settings.TermbasePath, sourceText, targetText, "", writeTermbases,
@@ -296,7 +296,7 @@ namespace Supervertaler.Trados
                             });
                         }
 
-                        // Incremental index update — no full DB reload
+                        // Incremental index update – no full DB reload
                         TermLensEditorViewPart.NotifyTermInserted(insertedEntries);
                     }
                     else

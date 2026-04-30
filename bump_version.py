@@ -6,7 +6,7 @@ Usage:
 Example:
     python bump_version.py 4.19.0
 
-Updates (all from a single new version — no old version needed):
+Updates (all from a single new version – no old version needed):
     - Supervertaler.Trados.csproj: <Version> and <InformationalVersion>
     - pluginpackage.manifest.xml: <Version> element
     - plugin.xml (UTF-16 LE): plugin version attribute + assembly binding versions
@@ -21,7 +21,7 @@ PLUGIN_XML = os.path.join(SRC_DIR, "Supervertaler.Trados.plugin.xml")
 MANIFEST_XML = os.path.join(SRC_DIR, "pluginpackage.manifest.xml")
 CSPROJ = os.path.join(SRC_DIR, "Supervertaler.Trados.csproj")
 
-# Matches any existing version value — normal (digits+dots) OR corrupted (anything non-XML)
+# Matches any existing version value – normal (digits+dots) OR corrupted (anything non-XML)
 VERSION_VALUE = r"[^<\"]+"
 
 
@@ -70,7 +70,7 @@ def bump_manifest(new_four):
 
 
 def bump_plugin_xml(new_four):
-    """Update plugin.xml (UTF-16 LE) — plugin version + assembly bindings."""
+    """Update plugin.xml (UTF-16 LE) – plugin version + assembly bindings."""
     with open(PLUGIN_XML, "rb") as f:
         raw = f.read()
 
@@ -87,7 +87,7 @@ def bump_plugin_xml(new_four):
     c1 = len(ver_pattern.findall(text))
     text = ver_pattern.sub(rf'\1version="{new_four}"', text)
 
-    # Assembly binding references — match ANY version string for Supervertaler.Trados
+    # Assembly binding references – match ANY version string for Supervertaler.Trados
     asm_pattern = re.compile(r"Supervertaler\.Trados, Version=[^,]+,")
     c2 = len(asm_pattern.findall(text))
     text = asm_pattern.sub(f"Supervertaler.Trados, Version={new_four},", text)
@@ -163,7 +163,7 @@ def main():
 
     new_three = sys.argv[1]  # e.g. "4.19.0"
 
-    # Validate BEFORE doing anything — reject flags and garbage input
+    # Validate BEFORE doing anything – reject flags and garbage input
     validate_version(new_three)
 
     new_four = new_three + ".0"  # e.g. "4.19.0.0"

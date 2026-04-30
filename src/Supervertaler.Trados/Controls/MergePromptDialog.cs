@@ -12,7 +12,7 @@ namespace Supervertaler.Trados.Controls
     /// already exists in the termbase. Offers to merge as a synonym (quick or
     /// via the term entry editor), keep both as separate entries, or cancel.
     ///
-    /// DialogResult.Yes    = Add as Synonym (quick — insert and done)
+    /// DialogResult.Yes    = Add as Synonym (quick – insert and done)
     /// DialogResult.Retry  = Add as Synonym &amp; open Term Entry Editor for review
     /// DialogResult.No     = Keep Both (create a separate entry)
     /// DialogResult.Cancel = Cancel (abort the add operation)
@@ -59,14 +59,14 @@ namespace Supervertaler.Trados.Controls
             ShowInTaskbar = false;
 
             // All controls are placed directly on the form with absolute
-            // positioning — no Dock panels, which misbehave inside Trados's
+            // positioning – no Dock panels, which misbehave inside Trados's
             // WPF-hosted plugin environment.
 
             int margin = 20;
             int contentWidth = 460;
             int y = 16;
 
-            // The new term is supplied in project direction — display directly.
+            // The new term is supplied in project direction – display directly.
             var displayNewSource = _newSource;
             var displayNewTarget = _newTarget;
 

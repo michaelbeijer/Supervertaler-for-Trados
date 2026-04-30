@@ -9,7 +9,7 @@ namespace Supervertaler.Trados
 {
     /// <summary>
     /// Legacy action kept for backward compatibility with Trados's cached action registry.
-    /// No default shortcut — Ctrl+T (TranslateActiveSegmentAction) is the primary shortcut.
+    /// No default shortcut – Ctrl+T (TranslateActiveSegmentAction) is the primary shortcut.
     /// Redirects to the same batch-translate pipeline as Ctrl+T.
     /// </summary>
     [Action("Supervertaler_AiTranslateSegment", typeof(EditorController),

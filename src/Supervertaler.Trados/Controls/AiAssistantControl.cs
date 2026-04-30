@@ -202,7 +202,7 @@ namespace Supervertaler.Trados.Controls
 
             Controls.Add(_tabControl);
 
-            // ─── Settings gear button — floats at top-right ──────────
+            // ─── Settings gear button – floats at top-right ──────────
             _btnSettings = new Button
             {
                 Text = "\uE713",  // Settings gear from Segoe MDL2 Assets
@@ -222,7 +222,7 @@ namespace Supervertaler.Trados.Controls
             _btnSettings.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 220, 220);
             _btnSettings.Click += (s, e) => SettingsRequested?.Invoke(this, EventArgs.Empty);
 
-            // Help/about button (?) — floats to the left of the gear button
+            // Help/about button (?) – floats to the left of the gear button
             _btnHelp = new Button
             {
                 Text = "?",
@@ -273,7 +273,7 @@ namespace Supervertaler.Trados.Controls
             {
                 Dock = DockStyle.Fill,
                 Font = new Font("Segoe UI", UiScale.FontSize(7.5f)),
-                // Material Design Green 800 — distinctive on the light grey
+                // Material Design Green 800 – distinctive on the light grey
                 // strip without being garish. Makes the language pair and
                 // current source segment visually stand out as the most
                 // important "where am I right now" hint in the panel.
@@ -284,7 +284,7 @@ namespace Supervertaler.Trados.Controls
             };
             _contextStrip.Controls.Add(_lblContext);
 
-            // Font size increase button (A+) — docked right inside context strip
+            // Font size increase button (A+) – docked right inside context strip
             var btnChatFontUp = new Button
             {
                 Text = "A+",
@@ -359,7 +359,7 @@ namespace Supervertaler.Trados.Controls
                 BackColor = Color.FromArgb(250, 250, 250)
             };
 
-            // Drag handle at top of input panel — allows vertical resizing
+            // Drag handle at top of input panel – allows vertical resizing
             _resizeHandle = new Panel
             {
                 Dock = DockStyle.Top,
@@ -534,7 +534,7 @@ namespace Supervertaler.Trados.Controls
             inputTips.SetToolTip(_btnStop, "Stop AI response");
             inputTips.SetToolTip(_btnClear, "Clear conversation history");
             inputTips.SetToolTip(_btnAttach,
-                "Attach files — images, documents, spreadsheets, and translation files\n" +
+                "Attach files – images, documents, spreadsheets, and translation files\n" +
                 "(Ctrl+V to paste images, or drag and drop)\n\n" +
                 "Supported: docx, pdf, rtf, pptx, xlsx, csv, tsv,\n" +
                 "tmx, sdlxliff, xliff, tbx, txt, md, html, json, xml,\n" +
@@ -576,7 +576,7 @@ namespace Supervertaler.Trados.Controls
                 // sometimes because the panel cached a stale preferred size,
                 // sometimes for reasons I could not reproduce). The visible
                 // symptom was ghost white space below the last bubble that
-                // users could scroll through — and worse, new messages
+                // users could scroll through – and worse, new messages
                 // landing in that white space, invisible to the user.
                 //
                 // The fix is to take AutoSize off entirely and set the
@@ -793,13 +793,13 @@ namespace Supervertaler.Trados.Controls
             // Recompute the manual AutoScrollMinSize to reflect the new
             // bubble heights. Without this, widening the chat panel (which
             // makes bubbles shorter) would leave the scroll range pointing
-            // at the previous taller state — the ghost white space bug.
+            // at the previous taller state – the ghost white space bug.
             UpdateChatScrollRange();
         }
 
         private void OnInputKeyDown(object sender, KeyEventArgs e)
         {
-            // Ctrl+V with image on clipboard — intercept for image paste
+            // Ctrl+V with image on clipboard – intercept for image paste
             if (e.Control && e.KeyCode == Keys.V)
             {
                 if (Clipboard.ContainsImage())
@@ -817,7 +817,7 @@ namespace Supervertaler.Trados.Controls
             }
             else if (e.KeyCode == Keys.Enter && e.Shift)
             {
-                // Explicitly insert newline for Shift+Enter — Trados may intercept
+                // Explicitly insert newline for Shift+Enter – Trados may intercept
                 // the default TextBox handling, so we do it manually
                 e.SuppressKeyPress = true;
                 var selStart = _txtInput.SelectionStart;
@@ -1232,7 +1232,7 @@ namespace Supervertaler.Trados.Controls
         {
             if (_isThinking) return;
 
-            // User-initiated action — re-engage auto-scroll so their message
+            // User-initiated action – re-engage auto-scroll so their message
             // and the AI response land in view even if they had previously
             // scrolled up to read history.
             ReengageAutoScroll();
@@ -1283,7 +1283,7 @@ namespace Supervertaler.Trados.Controls
         }
 
         /// <summary>
-        /// Reentry guard for <see cref="UpdateChatScrollRange"/> — the
+        /// Reentry guard for <see cref="UpdateChatScrollRange"/> – the
         /// <see cref="Panel.AutoScrollMinSize"/> setter can trigger layout
         /// events which in turn call back into this method.
         /// </summary>
@@ -1298,7 +1298,7 @@ namespace Supervertaler.Trados.Controls
         /// The rationale: <see cref="_userScrolledUp"/> was introduced to
         /// stop the chat from yanking the user back to the bottom every
         /// time a new AI-streamed message arrived while they were reading
-        /// history. That goal is still valid — but it was too aggressive:
+        /// history. That goal is still valid – but it was too aggressive:
         /// if the user had scrolled up earlier and then clicked an action
         /// button, the flag was still set to true, and the new progress
         /// bubble from the click landed below the viewport with no scroll.
@@ -1321,7 +1321,7 @@ namespace Supervertaler.Trados.Controls
         /// on the chat panel based on the actual positions of child bubbles
         /// in the message flow. This bypasses WinForms' automatic AutoScroll
         /// range computation, which has repeatedly been shown to get out of
-        /// sync with the real content — sometimes because AutoSize does not
+        /// sync with the real content – sometimes because AutoSize does not
         /// recompute in time, sometimes because a docked-Top child with
         /// AutoSize inherits stale dimensions from an earlier layout at a
         /// different chat panel width, and sometimes for reasons I still
@@ -1362,7 +1362,7 @@ namespace Supervertaler.Trados.Controls
                 // Set _messageFlow.Height MANUALLY to exactly match the
                 // children's total height plus a small breathing margin.
                 // With AutoSize off, this is the authoritative source of
-                // the FlowLayoutPanel's height — there is no AutoSize
+                // the FlowLayoutPanel's height – there is no AutoSize
                 // machinery to fight with, no stale cached preferred size,
                 // no ghost space beyond the last child.
                 //
@@ -1400,11 +1400,11 @@ namespace Supervertaler.Trados.Controls
         /// visible. Calls <see cref="UpdateChatScrollRange"/> first so the
         /// scroll target is computed against an accurate range, then uses
         /// <see cref="Panel.ScrollControlIntoView"/> on the last child of
-        /// the message flow — the WinForms-recommended "make this control
+        /// the message flow – the WinForms-recommended "make this control
         /// visible" API, which handles coordinate-space conversions and
         /// clamps to the actual scroll range.
         ///
-        /// Respects <see cref="_userScrolledUp"/> — if the user has manually
+        /// Respects <see cref="_userScrolledUp"/> – if the user has manually
         /// scrolled away from the bottom by more than ~50 px, this is a
         /// no-op so reading older content is not interrupted by progress
         /// messages or thinking-bubble animation ticks. The user can
@@ -1414,7 +1414,7 @@ namespace Supervertaler.Trados.Controls
         {
             if (_chatPanel == null || _messageFlow == null) return;
 
-            // Deliberately do NOT early-return on _userScrolledUp here —
+            // Deliberately do NOT early-return on _userScrolledUp here –
             // even when we end up not scrolling, UpdateChatScrollRange still
             // needs to run so the scroll range stays honest. The previous
             // implementation early-returned and skipped both, which left
@@ -1431,7 +1431,7 @@ namespace Supervertaler.Trados.Controls
                 // _chatPanel.AutoScrollMinSize in sync with the real
                 // content on every add/remove/resize, which is what
                 // actually fixes the "messages disappear into white space"
-                // bug — the scroll math only works if the panel knows
+                // bug – the scroll math only works if the panel knows
                 // where the content actually ends.
                 UpdateChatScrollRange();
 
@@ -1544,8 +1544,8 @@ namespace Supervertaler.Trados.Controls
             // scroll, in the right order and after the FlowLayoutPanel
             // has had a message-pump cycle to propagate the new child's
             // layout. Calling UpdateChatScrollRange synchronously here
-            // would be premature — the new child's position isn't settled
-            // yet — and would just get re-run in the deferred action
+            // would be premature – the new child's position isn't settled
+            // yet – and would just get re-run in the deferred action
             // anyway. So a single ScrollChatToBottom call is enough.
             ScrollChatToBottom();
         }
@@ -1655,7 +1655,7 @@ namespace Supervertaler.Trados.Controls
             }
 
             _isThinking = isThinking;
-            // Old docked label kept hidden — the thinking bubble in the chat flow
+            // Old docked label kept hidden – the thinking bubble in the chat flow
             // is more reliable and visible
             _lblThinking.Visible = false;
             _btnSend.Visible = !isThinking;
@@ -1967,14 +1967,14 @@ namespace Supervertaler.Trados.Controls
     ///
     /// Key processing order in WinForms:
     ///   -1. WH_GETMESSAGE hook  ← we intercept HERE (fires inside GetMessage)
-    ///    0. IMessageFilter chain ← Trados intercepts here (FIFO — its filter runs first)
+    ///    0. IMessageFilter chain ← Trados intercepts here (FIFO – its filter runs first)
     ///    1. ProcessCmdKey        ← walks focused control → parent chain
     ///    2. IsInputKey           ← only if ProcessCmdKey didn't consume
     ///    3. KeyDown event        ← only if IsInputKey returned true
     ///
     /// Trados registers its IMessageFilter at startup, so it runs before ours
     /// (FIFO order). The only way to beat it is a WH_GETMESSAGE hook, which
-    /// fires when GetMessage returns — before the IMessageFilter chain starts.
+    /// fires when GetMessage returns – before the IMessageFilter chain starts.
     ///
     /// Also normalizes pasted text: Trados clipboard uses bare \n for soft
     /// returns, but the Windows EDIT control only displays \r\n as line breaks.
@@ -2029,7 +2029,7 @@ namespace Supervertaler.Trados.Controls
         }
 
         /// <summary>
-        /// WH_GETMESSAGE hook callback — fires when GetMessage returns, before
+        /// WH_GETMESSAGE hook callback – fires when GetMessage returns, before
         /// the IMessageFilter chain. If the message is WM_KEYDOWN for VK_RETURN
         /// and our TextBox has Win32 focus, we replace the message with WM_NULL
         /// (killing it) and handle the Enter key ourselves via BeginInvoke.
@@ -2075,7 +2075,7 @@ namespace Supervertaler.Trados.Controls
                     var after = Text.Substring(selStart + selLen);
                     Text = before + text + after;
                     SelectionStart = selStart + text.Length;
-                    return; // Don't call base — we handled the paste
+                    return; // Don't call base – we handled the paste
                 }
             }
             base.WndProc(ref m);

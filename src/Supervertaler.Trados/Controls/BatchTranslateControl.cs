@@ -736,7 +736,7 @@ namespace Supervertaler.Trados.Controls
                             (activePromptPath ?? "").Replace('/', '\\'),
                             StringComparison.OrdinalIgnoreCase);
 
-                    // Filter by category if specified — but always include the active
+                    // Filter by category if specified – but always include the active
                     // prompt even if its category doesn't match, so "Set as active"
                     // works for any prompt regardless of folder.
                     if (!string.IsNullOrEmpty(categoryFilter) &&

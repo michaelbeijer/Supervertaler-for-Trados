@@ -43,7 +43,7 @@ namespace Supervertaler.Trados.Core
     /// <summary>
     /// Builds the system prompt for the AI Chat Assistant.
     /// Separate from TranslationPrompt because the chat assistant is conversational
-    /// rather than a pure translator — it needs different persona and guidelines.
+    /// rather than a pure translator – it needs different persona and guidelines.
     /// </summary>
     public static class ChatPrompt
     {
@@ -66,7 +66,7 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine("# TRADOS STUDIO TOOLS");
             sb.AppendLine("You have access to tools that can query the user's Trados Studio installation.");
             sb.AppendLine("Use these tools when the user asks about their projects, translation memories,");
-            sb.AppendLine("or project templates. The tools read local Trados data — you do not need to");
+            sb.AppendLine("or project templates. The tools read local Trados data – you do not need to");
             sb.AppendLine("ask the user for file paths or other details. Just call the appropriate tool.");
             sb.AppendLine("Present tool results in a clear, well-formatted table or summary.");
             sb.AppendLine();
@@ -82,7 +82,7 @@ namespace Supervertaler.Trados.Core
             if (ctx.DemoMode)
             {
                 sb.AppendLine();
-                sb.AppendLine("# INCOGNITO MODE — DATA ANONYMISATION");
+                sb.AppendLine("# INCOGNITO MODE – DATA ANONYMISATION");
                 sb.AppendLine("This is a demo session. All personal and organisational data MUST be anonymised");
                 sb.AppendLine("in every response you write. This applies to:");
                 sb.AppendLine("- User names, display names, and email addresses");
@@ -293,7 +293,7 @@ namespace Supervertaler.Trados.Core
         }
 
         /// <summary>
-        /// Legacy overload — builds a basic system prompt without document/project context.
+        /// Legacy overload – builds a basic system prompt without document/project context.
         /// Delegates to the ChatContext-based overload.
         /// </summary>
         public static string BuildSystemPrompt(

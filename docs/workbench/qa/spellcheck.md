@@ -22,9 +22,9 @@ The system automatically falls back through backends: Hunspell → Spylls → py
 
 - **Red wavy underlines** for misspelled words in the translation grid
 - **Right-click context menu** with spelling suggestions
-- **Add to Dictionary** — Save a word permanently
-- **Ignore** — Skip a word for the current session only
-- **Regional variants** — Distinguish between en_US "color" and en_GB "colour"
+- **Add to Dictionary** – Save a word permanently
+- **Ignore** – Skip a word for the current session only
+- **Regional variants** – Distinguish between en_US "color" and en_GB "colour"
 
 ## Language Variants
 
@@ -62,11 +62,11 @@ The dialog shows:
 To add spellcheck support for additional languages or variants:
 
 1. **Download Hunspell dictionaries** (.dic and .aff files) from:
-   - [hunspell.memoq.com](https://hunspell.memoq.com/) — 70+ languages
-   - [GitHub: wooorm/dictionaries](https://github.com/wooorm/dictionaries/tree/main/dictionaries) — 92+ languages
-   - [LibreOffice Extensions](https://extensions.libreoffice.org/?Tags%5B%5D=50) — Rename .oxt to .zip
+   - [hunspell.memoq.com](https://hunspell.memoq.com/) – 70+ languages
+   - [GitHub: wooorm/dictionaries](https://github.com/wooorm/dictionaries/tree/main/dictionaries) – 92+ languages
+   - [LibreOffice Extensions](https://extensions.libreoffice.org/?Tags%5B%5D=50) – Rename .oxt to .zip
 
-2. **Extract the files** — You need both `.dic` and `.aff` files (e.g., `nl_NL.dic` and `nl_NL.aff`)
+2. **Extract the files** – You need both `.dic` and `.aff` files (e.g., `nl_NL.dic` and `nl_NL.aff`)
 
 3. **Place them in the dictionaries folder:**
    - Open Supervertaler
@@ -75,7 +75,7 @@ To add spellcheck support for additional languages or variants:
    - Copy your .dic and .aff files there
    - You can also organize in subfolders (e.g., `dictionaries/en/en_GB.dic`)
 
-4. **Restart Supervertaler** — The new language will appear in the dropdown
+4. **Restart Supervertaler** – The new language will appear in the dropdown
 
 {% hint style="info" %}
 **Spylls bundled dictionaries** (EN, RU, SV) are stored inside the spylls pip package, not in your dictionaries folder. Add your own .dic/.aff files to the dictionaries folder to extend available languages.
@@ -94,9 +94,9 @@ Custom words are stored permanently and apply to all languages.
 
 ### Spellcheck not working?
 
-1. **Check the language** — Make sure the correct language variant is selected
-2. **Check the backend** — Open Spellcheck Info to see which backend is active
-3. **Missing dictionaries** — Some languages require manual dictionary installation
+1. **Check the language** – Make sure the correct language variant is selected
+2. **Check the backend** – Open Spellcheck Info to see which backend is active
+3. **Missing dictionaries** – Some languages require manual dictionary installation
 
 ### Wrong language variant?
 

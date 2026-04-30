@@ -11,7 +11,7 @@ namespace Supervertaler.Trados.Controls
     ///
     /// Two save modes:
     ///   • Structured article (default): writes a ready-to-use .md article
-    ///     directly to 02_TERMINOLOGY/ — no AI processing needed.
+    ///     directly to 02_TERMINOLOGY/ – no AI processing needed.
     ///   • Raw note: writes an unstructured note to 00_INBOX/ for the AI
     ///     to compile into structured articles via Process Inbox. Useful
     ///     when the knowledge is fuzzy or context-dependent ("fiche can

@@ -13,11 +13,11 @@ namespace Supervertaler.Trados.Core
     /// Read-only access using System.Data.OleDb with Microsoft.ACE.OLEDB.12.0.
     ///
     /// Schema (discovered from real .sdltb files):
-    ///   mtIndexes       — language index definitions (name, locale)
-    ///   I_{IndexName}   — indexed terms per language (origterm, termid, conceptid, topterm)
-    ///   mtConcepts      — concept XML with all languages, terms, and metadata
-    ///   mtFields        — field definitions (name, type)
-    ///   mtFieldsValues  — field values per entry
+    ///   mtIndexes       – language index definitions (name, locale)
+    ///   I_{IndexName}   – indexed terms per language (origterm, termid, conceptid, topterm)
+    ///   mtConcepts      – concept XML with all languages, terms, and metadata
+    ///   mtFields        – field definitions (name, type)
+    ///   mtFieldsValues  – field values per entry
     /// </summary>
     public class MultiTermReader : IDisposable
     {
@@ -28,7 +28,7 @@ namespace Supervertaler.Trados.Core
         /// <summary>
         /// OleDb provider versions to try, in order of preference.
         /// ACE drivers (Office/Access Database Engine): 16.0, 15.0, 14.0, 12.0.
-        /// JET 4.0: Built into Windows for 32-bit processes — since Trados Studio 2024
+        /// JET 4.0: Built into Windows for 32-bit processes – since Trados Studio 2024
         /// runs as x86 (Program Files (x86)), this should always be available without
         /// any additional driver installation.
         /// </summary>
@@ -83,14 +83,14 @@ namespace Supervertaler.Trados.Core
                 }
                 catch (InvalidOperationException)
                 {
-                    // This provider version isn't registered — try the next one
+                    // This provider version isn't registered – try the next one
                     triedProviders.Add(provider + " (not registered)");
                     _connection?.Dispose();
                     _connection = null;
                 }
                 catch (OleDbException ex)
                 {
-                    // Driver is registered but can't open the file — report and try next
+                    // Driver is registered but can't open the file – report and try next
                     triedProviders.Add($"{provider} ({ex.Message})");
                     _connection?.Dispose();
                     _connection = null;

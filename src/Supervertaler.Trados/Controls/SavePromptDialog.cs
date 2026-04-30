@@ -51,7 +51,7 @@ namespace Supervertaler.Trados.Controls
                 BorderStyle = BorderStyle.Fixed3D
             });
 
-            // Buttons — positioned relative to ClientSize like other working dialogs
+            // Buttons – positioned relative to ClientSize like other working dialogs
             var btnOk = new Button
             {
                 Text = "Save",

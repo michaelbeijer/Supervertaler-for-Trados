@@ -153,7 +153,7 @@ namespace Supervertaler.Trados.Controls
         /// True when this block is the keyboard-focused match in the TermLens
         /// popup. Drawn with a coloured ring around the source word so the
         /// user can see which match Enter will insert. The docked panel never
-        /// sets this — only the popup uses it.
+        /// sets this – only the popup uses it.
         /// </summary>
         public bool IsCurrent
         {
@@ -306,7 +306,7 @@ namespace Supervertaler.Trados.Controls
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-            // Source text — plain, no background (ellipsis if clamped)
+            // Source text – plain, no background (ellipsis if clamped)
             float y = 3;
             var sourceHeight = g.MeasureString(_sourceText, SourceFont).Height;
             var sourceWidth = g.MeasureString(_sourceText, SourceFont).Width;
@@ -334,7 +334,7 @@ namespace Supervertaler.Trados.Controls
             }
             y += sourceHeight;
 
-            // Target row — highlighted background only around translation
+            // Target row – highlighted background only around translation
             var targetText = DisplayTargetText;
             var targetSize = g.MeasureString(targetText, TargetFont);
 
@@ -367,7 +367,7 @@ namespace Supervertaler.Trados.Controls
                 g.FillPath(brush, path);
             }
 
-            // Target text (ellipsis if clamped) — white + strikethrough when forbidden
+            // Target text (ellipsis if clamped) – white + strikethrough when forbidden
             float targetX = 4;
             float maxTargetTextWidth = Width - 8 - extraWidth - badgeWidth;
             var tgtFont = _isForbidden
@@ -394,7 +394,7 @@ namespace Supervertaler.Trados.Controls
                 }
             }
 
-            // Shortcut badge — filled circle/pill with number, after translation
+            // Shortcut badge – filled circle/pill with number, after translation
             if (_shortcutIndex >= 0 && GetBadgeText(_shortcutIndex) != null)
             {
                 var badgeText = GetBadgeText(_shortcutIndex);
@@ -435,7 +435,7 @@ namespace Supervertaler.Trados.Controls
                     }
                 }
 
-                // Badge number — always white
+                // Badge number – always white
                 using (var textBrush = new SolidBrush(Color.White))
                 {
                     var textSize = g.MeasureString(badgeText, BadgeFont);
@@ -446,7 +446,7 @@ namespace Supervertaler.Trados.Controls
 
             }
 
-            // Corner indicators — drawn outside the badge block so they appear
+            // Corner indicators – drawn outside the badge block so they appear
             // regardless of whether a shortcut badge is visible.
 
             // Amber corner dot when entry has metadata (definition/domain/notes)

@@ -23,7 +23,7 @@ namespace Supervertaler.Trados.Settings
         // ─── Human-readable metadata ────────────────────────────────
 
         /// <summary>
-        /// Full path to the .sdlproj file. Stored for human readability only —
+        /// Full path to the .sdlproj file. Stored for human readability only –
         /// the file is looked up by hash key, not by this path.
         /// </summary>
         [DataMember(Name = "projectPath")]
@@ -163,7 +163,7 @@ namespace Supervertaler.Trados.Settings
                     return matches[0];
             }
 
-            // No existing file found — return the readable path for new saves
+            // No existing file found – return the readable path for new saves
             if (!string.IsNullOrEmpty(projectName))
             {
                 var safeName = SanitiseProjectName(projectName);
@@ -171,7 +171,7 @@ namespace Supervertaler.Trados.Settings
                     return Path.Combine(ProjectsDir, key + " - " + safeName + ".json");
             }
 
-            // Absolute fallback — hash only
+            // Absolute fallback – hash only
             return Path.Combine(ProjectsDir, key + ".json");
         }
 
@@ -286,7 +286,7 @@ namespace Supervertaler.Trados.Settings
         }
 
         /// <summary>
-        /// Naïve JSON indenter — works for the simple flat structure of project settings
+        /// Naïve JSON indenter – works for the simple flat structure of project settings
         /// without requiring an external JSON library.
         /// </summary>
         private static string IndentJson(string json)

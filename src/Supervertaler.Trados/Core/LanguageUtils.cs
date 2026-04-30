@@ -48,7 +48,7 @@ namespace Supervertaler.Trados.Core
             }
             catch
             {
-                // Not a valid culture code — fall through to display name parsing
+                // Not a valid culture code – fall through to display name parsing
             }
 
             // 2) Try to parse "Language (Country)" format and shorten the country
@@ -78,7 +78,7 @@ namespace Supervertaler.Trados.Core
         /// <list type="bullet">
         /// <item>"Dutch (Netherlands)" → "Dutch"</item>
         /// <item>"English (United Kingdom)" → "English"</item>
-        /// <item>"Chinese (Simplified)" → "Chinese (Simplified)" (kept — not a region)</item>
+        /// <item>"Chinese (Simplified)" → "Chinese (Simplified)" (kept – not a region)</item>
         /// <item>"Dutch" → "Dutch" (unchanged)</item>
         /// </list>
         /// </summary>
@@ -97,7 +97,7 @@ namespace Supervertaler.Trados.Core
             var parenthesised = match.Groups[2].Value;
 
             // Keep the parenthesised part for script variants (Simplified/Traditional)
-            // that are essential for disambiguation — strip country/region names only.
+            // that are essential for disambiguation – strip country/region names only.
             if (parenthesised.Equals("Simplified", StringComparison.OrdinalIgnoreCase)
                 || parenthesised.Equals("Traditional", StringComparison.OrdinalIgnoreCase)
                 || parenthesised.Equals("Latin", StringComparison.OrdinalIgnoreCase)
@@ -128,7 +128,7 @@ namespace Supervertaler.Trados.Core
                 }
                 catch
                 {
-                    // Some cultures may throw — skip them
+                    // Some cultures may throw – skip them
                 }
             }
             return null;

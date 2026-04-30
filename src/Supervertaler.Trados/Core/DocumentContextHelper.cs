@@ -39,7 +39,7 @@ namespace Supervertaler.Trados.Core
                     var sid = pair.Properties?.Id.Id;
                     int segIdNum;
                     if (int.TryParse(sid, out segIdNum) && segIdNum <= fileSegIdx && fileSegIdx > 0)
-                        fileSegIdx = 0; // file boundary detected — restart counter
+                        fileSegIdx = 0; // file boundary detected – restart counter
 
                     fileSegIdx++;
 
@@ -89,7 +89,7 @@ namespace Supervertaler.Trados.Core
             catch { return ""; }
         }
 
-        // ── {{PROJECT}} — full document source text ──────────────────────────────
+        // ── {{PROJECT}} – full document source text ──────────────────────────────
 
         /// <summary>
         /// Formats all source segments from the document as a numbered list for use in the
@@ -141,7 +141,7 @@ namespace Supervertaler.Trados.Core
             return sb.ToString().TrimEnd();
         }
 
-        // ── {{SURROUNDING_SEGMENTS}} — context window ────────────────────────────
+        // ── {{SURROUNDING_SEGMENTS}} – context window ────────────────────────────
 
         /// <summary>
         /// Formats <paramref name="count"/> source segments before and after the active

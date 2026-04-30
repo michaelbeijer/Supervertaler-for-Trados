@@ -16,7 +16,7 @@ namespace Supervertaler.Trados.Core
         /// <summary>
         /// Builds the base system prompt with critical translation instructions.
         /// This includes persona, core rules, tag preservation, and number formatting.
-        /// Always included — custom prompts are appended after this.
+        /// Always included – custom prompts are appended after this.
         /// </summary>
         public static string BuildBaseSystemPrompt(string sourceLang, string targetLang)
         {
@@ -100,7 +100,7 @@ namespace Supervertaler.Trados.Core
             // Layer 1: Base system prompt (or user's custom override)
             if (!string.IsNullOrWhiteSpace(customSystemPrompt))
             {
-                // User has overridden the system prompt — apply variable substitution
+                // User has overridden the system prompt – apply variable substitution
                 var resolved = PromptLibrary.ApplyVariables(customSystemPrompt, sourceLang, targetLang);
                 sb.Append(resolved);
             }
@@ -279,7 +279,7 @@ namespace Supervertaler.Trados.Core
                 }
                 else if (currentNumber >= 0)
                 {
-                    // Continuation line — append to current translation
+                    // Continuation line – append to current translation
                     map[currentNumber].AppendLine();
                     map[currentNumber].Append(line);
                 }

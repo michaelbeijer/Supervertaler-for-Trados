@@ -104,7 +104,7 @@ namespace Supervertaler.Trados.Controls
             };
             Controls.Add(btnCancel);
 
-            // No AcceptButton — Enter creates newlines in the textbox
+            // No AcceptButton – Enter creates newlines in the textbox
             CancelButton = btnCancel;
         }
 

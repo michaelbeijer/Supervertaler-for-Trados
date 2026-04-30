@@ -70,7 +70,7 @@ namespace Supervertaler.Trados
                     return;
                 }
 
-                // Get the term text — check source selection first, then target selection.
+                // Get the term text – check source selection first, then target selection.
                 // Non-translatables only need one text (target = source), so we accept
                 // selected text from either column.
                 // Use GetFinalText to strip tracked changes

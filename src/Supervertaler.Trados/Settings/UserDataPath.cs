@@ -12,20 +12,20 @@ namespace Supervertaler.Trados.Settings
     ///
     /// Both Supervertaler Workbench and this plugin share a single user-data root folder
     /// (default: ~/Supervertaler/).  The root is stored as "user_data_path" in a shared
-    /// config pointer at %APPDATA%\Supervertaler\config.json — the same file Workbench
+    /// config pointer at %APPDATA%\Supervertaler\config.json – the same file Workbench
     /// reads and writes.
     ///
     /// Folder layout under the root:
-    ///   prompt_library/     — prompt .md files shared between both products
-    ///   resources/          — supervertaler.db (shared termbase, if present)
-    ///   workbench/          — Supervertaler Workbench-specific data
-    ///     settings/         — Workbench settings files
+    ///   prompt_library/     – prompt .md files shared between both products
+    ///   resources/          – supervertaler.db (shared termbase, if present)
+    ///   workbench/          – Supervertaler Workbench-specific data
+    ///     settings/         – Workbench settings files
     ///   trados/
-    ///     settings/         — Trados plugin settings
-    ///       settings.json   — plugin preferences
-    ///       license.json    — license activation state
-    ///       chat_history.json — AI Assistant chat history
-    ///     projects/         — per-project settings overlays
+    ///     settings/         – Trados plugin settings
+    ///       settings.json   – plugin preferences
+    ///       license.json    – license activation state
+    ///       chat_history.json – AI Assistant chat history
+    ///     projects/         – per-project settings overlays
     ///
     /// Call <see cref="NeedsFirstRunSetup"/> before any path access to check whether the
     /// user has ever configured a data folder.  The first-run dialog calls
@@ -33,7 +33,7 @@ namespace Supervertaler.Trados.Settings
     /// </summary>
     public static class UserDataPath
     {
-        // Shared config pointer — same file used by Supervertaler Workbench
+        // Shared config pointer – same file used by Supervertaler Workbench
         private static readonly string ConfigFile = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "Supervertaler", "config.json");
@@ -109,7 +109,7 @@ namespace Supervertaler.Trados.Settings
         /// <summary>
         /// Full spec-standard folder skeleton created inside every freshly made
         /// memory bank. Mirrors <c>SKELETON_FOLDERS</c> in the Python
-        /// <c>supervertaler_assistant.memory_bank</c> module exactly — deviating
+        /// <c>supervertaler_assistant.memory_bank</c> module exactly – deviating
         /// would silently break cross-product compatibility because banks are
         /// shared between Workbench, the Python Assistant and this plugin via
         /// the same <c>memory-banks/</c> root.
@@ -133,7 +133,7 @@ namespace Supervertaler.Trados.Settings
 
         /// <summary>
         /// Resolves the on-disk path for a specific memory bank. The returned path
-        /// may or may not exist — callers should check with <see cref="Directory.Exists"/>
+        /// may or may not exist – callers should check with <see cref="Directory.Exists"/>
         /// and surface a user-facing message if it does not.
         /// </summary>
         /// <param name="bankName">
@@ -174,7 +174,7 @@ namespace Supervertaler.Trados.Settings
             }
             catch
             {
-                // Non-fatal — return whatever we managed to enumerate
+                // Non-fatal – return whatever we managed to enumerate
             }
 
             result.Sort(StringComparer.OrdinalIgnoreCase);
@@ -332,7 +332,7 @@ namespace Supervertaler.Trados.Settings
                 // Populate 06_TEMPLATES with the bundled template files so the
                 // new bank is immediately usable by Process Inbox, Health Check,
                 // and the Obsidian-side query / translate-with-KB helpers.
-                // Failures here do not roll the bank back — the skeleton is the
+                // Failures here do not roll the bank back – the skeleton is the
                 // minimum viable state, and missing templates can be healed later
                 // via TryWriteMissingMemoryBankTemplates.
                 try
@@ -388,7 +388,7 @@ namespace Supervertaler.Trados.Settings
         /// <param name="overwrite">
         /// When true, existing template files are replaced. When false
         /// (the default on both create and heal paths), files that already
-        /// exist on disk are left untouched — user edits to templates are
+        /// exist on disk are left untouched – user edits to templates are
         /// per-bank and must not be clobbered by a plugin upgrade.
         /// </param>
         /// <param name="error">
@@ -452,7 +452,7 @@ namespace Supervertaler.Trados.Settings
                 }
                 catch
                 {
-                    // Skip this file — individual failures must not block the rest.
+                    // Skip this file – individual failures must not block the rest.
                 }
             }
 
@@ -630,7 +630,7 @@ namespace Supervertaler.Trados.Settings
                 }
                 catch
                 {
-                    // Non-fatal — legacy files remain in place as a fallback
+                    // Non-fatal – legacy files remain in place as a fallback
                 }
             }
 
@@ -659,7 +659,7 @@ namespace Supervertaler.Trados.Settings
 
             if (!File.Exists(oldSettings) && !File.Exists(oldLicense) && !File.Exists(oldChatHistory))
             {
-                // Nothing to migrate — probably a fresh install.  Write the flag
+                // Nothing to migrate – probably a fresh install.  Write the flag
                 // so we don't check again, then create the settings dir.
                 try
                 {
@@ -687,7 +687,7 @@ namespace Supervertaler.Trados.Settings
             }
             catch
             {
-                // Non-fatal — old files remain usable at the old paths
+                // Non-fatal – old files remain usable at the old paths
             }
         }
 
@@ -698,8 +698,8 @@ namespace Supervertaler.Trados.Settings
 
         /// <summary>
         /// Removes legacy AppData folders that are no longer used:
-        ///   %LocalAppData%\Supervertaler.Trados\  — old plugin settings (migrated)
-        ///   %LocalAppData%\Supervertaler\          — stale Workbench artifact on Windows
+        ///   %LocalAppData%\Supervertaler.Trados\  – old plugin settings (migrated)
+        ///   %LocalAppData%\Supervertaler\          – stale Workbench artifact on Windows
         /// Only deletes if the migration flag exists (data has been safely copied).
         /// </summary>
         private static void CleanupLegacyFolders()
@@ -772,7 +772,7 @@ namespace Supervertaler.Trados.Settings
                 }
                 else
                 {
-                    // No existing entry — write minimal JSON
+                    // No existing entry – write minimal JSON
                     updated = "{\n  \"user_data_path\": \"" + escaped + "\"\n}";
                 }
 

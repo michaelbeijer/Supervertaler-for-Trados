@@ -110,13 +110,13 @@ namespace Supervertaler.Trados
             var surroundingCount = settings?.AiSettings?.QuickLauncherSurroundingSegments ?? 5;
 
             // Build and show the context menu at the current cursor position.
-            // Do NOT use a 'using' block or dispose on Closed — Show() is non-blocking
+            // Do NOT use a 'using' block or dispose on Closed – Show() is non-blocking
             // and Closed fires before item click handlers run, causing ObjectDisposedException.
             // ContextMenuStrip is small; GC handles it.
             var menu = new ContextMenuStrip();
             menu.ShowItemToolTips = true;
 
-            // Header: "Supervertaler QuickLauncher" — opens Settings → Prompts tab
+            // Header: "Supervertaler QuickLauncher" – opens Settings → Prompts tab
             var header = new ToolStripMenuItem("Supervertaler QuickLauncher");
             header.Font = new System.Drawing.Font(header.Font, System.Drawing.FontStyle.Bold);
             header.ToolTipText = "Click to open the Prompt Manager";
@@ -241,7 +241,7 @@ namespace Supervertaler.Trados
                     sourceLang, targetLang, projectName, documentName, surroundingCount));
             }
 
-            // Then child subfolders — flat children get their own section header
+            // Then child subfolders – flat children get their own section header
             foreach (var child in folder.Children)
             {
                 var childRel = child.RelativePath ?? "";
@@ -365,7 +365,7 @@ namespace Supervertaler.Trados
 
             item.Click += (s, e) =>
             {
-                // Text transforms: apply find/replace directly to target — no AI call
+                // Text transforms: apply find/replace directly to target – no AI call
                 if (capturedPrompt.IsTransform)
                 {
                     var result = AiAssistantViewPart.RunTextTransform(capturedPrompt);

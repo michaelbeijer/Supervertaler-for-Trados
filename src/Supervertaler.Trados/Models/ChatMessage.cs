@@ -23,7 +23,7 @@ namespace Supervertaler.Trados.Models
         /// <summary>
         /// Optional display-only override. When set, the chat bubble shows this text instead of
         /// <see cref="Content"/>. <see cref="Content"/> is always sent to the AI unchanged.
-        /// Used to show a short summary (e.g. "[source document — 47 segments]") in place of a
+        /// Used to show a short summary (e.g. "[source document – 47 segments]") in place of a
         /// large {{PROJECT}} expansion so the chat history stays readable.
         /// </summary>
         [DataMember(Name = "displayContent", EmitDefaultValue = false)]
@@ -98,7 +98,7 @@ namespace Supervertaler.Trados.Models
     }
 
     /// <summary>
-    /// Event args for chat send — carries text, optional images, and optional documents.
+    /// Event args for chat send – carries text, optional images, and optional documents.
     /// </summary>
     public class ChatSendEventArgs : EventArgs
     {

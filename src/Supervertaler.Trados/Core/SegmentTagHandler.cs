@@ -167,7 +167,7 @@ namespace Supervertaler.Trados.Core
                 }
                 else if (item is IAbstractMarkupDataContainer nestedContainer)
                 {
-                    // ILockedContent, etc. — treat as paired tag
+                    // ILockedContent, etc. – treat as paired tag
                     tagCounter++;
                     int tagNum = tagCounter;
                     tagMap[tagNum] = new TagInfo
@@ -182,7 +182,7 @@ namespace Supervertaler.Trados.Core
                 }
                 else
                 {
-                    // Unknown markup data — emit as standalone placeholder
+                    // Unknown markup data – emit as standalone placeholder
                     tagCounter++;
                     int tagNum = tagCounter;
                     tagMap[tagNum] = new TagInfo
@@ -282,7 +282,7 @@ namespace Supervertaler.Trados.Core
         /// and builds the target segment tree.
         ///
         /// Returns true if reconstruction succeeded (tags were found and placed).
-        /// Returns false if parsing failed — caller should fall back to plain-text insertion.
+        /// Returns false if parsing failed – caller should fall back to plain-text insertion.
         /// </summary>
         public static bool ReconstructTarget(
             ISegment targetSegment,
@@ -304,7 +304,7 @@ namespace Supervertaler.Trados.Core
                 IText textTemplate = FindFirstText(sourceSegment);
                 if (textTemplate == null)
                 {
-                    // No text node in source — cannot create text in target via cloning
+                    // No text node in source – cannot create text in target via cloning
                     return false;
                 }
 
@@ -370,7 +370,7 @@ namespace Supervertaler.Trados.Core
                     }
                     else
                     {
-                        // Mismatched close tag — LLM error; treat remainder as plain text
+                        // Mismatched close tag – LLM error; treat remainder as plain text
                         // Pop until we find the matching open tag, or give up
                         bool found = false;
                         var tempStack = new Stack<ParsedOpenTag>();
@@ -515,7 +515,7 @@ namespace Supervertaler.Trados.Core
                     if (tagMap.TryGetValue(ot.TagNumber, out tagInfo) &&
                         tagInfo.OriginalMarkup != null)
                     {
-                        // Clone the tag pair and clear its content — we'll rebuild inside
+                        // Clone the tag pair and clear its content – we'll rebuild inside
                         var clone = (IAbstractMarkupData)tagInfo.OriginalMarkup.Clone();
 
                         if (clone is IAbstractMarkupDataContainer tagContainer)
@@ -529,7 +529,7 @@ namespace Supervertaler.Trados.Core
                     }
                     else
                     {
-                        // Unknown tag number — add children as plain content (skip the tag wrapper)
+                        // Unknown tag number – add children as plain content (skip the tag wrapper)
                         AddElementsToContainer(container, ot.Children, tagMap, textTemplate, sourceHasTextNewlines);
                     }
                 }
@@ -621,7 +621,7 @@ namespace Supervertaler.Trados.Core
                     container.Add(textClone);
                 }
 
-                // Insert line-break tag between parts — not after the last one
+                // Insert line-break tag between parts – not after the last one
                 if (i < parts.Length - 1 && lineBreakInfo != null)
                 {
                     var tagClone = (IAbstractMarkupData)lineBreakInfo.OriginalMarkup.Clone();
@@ -665,7 +665,7 @@ namespace Supervertaler.Trados.Core
                 {
                     AppendFinalText(nested, sb);
                 }
-                // Standalone tags, placeholders, etc. — skip (plain text only)
+                // Standalone tags, placeholders, etc. – skip (plain text only)
             }
         }
 

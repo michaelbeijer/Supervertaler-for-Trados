@@ -47,7 +47,7 @@ namespace Supervertaler.Trados.Core
 
             try
             {
-                // Mode=ReadOnly — we only run SELECTs; this also avoids WAL
+                // Mode=ReadOnly – we only run SELECTs; this also avoids WAL
                 // locking issues when Supervertaler has the DB open.
                 var connStr = new SqliteConnectionStringBuilder
                 {
@@ -203,7 +203,7 @@ namespace Supervertaler.Trados.Core
             }
 
             // Load per-termbase declared direction (source_lang, target_lang). This is the
-            // canonical direction for the termbase — every entry inside it inherits this.
+            // canonical direction for the termbase – every entry inside it inherits this.
             // Historically the inversion-decision used entry.source_lang, which is a copy
             // that legacy write bugs (pre-v4.19.13) could get wrong. Using the termbase's
             // declared direction here is resilient to those corrupted per-entry tags.
@@ -241,7 +241,7 @@ namespace Supervertaler.Trados.Core
 
             if (disabledTermbaseIds != null && disabledTermbaseIds.Count > 0)
             {
-                // Build explicit exclusion list — parameterised via positional args
+                // Build explicit exclusion list – parameterised via positional args
                 var placeholders = new List<string>();
                 int i = 0;
                 foreach (var _ in disabledTermbaseIds)
@@ -296,7 +296,7 @@ namespace Supervertaler.Trados.Core
                 //
                 // Use the termbase's DECLARED source language (from the `termbases` table), not
                 // the per-entry `source_lang` column. The per-entry column is a copy that legacy
-                // write bugs could get wrong — trusting it here was the root cause of entries
+                // write bugs could get wrong – trusting it here was the root cause of entries
                 // silently not matching even though their text was fine. The termbase declaration
                 // is the canonical direction every entry inherits by definition.
                 List<string> srcSynsForIndex;
@@ -531,7 +531,7 @@ namespace Supervertaler.Trados.Core
 
         /// <summary>
         /// Ensures required columns exist on termbase_terms and backfills missing UUIDs.
-        /// Idempotent — safe to call multiple times.
+        /// Idempotent – safe to call multiple times.
         /// </summary>
         private static void MigrateSchema(SqliteConnection conn)
         {
@@ -638,7 +638,7 @@ namespace Supervertaler.Trados.Core
 
         private static TermEntry ReadTermEntry(SqliteDataReader reader, bool hasNonTranslatableColumn = false)
         {
-            // Use column name lookup instead of hardcoded positions —
+            // Use column name lookup instead of hardcoded positions –
             // resilient to schema changes and optional column ordering.
             var entry = new TermEntry
             {
@@ -658,7 +658,7 @@ namespace Supervertaler.Trados.Core
                 Ranking = GetIntByName(reader, "ranking", 99),
             };
 
-            // Optional columns — use TryGetOrdinal to avoid exceptions
+            // Optional columns – use TryGetOrdinal to avoid exceptions
             int ord;
             if (hasNonTranslatableColumn && TryGetOrdinal(reader, "is_nontranslatable", out ord))
                 entry.IsNonTranslatable = !reader.IsDBNull(ord) && GetBool(reader, ord);
@@ -782,7 +782,7 @@ namespace Supervertaler.Trados.Core
                 MigrateSchema(conn);
 
                 // Skip if an entry representing the same concept already exists in this
-                // termbase — check BOTH directions, so a term stored as
+                // termbase – check BOTH directions, so a term stored as
                 // source=A target=B is detected when the user tries to add B→A too.
                 // Handles the case where the same concept was previously stored with
                 // source/target swapped (e.g. due to a direction-mismatched termbase).
@@ -806,7 +806,7 @@ namespace Supervertaler.Trados.Core
 
                     var existing = check.ExecuteScalar();
                     if (existing != null)
-                        return -1; // duplicate — already exists (either direction)
+                        return -1; // duplicate – already exists (either direction)
                 }
 
                 const string sql = @"
@@ -860,7 +860,7 @@ namespace Supervertaler.Trados.Core
             //   whether the text needs to be swapped to match that termbase's
             //   stored direction. This fixes the long-standing bug where the
             //   caller (QuickAddTermAction) made ONE swap decision based on the
-            //   first termbase and applied it to every termbase in the batch —
+            //   first termbase and applied it to every termbase in the batch –
             //   which corrupted any write termbases whose direction happened
             //   to differ from the first one's.
             //
@@ -937,7 +937,7 @@ namespace Supervertaler.Trados.Core
                             check.Parameters.AddWithValue("@target", termForTargetColumn.Trim());
 
                             if (check.ExecuteScalar() != null)
-                                continue; // duplicate — skip this termbase
+                                continue; // duplicate – skip this termbase
                         }
 
                         using (var cmd = new SqliteCommand(sql, conn, txn))
@@ -1018,7 +1018,7 @@ namespace Supervertaler.Trados.Core
                             check.Parameters.AddWithValue("@source", trimmed);
 
                             if (check.ExecuteScalar() != null)
-                                continue; // duplicate — skip
+                                continue; // duplicate – skip
                         }
 
                         using (var cmd = new SqliteCommand(sql, conn, txn))
@@ -1153,7 +1153,7 @@ namespace Supervertaler.Trados.Core
                 MigrateSchema(conn);
 
                 // Swap term columns. source_abbreviation / target_abbreviation are
-                // only present on DBs that were migrated — guarded by the optional
+                // only present on DBs that were migrated – guarded by the optional
                 // column check done at connection open time.
                 var hasAbbr = HasColumn(conn, "termbase_terms", "source_abbreviation")
                               && HasColumn(conn, "termbase_terms", "target_abbreviation");
@@ -1545,7 +1545,7 @@ namespace Supervertaler.Trados.Core
                     tx.Commit();
                 }
 
-                // FTS5 virtual table — may not be available in all builds
+                // FTS5 virtual table – may not be available in all builds
                 try
                 {
                     using (var fts = new SqliteCommand(@"
@@ -1560,7 +1560,7 @@ namespace Supervertaler.Trados.Core
                 }
                 catch
                 {
-                    // FTS5 not available in this SQLite build — non-critical
+                    // FTS5 not available in this SQLite build – non-critical
                 }
             }
         }
@@ -1776,7 +1776,7 @@ namespace Supervertaler.Trados.Core
                         }
                         else
                         {
-                            // Check for duplicate by source+target (case-insensitive) — skip if exists
+                            // Check for duplicate by source+target (case-insensitive) – skip if exists
                             using (var dup = new SqliteCommand(@"
                                 SELECT id FROM termbase_terms
                                 WHERE CAST(termbase_id AS INTEGER) = @tbId
@@ -1789,7 +1789,7 @@ namespace Supervertaler.Trados.Core
                                 dup.Parameters.AddWithValue("@tgt", tgtMain);
 
                                 if (dup.ExecuteScalar() != null)
-                                    continue; // duplicate — skip
+                                    continue; // duplicate – skip
                             }
 
                             // INSERT new term
@@ -1925,7 +1925,7 @@ namespace Supervertaler.Trados.Core
                     }
                 }
 
-                // Fixed headers — language-neutral so the exported TSV can
+                // Fixed headers – language-neutral so the exported TSV can
                 // always be reimported regardless of the target termbase's
                 // language pair.
                 const string srcHeader = "Source";
@@ -2088,7 +2088,7 @@ namespace Supervertaler.Trados.Core
             // Header starts with the code's language part (e.g., header "english", code "en")
             if (header.StartsWith(lc.Split('-')[0])) return true;
 
-            // Strip parenthesised region from header for matching — handles
+            // Strip parenthesised region from header for matching – handles
             // export headers like "Dutch (BE)" or "English (US)" produced by
             // LanguageUtils.ShortenLanguageName().
             var baseName = StripParenthesisedRegion(header);
@@ -2374,7 +2374,7 @@ namespace Supervertaler.Trados.Core
                     checkCmd.Parameters.AddWithValue("@lang", language);
                     checkCmd.Parameters.AddWithValue("@text", text.Trim());
                     var count = Convert.ToInt64(checkCmd.ExecuteScalar());
-                    if (count > 0) return; // Already exists — skip silently
+                    if (count > 0) return; // Already exists – skip silently
                 }
 
                 using (var cmd = new SqliteCommand(@"

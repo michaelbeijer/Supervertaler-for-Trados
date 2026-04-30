@@ -41,7 +41,7 @@ namespace Supervertaler.Trados.Controls
         private static readonly Color UserAvatarBg = ColorTranslator.FromHtml("#4A90D9");
         private static readonly Color AssistantAvatarBg = ColorTranslator.FromHtml("#6B7280");
 
-        // Instance fonts — derived from the fontSize parameter
+        // Instance fonts – derived from the fontSize parameter
         private Font _messageFont;
         private Font _timestampFont;
         private Font _avatarFont;
@@ -153,7 +153,7 @@ namespace Supervertaler.Trados.Controls
         {
             if (_isExpanded)
             {
-                // Collapse: not implemented — one-way expand is simpler and
+                // Collapse: not implemented – one-way expand is simpler and
                 // avoids the complexity of re-truncating markdown mid-stream.
                 return;
             }
@@ -180,7 +180,7 @@ namespace Supervertaler.Trados.Controls
             ExpandedChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        // Scaled pixel helpers — apply UiScale to base constants
+        // Scaled pixel helpers – apply UiScale to base constants
         private static int BubblePadding => UiScale.Pixels(BaseBubblePadding);
         private static int BubbleRadius => UiScale.Pixels(BaseBubbleRadius);
         private static int TimestampHeight => UiScale.Pixels(BaseTimestampHeight);
@@ -541,7 +541,7 @@ namespace Supervertaler.Trados.Controls
                 else
                 {
                     // Copy raw markdown so tables, formatting etc. are preserved.
-                    // Use FullMarkdownContent when available — this is the complete
+                    // Use FullMarkdownContent when available – this is the complete
                     // text of a response that was truncated for display. The user
                     // always gets the full version on Copy even though the bubble
                     // only renders the first ~1000 characters.
@@ -572,7 +572,7 @@ namespace Supervertaler.Trados.Controls
                 var savePromptItem = new ToolStripMenuItem("Save as Prompt\u2026");
                 savePromptItem.Click += (s, e) =>
                 {
-                    // Use FullMarkdownContent when available — same as Copy — so that
+                    // Use FullMarkdownContent when available – same as Copy – so that
                     // truncated bubbles save the complete prompt, not just the display excerpt.
                     var fullText = FullMarkdownContent ?? _markdownContent;
                     var textToSave = string.IsNullOrEmpty(fullText)

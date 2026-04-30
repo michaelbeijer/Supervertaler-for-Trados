@@ -8,7 +8,7 @@ namespace Supervertaler.Trados
 {
     /// <summary>
     /// Keyboard action: Ctrl-tap (press and release Ctrl alone) opens the
-    /// floating TermLens popup — a borderless version of the docked TermLens
+    /// floating TermLens popup – a borderless version of the docked TermLens
     /// panel for the active segment, designed for keyboard-only term selection.
     /// Ctrl+Alt+G is the explicit-key fallback via [Shortcut]. Pressing the
     /// shortcut while the popup is already open advances the highlighted

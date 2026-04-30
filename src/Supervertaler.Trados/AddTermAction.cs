@@ -133,7 +133,7 @@ namespace Supervertaler.Trados
                     return;
                 }
 
-                // Pick target termbase — prefer project termbase, fall back to first write termbase
+                // Pick target termbase – prefer project termbase, fall back to first write termbase
                 var primaryTb = settings.ProjectTermbaseId > 0
                     ? writeTermbases.Find(t => t.Id == settings.ProjectTermbaseId) ?? writeTermbases[0]
                     : writeTermbases[0];

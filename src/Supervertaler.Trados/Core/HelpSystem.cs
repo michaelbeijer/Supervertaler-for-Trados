@@ -13,7 +13,7 @@ namespace Supervertaler.Trados.Core
         /// Trados Plugin pages live under <c>/help/trados/</c>; Workbench pages
         /// live under <c>/help/workbench/</c>. The <c>/help</c> slug is the
         /// site path on GitBook (free plan requires a non-empty slug, so root
-        /// publishing isn't available — <c>help</c> is the cleanest choice and
+        /// publishing isn't available – <c>help</c> is the cleanest choice and
         /// pairs nicely with a future <c>help.supervertaler.com</c> custom
         /// domain.
         /// </summary>
@@ -57,7 +57,7 @@ namespace Supervertaler.Trados.Core
             public const string ProjectSettings     = "trados/settings/project-settings";
             public const string KeyboardShortcuts   = "trados/keyboard-shortcuts";
             public const string Troubleshooting     = "trados/troubleshooting";
-            // Memory banks (formerly "SuperMemory") — now nested under the Supervertaler
+            // Memory banks (formerly "SuperMemory") – now nested under the Supervertaler
             // Assistant section in the GitBook SUMMARY. C# identifier names kept as
             // SuperMemory* for backwards-compat with existing call sites; rename when the
             // Trados UI strings are updated to match the new memory bank terminology.
@@ -99,7 +99,7 @@ namespace Supervertaler.Trados.Core
             }
             catch
             {
-                // No default browser configured — silently ignore
+                // No default browser configured – silently ignore
             }
         }
     }

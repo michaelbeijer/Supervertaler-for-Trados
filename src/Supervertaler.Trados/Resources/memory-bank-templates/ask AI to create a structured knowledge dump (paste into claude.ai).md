@@ -1,4 +1,4 @@
-I need you to produce a structured knowledge dump about this project for my SuperMemory system (a self-organizing translation knowledge base). Please create a single Markdown file with the following sections. Be thorough — extract everything you know from our conversation and the files I've given you.
+I need you to produce a structured knowledge dump about this project for my SuperMemory system (a self-organizing translation knowledge base). Please create a single Markdown file with the following sections. Be thorough – extract everything you know from our conversation and the files I've given you.
 
 ---
 
@@ -56,4 +56,4 @@ Format as a table:
 
 ---
 
-Output the entire thing as a single Markdown file I can save. Don't skip sections — if you don't have information for a section, say "Not yet established" so I know it's a gap.
+Output the entire thing as a single Markdown file I can save. Don't skip sections – if you don't have information for a section, say "Not yet established" so I know it's a gap.

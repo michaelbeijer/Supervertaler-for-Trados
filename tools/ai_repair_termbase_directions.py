@@ -1,7 +1,7 @@
 """LLM-powered repair of reversed-direction term entries.
 
 The stopword-based repair (tools/repair_termbase_directions.py) is too
-conservative for short single-word entries — "uitdampen", "uitvinding",
+conservative for short single-word entries – "uitdampen", "uitvinding",
 "uitlaattemperatuur" all evaded detection because they don't contain common
 stopwords. This script uses an LLM to classify each pair's languages as
 ground truth, then proposes swaps where the text is opposite to the
@@ -39,7 +39,7 @@ from pathlib import Path
 from typing import Iterable, Optional
 
 # ---------------------------------------------------------------------------
-# Settings plumbing — read the Claude API key from the plugin's settings.json
+# Settings plumbing – read the Claude API key from the plugin's settings.json
 # ---------------------------------------------------------------------------
 
 SETTINGS_PATH = Path(os.environ["USERPROFILE"]) / "Supervertaler" / "trados" / "settings" / "settings.json"
@@ -60,7 +60,7 @@ def load_claude_key() -> str:
 
 
 # ---------------------------------------------------------------------------
-# Claude client — bare-bones HTTP to avoid needing the anthropic SDK installed
+# Claude client – bare-bones HTTP to avoid needing the anthropic SDK installed
 # ---------------------------------------------------------------------------
 
 CLAUDE_MODEL = "claude-sonnet-4-6"  # best quality, cost is trivial at this volume
@@ -69,9 +69,9 @@ CLAUDE_ENDPOINT = "https://api.anthropic.com/v1/messages"
 SYSTEM_PROMPT = """You classify the language of short bilingual term pairs from a Dutch/English translation memory.
 
 For each pair you receive, identify the language of side `a` and side `b` independently. Possible values:
-- "nl" — Dutch
-- "en" — English
-- "ambiguous" — truly language-neutral (pure numbers, chemical formulas like "2-methyl-4-isothiazolin-3-one", a proper noun like "Python", or a single word that is spelled identically in both languages like "code", "tekst", or a loanword with no morphological marker).
+- "nl" – Dutch
+- "en" – English
+- "ambiguous" – truly language-neutral (pure numbers, chemical formulas like "2-methyl-4-isothiazolin-3-one", a proper noun like "Python", or a single word that is spelled identically in both languages like "code", "tekst", or a loanword with no morphological marker).
 
 Reply ONLY with a JSON array, one object per pair, same order as input:
 [{"id": <id>, "a": "nl"|"en"|"ambiguous", "b": "nl"|"en"|"ambiguous"}, ...]
@@ -118,7 +118,7 @@ def call_claude(api_key: str, user_content: str, max_tokens: int = 4000) -> str:
 
 
 def batch_cache_key(pairs: list[tuple[int, str, str]]) -> str:
-    """Stable hash of (id, a, b) tuples — identical input produces identical key."""
+    """Stable hash of (id, a, b) tuples – identical input produces identical key."""
     canonical = json.dumps([[i, a, b] for i, a, b in pairs], ensure_ascii=False, sort_keys=False)
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
@@ -394,7 +394,7 @@ def truncate(text: str, limit: int = 55) -> str:
 
 
 def main() -> int:
-    # Windows default console is cp1252 — force UTF-8 with `replace` so fancy
+    # Windows default console is cp1252 – force UTF-8 with `replace` so fancy
     # quotes, arrows, etc. in termbase content never crash the print loop.
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -440,7 +440,7 @@ def main() -> int:
 
     b_actions = [a for a in actions if a.category == "B"]
     if b_actions:
-        print(f"=== Sample Category B (text would be swapped) — up to {args.show_swaps} shown ===")
+        print(f"=== Sample Category B (text would be swapped) – up to {args.show_swaps} shown ===")
         for a in b_actions[: args.show_swaps]:
             print(
                 f"  id={a.entry_id:>7}  "
@@ -452,7 +452,7 @@ def main() -> int:
 
     c_actions = [a for a in actions if a.category == "C"]
     if c_actions:
-        print(f"=== Sample Category C (LLM said ambiguous, skipped) — up to {args.show_ambiguous} shown ===")
+        print(f"=== Sample Category C (LLM said ambiguous, skipped) – up to {args.show_ambiguous} shown ===")
         for a in c_actions[: args.show_ambiguous]:
             print(
                 f"  id={a.entry_id:>7}  "
@@ -463,12 +463,12 @@ def main() -> int:
         print()
 
     if not args.apply:
-        print("=== Dry run — no changes written. Rerun with --apply to commit. ===")
+        print("=== Dry run – no changes written. Rerun with --apply to commit. ===")
         return 0
 
     backup_path = args.db_path + ".pre_ai_repair.bak"
     if os.path.exists(backup_path):
-        print(f"Backup already exists at {backup_path} — aborting to avoid overwriting.", file=sys.stderr)
+        print(f"Backup already exists at {backup_path} – aborting to avoid overwriting.", file=sys.stderr)
         return 2
     print(f"Backing up DB to {backup_path}")
     shutil.copy2(args.db_path, backup_path)

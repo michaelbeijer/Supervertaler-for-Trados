@@ -46,9 +46,9 @@ namespace Supervertaler.Trados
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             // Order matters:
-            // 1. AssemblyResolve first — so managed SQLitePCLRaw DLLs can be found
-            // 2. PreloadNativeSQLite — pins e_sqlite3.dll in the Windows module table
-            // 3. Explicit Batteries init — ensures the provider is set up before
+            // 1. AssemblyResolve first – so managed SQLitePCLRaw DLLs can be found
+            // 2. PreloadNativeSQLite – pins e_sqlite3.dll in the Windows module table
+            // 3. Explicit Batteries init – ensures the provider is set up before
             //    any SqliteConnection is created (its static constructor does the
             //    same, but by that point the native DLL search may have already failed
             //    on non-standard environments like Windows on ARM / Parallels)
@@ -66,7 +66,7 @@ namespace Supervertaler.Trados
             }
             catch
             {
-                // Swallow — SqliteConnection's static ctor will retry.
+                // Swallow – SqliteConnection's static ctor will retry.
                 // If it also fails, the user gets a descriptive error
                 // when they first try to use a database.
             }
@@ -90,7 +90,7 @@ namespace Supervertaler.Trados
             // because the Python Supervertaler Assistant migrated first).
             MigrateLegacyMemoryBankIfNeeded();
 
-            // Initialize licensing — loads cached state, triggers background validation
+            // Initialize licensing – loads cached state, triggers background validation
             LicenseManager.Instance.InitializeAsync();
         }
 
@@ -112,7 +112,7 @@ namespace Supervertaler.Trados
                 using (var dlg = new LegacyMemoryBankMigrationDialog())
                 {
                     if (dlg.ShowDialog() != DialogResult.OK)
-                        return; // User hit "Skip for now" — legacy folder stays put.
+                        return; // User hit "Skip for now" – legacy folder stays put.
 
                     var chosen = dlg.ChosenBankName;
                     if (string.IsNullOrWhiteSpace(chosen))
@@ -129,7 +129,7 @@ namespace Supervertaler.Trados
             }
             catch
             {
-                // Non-fatal — the user can still rename the folder manually and set
+                // Non-fatal – the user can still rename the folder manually and set
                 // the active bank from the settings dialog on a future session.
             }
         }
@@ -179,24 +179,24 @@ namespace Supervertaler.Trados
                 if (packageVersion.EndsWith(".0"))
                     packageVersion = packageVersion.Substring(0, packageVersion.Length - 2);
 
-                // 5. Compare — if package is not newer, we're up to date
+                // 5. Compare – if package is not newer, we're up to date
                 if (UpdateChecker.CompareVersions(packageVersion, currentVersion) <= 0)
                     return false;
 
-                // 6. Package is newer — rename Unpacked folder and prompt restart
+                // 6. Package is newer – rename Unpacked folder and prompt restart
                 try
                 {
                     Directory.Move(asmDir, oldDir);
                 }
                 catch
                 {
-                    // Rename failed (rare) — still show the restart message
+                    // Rename failed (rare) – still show the restart message
                 }
 
                 MessageBox.Show(
                     "Supervertaler for Trados has been updated to v" + packageVersion + ".\n\n" +
                     "Please close and restart Trados Studio to load the new version.",
-                    "Supervertaler — Update Installed",
+                    "Supervertaler – Update Installed",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 return true;
@@ -279,7 +279,7 @@ namespace Supervertaler.Trados
         /// Loads e_sqlite3.dll from our plugin's runtimes/ folder by absolute path,
         /// pinning it in the Windows module table before SQLitePCLRaw initialises.
         /// Unlike System.Data.SQLite's "SQLite.Interop.dll" this uses standard
-        /// SQLite C entry points — no version-hash matching issues.
+        /// SQLite C entry points – no version-hash matching issues.
         ///
         /// Detects the process architecture using PROCESSOR_ARCHITECTURE env var
         /// to handle ARM64 (Windows on ARM / Parallels on Apple Silicon) in addition
@@ -324,7 +324,7 @@ namespace Supervertaler.Trados
                         }
                         catch
                         {
-                            // Non-fatal — our LoadLibrary already pinned it in the
+                            // Non-fatal – our LoadLibrary already pinned it in the
                             // module table.  If Batteries_V2.Init() also fails, the
                             // user gets a descriptive error on first database access.
                         }

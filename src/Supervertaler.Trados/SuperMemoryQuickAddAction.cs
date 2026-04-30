@@ -158,7 +158,7 @@ namespace Supervertaler.Trados
                 bool promptUpdated = false;
                 if (dlg.AppendToPrompt && !dlg.SaveAsRawNote)
                 {
-                    // Only append to the prompt for structured articles — raw
+                    // Only append to the prompt for structured articles – raw
                     // notes need AI processing first, so appending unprocessed
                     // content to the prompt would be premature.
                     promptUpdated = AppendToActivePrompt(dlg.Term, dlg.Correction, dlg.Notes);
@@ -283,7 +283,7 @@ namespace Supervertaler.Trados
 
         /// <summary>
         /// Creates a plain Markdown note in the SuperMemory vault's 00_INBOX folder.
-        /// This is the unstructured alternative to <see cref="WriteTermArticle"/> —
+        /// This is the unstructured alternative to <see cref="WriteTermArticle"/> –
         /// the AI will compile it into proper articles when Process Inbox runs.
         /// </summary>
         private static bool WriteRawNote(string vaultPath, string term, string correction, string notes)
@@ -353,7 +353,7 @@ namespace Supervertaler.Trados
 
                 var content = File.ReadAllText(fullPath, Encoding.UTF8);
 
-                // Find the terminology table — look for a line like
+                // Find the terminology table – look for a line like
                 //   "| Source term | Correct target | Notes |"
                 // or the section header "TERMINOLOGY" followed by a table.
                 // We'll insert after the last table row before the next blank line or section.
@@ -384,12 +384,12 @@ namespace Supervertaler.Trados
                     }
                     else if (inTable && string.IsNullOrWhiteSpace(trimmed))
                     {
-                        // End of table — stop here
+                        // End of table – stop here
                         break;
                     }
                     else if (inTable)
                     {
-                        // Non-table, non-blank line after table — stop
+                        // Non-table, non-blank line after table – stop
                         break;
                     }
 

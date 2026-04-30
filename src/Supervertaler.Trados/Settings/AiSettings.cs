@@ -83,7 +83,7 @@ namespace Supervertaler.Trados.Settings
 
         /// <summary>
         /// Whether to include TM (Translation Memory) fuzzy matches in AI context.
-        /// Default: true — TM matches provide useful reference for the AI.
+        /// Default: true – TM matches provide useful reference for the AI.
         /// </summary>
         [DataMember(Name = "includeTmMatches")]
         public bool IncludeTmMatches { get; set; } = true;
@@ -179,7 +179,7 @@ namespace Supervertaler.Trados.Settings
         /// Only effective when <see cref="IncludeSuperMemoryContext"/> is also true.
         ///
         /// Defaults to <c>false</c> (same reasoning as
-        /// <see cref="IncludeSuperMemoryContext"/> — opt-in only).
+        /// <see cref="IncludeSuperMemoryContext"/> – opt-in only).
         /// </summary>
         [DataMember(Name = "includeSuperMemoryInAutoPrompt")]
         public bool IncludeSuperMemoryInAutoPrompt { get; set; } = false;
@@ -198,7 +198,7 @@ namespace Supervertaler.Trados.Settings
 
         /// <summary>
         /// Incognito mode: when enabled, the AI anonymises all personal and project
-        /// data in its responses — project names, file paths, TM names, user names,
+        /// data in its responses – project names, file paths, TM names, user names,
         /// etc. are replaced with plausible placeholders. Useful for screen sharing,
         /// recording demos, and posting screenshots without exposing client data.
         /// </summary>

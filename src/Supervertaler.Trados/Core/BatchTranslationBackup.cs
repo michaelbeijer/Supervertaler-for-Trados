@@ -89,7 +89,7 @@ namespace Supervertaler.Trados.Core
 
         /// <summary>
         /// Writes the full TMX to a temp file then renames it over the target path.
-        /// The rename makes the update atomic on Windows — a reader always sees a
+        /// The rename makes the update atomic on Windows – a reader always sees a
         /// complete, valid TMX file (either the old one or the new one, never a partial).
         /// Must be called with <see cref="_lock"/> held.
         /// </summary>
@@ -137,7 +137,7 @@ namespace Supervertaler.Trados.Core
             catch
             {
                 // Never let a backup failure interrupt or crash the translation run.
-                // Silently swallow — the translation itself continues regardless.
+                // Silently swallow – the translation itself continues regardless.
             }
         }
 

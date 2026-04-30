@@ -88,7 +88,7 @@ namespace Supervertaler.Trados.Controls
         public List<SynonymEntry> TargetSynonymsList => _targetSyns;
 
         /// <summary>
-        /// Edit mode — opens an existing term with its synonyms.
+        /// Edit mode – opens an existing term with its synonyms.
         /// </summary>
         /// <remarks>
         /// Fields are always shown in termbase-declared direction (source on the left,
@@ -99,7 +99,7 @@ namespace Supervertaler.Trados.Controls
         /// termbases. Reading the values straight from the in-memory matcher entry
         /// was the root cause of edits silently writing into the wrong DB columns.
         /// The <paramref name="projectSourceLang"/> parameter is retained for source
-        /// compatibility but is no longer consulted — the database row is the single
+        /// compatibility but is no longer consulted – the database row is the single
         /// source of truth for direction.
         /// </remarks>
         public TermEntryEditorDialog(TermEntry entry, string dbPath, TermbaseInfo termbase,
@@ -118,7 +118,7 @@ namespace Supervertaler.Trados.Controls
         }
 
         /// <summary>
-        /// Add mode — creates a new term entry. Pre-fills are passed in PROJECT
+        /// Add mode – creates a new term entry. Pre-fills are passed in PROJECT
         /// direction (e.g. <paramref name="sourceTerm"/> contains the project source
         /// word, <paramref name="targetTerm"/> contains the project target word).
         /// The dialog displays labels and saves to the DB in TERMBASE direction, so
@@ -147,7 +147,7 @@ namespace Supervertaler.Trados.Controls
         }
 
         /// <summary>
-        /// Multi-entry edit mode — opens with a termbase switcher for entries from
+        /// Multi-entry edit mode – opens with a termbase switcher for entries from
         /// multiple termbases. Each entry is re-fetched from the database by ID so
         /// values are in termbase direction (see Edit ctor for rationale).
         /// </summary>
@@ -643,7 +643,7 @@ namespace Supervertaler.Trados.Controls
             };
             var clientTip = new ToolTip { AutoPopDelay = 8000 };
             clientTip.SetToolTip(_txtClient,
-                "Client code — a short identifier like ACME or GLOBEX.\n" +
+                "Client code – a short identifier like ACME or GLOBEX.\n" +
                 "Used to filter SuperMemory knowledge base context\n" +
                 "and link terms to specific clients.");
             _contentPanel.Controls.Add(_txtClient);
@@ -792,7 +792,7 @@ namespace Supervertaler.Trados.Controls
             }
             catch
             {
-                // Non-critical — editor still works without synonyms
+                // Non-critical – editor still works without synonyms
             }
         }
 
@@ -821,7 +821,7 @@ namespace Supervertaler.Trados.Controls
             ed.Client = _txtClient.Text.Trim();
             ed.IsNonTranslatable = _chkNonTranslatable.Checked;
             ed.IsForbidden = _chkForbidden.Checked;
-            // Synonym lists are stored by reference — already up to date
+            // Synonym lists are stored by reference – already up to date
             ed.SourceSyns = new List<SynonymEntry>(_sourceSyns);
             ed.TargetSyns = new List<SynonymEntry>(_targetSyns);
         }
@@ -1117,7 +1117,7 @@ namespace Supervertaler.Trados.Controls
             var target = _txtTarget.Text.Trim();
 
             // When the project direction is inverted relative to the termbase, the left field
-            // holds the project source (termbase target) and vice versa — swap before saving.
+            // holds the project source (termbase target) and vice versa – swap before saving.
             if (_isInverted) { var t = source; source = target; target = t; }
 
             if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(target))
@@ -1141,7 +1141,7 @@ namespace Supervertaler.Trados.Controls
                 }
                 else if (_termbase != null)
                 {
-                    // Insert new term — store ID for synonym save
+                    // Insert new term – store ID for synonym save
                     // Note: InsertTerm is for single termbase; for add mode we need the termbase
                     var newId = TermbaseReader.InsertTerm(_dbPath, _termbase.Id,
                         source, target,

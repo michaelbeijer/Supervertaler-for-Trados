@@ -3,7 +3,7 @@
 Legacy write-path bugs (pre-v4.19.13) caused some term entries to be saved with
 their `source_lang` / `target_lang` metadata flipped relative to the termbase's
 declared direction. In some cases the TEXT itself (source_term / target_term
-columns) was also swapped — the entry was saved "upside down" relative to the
+columns) was also swapped – the entry was saved "upside down" relative to the
 termbase.
 
 The v4.19.21 plugin fix makes matching resilient to flipped lang tags by using
@@ -14,14 +14,14 @@ fixes those.
 Categories (for each entry in a termbase, relative to the termbase's declared
 source_lang / target_lang):
 
-  A. Tags wrong, text correct — text is in termbase direction, lang tags lie.
+  A. Tags wrong, text correct – text is in termbase direction, lang tags lie.
      Fix: rewrite tags to match termbase declaration.
 
-  B. Tags wrong AND text reversed — source_term is in the termbase's TARGET
+  B. Tags wrong AND text reversed – source_term is in the termbase's TARGET
      language, target_term is in the termbase's SOURCE language.
      Fix: swap source_term ↔ target_term and rewrite tags.
 
-  C. Ambiguous — text too short or language-neutral (chemical names, numbers,
+  C. Ambiguous – text too short or language-neutral (chemical names, numbers,
      proper nouns) to detect reliably. Skipped, reported for manual review.
 
 The detection uses a stopword-based heuristic keyed to Dutch ↔ English, which is
@@ -47,7 +47,7 @@ from typing import Iterable, Optional
 
 # Whitespace-bounded markers that strongly indicate Dutch. Each marker is
 # searched as a " word " token to avoid matching substrings inside other words.
-# "Strong" Dutch markers — words that practically never appear in English text.
+# "Strong" Dutch markers – words that practically never appear in English text.
 # A single occurrence, with no English markers present, is enough to classify.
 DUTCH_STRONG = {
     "het", "een", "der", "den", "van", "zijn",
@@ -57,7 +57,7 @@ DUTCH_STRONG = {
     "werkwijze", "inrichting", "onderhavige",
 }
 
-# "Moderate" Dutch markers — need a confirming signal (another marker or n-gram).
+# "Moderate" Dutch markers – need a confirming signal (another marker or n-gram).
 DUTCH_MARKERS = DUTCH_STRONG | {
     "de", "bij", "met", "aan", "uit", "naar", "door", "onder", "over",
     "worden", "werd", "wordt", "hebben", "heeft",
@@ -67,7 +67,7 @@ DUTCH_MARKERS = DUTCH_STRONG | {
     "beschreven",
 }
 
-# "Strong" English markers — virtually never in Dutch text.
+# "Strong" English markers – virtually never in Dutch text.
 ENGLISH_STRONG = {
     "the", "and",
     "which", "whose",
@@ -216,7 +216,7 @@ def plan_repairs(db_path: str) -> tuple[list[RepairAction], dict]:
             stats["already_correct"] += 1
             continue
 
-        # Not tags_match_termbase — candidate for repair. Detect text language.
+        # Not tags_match_termbase – candidate for repair. Detect text language.
         source_text = row["source_term"] or ""
         target_text = row["target_term"] or ""
         detected_src = detect_language(source_text)
@@ -352,10 +352,10 @@ def main() -> int:
             print(f"  {key:30s} {stats[key]:,}")
     print()
 
-    # Sample Category B (text swaps) — these are the ones that matter for matching
+    # Sample Category B (text swaps) – these are the ones that matter for matching
     b_actions = [a for a in actions if a.category == "B"]
     if b_actions:
-        print(f"=== Sample Category B (text would be swapped) — up to {args.show_swaps} shown ===")
+        print(f"=== Sample Category B (text would be swapped) – up to {args.show_swaps} shown ===")
         for a in b_actions[: args.show_swaps]:
             print(
                 f"  id={a.entry_id:>7} tb={a.termbase_id:>3} "
@@ -366,10 +366,10 @@ def main() -> int:
             print(f"  ...and {len(b_actions) - args.show_swaps} more")
         print()
 
-    # Sample Category C (ambiguous — skipped)
+    # Sample Category C (ambiguous – skipped)
     c_actions = [a for a in actions if a.category == "C"]
     if c_actions:
-        print(f"=== Sample Category C (ambiguous, skipped) — up to {args.show_ambiguous} shown ===")
+        print(f"=== Sample Category C (ambiguous, skipped) – up to {args.show_ambiguous} shown ===")
         for a in c_actions[: args.show_ambiguous]:
             print(
                 f"  id={a.entry_id:>7} tb={a.termbase_id:>3} "
@@ -380,13 +380,13 @@ def main() -> int:
         print()
 
     if not args.apply:
-        print("=== Dry run — no changes written. Rerun with --apply to commit. ===")
+        print("=== Dry run – no changes written. Rerun with --apply to commit. ===")
         return 0
 
     # Backup before writing
     backup_path = args.db_path + ".pre_tag_repair.bak"
     if os.path.exists(backup_path):
-        print(f"Backup already exists at {backup_path} — aborting to avoid overwriting.", file=sys.stderr)
+        print(f"Backup already exists at {backup_path} – aborting to avoid overwriting.", file=sys.stderr)
         return 2
     print(f"Backing up DB to {backup_path}")
     shutil.copy2(args.db_path, backup_path)

@@ -32,7 +32,7 @@ namespace Supervertaler.Trados.Core
     /// </summary>
     public static class LlmModels
     {
-        // Provider key strings — match Python Supervertaler and JSON settings
+        // Provider key strings – match Python Supervertaler and JSON settings
         public const string ProviderOpenAi = "openai";
         public const string ProviderClaude = "claude";
         public const string ProviderGemini = "gemini";
@@ -47,13 +47,13 @@ namespace Supervertaler.Trados.Core
             new LlmModelInfo
             {
                 Id = "gpt-5.4", DisplayName = "GPT-5.4",
-                Description = "Premium quality — OpenAI's most advanced model, ideal for AutoPrompt and complex translation tasks",
+                Description = "Premium quality – OpenAI's most advanced model, ideal for AutoPrompt and complex translation tasks",
                 Provider = LlmProvider.OpenAi
             },
             new LlmModelInfo
             {
                 Id = "gpt-5.4-mini", DisplayName = "GPT-5.4 Mini",
-                Description = "Recommended for most tasks — fast, affordable, and high quality for everyday translation work",
+                Description = "Recommended for most tasks – fast, affordable, and high quality for everyday translation work",
                 Provider = LlmProvider.OpenAi
             }
         };
@@ -63,25 +63,25 @@ namespace Supervertaler.Trados.Core
             new LlmModelInfo
             {
                 Id = "claude-sonnet-4-6", DisplayName = "Claude Sonnet 4.6",
-                Description = "Recommended — best balance of speed, quality, and cost",
+                Description = "Recommended – best balance of speed, quality, and cost",
                 Provider = LlmProvider.Claude
             },
             new LlmModelInfo
             {
                 Id = "claude-haiku-4-5-20251001", DisplayName = "Claude Haiku 4.5",
-                Description = "Fast and affordable — good for large batch jobs",
+                Description = "Fast and affordable – good for large batch jobs",
                 Provider = LlmProvider.Claude
             },
             new LlmModelInfo
             {
                 Id = "claude-opus-4-7", DisplayName = "Claude Opus 4.7",
-                Description = "Highest quality — Anthropic's most capable model, 1M context",
+                Description = "Highest quality – Anthropic's most capable model, 1M context",
                 Provider = LlmProvider.Claude
             },
             new LlmModelInfo
             {
                 Id = "claude-opus-4-6", DisplayName = "Claude Opus 4.6",
-                Description = "Previous flagship — still excellent for legal/technical translation",
+                Description = "Previous flagship – still excellent for legal/technical translation",
                 Provider = LlmProvider.Claude
             }
         };
@@ -91,31 +91,31 @@ namespace Supervertaler.Trados.Core
             new LlmModelInfo
             {
                 Id = "gemini-2.5-flash", DisplayName = "Gemini 2.5 Flash",
-                Description = "Recommended — fast, affordable, 1M context",
+                Description = "Recommended – fast, affordable, 1M context",
                 Provider = LlmProvider.Gemini
             },
             new LlmModelInfo
             {
                 Id = "gemini-2.5-pro", DisplayName = "Gemini 2.5 Pro",
-                Description = "Higher quality — advanced reasoning, 1M context",
+                Description = "Higher quality – advanced reasoning, 1M context",
                 Provider = LlmProvider.Gemini
             },
             new LlmModelInfo
             {
                 Id = "gemini-3.1-pro-preview", DisplayName = "Gemini 3.1 Pro (Preview)",
-                Description = "Newest model (preview) — Google's most advanced, 1M context",
+                Description = "Newest model (preview) – Google's most advanced, 1M context",
                 Provider = LlmProvider.Gemini
             },
             new LlmModelInfo
             {
                 Id = "gemma-4-31b-it", DisplayName = "Gemma 4 31B",
-                Description = "Open-source — strong multilingual quality, 256K context",
+                Description = "Open-source – strong multilingual quality, 256K context",
                 Provider = LlmProvider.Gemini
             },
             new LlmModelInfo
             {
                 Id = "gemma-4-26b-a4b-it", DisplayName = "Gemma 4 26B MoE",
-                Description = "Open-source — lightweight MoE variant, 256K context",
+                Description = "Open-source – lightweight MoE variant, 256K context",
                 Provider = LlmProvider.Gemini
             }
         };
@@ -125,19 +125,19 @@ namespace Supervertaler.Trados.Core
             new LlmModelInfo
             {
                 Id = "mistral-large-latest", DisplayName = "Mistral Large",
-                Description = "Flagship — best quality, ideal for complex translation tasks",
+                Description = "Flagship – best quality, ideal for complex translation tasks",
                 Provider = LlmProvider.Mistral
             },
             new LlmModelInfo
             {
                 Id = "mistral-small-latest", DisplayName = "Mistral Small",
-                Description = "Fast and cost-effective — great for large batch jobs",
+                Description = "Fast and cost-effective – great for large batch jobs",
                 Provider = LlmProvider.Mistral
             },
             new LlmModelInfo
             {
                 Id = "open-mistral-nemo", DisplayName = "Mistral Nemo",
-                Description = "Open, multilingual — good general-purpose translation",
+                Description = "Open, multilingual – good general-purpose translation",
                 Provider = LlmProvider.Mistral
             }
         };
@@ -175,19 +175,19 @@ namespace Supervertaler.Trados.Core
             new LlmModelInfo
             {
                 Id = "grok-4.20-0309-non-reasoning", DisplayName = "Grok 4.20",
-                Description = "Recommended — highest quality, 2M context",
+                Description = "Recommended – highest quality, 2M context",
                 Provider = LlmProvider.Grok
             },
             new LlmModelInfo
             {
                 Id = "grok-4-1-fast-non-reasoning", DisplayName = "Grok 4.1 Fast",
-                Description = "Fast and affordable — great for batch jobs",
+                Description = "Fast and affordable – great for batch jobs",
                 Provider = LlmProvider.Grok
             },
             new LlmModelInfo
             {
                 Id = "grok-4.20-0309-reasoning", DisplayName = "Grok 4.20 (Reasoning)",
-                Description = "Deep reasoning — ideal for prompt generation",
+                Description = "Deep reasoning – ideal for prompt generation",
                 Provider = LlmProvider.Grok,
                 IsReasoningModel = true,
                 DefaultTimeoutMs = 600_000,
@@ -200,25 +200,25 @@ namespace Supervertaler.Trados.Core
             new LlmModelInfo
             {
                 Id = "anthropic/claude-sonnet-4.6", DisplayName = "Claude Sonnet 4.6",
-                Description = "Recommended — best balance of speed, quality, and cost",
+                Description = "Recommended – best balance of speed, quality, and cost",
                 Provider = LlmProvider.OpenRouter
             },
             new LlmModelInfo
             {
                 Id = "anthropic/claude-opus-4.7", DisplayName = "Claude Opus 4.7",
-                Description = "Highest quality — Anthropic's most capable model, 1M context",
+                Description = "Highest quality – Anthropic's most capable model, 1M context",
                 Provider = LlmProvider.OpenRouter
             },
             new LlmModelInfo
             {
                 Id = "anthropic/claude-opus-4.6", DisplayName = "Claude Opus 4.6",
-                Description = "Previous flagship — still excellent for legal/technical translation",
+                Description = "Previous flagship – still excellent for legal/technical translation",
                 Provider = LlmProvider.OpenRouter
             },
             new LlmModelInfo
             {
                 Id = "openai/gpt-5.4", DisplayName = "GPT-5.4",
-                Description = "Premium quality — OpenAI's most advanced model",
+                Description = "Premium quality – OpenAI's most advanced model",
                 Provider = LlmProvider.OpenRouter
             },
             new LlmModelInfo
@@ -236,31 +236,31 @@ namespace Supervertaler.Trados.Core
             new LlmModelInfo
             {
                 Id = "google/gemini-3-flash-preview", DisplayName = "Gemini 3 Flash",
-                Description = "Fast and affordable — great for large batch jobs",
+                Description = "Fast and affordable – great for large batch jobs",
                 Provider = LlmProvider.OpenRouter
             },
             new LlmModelInfo
             {
                 Id = "google/gemma-4-31b-it", DisplayName = "Gemma 4 31B",
-                Description = "Open-source — strong multilingual quality, 256K context",
+                Description = "Open-source – strong multilingual quality, 256K context",
                 Provider = LlmProvider.OpenRouter
             },
             new LlmModelInfo
             {
                 Id = "google/gemma-4-26b-a4b-it", DisplayName = "Gemma 4 26B MoE",
-                Description = "Open-source — near-31B quality at a fraction of the cost",
+                Description = "Open-source – near-31B quality at a fraction of the cost",
                 Provider = LlmProvider.OpenRouter
             },
             new LlmModelInfo
             {
                 Id = "mistralai/mistral-small-2603", DisplayName = "Mistral Small 4",
-                Description = "Very fast and cheap — good multilingual support",
+                Description = "Very fast and cheap – good multilingual support",
                 Provider = LlmProvider.OpenRouter
             },
             new LlmModelInfo
             {
                 Id = "qwen/qwen3.6-plus:free", DisplayName = "Qwen 3.6 Plus (Free)",
-                Description = "Free — no API costs, good general-purpose quality",
+                Description = "Free – no API costs, good general-purpose quality",
                 Provider = LlmProvider.OpenRouter
             }
         };

@@ -29,8 +29,8 @@ namespace Supervertaler.Trados.Core
     // ─── Engine ──────────────────────────────────────────────
 
     /// <summary>
-    /// Core batch proofreading engine. UI-agnostic — communicates via events.
-    /// Parallel to BatchTranslator — uses the same event-driven pattern.
+    /// Core batch proofreading engine. UI-agnostic – communicates via events.
+    /// Parallel to BatchTranslator – uses the same event-driven pattern.
     /// </summary>
     public class BatchProofreader
     {
@@ -192,7 +192,7 @@ namespace Supervertaler.Trados.Core
                             }
                             else
                             {
-                                // No result from AI — mark as OK by default
+                                // No result from AI – mark as OK by default
                                 proofResult.IsOk = true;
                             }
 

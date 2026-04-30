@@ -8,13 +8,13 @@ namespace Supervertaler.Trados.Licensing
     /// </summary>
     public enum LicenseTier
     {
-        /// <summary>No valid license — trial expired, subscription lapsed.</summary>
+        /// <summary>No valid license – trial expired, subscription lapsed.</summary>
         None = 0,
 
-        /// <summary>14-day free trial — grants full access.</summary>
+        /// <summary>14-day free trial – grants full access.</summary>
         Trial = 1,
 
-        /// <summary>Any active paid license — all features unlocked.</summary>
+        /// <summary>Any active paid license – all features unlocked.</summary>
         Licensed = 2,
 
         // ── Legacy tiers (kept for backward compatibility with cached license.json) ──

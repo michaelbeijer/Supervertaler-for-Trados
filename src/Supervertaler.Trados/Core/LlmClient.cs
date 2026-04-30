@@ -17,7 +17,7 @@ namespace Supervertaler.Trados.Core
 {
     /// <summary>
     /// Universal LLM client for all supported providers.
-    /// Uses System.Net.Http.HttpClient (built into .NET 4.8) — no external dependencies.
+    /// Uses System.Net.Http.HttpClient (built into .NET 4.8) – no external dependencies.
     /// Ported from Python Supervertaler's LLMClient in modules/llm_clients.py.
     /// </summary>
     public class LlmClient : IDisposable
@@ -365,7 +365,7 @@ namespace Supervertaler.Trados.Core
                 try
                 {
                     var json = File.ReadAllText(path, Encoding.UTF8);
-                    // Parse api_keys section — look for the provider key
+                    // Parse api_keys section – look for the provider key
                     var key = ExtractNestedJsonString(json, "api_keys", providerKey);
                     if (!string.IsNullOrEmpty(key))
                         return key;
@@ -953,7 +953,7 @@ namespace Supervertaler.Trados.Core
 
         private static string ExtractGeminiContent(string json)
         {
-            // Extract candidates[0].content.parts[0].text — anchored to Gemini response structure
+            // Extract candidates[0].content.parts[0].text – anchored to Gemini response structure
             var textMatch = Regex.Match(json,
                 @"""candidates""\s*:\s*\[\s*\{[^}]*""content""\s*:\s*\{[^}]*""parts""\s*:\s*\[\s*\{[^}]*""text""\s*:\s*""((?:[^""\\]|\\.)*)""",
                 RegexOptions.Singleline);
@@ -1163,7 +1163,7 @@ namespace Supervertaler.Trados.Core
         {
             var raw = $"{provider} API error {statusCode}: {TruncateError(body)}";
 
-            // OpenAI 403 "model_not_found" — model not enabled in project
+            // OpenAI 403 "model_not_found" – model not enabled in project
             if (statusCode == 403 && body != null &&
                 (body.Contains("model_not_found") || body.Contains("does not have access to model")))
             {
@@ -1172,7 +1172,7 @@ namespace Supervertaler.Trados.Core
                        "and enable the model.";
             }
 
-            // 401 Unauthorized — invalid or missing API key
+            // 401 Unauthorized – invalid or missing API key
             if (statusCode == 401)
             {
                 return raw + $"\n\nYour {provider} API key appears to be invalid or expired. " +
@@ -1448,11 +1448,11 @@ namespace Supervertaler.Trados.Core
                         ContentJson = resultSb.ToString()
                     });
 
-                    // Continue the loop — Claude will process the tool results
+                    // Continue the loop – Claude will process the tool results
                     continue;
                 }
 
-                // stop_reason is "end_turn" or similar — extract final text
+                // stop_reason is "end_turn" or similar – extract final text
                 return ExtractClaudeTextFromContent(body);
             }
 
@@ -1543,7 +1543,7 @@ namespace Supervertaler.Trados.Core
 
                     if (turn.Role == "assistant" && turn.ToolCallsJson != null)
                     {
-                        // Assistant message with tool_calls — content may be null
+                        // Assistant message with tool_calls – content may be null
                         sb.Append(",\"content\":").Append(turn.ContentJson ?? "null");
                         sb.Append(",\"tool_calls\":").Append(turn.ToolCallsJson);
                     }
@@ -1597,7 +1597,7 @@ namespace Supervertaler.Trados.Core
                     }
                 }
 
-                // Check finish_reason — "tool_calls" means function calling
+                // Check finish_reason – "tool_calls" means function calling
                 var finishReason = ExtractOpenAiFinishReason(body);
 
                 if (finishReason == "tool_calls")
@@ -1636,7 +1636,7 @@ namespace Supervertaler.Trados.Core
                     continue;
                 }
 
-                // Final response — extract text
+                // Final response – extract text
                 return ExtractOpenAiContent(body);
             }
 
@@ -1730,7 +1730,7 @@ namespace Supervertaler.Trados.Core
             var afterContent = json.Substring(contentIdx + 9).TrimStart(':', ' ', '\t');
             if (afterContent.StartsWith("null")) return null;
 
-            // It's a string — extract it
+            // It's a string – extract it
             return ExtractJsonFieldStatic(json.Substring(msgIdx), "content");
         }
 
@@ -1864,7 +1864,7 @@ namespace Supervertaler.Trados.Core
                     continue;
                 }
 
-                // No function calls — extract final text
+                // No function calls – extract final text
                 return ExtractGeminiContent(body);
             }
 
@@ -2176,7 +2176,7 @@ namespace Supervertaler.Trados.Core
 
         public void Dispose()
         {
-            // HttpClient is static and shared — do not dispose it here
+            // HttpClient is static and shared – do not dispose it here
         }
     }
 }

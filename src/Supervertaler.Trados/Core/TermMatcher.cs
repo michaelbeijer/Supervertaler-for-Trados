@@ -229,7 +229,7 @@ namespace Supervertaler.Trados.Core
 
         /// <summary>
         /// Tokenizes source text into a list of SegmentTokens with term matches populated.
-        /// This is the main entry point — equivalent to Supervertaler's update_with_matches().
+        /// This is the main entry point – equivalent to Supervertaler's update_with_matches().
         /// </summary>
         public List<SegmentToken> Tokenize(string sourceText)
         {
@@ -479,7 +479,7 @@ namespace Supervertaler.Trados.Core
                             }
                         }
                     }
-                    if (!caseMatch) continue; // skip this entry — case doesn't match
+                    if (!caseMatch) continue; // skip this entry – case doesn't match
                 }
                 filtered.Add(entry);
             }

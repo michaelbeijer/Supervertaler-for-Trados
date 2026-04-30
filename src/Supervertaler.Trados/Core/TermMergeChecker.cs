@@ -28,7 +28,7 @@ namespace Supervertaler.Trados.Core
         /// <summary>
         /// "source" if the existing entry's source_term column matched, "target"
         /// if its target_term column matched. Always relative to the termbase's
-        /// own storage direction, NOT the project direction — see TermbaseInverted.
+        /// own storage direction, NOT the project direction – see TermbaseInverted.
         /// </summary>
         public string MatchType { get; set; }
 

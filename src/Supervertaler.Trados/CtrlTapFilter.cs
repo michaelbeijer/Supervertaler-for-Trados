@@ -5,7 +5,7 @@ using System.Windows.Forms;
 namespace Supervertaler.Trados
 {
     /// <summary>
-    /// IMessageFilter that detects a Ctrl "tap" — pressing and releasing the
+    /// IMessageFilter that detects a Ctrl "tap" – pressing and releasing the
     /// Ctrl key without any other key pressed in between.  This mimics memoQ's
     /// behaviour where a quick Ctrl tap opens the term picker.
     ///
@@ -68,7 +68,7 @@ namespace Supervertaler.Trados
                 }
                 else if (!IsModifierKey(vk))
                 {
-                    // A non-modifier key was pressed while Ctrl is held —
+                    // A non-modifier key was pressed while Ctrl is held –
                     // this is a combo (Ctrl+C, Ctrl+V, etc.), not a tap.
                     _otherKeyPressed = true;
                 }
@@ -84,7 +84,7 @@ namespace Supervertaler.Trados
 
                     if (!_otherKeyPressed && held <= _maxHoldMs)
                     {
-                        // Pure Ctrl tap detected — fire callback
+                        // Pure Ctrl tap detected – fire callback
                         _onCtrlTap();
                     }
 
@@ -92,7 +92,7 @@ namespace Supervertaler.Trados
                 }
             }
 
-            // Never consume the message — let it propagate normally
+            // Never consume the message – let it propagate normally
             return false;
         }
 

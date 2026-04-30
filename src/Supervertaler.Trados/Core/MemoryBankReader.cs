@@ -28,7 +28,7 @@ namespace Supervertaler.Trados.Core
 
         /// <summary>
         /// File extensions that appear inside memory banks but are NOT knowledge
-        /// content — Obsidian plugin sidecars, editor metadata, etc. Callers that
+        /// content – Obsidian plugin sidecars, editor metadata, etc. Callers that
         /// enumerate inbox files for Process Inbox or Distill must filter these
         /// out, otherwise Distill tries to hand them to DocumentTextExtractor and
         /// fails with "Unsupported file format".
@@ -142,7 +142,7 @@ namespace Supervertaler.Trados.Core
 
             if (!string.IsNullOrEmpty(manualClientProfile))
             {
-                // Manual override — exact filename match
+                // Manual override – exact filename match
                 clientEntry = _index.FirstOrDefault(e =>
                     e.Folder == "01_CLIENTS" &&
                     e.FileName.Equals(manualClientProfile, StringComparison.OrdinalIgnoreCase));
@@ -252,7 +252,7 @@ namespace Supervertaler.Trados.Core
                 sb.AppendLine("## Terminology Decisions");
                 sb.AppendLine();
                 sb.AppendLine("These terms have been specifically chosen with reasoning. " +
-                    "Follow them exactly — rejected alternatives are listed so you know what to avoid.");
+                    "Follow them exactly – rejected alternatives are listed so you know what to avoid.");
                 sb.AppendLine();
 
                 foreach (var article in ctx.TerminologyArticles)
@@ -521,7 +521,7 @@ namespace Supervertaler.Trados.Core
     }
 
     /// <summary>
-    /// Resolved KB context for a translation — the relevant articles loaded and ready.
+    /// Resolved KB context for a translation – the relevant articles loaded and ready.
     /// </summary>
     public class KbContext
     {

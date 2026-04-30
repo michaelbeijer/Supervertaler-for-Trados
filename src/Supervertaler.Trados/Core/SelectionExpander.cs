@@ -12,8 +12,8 @@ namespace Supervertaler.Trados.Core
     /// outward to encompass complete words.
     ///
     /// Selection priority (highest to lowest):
-    ///   1. Exact word-boundary match — selection is already a complete word
-    ///   2. Shortest expansion — when multiple words contain the selection,
+    ///   1. Exact word-boundary match – selection is already a complete word
+    ///   2. Shortest expansion – when multiple words contain the selection,
     ///      the shortest enclosing word wins (e.g. "echt" → "hechting" not
     ///      "hechtingsbevorderaars")
     /// </summary>
@@ -49,7 +49,7 @@ namespace Supervertaler.Trados.Core
             if (string.IsNullOrEmpty(fullText) || string.IsNullOrEmpty(partialSelection))
                 return (partialSelection ?? "").Trim();
 
-            // Strip leading/trailing whitespace before matching — a selection like
+            // Strip leading/trailing whitespace before matching – a selection like
             // "trimethoxysilaan " (trailing space) would otherwise cause endPos to land
             // on the next word, making the expansion loop swallow it ("trimethoxysilaan of").
             partialSelection = partialSelection.Trim();
@@ -90,7 +90,7 @@ namespace Supervertaler.Trados.Core
 
                 if (atLeft && atRight)
                 {
-                    // Perfect word-boundary match — return immediately
+                    // Perfect word-boundary match – return immediately
                     return TrimNonWordEdges(needle);
                 }
 
@@ -105,7 +105,7 @@ namespace Supervertaler.Trados.Core
 
                 string expanded = TrimNonWordEdges(haystack.Substring(start, end - start));
 
-                // Prefer the shortest expansion — the user most likely
+                // Prefer the shortest expansion – the user most likely
                 // intended the simpler/base word, not a longer compound
                 if (expanded.Length < bestLength)
                 {

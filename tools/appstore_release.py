@@ -156,7 +156,7 @@ def main():
         from_version = None
         to_version = current_version
 
-    # Filter entries — entries are newest-first in the list
+    # Filter entries – entries are newest-first in the list
     all_versions = [v for v, _ in entries]
 
     if from_version:
@@ -194,12 +194,12 @@ def main():
 
     # Build the full release notes file
     output_lines = []
-    output_lines.append(f"# RWS App Store Manager — v{version_four}")
+    output_lines.append(f"# RWS App Store Manager – v{version_four}")
     output_lines.append("")
     output_lines.append(f"**Version number:** `{version_four}`")
     output_lines.append(f"**Minimum studio version:** `{min_studio or '?'}`")
     output_lines.append(f"**Maximum studio version:** `{max_studio or '?'}`")
-    output_lines.append(f"**Checksum:** `{checksum or 'BUILD NOT FOUND — run bash build.sh first'}`")
+    output_lines.append(f"**Checksum:** `{checksum or 'BUILD NOT FOUND – run bash build.sh first'}`")
     output_lines.append("")
     output_lines.append("---")
     output_lines.append("")
@@ -222,7 +222,7 @@ def main():
     print(f"  Written to: {output_file}")
     print(f"  {len(added)} added, {len(changed)} changed, {len(fixed)} fixed items")
     if not checksum:
-        print(f"  WARNING: {SDLPLUGIN} not found — run bash build.sh first")
+        print(f"  WARNING: {SDLPLUGIN} not found – run bash build.sh first")
 
 
 if __name__ == "__main__":

@@ -662,7 +662,7 @@ Local LLM allows you to run AI translation entirely on your computer - no API co
 **Step 2: Download a Model**
 Open a terminal/command prompt and run:
 ```bash
-# Recommended — purpose-built translation model (12GB+ RAM):
+# Recommended – purpose-built translation model (12GB+ RAM):
 ollama pull translategemma:12b
 
 # For 24GB+ RAM (highest translation quality):
@@ -1271,14 +1271,14 @@ The Superlookup Web Resources tab includes an **embedded browser** that lets you
 
 **Recommendations:**
 - Don't use the embedded browser for highly sensitive accounts (banking, medical portals, etc.)
-- For terminology sites like ProZ, IATE, Linguee — the risk is minimal
+- For terminology sites like ProZ, IATE, Linguee – the risk is minimal
 - If you're on a shared computer, delete `user_data/web_cache/` to clear all sessions
-- For maximum security, use **External browser mode** in Superlookup settings — this opens links in your regular browser where you have full control over security settings
+- For maximum security, use **External browser mode** in Superlookup settings – this opens links in your regular browser where you have full control over security settings
 
 **How to clear saved sessions:**
 1. Close Supervertaler
 2. Delete the folder: `user_data/web_cache/`
-3. Restart Supervertaler — you'll need to log in again to any sites
+3. Restart Supervertaler – you'll need to log in again to any sites
 
 ### Can I use Supervertaler commercially?
 

@@ -45,7 +45,7 @@ namespace Supervertaler.Trados.Core
 
         /// <summary>
         /// Returns the core tool definitions array using "parameters" as the schema key.
-        /// This is the canonical format — provider-specific methods transform it.
+        /// This is the canonical format – provider-specific methods transform it.
         /// </summary>
         private static string GetCoreToolDefinitions()
         {

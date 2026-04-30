@@ -13,7 +13,7 @@ namespace Supervertaler.Trados.Controls
     /// where keeping the docked panel always-visible costs too much vertical space.
     ///
     /// Lifecycle:
-    ///   - Opened via TermLensEditorViewPart.HandleTermLensPopup() — bound to
+    ///   - Opened via TermLensEditorViewPart.HandleTermLensPopup() – bound to
     ///     Ctrl-tap (primary) and Ctrl+Alt+G (fallback). Re-pressing the open
     ///     shortcut closes the popup (toggle); cycling is keyboard-only inside.
     ///   - Right / Down / Tab → next; Left / Up / Shift+Tab → previous.
@@ -32,11 +32,11 @@ namespace Supervertaler.Trados.Controls
         private int _currentIndex = -1;
 
         // Guards against any second invocation of RequestInsert on the same
-        // popup — keeps the insertion exactly-once even if the click path
+        // popup – keeps the insertion exactly-once even if the click path
         // and the keyboard path race, or if a block fires its event twice.
         private int? _pendingInsertOneBased;
 
-        // Transient hint state — used to flash a short message in place of
+        // Transient hint state – used to flash a short message in place of
         // the keyboard-shortcut hint label (e.g. when the user presses E on
         // a read-only MultiTerm match). Auto-restores after a few seconds.
         private string _originalHintText;
@@ -74,7 +74,7 @@ namespace Supervertaler.Trados.Controls
             Controls.Add(card);
             BackColor = Color.FromArgb(180, 180, 180); // border tone
 
-            // Keyboard-only popup — no visible help button, no mouse affordances
+            // Keyboard-only popup – no visible help button, no mouse affordances
             // beyond clicking a chip to insert. Help shortcut keys removed too:
             // F1 is owned by Trados Studio (its handler beats application-level
             // message filters) so a working in-popup help binding would need a
@@ -105,7 +105,7 @@ namespace Supervertaler.Trados.Controls
             card.Controls.Add(_hintLabel);
 
             // Sizing strategy:
-            //   - maxAvailableWidth caps how wide the popup can ever be — a
+            //   - maxAvailableWidth caps how wide the popup can ever be – a
             //     fraction of the screen the popup will appear on, with an
             //     absolute upper bound so it doesn't span 4K monitors.
             //   - Individual chips get the same cap (less the form's chrome)
@@ -113,7 +113,7 @@ namespace Supervertaler.Trados.Controls
             //     still ellipsis-truncate rather than blow past the screen.
             //   - After the chips are added, ResizeToContent measures the
             //     flow panel's preferred size at maxAvailableWidth and
-            //     SHRINKS the popup to fit in BOTH dimensions — short
+            //     SHRINKS the popup to fit in BOTH dimensions – short
             //     segments don't get a giant empty popup, long segments
             //     grow to show every chip.
             //
@@ -129,7 +129,7 @@ namespace Supervertaler.Trados.Controls
             int maxBlockWidth = maxAvailableWidth - card.Padding.Horizontal - UiScale.Pixels(40);
             if (maxBlockWidth < 60) maxBlockWidth = 60;
 
-            // Reuse the docked panel's matcher/index — no termbase reload.
+            // Reuse the docked panel's matcher/index – no termbase reload.
             // Pass wireInsertBubble: false so chip clicks DON'T bubble through
             // to the docked panel's existing OnTermInsertRequested handler;
             // we wire our own handler that routes click and keyboard Enter
@@ -162,7 +162,7 @@ namespace Supervertaler.Trados.Controls
             int chromeV = Padding.Vertical + _hintLabel.Height + UiScale.Pixels(12); // card vertical padding
 
             // Measure the flow panel's preferred size at the maximum allowed
-            // width — chips wrap inside that constraint.
+            // width – chips wrap inside that constraint.
             var pref = _flowPanel.GetPreferredSize(new Size(
                 maxAvailableWidth - chromeH,
                 int.MaxValue));
@@ -251,10 +251,10 @@ namespace Supervertaler.Trados.Controls
 
         // Note: no OnDeactivate-Close. The chip-hover tooltip (TermPopup)
         // briefly steals focus, which would close the popup mid-hover and
-        // strand the user. The popup is keyboard-only anyway — Esc closes,
+        // strand the user. The popup is keyboard-only anyway – Esc closes,
         // Ctrl-tap toggles. Mouse users can still click a chip to insert
         // (which closes), or Esc, or click outside (which leaves it open
-        // until they press a key — a small papercut traded for not losing
+        // until they press a key – a small papercut traded for not losing
         // the popup to spurious focus events).
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -294,7 +294,7 @@ namespace Supervertaler.Trados.Controls
         /// entry data before closing the popup so the editor doesn't
         /// reference a disposed TermBlock; routes through the same
         /// OnTermEditRequested handler the docked panel's right-click
-        /// "Edit Term…" menu uses. MultiTerm matches are read-only — we
+        /// "Edit Term…" menu uses. MultiTerm matches are read-only – we
         /// flash a hint instead of opening anything (Trados Studio 2026
         /// is expected to replace MultiTerm with a SQLite-backed
         /// terminology system, so we're not investing in MultiTerm
@@ -303,7 +303,7 @@ namespace Supervertaler.Trados.Controls
         /// Why Hide() + owner.BeginInvoke instead of "FormClosed += …; Close()":
         /// The editor dialog opens via ShowDialog, which is modal and blocks
         /// the message pump. When invoked from inside FormClosed, the pump is
-        /// blocked before the area beneath the popup has been repainted — the
+        /// blocked before the area beneath the popup has been repainted – the
         /// popup's pixels stay visible behind the modal until it closes.
         /// Hiding synchronously and deferring Close() + editor-open to the
         /// owner's message loop lets WM_PAINT for the freshly-uncovered area
@@ -319,11 +319,11 @@ namespace Supervertaler.Trados.Controls
             if (entry.IsMultiTerm)
             {
                 ShowTransientHint(
-                    "MultiTerm entries are read-only — edit them in Trados → Termbase Viewer.");
+                    "MultiTerm entries are read-only – edit them in Trados → Termbase Viewer.");
                 return;
             }
 
-            // Snapshot the entry list — block.Entries is a live read-only
+            // Snapshot the entry list – block.Entries is a live read-only
             // view that's invalid after the popup disposes.
             var allEntries = new List<TermEntry>(block.Entries);
 
@@ -344,7 +344,7 @@ namespace Supervertaler.Trados.Controls
             }
             else
             {
-                // No live owner — fall back to the original FormClosed pattern.
+                // No live owner – fall back to the original FormClosed pattern.
                 FormClosed += (s, e) =>
                     TermLensEditorViewPart.HandleEditCurrentTerm(entry, allEntries);
                 Close();

@@ -24,7 +24,7 @@ namespace Supervertaler.Trados.Core
     ///   - System locale
     ///
     /// No personal data, no translation content, no termbase info, no tracking.
-    /// Silent failure — if the ping fails, nothing happens.
+    /// Silent failure – if the ping fails, nothing happens.
     /// </summary>
     internal static class UsageStatistics
     {
@@ -39,7 +39,7 @@ namespace Supervertaler.Trados.Core
 
         /// <summary>
         /// Sends the anonymous usage ping if the user has opted in.
-        /// Call from a background task — never blocks the UI.
+        /// Call from a background task – never blocks the UI.
         /// Swallows all exceptions silently.
         /// </summary>
         public static async Task SendPingAsync()
@@ -76,12 +76,12 @@ namespace Supervertaler.Trados.Core
                 var json = SerializePayload(payload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                // Fire and forget — we don't care about the response
+                // Fire and forget – we don't care about the response
                 await _http.PostAsync(PingUrl, content).ConfigureAwait(false);
             }
             catch
             {
-                // Silent failure — no retries, no queuing, no error messages
+                // Silent failure – no retries, no queuing, no error messages
             }
         }
 

@@ -1,9 +1,9 @@
 # Table of contents
 
-* [Supervertaler — Welcome](README.md)
+* [Supervertaler – Welcome](README.md)
 
 
-## 🧩 Trados — Get Started
+## 🧩 Trados – Get Started
 
 * [Supervertaler for Trados](trados/README.md)
 * [Installation](trados/installation.md)
@@ -11,7 +11,7 @@
 * [Licensing & Pricing](trados/licensing.md)
 * [AI Cost Guide](trados/ai-cost-guide.md)
 
-## 🧩 Trados — Features
+## 🧩 Trados – Features
 
 * [TermLens](trados/termlens.md)
   * [Adding & Editing Terms](trados/termlens/adding-terms.md)
@@ -41,11 +41,11 @@
   * [Clipboard Mode](trados/clipboard-mode.md)
   * [AutoPrompt](trados/generate-prompt.md)
 
-## 🧩 Trados — Terminology
+## 🧩 Trados – Terminology
 
 * [Termbase Management](trados/termbase-management.md)
 
-## 🧩 Trados — Settings
+## 🧩 Trados – Settings
 
 * [TermLens Settings](trados/settings/termlens.md)
 * [AI Settings](trados/settings/ai-settings.md)
@@ -60,7 +60,7 @@
 * [Per-Project Settings](trados/settings/project-settings.md)
 * [Usage Statistics](trados/settings/usage-statistics.md)
 
-## 🧩 Trados — Reference
+## 🧩 Trados – Reference
 
 * [User Data Folder](trados/data-folder.md)
 * [Keyboard Shortcuts](trados/keyboard-shortcuts.md)
@@ -69,7 +69,7 @@
 * [Privacy Policy](trados/privacy.md)
 
 
-## 🖥️ Workbench — Get Started
+## 🖥️ Workbench – Get Started
 
 * [Supervertaler Workbench](workbench/README.md)
 * [Installation](workbench/get-started/installation.md)
@@ -77,7 +77,7 @@
 * [Setting Up API Keys](workbench/get-started/api-keys.md)
 * [Your First Translation Project](workbench/get-started/first-project.md)
 
-## 🖥️ Workbench — Editor & Translation
+## 🖥️ Workbench – Editor & Translation
 
 * [The Editor](workbench/editor/translation-grid.md)
 * [Navigating Segments](workbench/editor/navigation.md)
@@ -88,7 +88,7 @@
 * [Filtering Segments](workbench/editor/filtering.md)
 * [Pagination](workbench/editor/pagination.md)
 
-## 🖥️ Workbench — AI Translation
+## 🖥️ Workbench – AI Translation
 
 * [AI Translation Overview](workbench/ai-translation/overview.md)
 * [Supported LLM Providers](workbench/ai-translation/providers.md)
@@ -99,7 +99,7 @@
 * [Supervertaler Sidekick](workbench/ai-translation/quicklauncher.md)
 * [Using Local LLMs (Ollama)](workbench/ai-translation/ollama.md)
 
-## 🖥️ Workbench — CAT Tool Integration
+## 🖥️ Workbench – CAT Tool Integration
 
 * [CAT Tool Overview](workbench/cat-tools/overview.md)
 * [memoQ Workflow](workbench/cat-tools/memoq.md)
@@ -107,7 +107,7 @@
 * [Phrase (Memsource) Workflow](workbench/cat-tools/phrase.md)
 * [CafeTran Workflow](workbench/cat-tools/cafetran.md)
 
-## 🖥️ Workbench — Translation Memory
+## 🖥️ Workbench – Translation Memory
 
 * [Translation Memory Basics](workbench/translation-memory/basics.md)
 * [Creating & Managing TMs](workbench/translation-memory/managing-tms.md)
@@ -115,7 +115,7 @@
 * [Fuzzy Matching](workbench/translation-memory/fuzzy-matching.md)
 * [Supermemory (Semantic Search)](workbench/translation-memory/supermemory.md)
 
-## 🖥️ Workbench — Glossaries
+## 🖥️ Workbench – Glossaries
 
 * [Glossary Basics](workbench/glossaries/basics.md)
 * [Creating Glossaries](workbench/glossaries/creating.md)
@@ -124,7 +124,7 @@
 * [TermLens (Inline Terminology)](workbench/glossaries/termlens.md)
 * [Term Extraction](workbench/glossaries/extraction.md)
 
-## 🖥️ Workbench — Import & Export
+## 🖥️ Workbench – Import & Export
 
 * [Supported File Formats](workbench/import-export/formats.md)
 * [Importing DOCX Files](workbench/import-export/docx-import.md)
@@ -133,7 +133,7 @@
 * [Exporting Translations](workbench/import-export/exporting.md)
 * [Bilingual Tables](workbench/import-export/bilingual-tables.md)
 
-## 🖥️ Workbench — Superlookup
+## 🖥️ Workbench – Superlookup
 
 * [Superlookup Overview](workbench/superlookup/overview.md)
 * [TM Concordance Search](workbench/superlookup/tm-search.md)
@@ -141,19 +141,19 @@
 * [Machine Translation](workbench/superlookup/mt.md)
 * [Web Resources](workbench/superlookup/web-resources.md)
 
-## 🖥️ Workbench — Quality Assurance
+## 🖥️ Workbench – Quality Assurance
 
 * [Spellcheck](workbench/qa/spellcheck.md)
 * [Tag Validation](workbench/qa/tag-validation.md)
 * [Non-Translatables](workbench/qa/non-translatables.md)
 
-## 🖥️ Workbench — Tools
+## 🖥️ Workbench – Tools
 
 * [PDF Rescue (OCR)](workbench/tools/pdf-rescue.md)
 * [TMX Editor](workbench/tools/tmx-editor.md)
 * [Image Extractor](workbench/tools/image-extractor.md)
 
-## 🖥️ Workbench — Settings
+## 🖥️ Workbench – Settings
 
 * [General Settings](workbench/settings/general.md)
 * [View Settings](workbench/settings/view.md)
@@ -161,7 +161,7 @@
 * [Theme (Light/Dark Mode)](workbench/settings/theme.md)
 * [Font Customization](workbench/settings/fonts.md)
 
-## 🖥️ Workbench — Troubleshooting
+## 🖥️ Workbench – Troubleshooting
 
 * [Common Issues](workbench/troubleshooting/common-issues.md)
 * [API Connection Problems](workbench/troubleshooting/api-issues.md)
@@ -169,7 +169,7 @@
 * [Performance Tips](workbench/troubleshooting/performance.md)
 * [Linux-Specific Issues](workbench/troubleshooting/linux.md)
 
-## 🖥️ Workbench — Reference
+## 🖥️ Workbench – Reference
 
 * [FAQ](workbench/reference/faq.md)
 * [File Format Reference](workbench/reference/file-formats.md)

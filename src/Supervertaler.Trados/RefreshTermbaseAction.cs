@@ -11,7 +11,7 @@ namespace Supervertaler.Trados
     /// Keyboard action: F5 reloads Supervertaler termbases from disk and refreshes
     /// the TermLens display for the current segment. Useful after external edits
     /// or as a manual fallback if the panel shows stale data.
-    /// Note: does NOT reload MultiTerm (.sdltb) termbases — those auto-refresh
+    /// Note: does NOT reload MultiTerm (.sdltb) termbases – those auto-refresh
     /// on segment navigation via file-modification timestamp checks.
     /// </summary>
     [Action("TermLens_RefreshTermbase", typeof(EditorController),

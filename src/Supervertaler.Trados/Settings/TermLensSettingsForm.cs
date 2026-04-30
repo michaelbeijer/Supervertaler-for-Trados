@@ -113,7 +113,7 @@ namespace Supervertaler.Trados.Settings
             MaximumSize = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
             BackColor = Color.White;
 
-            // === OK / Cancel — anchored to bottom of form, outside tabs ===
+            // === OK / Cancel – anchored to bottom of form, outside tabs ===
             _btnOK = new Button
             {
                 Text = "OK",
@@ -193,7 +193,7 @@ namespace Supervertaler.Trados.Settings
         }
 
         /// <summary>
-        /// Builds the General tab — plugin-wide settings that are not specific to TermLens or AI.
+        /// Builds the General tab – plugin-wide settings that are not specific to TermLens or AI.
         /// </summary>
         private void BuildGeneralTab(TabPage page)
         {
@@ -726,9 +726,9 @@ namespace Supervertaler.Trados.Settings
 
             gridPanel.Controls.Add(_dgvTermbases);
 
-            // Add panels to page — order matters for Dock layout
+            // Add panels to page – order matters for Dock layout
             // (last added has highest z-order and docks first)
-            page.Controls.Add(gridPanel);     // Fill — docks last, fills remaining space
+            page.Controls.Add(gridPanel);     // Fill – docks last, fills remaining space
             page.Controls.Add(bottomPanel);   // Bottom
             page.Controls.Add(topPanel);      // Top
         }
@@ -746,7 +746,7 @@ namespace Supervertaler.Trados.Settings
 
             var lblDesc = new Label
             {
-                Text = "Export your settings to a file so you can restore them later — for example " +
+                Text = "Export your settings to a file so you can restore them later – for example " +
                        "before upgrading the plugin, or to transfer your setup to another machine.\n\n" +
                        "The settings file contains all your plugin configuration: termbase paths, " +
                        "toggle states, font size, shortcut preferences, AI provider keys, model " +
@@ -850,7 +850,7 @@ namespace Supervertaler.Trados.Settings
             }
 
             // Radio-button enforcement for Project column only (only one can be project)
-            // Write column allows multiple selections — terms are inserted into all write targets.
+            // Write column allows multiple selections – terms are inserted into all write targets.
             if (colName == "colProject")
             {
                 // Commit the edit so .Value is up-to-date
@@ -883,7 +883,7 @@ namespace Supervertaler.Trados.Settings
 
             if (col.Name == "colProject")
             {
-                // Project is radio-button style — header click clears the selection
+                // Project is radio-button style – header click clears the selection
                 foreach (DataGridViewRow row in _dgvTermbases.Rows)
                 {
                     if (skipMultiTerm && row.Index >= _termbases.Count) continue;
@@ -960,7 +960,7 @@ namespace Supervertaler.Trados.Settings
                 editor.ShowDialog(this);
             }
 
-            // Refresh the list — term counts may have changed
+            // Refresh the list – term counts may have changed
             UpdateTermbaseInfo(dbPath);
             PopulateTermbaseList(dbPath);
         }
@@ -992,7 +992,7 @@ namespace Supervertaler.Trados.Settings
 
             if (terms.Count == 0)
             {
-                MessageBox.Show("This termbase is empty — nothing to distill.",
+                MessageBox.Show("This termbase is empty – nothing to distill.",
                     "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -1035,7 +1035,7 @@ namespace Supervertaler.Trados.Settings
             _aiSettingsPanel.SetAvailableTermbases(GetCombinedTermbaseList(),
                 _settings.AiSettings?.DisabledAiTermbaseIds);
 
-            // Prompts — pass per-project active prompt if available
+            // Prompts – pass per-project active prompt if available
             string projectActivePrompt = null;
             var projPath = TermLensEditorViewPart.GetCurrentProjectPath();
             if (!string.IsNullOrEmpty(projPath))
@@ -1706,7 +1706,7 @@ namespace Supervertaler.Trados.Settings
                         "Import Settings",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    // Signal import and close — caller checks SettingsImported flag
+                    // Signal import and close – caller checks SettingsImported flag
                     SettingsImported = true;
                     DialogResult = DialogResult.Cancel;
                     Close();

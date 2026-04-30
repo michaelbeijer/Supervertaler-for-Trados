@@ -4,9 +4,9 @@ Supervertaler supports multiple AI providers so you can choose what fits your wo
 
 ## Cloud providers
 
-- **OpenAI** (GPT models) — https://platform.openai.com/api-keys
-- **Anthropic** (Claude models) — https://console.anthropic.com/
-- **Google** (Gemini models) — https://aistudio.google.com/apikey
+- **OpenAI** (GPT models) – https://platform.openai.com/api-keys
+- **Anthropic** (Claude models) – https://console.anthropic.com/
+- **Google** (Gemini models) – https://aistudio.google.com/apikey
 
 ## Local providers
 

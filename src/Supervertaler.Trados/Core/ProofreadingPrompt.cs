@@ -8,7 +8,7 @@ namespace Supervertaler.Trados.Core
 {
     /// <summary>
     /// Builds system and user prompts for AI proofreading, and parses batch responses.
-    /// Parallel to TranslationPrompt — uses the same composable prompt assembly pattern.
+    /// Parallel to TranslationPrompt – uses the same composable prompt assembly pattern.
     /// </summary>
     public static class ProofreadingPrompt
     {

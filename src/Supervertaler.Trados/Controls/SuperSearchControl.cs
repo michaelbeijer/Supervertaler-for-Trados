@@ -841,7 +841,7 @@ namespace Supervertaler.Trados.Controls
                 }
             }
 
-            // Draw the full text once — it renders on top of the yellow rects
+            // Draw the full text once – it renders on top of the yellow rects
             TextRenderer.DrawText(e.Graphics, cellText, font, textRect, fgColor, flags);
 
             e.Handled = true;

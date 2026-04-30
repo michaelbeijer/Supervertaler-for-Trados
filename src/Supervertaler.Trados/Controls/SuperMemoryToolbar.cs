@@ -248,7 +248,7 @@ namespace Supervertaler.Trados.Controls
             Controls.Add(_cmbMemoryBank);
             Controls.Add(_lblHeading);
 
-            // Manual layout — position controls left to right
+            // Manual layout – position controls left to right
             Resize += (s, e) => LayoutControls();
             Layout += (s, e) => LayoutControls();
         }
@@ -292,7 +292,7 @@ namespace Supervertaler.Trados.Controls
         /// <summary>
         /// Last inbox count reported by <see cref="UpdateInboxCount"/>.
         /// Tracked so <see cref="SetBusy"/>(false) can restore the correct
-        /// Process Inbox button state after a busy operation completes —
+        /// Process Inbox button state after a busy operation completes –
         /// without this, the button would be unconditionally re-enabled
         /// even when the inbox is empty, which is a confusing dead-end
         /// click for the user.
@@ -319,7 +319,7 @@ namespace Supervertaler.Trados.Controls
         /// Enables or disables the SuperMemory action buttons (e.g. during
         /// long-running operations like Health Check or Distill). When
         /// un-busying, Process Inbox is only re-enabled if the last known
-        /// inbox count is non-zero — it does not make sense to offer a
+        /// inbox count is non-zero – it does not make sense to offer a
         /// clickable "Process Inbox" button when there is nothing to
         /// process, and the previous implementation's unconditional
         /// <c>_btnProcessInbox.Enabled = !busy</c> overrode the count-based
@@ -362,7 +362,7 @@ namespace Supervertaler.Trados.Controls
         /// <summary>
         /// Replaces the memory bank dropdown contents with the given list and
         /// selects <paramref name="activeBank"/> if present. Does not raise
-        /// <see cref="MemoryBankChanged"/> — callers drive that side effect
+        /// <see cref="MemoryBankChanged"/> – callers drive that side effect
         /// themselves so repopulation after a user switch is silent.
         /// </summary>
         /// <param name="banks">Bank names from <c>UserDataPath.ListMemoryBanks()</c>.</param>
@@ -381,7 +381,7 @@ namespace Supervertaler.Trados.Controls
                     // Even with no banks on disk we still want the user to be
                     // able to create one, so the "New memory bank…" sentinel is
                     // added as the only usable row. The placeholder above it
-                    // is disabled-looking via the text itself — ComboBox has no
+                    // is disabled-looking via the text itself – ComboBox has no
                     // per-item enabled state, so we rely on the change handler
                     // ignoring the placeholder.
                     _cmbMemoryBank.Items.Add("(no memory banks)");
@@ -403,7 +403,7 @@ namespace Supervertaler.Trados.Controls
                 }
 
                 // Append the "create new bank" sentinel as the last entry.
-                // It is not selectable in the normal sense — OnMemoryBankComboChanged
+                // It is not selectable in the normal sense – OnMemoryBankComboChanged
                 // fires NewMemoryBankRequested and reverts the combo instead.
                 _cmbMemoryBank.Items.Add(NewBankSentinel);
 

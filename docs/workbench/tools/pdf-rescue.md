@@ -14,7 +14,7 @@ If you prefer the repository copy, see: https://github.com/Supervertaler/Superve
 
 ## 📖 Overview
 
-**PDF Rescue** is a specialised AI-powered OCR tool designed to extract clean, editable text from poorly formatted PDFs. Built into Supervertaler, it uses vision-capable LLM OCR to intelligently recognise text, formatting, redactions, stamps, and signatures—producing professional, translator-ready documents.
+**PDF Rescue** is a specialised AI-powered OCR tool designed to extract clean, editable text from poorly formatted PDFs. Built into Supervertaler, it uses vision-capable LLM OCR to intelligently recognise text, formatting, redactions, stamps, and signatures–producing professional, translator-ready documents.
 
 ### 🎯 The Problem It Solves
 
@@ -30,13 +30,13 @@ Have you ever received a PDF translation job where:
 
 ###  Real-World Success Story
 
-> *"I had a client reach out for a rush job—a 4-page legal document that had clearly been scanned badly. Traditional OCR couldn't handle it, and manual retyping would have taken hours.*
+> *"I had a client reach out for a rush job–a 4-page legal document that had clearly been scanned badly. Traditional OCR couldn't handle it, and manual retyping would have taken hours.*
 > 
 > *I used PDF Rescue's one-click PDF import, processed all 4 pages with AI OCR, and it produced a flawless Word document that I could immediately start working with. What would have been a multi-day nightmare became a straightforward job I could deliver on time.*
 > 
-> *I was able to tell my client that I could handle the job—and delivered professional quality. PDF Rescue literally saved a client relationship."*
+> *I was able to tell my client that I could handle the job–and delivered professional quality. PDF Rescue literally saved a client relationship."*
 > 
-> — Michael Beijer, Professional Translator
+> – Michael Beijer, Professional Translator
 
 ---
 

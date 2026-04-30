@@ -9,7 +9,7 @@ namespace Supervertaler.Trados
     /// <summary>
     /// Base class for Alt+digit term insertion shortcuts.
     /// Each subclass maps a single digit (0-9) to a keyboard shortcut.
-    /// No ActionLayout — these are keyboard-only actions (no context menu).
+    /// No ActionLayout – these are keyboard-only actions (no context menu).
     /// </summary>
     public abstract class TermInsertDigitActionBase : AbstractAction
     {

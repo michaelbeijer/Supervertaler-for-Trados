@@ -72,8 +72,8 @@ namespace Supervertaler.Trados.Controls
             get
             {
                 var cp = base.CreateParams;
-                // WS_EX_TOOLWINDOW — no taskbar entry
-                // WS_EX_NOACTIVATE — don't steal focus
+                // WS_EX_TOOLWINDOW – no taskbar entry
+                // WS_EX_NOACTIVATE – don't steal focus
                 cp.ExStyle |= 0x80 | 0x08000000;
                 return cp;
             }
@@ -294,7 +294,7 @@ namespace Supervertaler.Trados.Controls
                 }
                 else if (line.Type == PopupLineType.Meta && UrlRegex.IsMatch(line.Text))
                 {
-                    // Meta line with URLs — use special rendering
+                    // Meta line with URLs – use special rendering
                     var ctrl = CreateMetaLineWithUrls(line.Text, font, contentWidth);
                     ctrl.Location = new Point(ContentPad, y);
                     Controls.Add(ctrl);
@@ -445,7 +445,7 @@ namespace Supervertaler.Trados.Controls
             };
             panel.Controls.Add(lblLabel);
 
-            // Value text with hanging indent — wraps within (maxWidth - labelWidth)
+            // Value text with hanging indent – wraps within (maxWidth - labelWidth)
             int valueWidth = maxWidth - labelWidth;
             if (valueWidth < 100) valueWidth = maxWidth; // fallback if label is very wide
 

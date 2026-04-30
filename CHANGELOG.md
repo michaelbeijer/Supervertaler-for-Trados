@@ -2,18 +2,18 @@
 
 ## [4.19.44] – 2026-04-30
 
-### Changed (Help system — base URL now includes `/help` slug)
+### Changed (Help system – base URL now includes `/help` slug)
 
-- **`HelpSystem.DocsBaseUrl` updated to `https://supervertaler.gitbook.io/help`** to match the renamed GitBook site slug. (GitBook's free plan requires a non-empty slug, so the merged Supervertaler help site uses `/help` as its path; full URLs are now `…/help/trados/<page>` for Trados topics and `…/help/workbench/<page>` for Workbench topics.) Topic constants in `HelpSystem.Topics` are unchanged from v4.19.43 — they continue to start with `trados/`, just appended to the new base. Existing call-sites unaffected.
+- **`HelpSystem.DocsBaseUrl` updated to `https://supervertaler.gitbook.io/help`** to match the renamed GitBook site slug. (GitBook's free plan requires a non-empty slug, so the merged Supervertaler help site uses `/help` as its path; full URLs are now `…/help/trados/<page>` for Trados topics and `…/help/workbench/<page>` for Workbench topics.) Topic constants in `HelpSystem.Topics` are unchanged from v4.19.43 – they continue to start with `trados/`, just appended to the new base. Existing call-sites unaffected.
 
 ---
 
 ## [4.19.43] – 2026-04-30
 
-### Changed (Help system — unified GitBook site for both products)
+### Changed (Help system – unified GitBook site for both products)
 
 - **The Supervertaler GitBook site now hosts documentation for both Supervertaler for Trados and Supervertaler Workbench in a single space**, with content organised under `/trados/` and `/workbench/` URL prefixes. Previously the Workbench shipped its own separate VitePress site at `help.supervertaler.com` which had drifted out of sync with reality; the Trados plugin's own GitBook (`supervertaler.gitbook.io/trados`) was the up-to-date one. Rather than maintain two parallel docs systems on two different toolchains, the Workbench docs were imported alongside the Trados docs in the existing GitBook space. The merged `SUMMARY.md` uses GitBook's `# Part` headings to give each product its own visually-divided sidebar section ("Trados Plugin" and "Workbench") so the two product surfaces don't visually compete.
-- **`HelpSystem.cs` topic paths now carry a `trados/` prefix** to match the new file-path layout. Existing call-sites (`HelpSystem.OpenHelp(Topics.TermLensPanel)` etc.) are unchanged — the indirection through the `Topics` constants insulates them from the path rename. The `DocsBaseUrl` constant is now `https://supervertaler.gitbook.io` (root) rather than `…/trados`; the trailing `/trados/` is part of every topic path. **Important: this assumes the GitBook space slug has been renamed from `/trados` to `/` (root) on the GitBook admin side** — if you keep the old slug, every help link will resolve to `…/trados/trados/<page>` (broken). Rename the slug before publishing this version.
+- **`HelpSystem.cs` topic paths now carry a `trados/` prefix** to match the new file-path layout. Existing call-sites (`HelpSystem.OpenHelp(Topics.TermLensPanel)` etc.) are unchanged – the indirection through the `Topics` constants insulates them from the path rename. The `DocsBaseUrl` constant is now `https://supervertaler.gitbook.io` (root) rather than `…/trados`; the trailing `/trados/` is part of every topic path. **Important: this assumes the GitBook space slug has been renamed from `/trados` to `/` (root) on the GitBook admin side** – if you keep the old slug, every help link will resolve to `…/trados/trados/<page>` (broken). Rename the slug before publishing this version.
 - **Documentation site title** to be renamed from "Supervertaler for Trados Help" to "Supervertaler Help" in the GitBook admin (cosmetic; no code change required).
 
 ---
@@ -46,11 +46,11 @@
 
 ### Added (Forbidden Term System – active warnings in TermLens)
 
-- **TermLens now actively warns when the source segment contains a target translation that has been marked forbidden in the termbase.** Previously the plugin simply filtered forbidden terms out of all SQL lookups (`WHERE COALESCE(t.forbidden, 0) = 0`), so the user had no idea a term existed at all — equivalent to silent suppression. Now forbidden matches show up in the TermLens chip flow with a strong red background (`#E53935`, hover `#C62828`), white target text, and a strikethrough on the target term (the source is rendered normally — it isn't the source that's forbidden, it's the translation). Hovering the chip shows a `🚫 Forbidden — do not use` tag at the top of the popup. Background colour was deliberately picked to be unmistakably distinct from the soft pink used for project-termbase entries (`#FFE5F0`); a first attempt at salmon (`#FFDAD6`) was too close to pink and got changed in the same release.
-- **Term Entry Editor dialog has a "Forbidden term (warn when used in translation)" checkbox** below the Non-translatable checkbox, drawn in dark red so it reads as a warning option. Toggling it persists to `termbase_terms.forbidden` via new `forbidden` parameters on `TermbaseReader.InsertTerm` and `UpdateTerm`. The checkbox correctly reflects DB state when reopening an existing term — required adding `forbidden` to the column list in `GetTermById`, which had been quietly omitting it.
+- **TermLens now actively warns when the source segment contains a target translation that has been marked forbidden in the termbase.** Previously the plugin simply filtered forbidden terms out of all SQL lookups (`WHERE COALESCE(t.forbidden, 0) = 0`), so the user had no idea a term existed at all – equivalent to silent suppression. Now forbidden matches show up in the TermLens chip flow with a strong red background (`#E53935`, hover `#C62828`), white target text, and a strikethrough on the target term (the source is rendered normally – it isn't the source that's forbidden, it's the translation). Hovering the chip shows a `🚫 Forbidden – do not use` tag at the top of the popup. Background colour was deliberately picked to be unmistakably distinct from the soft pink used for project-termbase entries (`#FFE5F0`); a first attempt at salmon (`#FFDAD6`) was too close to pink and got changed in the same release.
+- **Term Entry Editor dialog has a "Forbidden term (warn when used in translation)" checkbox** below the Non-translatable checkbox, drawn in dark red so it reads as a warning option. Toggling it persists to `termbase_terms.forbidden` via new `forbidden` parameters on `TermbaseReader.InsertTerm` and `UpdateTerm`. The checkbox correctly reflects DB state when reopening an existing term – required adding `forbidden` to the column list in `GetTermById`, which had been quietly omitting it.
 - **Termbase Editor grid now has a 🚫 column** showing the forbidden state for every term at a glance, sized to match the existing NT column. Read-only by design (clicking the cell would otherwise change the visual state without persisting, which was confusing during testing); editing is done through the term-editor dialog. The grid row is patched with the new value when the dialog returns OK so the column updates immediately.
 
-### Fixed (Termbase settings — column sort scrambled checkbox assignments)
+### Fixed (Termbase settings – column sort scrambled checkbox assignments)
 
 - **Sorting the termbase list in Settings → Termbases by Termbase / Terms / Languages no longer corrupts Read / Write / Project / CS checkbox assignments.** Root cause: the save path read checkboxes by row index (`_dgvTermbases.Rows[i]`) and looked up the corresponding termbase via the parallel `_termbases[i]` list, which assumed visual row order matched the underlying list. After a column header click the DataGridView reorders rows in place but the parallel list stays put, so checkbox state for one termbase was being saved against another's ID. Fixed by storing the `TermbaseInfo` (or `MultiTermTermbaseInfo`) reference in each row's `Tag` when the grid is populated, and rewriting the save loop plus all selected-row operations (Open, Distill, Remove, Import, Export) to look up the termbase via `row.Tag` instead of by index. Sort is fully re-enabled.
 
@@ -60,7 +60,7 @@
 
 ### Changed (TermLens popup – feedback when E is pressed on a MultiTerm match)
 
-- **Pressing E on a MultiTerm (green) match in the floating TermLens popup now flashes a short hint in place of the keyboard-shortcut footer instead of silently doing nothing.** The hint reads *"MultiTerm entries are read-only — edit them in Trados → Termbase Viewer."* in muted red, then auto-restores the regular hint after 3.5 seconds. Same E-key behaviour as before for non-MultiTerm matches: editor opens. Decision rationale: Trados Studio 2026 is expected to replace MultiTerm with a SQLite-backed terminology system, so MultiTerm write support isn't worth investing in — the right escape hatch is to send users to Trados's own MultiTerm editor for now.
+- **Pressing E on a MultiTerm (green) match in the floating TermLens popup now flashes a short hint in place of the keyboard-shortcut footer instead of silently doing nothing.** The hint reads *"MultiTerm entries are read-only – edit them in Trados → Termbase Viewer."* in muted red, then auto-restores the regular hint after 3.5 seconds. Same E-key behaviour as before for non-MultiTerm matches: editor opens. Decision rationale: Trados Studio 2026 is expected to replace MultiTerm with a SQLite-backed terminology system, so MultiTerm write support isn't worth investing in – the right escape hatch is to send users to Trados's own MultiTerm editor for now.
 
 ---
 
@@ -72,7 +72,7 @@
 
 ### Fixed (TermLens popup – grows to fit long segments)
 
-- **The popup no longer truncates chips on long source segments.** Previously the popup was hard-capped at 560 pixels wide regardless of screen size, so a patent-style sentence pushing past 100 characters would show the source segment fine but truncate the target chip text with an ellipsis (e.g. "De onderhavige uitvinding heeft in het algemeen betrekkin…"). Width now scales with the screen — capped at `min(1200 px, screen.Width − 60)` — and the popup shrinks to the actual content width (so short segments still get compact popups). Height cap raised from half-screen to four-fifths so multi-line chip rows aren't cut off either; `AutoScroll` handles anything beyond that. Reported by a user on a long English-Dutch patent sentence.
+- **The popup no longer truncates chips on long source segments.** Previously the popup was hard-capped at 560 pixels wide regardless of screen size, so a patent-style sentence pushing past 100 characters would show the source segment fine but truncate the target chip text with an ellipsis (e.g. "De onderhavige uitvinding heeft in het algemeen betrekkin…"). Width now scales with the screen – capped at `min(1200 px, screen.Width − 60)` – and the popup shrinks to the actual content width (so short segments still get compact popups). Height cap raised from half-screen to four-fifths so multi-line chip rows aren't cut off either; `AutoScroll` handles anything beyond that. Reported by a user on a long English-Dutch patent sentence.
 
 ---
 
@@ -88,12 +88,12 @@
 
 ### Added (TermLens popup – E opens the term-entry editor)
 
-- **Pressing E on the highlighted match opens the term-entry editor.** Mirrors the docked panel's right-click "Edit Term…" menu but on a single keystroke, so the editor is reachable without leaving the keyboard. The popup snapshots the entry data, closes itself, then routes through the same `OnTermEditRequested` handler the docked panel uses — so the editor sees the same single-/multi-entry flow it always has, including the multi-termbase editing case for entries that exist in more than one termbase. Read-only MultiTerm entries are skipped (same rule as the right-click menu).
+- **Pressing E on the highlighted match opens the term-entry editor.** Mirrors the docked panel's right-click "Edit Term…" menu but on a single keystroke, so the editor is reachable without leaving the keyboard. The popup snapshots the entry data, closes itself, then routes through the same `OnTermEditRequested` handler the docked panel uses – so the editor sees the same single-/multi-entry flow it always has, including the multi-termbase editing case for entries that exist in more than one termbase. Read-only MultiTerm entries are skipped (same rule as the right-click menu).
 
 ### Changed (TermLens popup – keyboard-only, fewer surprises)
 
-- **Removed the "?" help button.** v4.19.33's button never worked reliably (off-screen in v4.19.33, focus-stealing the popup itself in v4.19.34) and was at odds with the popup's keyboard-only design anyway. F1 plumbing removed too — Trados Studio's own F1 binding takes precedence over application-level message filters and beating it would need a Win32 low-level keyboard hook, more complexity than this is worth. Help for the popup is one click away on the [GitBook docs site](https://supervertaler.gitbook.io/trados/features/termlens/termlens-popup).
-- **Popup no longer auto-dismisses on focus loss.** v4.19.34 closed the popup whenever focus moved off it, which meant the chip-hover tooltip (the metadata `TermPopup`) silently killed the popup the moment the mouse passed over a chip — reported by a user moving the mouse toward the now-removed "?" button. Closing is now exclusively via Esc, Enter (after insert), Ctrl-tap (toggle), Ctrl+Alt+G (toggle), or clicking a chip (insert).
+- **Removed the "?" help button.** v4.19.33's button never worked reliably (off-screen in v4.19.33, focus-stealing the popup itself in v4.19.34) and was at odds with the popup's keyboard-only design anyway. F1 plumbing removed too – Trados Studio's own F1 binding takes precedence over application-level message filters and beating it would need a Win32 low-level keyboard hook, more complexity than this is worth. Help for the popup is one click away on the [GitBook docs site](https://supervertaler.gitbook.io/trados/features/termlens/termlens-popup).
+- **Popup no longer auto-dismisses on focus loss.** v4.19.34 closed the popup whenever focus moved off it, which meant the chip-hover tooltip (the metadata `TermPopup`) silently killed the popup the moment the mouse passed over a chip – reported by a user moving the mouse toward the now-removed "?" button. Closing is now exclusively via Esc, Enter (after insert), Ctrl-tap (toggle), Ctrl+Alt+G (toggle), or clicking a chip (insert).
 - Footer hint updated to `← → cycle  ·  Enter insert  ·  E edit  ·  Esc close`.
 
 ---
@@ -102,7 +102,7 @@
 
 ### Fixed (TermLens popup – help affordances)
 
-- **The "?" help button is now actually visible.** v4.19.33 added a manually-positioned Label with `Anchor = Top | Right` whose initial Location was computed against the form's pre-resize 560 px width, then `ResizeToContent` shrank the form before the anchor distance was committed — the button silently ended up off-screen to the right. Replaced with a docked bottom-bar Panel that contains the keyboard hint (`Dock = Fill`) and the "?" button (`Dock = Right`); no manual coordinates, no anchor math.
+- **The "?" help button is now actually visible.** v4.19.33 added a manually-positioned Label with `Anchor = Top | Right` whose initial Location was computed against the form's pre-resize 560 px width, then `ResizeToContent` shrank the form before the anchor distance was committed – the button silently ended up off-screen to the right. Replaced with a docked bottom-bar Panel that contains the keyboard hint (`Dock = Fill`) and the "?" button (`Dock = Right`); no manual coordinates, no anchor math.
 - **F1 inside the popup now opens the TermLens popup help page instead of the Trados Studio help site.** Trados has an Application-level message filter for F1 that fires before `Form.ProcessCmdKey`, so v4.19.33's `case Keys.F1` handler in `ProcessCmdKey` was never reached. Added a `PopupF1Filter : IMessageFilter` (same pattern as `CtrlTapFilter`) registered once on plugin startup that consumes F1 key-down events when the popup is open and focused, before Trados sees them. The `ProcessCmdKey` handler stays as a fallback in case the application filter chain ever misses.
 
 ---
@@ -111,7 +111,7 @@
 
 ### Added (TermLens popup – help affordances)
 
-- **Help is now reachable from the popup itself.** A small "?" button in the top-right corner of the popup opens the dedicated help page (https://supervertaler.gitbook.io/trados/features/termlens/termlens-popup) in the default browser, and F1 does the same — keeping parity with the existing dialogs (Add Term, Settings) that have both a visible question-mark affordance and a keyboard equivalent. The popup stays open so the user can read the docs and come back to picking a term.
+- **Help is now reachable from the popup itself.** A small "?" button in the top-right corner of the popup opens the dedicated help page (https://supervertaler.gitbook.io/trados/features/termlens/termlens-popup) in the default browser, and F1 does the same – keeping parity with the existing dialogs (Add Term, Settings) that have both a visible question-mark affordance and a keyboard equivalent. The popup stays open so the user can read the docs and come back to picking a term.
 
 ### Docs
 
@@ -124,7 +124,7 @@
 
 ### Fixed (TermLens – handler leak across document close/reopen cycles)
 
-- **Term-insert / right-click actions in the docked TermLens panel no longer fan out to dead view-part instances.** `TermLensEditorViewPart.Initialize` subscribed seven event handlers to static singletons (`_control.Value` for `TermInsertRequested` / `TermEditRequested` / `TermDeleteRequested` / `TermNonTranslatableToggled` / `FontSizeChanged`, `_mainPanel.Value.SettingsRequested`, `LicenseManager.Instance.LicenseStateChanged`) but `Dispose` only unsubscribed the per-document handlers — so each time Trados tore down and recreated the view-part (document close/reopen, project switch, layout change), the new instance added another set of subscribers while the old set stayed reachable through the singleton's invocation lists. The dead instances continued to dispatch, so a single chip click in the docked panel could fire `Selection.Target.Replace` two, three, or N times depending on how many times the view-part had been recreated in the session — root cause behind the v4.19.30 popup-double-insert bug, which the popup fix sidestepped by skipping the bubble entirely without addressing the leak itself. `Dispose` now unsubscribes all seven (using `Lazy<T>.IsValueCreated` checks to avoid forcing the singletons into existence purely to call `-=`), and the `LicenseStateChanged` lambda was extracted to a named `OnLicenseStateChanged` method so it can be unsubscribed at all.
+- **Term-insert / right-click actions in the docked TermLens panel no longer fan out to dead view-part instances.** `TermLensEditorViewPart.Initialize` subscribed seven event handlers to static singletons (`_control.Value` for `TermInsertRequested` / `TermEditRequested` / `TermDeleteRequested` / `TermNonTranslatableToggled` / `FontSizeChanged`, `_mainPanel.Value.SettingsRequested`, `LicenseManager.Instance.LicenseStateChanged`) but `Dispose` only unsubscribed the per-document handlers – so each time Trados tore down and recreated the view-part (document close/reopen, project switch, layout change), the new instance added another set of subscribers while the old set stayed reachable through the singleton's invocation lists. The dead instances continued to dispatch, so a single chip click in the docked panel could fire `Selection.Target.Replace` two, three, or N times depending on how many times the view-part had been recreated in the session – root cause behind the v4.19.30 popup-double-insert bug, which the popup fix sidestepped by skipping the bubble entirely without addressing the leak itself. `Dispose` now unsubscribes all seven (using `Lazy<T>.IsValueCreated` checks to avoid forcing the singletons into existence purely to call `-=`), and the `LicenseStateChanged` lambda was extracted to a named `OnLicenseStateChanged` method so it can be unsubscribed at all.
 
 ---
 
@@ -132,7 +132,7 @@
 
 ### Fixed (TermLens popup – focus returns to target after insert)
 
-- **After picking a term from the floating TermLens popup, focus now returns to the target cell.** Previously the popup was a borderless modeless form opened with `Show()` followed by `popup.Activate()`, which stole focus from the Trados editor on open and gave Windows no owner relationship to use when assigning focus on close — so the target cell was left without keyboard focus, leaving the user with no caret to keep typing in. The popup is now opened via `Show(ownerForm)` where `ownerForm` is the WinForms host of the docked TermLens panel (i.e. the Trados main window from a Win32 perspective), the same pattern the existing Term Picker dialog uses with `ShowDialog(parent)`. The insertion callback also explicitly calls `ownerForm.Activate()` immediately before `Selection.Target.Replace` runs, so the editor is the foreground window when Trados processes the replace and the target cell is re-focused.
+- **After picking a term from the floating TermLens popup, focus now returns to the target cell.** Previously the popup was a borderless modeless form opened with `Show()` followed by `popup.Activate()`, which stole focus from the Trados editor on open and gave Windows no owner relationship to use when assigning focus on close – so the target cell was left without keyboard focus, leaving the user with no caret to keep typing in. The popup is now opened via `Show(ownerForm)` where `ownerForm` is the WinForms host of the docked TermLens panel (i.e. the Trados main window from a Win32 perspective), the same pattern the existing Term Picker dialog uses with `ShowDialog(parent)`. The insertion callback also explicitly calls `ownerForm.Activate()` immediately before `Selection.Target.Replace` runs, so the editor is the foreground window when Trados processes the replace and the target cell is re-focused.
 
 ---
 
@@ -140,7 +140,7 @@
 
 ### Fixed (TermLens popup – term inserted twice)
 
-- **Selecting a term from the floating TermLens popup no longer inserts it twice.** Reported by a user — picking "tank vessel" produced "tank vesseltank vessel" in the target. Root cause: the popup's chips bubbled their `TermInsertRequested` event to the docked panel's existing `OnTermInsertRequested` handler (insertion #1) AND the popup also wired a close-on-insert handler that ran in the same chain. When combined with a separate handler-leak in `TermLensEditorViewPart.Initialize` (the `OnTermInsertRequested` subscription accumulates across view-part lifecycles because `Dispose` doesn't unsubscribe), the bubble path could fire the insertion two or more times per chip click. `TermLensControl.BuildSegmentBlocks` now takes an opt-out `wireInsertBubble` parameter so the popup can request blocks with no bubble wiring; the popup wires its own single handler that funnels both mouse-click and keyboard Enter through one `RequestInsert(oneBased)` method, which uses an `_pendingInsertOneBased` guard to make the insertion exactly-once and defers it to `FormClosed` so focus has returned to the Trados editor before `Selection.Target.Replace` runs. The handler-leak in `TermLensEditorViewPart` itself is untouched in this release — see follow-up issue. The docked panel's chip-click flow is unchanged (still uses the bubble).
+- **Selecting a term from the floating TermLens popup no longer inserts it twice.** Reported by a user – picking "tank vessel" produced "tank vesseltank vessel" in the target. Root cause: the popup's chips bubbled their `TermInsertRequested` event to the docked panel's existing `OnTermInsertRequested` handler (insertion #1) AND the popup also wired a close-on-insert handler that ran in the same chain. When combined with a separate handler-leak in `TermLensEditorViewPart.Initialize` (the `OnTermInsertRequested` subscription accumulates across view-part lifecycles because `Dispose` doesn't unsubscribe), the bubble path could fire the insertion two or more times per chip click. `TermLensControl.BuildSegmentBlocks` now takes an opt-out `wireInsertBubble` parameter so the popup can request blocks with no bubble wiring; the popup wires its own single handler that funnels both mouse-click and keyboard Enter through one `RequestInsert(oneBased)` method, which uses an `_pendingInsertOneBased` guard to make the insertion exactly-once and defers it to `FormClosed` so focus has returned to the Trados editor before `Selection.Target.Replace` runs. The handler-leak in `TermLensEditorViewPart` itself is untouched in this release – see follow-up issue. The docked panel's chip-click flow is unchanged (still uses the bubble).
 
 ---
 
@@ -148,7 +148,7 @@
 
 ### Changed (TermLens popup – Ctrl-tap is now a toggle)
 
-- **Ctrl-tap now toggles the floating TermLens popup open / closed instead of cycling.** Previously the second Ctrl-tap advanced the highlighted "current" match, on the theory that it kept the user on a single key for both opening and stepping. In practice closing was the more common follow-up — once the right term was visible the user wanted out — so the second press now closes the popup. Cycling stays on the keyboard via Right / Down / Tab (next) and Left / Up / Shift+Tab (previous).
+- **Ctrl-tap now toggles the floating TermLens popup open / closed instead of cycling.** Previously the second Ctrl-tap advanced the highlighted "current" match, on the theory that it kept the user on a single key for both opening and stepping. In practice closing was the more common follow-up – once the right term was visible the user wanted out – so the second press now closes the popup. Cycling stays on the keyboard via Right / Down / Tab (next) and Left / Up / Shift+Tab (previous).
 
 ---
 
@@ -206,61 +206,61 @@
 
 ---
 
-## [4.19.23] — 2026-04-21
+## [4.19.23] – 2026-04-21
 
 ### Added
 
-- **Rename custom OpenAI-compatible endpoints in AI Settings.** Previously, custom endpoints were auto-named "New Endpoint 1", "New Endpoint 2", etc., with no in-app way to give them meaningful labels (the `Name` field existed on the profile object but had no UI). A new pencil button sits next to the existing **+** / **−** buttons on the Custom OpenAI provider panel and opens a small modal dialog: pre-fills the current name, validates live (OK button disabled when empty, unchanged, or colliding with another profile's name — case-insensitive), and updates the combo in place without firing `SelectedIndexChanged` (so unsaved endpoint / model / API-key edits aren't wiped during rename). The rename persists through the existing save path — `SaveCurrentCustomProfile` rebuilds `CustomOpenAiProfiles` from combo items and `SelectedCustomProfileName` is reconciled to the current selection, so a rename survives Settings-dialog OK and Trados restart. Feature request from a user.
+- **Rename custom OpenAI-compatible endpoints in AI Settings.** Previously, custom endpoints were auto-named "New Endpoint 1", "New Endpoint 2", etc., with no in-app way to give them meaningful labels (the `Name` field existed on the profile object but had no UI). A new pencil button sits next to the existing **+** / **−** buttons on the Custom OpenAI provider panel and opens a small modal dialog: pre-fills the current name, validates live (OK button disabled when empty, unchanged, or colliding with another profile's name – case-insensitive), and updates the combo in place without firing `SelectedIndexChanged` (so unsaved endpoint / model / API-key edits aren't wiped during rename). The rename persists through the existing save path – `SaveCurrentCustomProfile` rebuilds `CustomOpenAiProfiles` from combo items and `SelectedCustomProfileName` is reconciled to the current selection, so a rename survives Settings-dialog OK and Trados restart. Feature request from a user.
 
 ---
 
-## [4.19.22] — 2026-04-21
+## [4.19.22] – 2026-04-21
 
-### Fixed (termbase direction handling — architectural overhaul)
+### Fixed (termbase direction handling – architectural overhaul)
 
-- **Term matching now uses the termbase's declared direction, not the per-entry `source_lang` / `target_lang` columns.** Legacy write-path bugs (pre-v4.19.13) left many termbases with a mix of entries whose per-entry language tags didn't agree with the termbase declaration — and `TermbaseReader.LoadAllTerms` trusted those per-entry tags when deciding whether to invert for reverse-direction projects. The result was entries silently not matching even though their text was correct. `LoadAllTerms` now pulls `source_lang` / `target_lang` from the canonical `termbases` table for the inversion decision, making matching resilient to corrupted per-entry tags. Root-cause fix for the "my termbase entry exists but TermLens says no match" class of bug.
-- **The term entry editor now always shows fields in termbase-declared direction.** Previously `TermEntryEditorDialog` inverted field layout when the project direction differed from the termbase's, and this happened only sometimes depending on which entry point opened it — the Termbase Editor grid right-click did not invert, but the TermLens chip right-click did. The inconsistency made reverse-direction termbases especially confusing. Fields, labels, and save flow are now always termbase-direction, matching the Termbase Editor grid. The `projectSourceLang` parameter is retained for source compatibility but ignored.
+- **Term matching now uses the termbase's declared direction, not the per-entry `source_lang` / `target_lang` columns.** Legacy write-path bugs (pre-v4.19.13) left many termbases with a mix of entries whose per-entry language tags didn't agree with the termbase declaration – and `TermbaseReader.LoadAllTerms` trusted those per-entry tags when deciding whether to invert for reverse-direction projects. The result was entries silently not matching even though their text was correct. `LoadAllTerms` now pulls `source_lang` / `target_lang` from the canonical `termbases` table for the inversion decision, making matching resilient to corrupted per-entry tags. Root-cause fix for the "my termbase entry exists but TermLens says no match" class of bug.
+- **The term entry editor now always shows fields in termbase-declared direction.** Previously `TermEntryEditorDialog` inverted field layout when the project direction differed from the termbase's, and this happened only sometimes depending on which entry point opened it – the Termbase Editor grid right-click did not invert, but the TermLens chip right-click did. The inconsistency made reverse-direction termbases especially confusing. Fields, labels, and save flow are now always termbase-direction, matching the Termbase Editor grid. The `projectSourceLang` parameter is retained for source compatibility but ignored.
 
 ### Added
 
-- **"Reverse source/target" right-click action in the Termbase Editor.** Lets you fix one or many reversed-direction entries at once. Menu label dynamically shows the count when multiple rows are selected (e.g. *"Reverse source/target (12 entries)"*). The operation swaps `source_term` ↔ `target_term`, `source_lang` ↔ `target_lang`, `source_abbreviation` ↔ `target_abbreviation`, and flips every linked synonym's language tag (`'source'` ↔ `'target'`). All in one SQL transaction, so partial failure leaves the DB untouched. Right-click on the grid now also preserves multi-row selection when the clicked row was already selected — matches standard Windows list behaviour.
+- **"Reverse source/target" right-click action in the Termbase Editor.** Lets you fix one or many reversed-direction entries at once. Menu label dynamically shows the count when multiple rows are selected (e.g. *"Reverse source/target (12 entries)"*). The operation swaps `source_term` ↔ `target_term`, `source_lang` ↔ `target_lang`, `source_abbreviation` ↔ `target_abbreviation`, and flips every linked synonym's language tag (`'source'` ↔ `'target'`). All in one SQL transaction, so partial failure leaves the DB untouched. Right-click on the grid now also preserves multi-row selection when the clicked row was already selected – matches standard Windows list behaviour.
 - **New `TermbaseReader.ReverseTermDirection(dbPath, termIds)`** helper backing the above. Takes a list of term IDs, opens a single ReadWrite connection, does the swaps atomically.
 
 ### Tools
 
-- **New `tools/repair_termbase_directions.py`** — stopword-heuristic repair that scans a Supervertaler DB, classifies each legacy-bad entry as tag-only / text-swap / ambiguous, and applies the safe fixes. Conservative by design; skips short single-word entries where language can't be determined confidently.
-- **New `tools/ai_repair_termbase_directions.py`** — LLM-powered repair using Claude Sonnet 4.6 for the entries the heuristic can't handle. Reads the Claude API key straight from the plugin's `settings.json`, batches 50 pairs per call, caches responses locally so reruns are free. Operates on one termbase at a time. See `tools/README.md` for caveats and usage.
+- **New `tools/repair_termbase_directions.py`** – stopword-heuristic repair that scans a Supervertaler DB, classifies each legacy-bad entry as tag-only / text-swap / ambiguous, and applies the safe fixes. Conservative by design; skips short single-word entries where language can't be determined confidently.
+- **New `tools/ai_repair_termbase_directions.py`** – LLM-powered repair using Claude Sonnet 4.6 for the entries the heuristic can't handle. Reads the Claude API key straight from the plugin's `settings.json`, batches 50 pairs per call, caches responses locally so reruns are free. Operates on one termbase at a time. See `tools/README.md` for caveats and usage.
 
 ---
 
-## [4.19.20] — 2026-04-20
+## [4.19.20] – 2026-04-20
 
 ### Fixed
 
 - **"Set as active prompt for this project" now reflects in the Batch Translate dropdown immediately and works for any prompt, regardless of which entry point opened the Settings dialog.** Three issues were stacked on top of each other:
-  1. **No live sync** — the Batch Translate dropdown only refreshed when the Settings dialog closed, so right-clicking a prompt → "Set as active prompt for this project" had no visible effect until the user clicked OK. `PromptManagerPanel` now raises a static `ActivePromptChangedGlobal` event; `AiAssistantViewPart` subscribes once in `Initialize` and live-refreshes the Batch dropdown with the pending active path while the dialog is still open. Cancelling the dialog still snaps back to the persisted state via the existing unconditional refresh on close.
-  2. **Category filter hid the checkmark** — even after clicking OK, prompts whose `Category` was not `Translate` (or `Proofread`, in proofread mode) were silently filtered out of the dropdown, so the checkmark had nowhere to land. The category filter now makes an exception for the active prompt — it always appears in the dropdown regardless of folder, so marking any prompt as active works uniformly. Path-separator normalisation was also extended to the selection match (previously only the active-marker check handled `/` vs `\`), eliminating a subtle mismatch when the stored path used forward slashes.
-  3. **Entry-point-dependent wiring** — an earlier iteration subscribed to the event only when the Settings dialog was opened from the AI Assistant gear. Opening Settings from the TermLens gear (which instantiates `TermLensSettingsForm` in a separate code path) left the event with zero subscribers, making the live-sync appear intermittent. The static event used in the final fix is wired once at plugin init, so it catches the change regardless of which code path created the form.
+  1. **No live sync** – the Batch Translate dropdown only refreshed when the Settings dialog closed, so right-clicking a prompt → "Set as active prompt for this project" had no visible effect until the user clicked OK. `PromptManagerPanel` now raises a static `ActivePromptChangedGlobal` event; `AiAssistantViewPart` subscribes once in `Initialize` and live-refreshes the Batch dropdown with the pending active path while the dialog is still open. Cancelling the dialog still snaps back to the persisted state via the existing unconditional refresh on close.
+  2. **Category filter hid the checkmark** – even after clicking OK, prompts whose `Category` was not `Translate` (or `Proofread`, in proofread mode) were silently filtered out of the dropdown, so the checkmark had nowhere to land. The category filter now makes an exception for the active prompt – it always appears in the dropdown regardless of folder, so marking any prompt as active works uniformly. Path-separator normalisation was also extended to the selection match (previously only the active-marker check handled `/` vs `\`), eliminating a subtle mismatch when the stored path used forward slashes.
+  3. **Entry-point-dependent wiring** – an earlier iteration subscribed to the event only when the Settings dialog was opened from the AI Assistant gear. Opening Settings from the TermLens gear (which instantiates `TermLensSettingsForm` in a separate code path) left the event with zero subscribers, making the live-sync appear intermittent. The static event used in the final fix is wired once at plugin init, so it catches the change regardless of which code path created the form.
 
 ---
 
-## [4.19.15] — 2026-04-20
+## [4.19.15] – 2026-04-20
 
 ### Fixed
 
-- **New prompts created at the tree root in the Prompt Manager are now visible in the Batch Translate dropdown.** Previously, creating a new prompt without first selecting a folder left its `Category` empty. The Batch Translate dropdown filters strictly by `Category == "Translate"` (or `"Proofread"`), so root-level prompts were silently excluded — marking one as the active prompt for the project had no visible effect in the Batch panel (the dropdown stayed on `(None — default)`). New prompts now default to the `Translate` category when no folder is selected, so they appear in the Batch dropdown and respect "Set as active prompt for this project" immediately. Existing root-level prompts with empty categories still need to be moved into the `Translate` folder (or re-categorised in the editor) to become visible.
+- **New prompts created at the tree root in the Prompt Manager are now visible in the Batch Translate dropdown.** Previously, creating a new prompt without first selecting a folder left its `Category` empty. The Batch Translate dropdown filters strictly by `Category == "Translate"` (or `"Proofread"`), so root-level prompts were silently excluded – marking one as the active prompt for the project had no visible effect in the Batch panel (the dropdown stayed on `(None – default)`). New prompts now default to the `Translate` category when no folder is selected, so they appear in the Batch dropdown and respect "Set as active prompt for this project" immediately. Existing root-level prompts with empty categories still need to be moved into the `Translate` folder (or re-categorised in the editor) to become visible.
 
 ---
 
-## [4.19.14] — 2026-04-17
+## [4.19.14] – 2026-04-17
 
 ### Added
 
-- **Claude Opus 4.7 support.** Anthropic's new flagship model (released 2026-04-16) is now selectable in AI Settings under the Claude provider and via the OpenRouter gateway (`anthropic/claude-opus-4.7`). Opus 4.7 has a 1M-token context window, 128k max output, and is Anthropic's most capable generally available model. Pricing is $5 / input MTok, $25 / output MTok — the same as Opus 4.6. Sonnet 4.6 remains the recommended default for most translation work; reach for Opus 4.7 when you need top-tier reasoning or long-context jobs. See [What's new in Claude Opus 4.7](https://platform.claude.com/docs/en/about-claude/models/whats-new-claude-4-7) for details.
+- **Claude Opus 4.7 support.** Anthropic's new flagship model (released 2026-04-16) is now selectable in AI Settings under the Claude provider and via the OpenRouter gateway (`anthropic/claude-opus-4.7`). Opus 4.7 has a 1M-token context window, 128k max output, and is Anthropic's most capable generally available model. Pricing is $5 / input MTok, $25 / output MTok – the same as Opus 4.6. Sonnet 4.6 remains the recommended default for most translation work; reach for Opus 4.7 when you need top-tier reasoning or long-context jobs. See [What's new in Claude Opus 4.7](https://platform.claude.com/docs/en/about-claude/models/whats-new-claude-4-7) for details.
 
 ### Fixed (cost estimates)
 
-- **Corrected stale pricing for Claude Opus 4.6 and Haiku 4.5.** The internal pricing table had Opus 4.6 at the pre-4.6 rate of $15 / $75 per MTok — Anthropic dropped Opus pricing to $5 / $25 with the 4.6 release. Haiku 4.5 was listed at $0.80 / $4.00, corrected to the current $1.00 / $5.00. Cost estimates shown in the AI Assistant and Batch Translate were over-stating Opus usage and under-stating Haiku usage — now accurate.
+- **Corrected stale pricing for Claude Opus 4.6 and Haiku 4.5.** The internal pricing table had Opus 4.6 at the pre-4.6 rate of $15 / $75 per MTok – Anthropic dropped Opus pricing to $5 / $25 with the 4.6 release. Haiku 4.5 was listed at $0.80 / $4.00, corrected to the current $1.00 / $5.00. Cost estimates shown in the AI Assistant and Batch Translate were over-stating Opus usage and under-stating Haiku usage – now accurate.
 
 ### Note on Opus 4.7 tokenizer
 
@@ -268,50 +268,50 @@
 
 ---
 
-## [4.19.13] — 2026-04-17
+## [4.19.13] – 2026-04-17
 
-### Fixed (critical — termbase data integrity)
+### Fixed (critical – termbase data integrity)
 
-- **Wrong-direction entries were silently being written to write termbases with mixed declared directions.** `QuickAddTermAction` (Alt+Down / Ctrl+Alt+Shift+T) made a single swap decision using only the **first** write termbase's declared direction, then applied that same swap to **every** termbase in the batch. If you had two or more write termbases with different declared directions (e.g. one EN→NL and one NL→EN), the text for roughly half of them ended up in the wrong source/target columns. The rot compounded on every Alt+Down press. Existing already-wrong entries remain in the DB — clean them up row-by-row with the existing ⇄ reverse button in the Term Entry Editor. Prevention is now in place:
+- **Wrong-direction entries were silently being written to write termbases with mixed declared directions.** `QuickAddTermAction` (Alt+Down / Ctrl+Alt+Shift+T) made a single swap decision using only the **first** write termbase's declared direction, then applied that same swap to **every** termbase in the batch. If you had two or more write termbases with different declared directions (e.g. one EN→NL and one NL→EN), the text for roughly half of them ended up in the wrong source/target columns. The rot compounded on every Alt+Down press. Existing already-wrong entries remain in the DB – clean them up row-by-row with the existing ⇄ reverse button in the Term Entry Editor. Prevention is now in place:
   - `TermbaseReader.InsertTermBatch` takes a new optional `projectSourceLang` parameter and makes a **per-termbase** swap decision inside its loop. Each termbase now stores the text in its own declared direction regardless of the mix of directions in the batch.
   - `QuickAddTermAction` no longer does a global pre-swap; it always passes the project-direction texts through and lets `InsertTermBatch` handle the per-termbase decision.
 - **Duplicate check now detects reverse-direction matches.** `InsertTerm` and `InsertTermBatch` used to consider a term "new" if the same pair existed but was stored in the opposite direction (source↔target). That meant users whose termbases already contained wrong-direction entries from the bug above would end up with the concept stored **twice**, once in each direction, on re-add. The check now matches either `(source=A ∧ target=B)` or `(source=B ∧ target=A)` in the same termbase and rejects both as duplicates.
 
 ---
 
-## [4.19.12] — 2026-04-16
+## [4.19.12] – 2026-04-16
 
 ### Fixed
 
-- **Ctrl+Q (QuickLauncher) now reliably surfaces the Supervertaler Assistant panel.** Previously, selecting a QuickLauncher prompt would submit the message to the chat backend but the dockable Assistant panel could remain auto-hidden, unpinned, or buried behind another dock tab — so the user saw nothing happen. The Chat tab inside the panel was already being selected correctly by `SubmitMessage`; the missing step was activating the panel itself. `RunQuickLauncherPrompt` now calls `instance.Activate()` before submitting, matching the SuperSearch action pattern. Affects both the context-menu QuickLauncher (Ctrl+Q) and the Ctrl+Alt+digit slot shortcuts, since both funnel through the same entry point.
+- **Ctrl+Q (QuickLauncher) now reliably surfaces the Supervertaler Assistant panel.** Previously, selecting a QuickLauncher prompt would submit the message to the chat backend but the dockable Assistant panel could remain auto-hidden, unpinned, or buried behind another dock tab – so the user saw nothing happen. The Chat tab inside the panel was already being selected correctly by `SubmitMessage`; the missing step was activating the panel itself. `RunQuickLauncherPrompt` now calls `instance.Activate()` before submitting, matching the SuperSearch action pattern. Affects both the context-menu QuickLauncher (Ctrl+Q) and the Ctrl+Alt+digit slot shortcuts, since both funnel through the same entry point.
 
 ---
 
-## [4.19.11] — 2026-04-15
+## [4.19.11] – 2026-04-15
 
 ### Fixed
 
-- **Distill and Process Inbox now ignore Obsidian plugin sidecar files (`.edtz`)** in the SuperMemory inbox. Previously, a `.edtz` sidecar sitting next to a Markdown note would be handed to Distill as "raw material", and Distill would fail with *"Unsupported file format: .edtz"*. The inbox scanners in both Distill and Process Inbox now filter these out silently — they are editor metadata, not knowledge content. Other bank-enumeration code paths (article counts, future bank-management features) share the same filter via a new `MemoryBankReader.IsIgnoredSidecar` helper.
+- **Distill and Process Inbox now ignore Obsidian plugin sidecar files (`.edtz`)** in the SuperMemory inbox. Previously, a `.edtz` sidecar sitting next to a Markdown note would be handed to Distill as "raw material", and Distill would fail with *"Unsupported file format: .edtz"*. The inbox scanners in both Distill and Process Inbox now filter these out silently – they are editor metadata, not knowledge content. Other bank-enumeration code paths (article counts, future bank-management features) share the same filter via a new `MemoryBankReader.IsIgnoredSidecar` helper.
 
 ---
 
-## [4.19.10] — 2026-04-13
+## [4.19.10] – 2026-04-13
 
 ### Changed
 
-- **British English consistency** — all user-facing licensing messages and UI labels now use "licence" instead of "license" (e.g., "Please enter a licence key", "Licence activated successfully", Settings → Licence), matching the project's British English convention.
+- **British English consistency** – all user-facing licensing messages and UI labels now use "licence" instead of "license" (e.g., "Please enter a licence key", "Licence activated successfully", Settings → Licence), matching the project's British English convention.
 
 ### Added
 
 - **Auto-indexing after Process Inbox and Health Check.** The `05_INDICES/` folder is now automatically populated with three master index files after every successful Process Inbox or Health Check run:
-  - `master-terminology.md` — a flat table of all source → target term decisions across the bank, with domain, client, confidence, and status columns.
-  - `client-summary.md` — one section per client with their `tldr:` or first paragraph.
-  - `domain-summary.md` — one section per domain with their `tldr:` or first paragraph.
-  These indices are built by scanning frontmatter directly — no LLM call needed, completes in under a second. They make the bank browsable in Obsidian and provide the scan source for future two-pass context loading ([#22](https://github.com/Supervertaler/Supervertaler-for-Trados/issues/22), enhancement #3).
+  - `master-terminology.md` – a flat table of all source → target term decisions across the bank, with domain, client, confidence, and status columns.
+  - `client-summary.md` – one section per client with their `tldr:` or first paragraph.
+  - `domain-summary.md` – one section per domain with their `tldr:` or first paragraph.
+  These indices are built by scanning frontmatter directly – no LLM call needed, completes in under a second. They make the bank browsable in Obsidian and provide the scan source for future two-pass context loading ([#22](https://github.com/Supervertaler/Supervertaler-for-Trados/issues/22), enhancement #3).
 
 ---
 
-## [4.19.9] — 2026-04-13
+## [4.19.9] – 2026-04-13
 
 ### Added
 
@@ -327,15 +327,15 @@
 
 ---
 
-## [4.19.8] — 2026-04-13
+## [4.19.8] – 2026-04-13
 
 ### Added
 
-- **"Save to memory bank" from chat.** Right-click any assistant message in the AI Assistant chat and select "Save to memory bank" to save the Q&A pair (your question and the AI's response) as an inbox note in the active memory bank. Run Process Inbox afterwards to compile it into the knowledge base. This closes the feedback loop described in [#22](https://github.com/Supervertaler/Supervertaler-for-Trados/issues/22) — useful answers no longer vanish into chat history.
+- **"Save to memory bank" from chat.** Right-click any assistant message in the AI Assistant chat and select "Save to memory bank" to save the Q&A pair (your question and the AI's response) as an inbox note in the active memory bank. Run Process Inbox afterwards to compile it into the knowledge base. This closes the feedback loop described in [#22](https://github.com/Supervertaler/Supervertaler-for-Trados/issues/22) – useful answers no longer vanish into chat history.
 
 ---
 
-## [4.19.7] — 2026-04-13
+## [4.19.7] – 2026-04-13
 
 ### Fixed
 
@@ -343,12 +343,12 @@
 
 ### Changed
 
-- **TSV import confirmation dialog.** Before importing, a confirmation dialog now shows the filename, row count, target termbase name, and language pair — giving you a chance to catch mistakes before anything is written.
+- **TSV import confirmation dialog.** Before importing, a confirmation dialog now shows the filename, row count, target termbase name, and language pair – giving you a chance to catch mistakes before anything is written.
 - **TSV import progress dialog.** Large imports (e.g., 2,700+ terms) now show a progress bar with a running count instead of freezing the UI with a wait cursor.
 
 ---
 
-## [4.19.6] — 2026-04-13
+## [4.19.6] – 2026-04-13
 
 ### Changed
 
@@ -356,11 +356,11 @@
 
 ---
 
-## [4.19.5] — 2026-04-13
+## [4.19.5] – 2026-04-13
 
 ### Changed
 
-- **Term Picker shortcut — Ctrl tap (memoQ-style).** Pressing and releasing Ctrl alone (without any other key) now opens the Term Picker dialogue, matching memoQ's behaviour. A quick tap of Ctrl triggers it; holding Ctrl for a combo (Ctrl+C, Ctrl+V, etc.) works normally. Maximum hold duration is 400 ms to prevent accidental triggers. The previous shortcut Ctrl+Alt+G is kept as a fallback.
+- **Term Picker shortcut – Ctrl tap (memoQ-style).** Pressing and releasing Ctrl alone (without any other key) now opens the Term Picker dialogue, matching memoQ's behaviour. A quick tap of Ctrl triggers it; holding Ctrl for a combo (Ctrl+C, Ctrl+V, etc.) works normally. Maximum hold duration is 400 ms to prevent accidental triggers. The previous shortcut Ctrl+Alt+G is kept as a fallback.
 
 ### Fixed
 
@@ -368,15 +368,15 @@
 
 ---
 
-## [4.19.4] — 2026-04-11
+## [4.19.4] – 2026-04-11
 
 ### Fixed
 
-- **Clipboard Mode now respects the Limit spinner.** Previously, clicking "Copy to Clipboard" ignored the Limit value and always copied every matching segment. Now it applies the same limit as the API batch path — set Limit to 20 to copy only the first 20 segments.
+- **Clipboard Mode now respects the Limit spinner.** Previously, clicking "Copy to Clipboard" ignored the Limit value and always copied every matching segment. Now it applies the same limit as the API batch path – set Limit to 20 to copy only the first 20 segments.
 
 ---
 
-## [4.19.3] — 2026-04-11
+## [4.19.3] – 2026-04-11
 
 ### Changed
 
@@ -384,55 +384,55 @@
 
 ---
 
-## [4.19.2] — 2026-04-11
+## [4.19.2] – 2026-04-11
 
 ### Added
 
-- **Crash-recovery TMX backup.** Batch Translate now writes every translated segment to a TMX file as it arrives from the AI. If Trados crashes mid-run, the backup contains everything received so far — import it into any TM to recover. A pre-checked **"Auto-backup translations to TMX"** checkbox and an **"Open folder…"** link appear below the Translate button; untick to disable for a run. Files are saved to `Supervertaler\trados\batch_backups\` and are standard TMX 1.4 — compatible with Trados, memoQ, Wordfast, and any other CAT tool that imports TMX.
+- **Crash-recovery TMX backup.** Batch Translate now writes every translated segment to a TMX file as it arrives from the AI. If Trados crashes mid-run, the backup contains everything received so far – import it into any TM to recover. A pre-checked **"Auto-backup translations to TMX"** checkbox and an **"Open folder…"** link appear below the Translate button; untick to disable for a run. Files are saved to `Supervertaler\trados\batch_backups\` and are standard TMX 1.4 – compatible with Trados, memoQ, Wordfast, and any other CAT tool that imports TMX.
 
 ### Fixed
 
 - **Reports tab now shows entries newest-first.** Prompt log cards are sorted by timestamp during relayout, so the most recent batch or chat call always appears at the top regardless of the order entries arrived.
-- **Termbase AI filtering — word-boundary matching.** `FilterRelevantTerms` now uses `\b` word-boundary regex instead of plain substring matching, so a term like "claim" no longer incorrectly matches "Disclaimer" or "Proclaim".
-- **Termbase AI filtering — initialisation flag.** A bug caused `DisabledAiTermbaseIds` to be reset on every settings save, so per-project termbase exclusions were not preserved correctly across saves. Fixed.
+- **Termbase AI filtering – word-boundary matching.** `FilterRelevantTerms` now uses `\b` word-boundary regex instead of plain substring matching, so a term like "claim" no longer incorrectly matches "Disclaimer" or "Proclaim".
+- **Termbase AI filtering – initialisation flag.** A bug caused `DisabledAiTermbaseIds` to be reset on every settings save, so per-project termbase exclusions were not preserved correctly across saves. Fixed.
 
 ---
 
-## [4.19.1] — 2026-04-10
+## [4.19.1] – 2026-04-10
 
 ### Fixed
 
-- **Long AI responses are now truncated in the chat.** Assistant messages longer than 1,500 characters are truncated to the first 1,000 characters in the chat bubble, with a note: *"Response truncated (N more characters). Right-click → Copy for the full text."* The full original text is always available via right-click → Copy and is preserved in the chat history. This is what finally makes long chat sessions usable — a single Health Check report can be 25,000+ characters (15 screens tall), and rendering that inline broke the scroll math in multiple subtle ways. With truncation, every bubble fits comfortably in the viewport.
+- **Long AI responses are now truncated in the chat.** Assistant messages longer than 1,500 characters are truncated to the first 1,000 characters in the chat bubble, with a note: *"Response truncated (N more characters). Right-click → Copy for the full text."* The full original text is always available via right-click → Copy and is preserved in the chat history. This is what finally makes long chat sessions usable – a single Health Check report can be 25,000+ characters (15 screens tall), and rendering that inline broke the scroll math in multiple subtle ways. With truncation, every bubble fits comfortably in the viewport.
 - **Chat scroll rewrite.** Disabled `FlowLayoutPanel.AutoSize` and switched to manual height management, fixing the long-standing "messages disappear into ghost white space" bug on long chat histories. Users no longer need to click **Clear** before every chat message.
-- **Health Check always shows a completion summary.** When the AI reports issues without auto-fixing any files (no `### FILE:` markers in the response), the chat now shows a clear *"Health Check complete — no changes applied"* message instead of leaving the user guessing whether the operation finished.
-- **User-initiated actions re-engage auto-scroll.** Clicking Send, Health Check, Process Inbox, Distill, or switching memory banks now resets the "user scrolled up" flag so the progress bubble and response land in view — even if the user had been scrolled up reading history.
+- **Health Check always shows a completion summary.** When the AI reports issues without auto-fixing any files (no `### FILE:` markers in the response), the chat now shows a clear *"Health Check complete – no changes applied"* message instead of leaving the user guessing whether the operation finished.
+- **User-initiated actions re-engage auto-scroll.** Clicking Send, Health Check, Process Inbox, Distill, or switching memory banks now resets the "user scrolled up" flag so the progress bubble and response land in view – even if the user had been scrolled up reading history.
 
 ### Changed
 
-- **SuperMemory is off by default for new installations.** `IncludeSuperMemoryContext` and `IncludeSuperMemoryInAutoPrompt` now default to `false`. Most translators should start with the simpler workflow (TermLens glossaries + AI context awareness) and opt into SuperMemory once they have a populated bank. Existing users are unaffected — their saved `true` values are preserved.
+- **SuperMemory is off by default for new installations.** `IncludeSuperMemoryContext` and `IncludeSuperMemoryInAutoPrompt` now default to `false`. Most translators should start with the simpler workflow (TermLens glossaries + AI context awareness) and opt into SuperMemory once they have a populated bank. Existing users are unaffected – their saved `true` values are preserved.
 - **Quick Add dialog redesigned (Ctrl+Alt+M).** The field labels are now language-aware: "Source term (Dutch):" and "Target term (English):" instead of the old "Term / pattern (what's wrong):" and "Correction (correct English form):". New "Save as raw note" checkbox lets you dump ambiguous or context-dependent knowledge into `00_INBOX/` for the AI to compile via Process Inbox, instead of forcing it into a rigid source→target pair. Structured articles now use `→` in their filenames instead of `vs`.
 - **SuperMemory page renamed to "SuperMemory" in GitBook.** The help page title, sidebar label, and all cross-references now consistently use "SuperMemory" as the heading (was "Memory banks"). URL is preserved at `/memory-banks` for backwards compatibility.
 
 ---
 
-## [4.19.0] — 2026-04-09
+## [4.19.0] – 2026-04-09
 
 Headline release: **SuperMemory multi-bank support**. You can now keep several self-contained translation knowledge bases side by side (one per client, per domain, per language pair) and switch between them in a single click from the Supervertaler Assistant toolbar. The two-level terminology ("SuperMemory" = system, "memory bank" = container) is now reflected consistently across the UI, docs, and help system.
 
-### Added — SuperMemory multi-bank support
+### Added – SuperMemory multi-bank support
 
 - **Memory Bank dropdown** in the Supervertaler Assistant toolbar. Lists every bank under your user-data folder with the active bank pre-selected. Switching is immediate: the next chat turn, batch translation and Process Inbox run all read from the new bank, and chat history is preserved across the switch. The active bank is persisted in settings and survives Trados restarts.
-- **Create new banks from the toolbar** — pick `+ New memory bank…` at the bottom of the dropdown, enter a short name (lowercase letters, digits, hyphens or underscores) with a live preview of the final folder name, and the bank is created on disk with the full seven-folder skeleton and activated in one click. No need to touch Settings or File Explorer.
-- **Bundled template files** — every new bank ships with the canonical `compile.md`, `lint.md`, `query.md`, `translate_with_kb.md` and "Claude dump" helper templates in `06_TEMPLATES/`, so Process Inbox and Health Check work against a fresh bank out of the box.
-- **Heal-on-activation prompt** — if you activate an older bank that is missing its canonical template files (a bank created before this release, or one where you deleted a template by accident), the plugin shows a one-time "Missing memory bank templates" dialog offering to restore them from the built-in defaults. Existing template files are never overwritten.
-- **Shared with the Python Supervertaler Assistant** — memory banks live in the shared Supervertaler user-data folder with byte-identical layout, so a bank created in Trados works unchanged in the standalone app and vice versa.
-- **Legacy single-bank migration** — the first time you open a multi-bank-aware build against an older single-bank installation, the plugin offers to move your existing `memory-bank/` or `supermemory/` folder into the new `memory-banks/<name>/` layout.
+- **Create new banks from the toolbar** – pick `+ New memory bank…` at the bottom of the dropdown, enter a short name (lowercase letters, digits, hyphens or underscores) with a live preview of the final folder name, and the bank is created on disk with the full seven-folder skeleton and activated in one click. No need to touch Settings or File Explorer.
+- **Bundled template files** – every new bank ships with the canonical `compile.md`, `lint.md`, `query.md`, `translate_with_kb.md` and "Claude dump" helper templates in `06_TEMPLATES/`, so Process Inbox and Health Check work against a fresh bank out of the box.
+- **Heal-on-activation prompt** – if you activate an older bank that is missing its canonical template files (a bank created before this release, or one where you deleted a template by accident), the plugin shows a one-time "Missing memory bank templates" dialog offering to restore them from the built-in defaults. Existing template files are never overwritten.
+- **Shared with the Python Supervertaler Assistant** – memory banks live in the shared Supervertaler user-data folder with byte-identical layout, so a bank created in Trados works unchanged in the standalone app and vice versa.
+- **Legacy single-bank migration** – the first time you open a multi-bank-aware build against an older single-bank installation, the plugin offers to move your existing `memory-bank/` or `supermemory/` folder into the new `memory-banks/<name>/` layout.
 
 ### Improved
 
-- **Distill now archives source files dropped in the inbox.** If you drop a TMX, PDF or DOCX directly into a bank's `00_INBOX/` folder and run Distill on it, the source file is moved to `00_INBOX/_archive/` after a successful distill — mirroring how Process Inbox archives the Markdown files it compiles.
+- **Distill now archives source files dropped in the inbox.** If you drop a TMX, PDF or DOCX directly into a bank's `00_INBOX/` folder and run Distill on it, the source file is moved to `00_INBOX/_archive/` after a successful distill – mirroring how Process Inbox archives the Markdown files it compiles.
 - **Process Inbox now recognises non-Markdown files in the inbox.** Instead of silently ignoring TMX, PDF or DOCX files dropped in `00_INBOX/`, the button lights up and clicking it shows a helpful message pointing you at Distill for binary files. Mixed inboxes (both `.md` and binary files) process the Markdown and warn about the rest.
-- **Health Check shows progress instantly.** The feature used to scan the entire bank synchronously on the UI thread before adding any chat message, leaving the user staring at a frozen UI for several seconds on mature banks. The scan now runs on a background thread and a "SuperMemory: Health Check — scanning memory bank …" bubble appears the moment you click the button.
+- **Health Check shows progress instantly.** The feature used to scan the entire bank synchronously on the UI thread before adding any chat message, leaving the user staring at a frozen UI for several seconds on mature banks. The scan now runs on a background thread and a "SuperMemory: Health Check – scanning memory bank …" bubble appears the moment you click the button.
 - **Next-steps messages in Distill and Process Inbox summaries.** The chat banner after a successful Distill now suggests running Process Inbox next and then Health Check; the Process Inbox summary suggests running Health Check afterwards. Obsidian review is positioned as the optional step, not the main one.
 - **Chat context bar is now green.** The "Dutch (BE) → English (GB) | Source: …" line at the top of the Supervertaler Assistant panel is now rendered in forest green (Material Design Green 800) instead of medium grey, making the current language pair and source segment much easier to spot at a glance.
 
@@ -448,7 +448,7 @@ Headline release: **SuperMemory multi-bank support**. You can now keep several s
 ### Changed
 
 - **SuperMemory is the brand name; memory banks are the containers.** The two-level terminology (similar to Gmail/inbox or Obsidian/vault) is now reflected consistently. Chat banners, Reports tab labels, and the help menu use "SuperMemory:" as the system prefix. The toolbar dropdown and the "+ New memory bank…" sentinel use "memory bank" for the individual container. Both naming choices are stable going forward.
-- **Memory Banks help pages reorganised** — the three overlapping pages (`memory-banks.md`, `context-awareness.md`, `memory-banks/ai-integration.md`) now follow a clear "one canonical home per concept" principle. `context-awareness.md` is the single authoritative menu of context sources with memory banks as one section among several; `memory-banks.md` is the noun page covering what SuperMemory is, what memory banks are, how to create and switch them, and how they sync with the Python assistant; `memory-banks/ai-integration.md` is the power-user deep dive on the loading algorithm.
+- **Memory Banks help pages reorganised** – the three overlapping pages (`memory-banks.md`, `context-awareness.md`, `memory-banks/ai-integration.md`) now follow a clear "one canonical home per concept" principle. `context-awareness.md` is the single authoritative menu of context sources with memory banks as one section among several; `memory-banks.md` is the noun page covering what SuperMemory is, what memory banks are, how to create and switch them, and how they sync with the Python assistant; `memory-banks/ai-integration.md` is the power-user deep dive on the loading algorithm.
 - **Tooltip text** on Process Inbox, Health Check and Distill buttons clarified to refer to "the active memory bank" rather than "your SuperMemory" generically.
 - **Quick Add dialog title** changed from "Add to SuperMemory" to "Quick Add to memory bank".
 
@@ -460,191 +460,191 @@ Headline release: **SuperMemory multi-bank support**. You can now keep several s
 
 All the 4.18.50–4.18.57 improvements are rolled into this release:
 
-- **Shorter panel names** — docking tabs and ribbon buttons show "TermLens" and "SuperSearch" instead of "Supervertaler TermLens" and "Supervertaler SuperSearch".
-- **SuperSearch improvements** — resizable preview pane (draggable splitter), visible source/target divider, highlight rendering fix (no more "documentsare" collisions), preview pane click reliability, header label clipping fix, match truncation fix (matches no longer show "Da..." instead of "Dawn").
+- **Shorter panel names** – docking tabs and ribbon buttons show "TermLens" and "SuperSearch" instead of "Supervertaler TermLens" and "Supervertaler SuperSearch".
+- **SuperSearch improvements** – resizable preview pane (draggable splitter), visible source/target divider, highlight rendering fix (no more "documentsare" collisions), preview pane click reliability, header label clipping fix, match truncation fix (matches no longer show "Da..." instead of "Dawn").
 - **SuperSearch screencast** embedded at the top of the SuperSearch help page.
-- **Gemma 4 models** — Google's Gemma 4 31B and Gemma 4 26B MoE added to both the Gemini provider and OpenRouter routes.
-- **Proofreading false positives for inline tags** — source and target now use the same plain-text extraction so tag markup never reaches the AI proofreader.
+- **Gemma 4 models** – Google's Gemma 4 31B and Gemma 4 26B MoE added to both the Gemini provider and OpenRouter routes.
+- **Proofreading false positives for inline tags** – source and target now use the same plain-text extraction so tag markup never reaches the AI proofreader.
 
 ---
 
-## [4.18.57] — 2026-04-07
+## [4.18.57] – 2026-04-07
 
 ### Changed
-- **Shorter panel names** — docking tabs and ribbon buttons now show "TermLens" and "SuperSearch" instead of "Supervertaler TermLens" and "Supervertaler SuperSearch"; "Supervertaler Assistant" is unchanged
+- **Shorter panel names** – docking tabs and ribbon buttons now show "TermLens" and "SuperSearch" instead of "Supervertaler TermLens" and "Supervertaler SuperSearch"; "Supervertaler Assistant" is unchanged
 
 ### Docs
-- **SuperSearch screencast** — embedded the new SuperSearch demo video at the top of the SuperSearch help page
+- **SuperSearch screencast** – embedded the new SuperSearch demo video at the top of the SuperSearch help page
 - **Updated help, README, and website** with video links and playlist
 
 ---
 
-## [4.18.56] — 2026-04-06
+## [4.18.56] – 2026-04-06
 
 ### Added
-- **SuperSearch resizable preview** — the preview pane below the results grid can now be dragged up or down to resize via a splitter bar (with hover highlight)
+- **SuperSearch resizable preview** – the preview pane below the results grid can now be dragged up or down to resize via a splitter bar (with hover highlight)
 
 ### Improved
-- **SuperSearch preview divider** — added a visible vertical line between the Source and Target preview boxes, and refined the header background colour for better visual separation
+- **SuperSearch preview divider** – added a visible vertical line between the Source and Target preview boxes, and refined the header background colour for better visual separation
 
 ---
 
-## [4.18.55] — 2026-04-06
+## [4.18.55] – 2026-04-06
 
 ### Fixed
-- **SuperSearch highlight rendering** — rewrote the highlight painting to draw yellow backgrounds first, then render text once on top, eliminating the "documentsare" word-collision and truncation artefacts from the previous overlay approach
-- **SuperSearch preview pane** — preview now also updates on cell click (not just selection change), making it more reliable when clicking between results
-- **SuperSearch "Target" label clipped** — increased the preview header row height so descenders (g, y, p) are no longer cut off
+- **SuperSearch highlight rendering** – rewrote the highlight painting to draw yellow backgrounds first, then render text once on top, eliminating the "documentsare" word-collision and truncation artefacts from the previous overlay approach
+- **SuperSearch preview pane** – preview now also updates on cell click (not just selection change), making it more reliable when clicking between results
+- **SuperSearch "Target" label clipped** – increased the preview header row height so descenders (g, y, p) are no longer cut off
 
 ---
 
-## [4.18.54] — 2026-04-06
+## [4.18.54] – 2026-04-06
 
 ### Fixed
-- **SuperSearch highlight truncation** — search matches in the results grid showed truncated text with ellipsis (e.g. "Da..." instead of "Dawn") because the highlight overlay used `EndEllipsis` text formatting; match text is now clipped cleanly
+- **SuperSearch highlight truncation** – search matches in the results grid showed truncated text with ellipsis (e.g. "Da..." instead of "Dawn") because the highlight overlay used `EndEllipsis` text formatting; match text is now clipped cleanly
 
 ---
 
-## [4.18.53] — 2026-04-06
+## [4.18.53] – 2026-04-06
 
 ### Added
-- **Gemma 4 on OpenRouter** — added Gemma 4 31B and 26B MoE to the OpenRouter provider list for users who prefer that route
+- **Gemma 4 on OpenRouter** – added Gemma 4 31B and 26B MoE to the OpenRouter provider list for users who prefer that route
 
 ---
 
-## [4.18.52] — 2026-04-06
+## [4.18.52] – 2026-04-06
 
 ### Added
-- **Gemma 4 models** — added Google's new open-source Gemma 4 31B and Gemma 4 26B MoE models to the Gemini provider. These use the same API key and endpoint, offer strong multilingual quality, and have a 256K context window
+- **Gemma 4 models** – added Google's new open-source Gemma 4 31B and Gemma 4 26B MoE models to the Gemini provider. These use the same API key and endpoint, offer strong multilingual quality, and have a 256K context window
 
 ---
 
-## [4.18.51] — 2026-04-06
+## [4.18.51] – 2026-04-06
 
 ### Fixed
-- **Proofreading false positives for inline tags** — source segments were sent to the AI with raw Trados tag markup (e.g. `<field name="Seq" value="2"/>`) while target segments had tags stripped to plain text, causing the AI to flag every auto-numbering field and inline tag as "removed from the target". Both source and target now use the same plain-text extraction so tag markup never reaches the proofreader
+- **Proofreading false positives for inline tags** – source segments were sent to the AI with raw Trados tag markup (e.g. `<field name="Seq" value="2"/>`) while target segments had tags stripped to plain text, causing the AI to flag every auto-numbering field and inline tag as "removed from the target". Both source and target now use the same plain-text extraction so tag markup never reaches the proofreader
 
 ---
 
-## [4.18.50] — 2026-04-06
+## [4.18.50] – 2026-04-06
 
 ### Fixed
-- **SuperMemory toolbar** — Health Check button stayed greyed out after any operation completed; now correctly restores to active blue like the other buttons
+- **SuperMemory toolbar** – Health Check button stayed greyed out after any operation completed; now correctly restores to active blue like the other buttons
 
 ---
 
-## [4.18.49] — 2026-04-06
+## [4.18.49] – 2026-04-06
 
 ### Changed
-- **Single-tier licensing** — replaced the three-tier pricing model (TermLens / Supervertaler Assistant / Bundle) with a single plan: **Supervertaler for Trados** at €20/month or €200/year. All features are now included in every paid licence. Existing subscribers on older plans are automatically upgraded to full access
+- **Single-tier licensing** – replaced the three-tier pricing model (TermLens / Supervertaler Assistant / Bundle) with a single plan: **Supervertaler for Trados** at €20/month or €200/year. All features are now included in every paid licence. Existing subscribers on older plans are automatically upgraded to full access
 
 ### Improved
-- **Licence panel** — simplified UI with a single purchase link; removed the "Upgrade" link (no longer applicable)
-- **About dialogue** — licence status now shows "Licence: Active" instead of tier-specific names
-- **Licence overlay** — the AI Assistant panel now shows a generic "A licence is required" message instead of the old tier-specific "upgrade required" text
-- **Licensing documentation** — rewritten for the single-tier model
+- **Licence panel** – simplified UI with a single purchase link; removed the "Upgrade" link (no longer applicable)
+- **About dialogue** – licence status now shows "Licence: Active" instead of tier-specific names
+- **Licence overlay** – the AI Assistant panel now shows a generic "A licence is required" message instead of the old tier-specific "upgrade required" text
+- **Licensing documentation** – rewritten for the single-tier model
 
 ---
 
-## [4.18.48] — 2026-04-05
+## [4.18.48] – 2026-04-05
 
 ### Added
-- **SuperSearch** — new dockable ViewPart (View > Supervertaler SuperSearch) for cross-file search, find & replace, and segment navigation across all SDLXLIFF files in a Trados project
+- **SuperSearch** – new dockable ViewPart (View > Supervertaler SuperSearch) for cross-file search, find & replace, and segment navigation across all SDLXLIFF files in a Trados project
   - Searches all SDLXLIFF files in the target language folder (avoids duplicate results from the source language folder)
   - Search scope: Source & Target, Source only, or Target only
   - Case-sensitive and regex search options
   - Results grid with File, Segment #, Source, Target, and Status columns
   - Matching text highlighted in yellow in both the results grid and the preview pane
-  - **Preview pane** — single-click a result row to see the full source and target text in a detail pane below the grid, with large font and yellow match highlighting
-  - **Click-to-navigate** — double-click a result to jump to that segment in the Trados editor (active file); clear status message for cross-file segments
-  - **Find & Replace** — collapsible replace bar for target-only replacements; single replace (via Trados API, undoable) and Replace All (with two-step confirmation dialog for irreversible disk modifications)
-  - **File selection** — Files button to include/exclude specific project files from the search
-  - **Keyboard shortcut** — Alt+S opens SuperSearch; if text is selected in the editor, it auto-fills the search box and runs the search immediately
-  - **Right-click context menu** — SuperSearch option in the editor context menu
+  - **Preview pane** – single-click a result row to see the full source and target text in a detail pane below the grid, with large font and yellow match highlighting
+  - **Click-to-navigate** – double-click a result to jump to that segment in the Trados editor (active file); clear status message for cross-file segments
+  - **Find & Replace** – collapsible replace bar for target-only replacements; single replace (via Trados API, undoable) and Replace All (with two-step confirmation dialog for irreversible disk modifications)
+  - **File selection** – Files button to include/exclude specific project files from the search
+  - **Keyboard shortcut** – Alt+S opens SuperSearch; if text is selected in the editor, it auto-fills the search box and runs the search immediately
+  - **Right-click context menu** – SuperSearch option in the editor context menu
   - Regex replace supports capture groups ($1, $2, etc.)
   - Status bar shows result count, file count, and search time in milliseconds
 
 ---
 
-## [4.18.47] — 2026-04-05
+## [4.18.47] – 2026-04-05
 
 ### Added
-- **Incognito Mode** — new toggle in AI Settings that tells the AI to anonymise all personal and project data in its responses. Project names, file paths, TM names, user names, and other identifying information are replaced with plausible placeholders. Useful for screen sharing, recording demos, posting screenshots in forums, or any situation where client data should remain confidential
+- **Incognito Mode** – new toggle in AI Settings that tells the AI to anonymise all personal and project data in its responses. Project names, file paths, TM names, user names, and other identifying information are replaced with plausible placeholders. Useful for screen sharing, recording demos, posting screenshots in forums, or any situation where client data should remain confidential
 
 ### Fixed
-- **TM discovery** — the "List TMs" and "Find TM" tools now scan all `.sdlproj` files for TM references, correctly resolving `sdltm.file:///` URIs and relative paths. This fixes the issue where TMs stored in project folders or custom locations (outside the default `Translation Memories` folder) were not found
-- **Studio Tools help** — removed outdated Claude-only language; added active-development notice with support contact
+- **TM discovery** – the "List TMs" and "Find TM" tools now scan all `.sdlproj` files for TM references, correctly resolving `sdltm.file:///` URIs and relative paths. This fixes the issue where TMs stored in project folders or custom locations (outside the default `Translation Memories` folder) were not found
+- **Studio Tools help** – removed outdated Claude-only language; added active-development notice with support contact
 
 ---
 
-## [4.18.46] — 2026-04-05
+## [4.18.46] – 2026-04-05
 
 ### Added
-- **Multi-provider Studio Tools** — Studio Tools now works with all major AI providers: OpenAI, Gemini, Grok, and Mistral, in addition to Claude. Each provider uses its native function calling API (OpenAI `tools`, Gemini `functionDeclarations`, Claude `tool_use`). Ollama remains chat-only as local models have inconsistent tool support
+- **Multi-provider Studio Tools** – Studio Tools now works with all major AI providers: OpenAI, Gemini, Grok, and Mistral, in addition to Claude. Each provider uses its native function calling API (OpenAI `tools`, Gemini `functionDeclarations`, Claude `tool_use`). Ollama remains chat-only as local models have inconsistent tool support
 
 ### Improved
-- **AI Assistant help** — restructured into sub-pages: Context Awareness, File Attachments, Studio Tools, and Providers and Models (matching the SuperMemory help structure)
+- **AI Assistant help** – restructured into sub-pages: Context Awareness, File Attachments, Studio Tools, and Providers and Models (matching the SuperMemory help structure)
 
 ---
 
-## [4.18.45] — 2026-04-05
+## [4.18.45] – 2026-04-05
 
 ### Added
-- **Project Statistics tool** — ask "What are the word counts for this project?" to get a full analysis breakdown (perfect, context, exact, fuzzy, new, repetitions) per language direction, read directly from the `.sdlproj` file
-- **File Status tool** — ask "What is the translation status of the files?" to see per-file confirmation status (not started, draft, translated, approved, signed off) with segment and word counts
-- **Project Termbases tool** — ask "What termbases are attached to this project?" to list termbases with their enabled state, file paths, and language index mappings
-- **TM Info tool** — ask "Tell me about my English-Dutch TM" to get TM details (language pair, segment count, file size, creation date) read directly from the `.sdltm` SQLite metadata
-- **TM Search tool** — ask "Search the TM for 'compliance'" to find how terms or phrases were translated before, with source/target pairs and usage counts
+- **Project Statistics tool** – ask "What are the word counts for this project?" to get a full analysis breakdown (perfect, context, exact, fuzzy, new, repetitions) per language direction, read directly from the `.sdlproj` file
+- **File Status tool** – ask "What is the translation status of the files?" to see per-file confirmation status (not started, draft, translated, approved, signed off) with segment and word counts
+- **Project Termbases tool** – ask "What termbases are attached to this project?" to list termbases with their enabled state, file paths, and language index mappings
+- **TM Info tool** – ask "Tell me about my English-Dutch TM" to get TM details (language pair, segment count, file size, creation date) read directly from the `.sdltm` SQLite metadata
+- **TM Search tool** – ask "Search the TM for 'compliance'" to find how terms or phrases were translated before, with source/target pairs and usage counts
 
 ### Improved
-- **Studio Tools help page** — expanded with all 9 tools, 30+ example questions organised by category (projects, statistics, progress, termbases, TMs, TM search, combined)
+- **Studio Tools help page** – expanded with all 9 tools, 30+ example questions organised by category (projects, statistics, progress, termbases, TMs, TM search, combined)
 
 ---
 
-## [4.18.44] — 2026-04-05
+## [4.18.44] – 2026-04-05
 
 ### Added
-- **Studio Tools** — the Supervertaler Assistant can now query your Trados Studio installation using natural language. Ask about your projects, translation memories, or project templates and the AI will look up the answer directly from your local Studio data. Uses Claude's tool use API to automatically call the right query behind the scenes — no special syntax needed, just ask naturally (e.g. "What projects do I have?", "Tell me about the Client Alpha project", "List my TMs"). The thinking indicator shows what tool is running (e.g. "Checking Trados projects…"). Currently supports four read-only tools: list projects (with optional status filter), get project details (languages, files, path), list translation memories, and list project templates. Claude-only for now — other providers continue to work as before without tool use
-- **Studio Tools help page** — new documentation page with feature overview, available tools table, and 15+ example questions organised by category
+- **Studio Tools** – the Supervertaler Assistant can now query your Trados Studio installation using natural language. Ask about your projects, translation memories, or project templates and the AI will look up the answer directly from your local Studio data. Uses Claude's tool use API to automatically call the right query behind the scenes – no special syntax needed, just ask naturally (e.g. "What projects do I have?", "Tell me about the Client Alpha project", "List my TMs"). The thinking indicator shows what tool is running (e.g. "Checking Trados projects…"). Currently supports four read-only tools: list projects (with optional status filter), get project details (languages, files, path), list translation memories, and list project templates. Claude-only for now – other providers continue to work as before without tool use
+- **Studio Tools help page** – new documentation page with feature overview, available tools table, and 15+ example questions organised by category
 
 ---
 
-## [4.18.43] — 2026-04-04
+## [4.18.43] – 2026-04-04
 
 ### Added
-- **SuperMemory knowledge base integration** — SuperMemory articles (client profiles, domain knowledge, style guides, terminology decisions) are now automatically loaded into both AI chat and batch translation prompts. Context is selected based on the active Trados project: client profiles are matched by project name, domain articles by document type, and style/terminology articles are always included. Token budget management (4 000 tokens) with priority-based trimming ensures prompts stay within limits
-- **Client detection** — fuzzy-matches the Trados project name against SuperMemory `01_CLIENTS/` profile frontmatter to automatically load the right client profile
-- **Domain detection** — reuses the existing document analyser to load relevant domain knowledge articles (legal, medical, technical, etc.)
-- **SuperMemory on/off toggle** — new "Include SuperMemory knowledge base in AI context" checkbox in AI Settings, enabled by default
-- **Client code field for termbases** — new optional "Client" metadata field on term entries (e.g. "ACME", "GLOBEX"); shown in the term editor dialog and included in AI prompts when present
-- **Inbox auto-refresh** — a FileSystemWatcher monitors the SuperMemory `00_INBOX` folder and automatically updates the inbox count when files are added externally (e.g. via the Obsidian Web Clipper)
-- **SuperMemory toolbar heading** — the toolbar strip now shows a "SuperMemory" label and a "?" help link that opens the SuperMemory documentation
-- **SuperMemory help links** — the Chat tab's help dropdown now includes a "SuperMemory Help" item; the toolbar "?" also links to the docs
+- **SuperMemory knowledge base integration** – SuperMemory articles (client profiles, domain knowledge, style guides, terminology decisions) are now automatically loaded into both AI chat and batch translation prompts. Context is selected based on the active Trados project: client profiles are matched by project name, domain articles by document type, and style/terminology articles are always included. Token budget management (4 000 tokens) with priority-based trimming ensures prompts stay within limits
+- **Client detection** – fuzzy-matches the Trados project name against SuperMemory `01_CLIENTS/` profile frontmatter to automatically load the right client profile
+- **Domain detection** – reuses the existing document analyser to load relevant domain knowledge articles (legal, medical, technical, etc.)
+- **SuperMemory on/off toggle** – new "Include SuperMemory knowledge base in AI context" checkbox in AI Settings, enabled by default
+- **Client code field for termbases** – new optional "Client" metadata field on term entries (e.g. "ACME", "GLOBEX"); shown in the term editor dialog and included in AI prompts when present
+- **Inbox auto-refresh** – a FileSystemWatcher monitors the SuperMemory `00_INBOX` folder and automatically updates the inbox count when files are added externally (e.g. via the Obsidian Web Clipper)
+- **SuperMemory toolbar heading** – the toolbar strip now shows a "SuperMemory" label and a "?" help link that opens the SuperMemory documentation
+- **SuperMemory help links** – the Chat tab's help dropdown now includes a "SuperMemory Help" item; the toolbar "?" also links to the docs
 
 ### Improved
-- **SuperMemory documentation** — rewrote the safety/backup section with practical advice (no git jargon); added Obsidian Web Clipper setup instructions; documented the AI context integration, auto-detection, and token budget
+- **SuperMemory documentation** – rewrote the safety/backup section with practical advice (no git jargon); added Obsidian Web Clipper setup instructions; documented the AI context integration, auto-detection, and token budget
 
 ---
 
-## [4.18.40] — 2026-04-04
+## [4.18.40] – 2026-04-04
 
 ### Added
-- **SuperMemory** — a self-organizing, AI-maintained translation knowledge base that replaces traditional TMs and term bases with a living wiki of interlinked Markdown files. Stores client profiles, terminology decisions, domain conventions, and style preferences in a human-readable vault that the AI consults when translating. Inspired by Andrej Karpathy's LLM knowledge base architecture
-- **SuperMemory Quick Add (Ctrl+Alt+M)** — capture terms and corrections from the Trados editor into your SuperMemory vault. Also available via right-click in the editor grid. Pre-fills from source/target selection, adapts the correction label to the target language (e.g. "Correct Dutch form"), and optionally appends the term to the active translation prompt's terminology table for immediate effect on the next Ctrl+T
-- **Per-project active prompt** — right-click any translation prompt in the Prompt Manager and choose "Set as active prompt for this project". Shown with a pin icon and bold blue text in the Prompt Manager, and with a checkmark in the Batch Translate dropdown. Saved per project so different projects can use different prompts
-- **Active prompt auto-selection in Batch Translate** — opening a project with an active prompt set automatically selects it in the dropdown
+- **SuperMemory** – a self-organizing, AI-maintained translation knowledge base that replaces traditional TMs and term bases with a living wiki of interlinked Markdown files. Stores client profiles, terminology decisions, domain conventions, and style preferences in a human-readable vault that the AI consults when translating. Inspired by Andrej Karpathy's LLM knowledge base architecture
+- **SuperMemory Quick Add (Ctrl+Alt+M)** – capture terms and corrections from the Trados editor into your SuperMemory vault. Also available via right-click in the editor grid. Pre-fills from source/target selection, adapts the correction label to the target language (e.g. "Correct Dutch form"), and optionally appends the term to the active translation prompt's terminology table for immediate effect on the next Ctrl+T
+- **Per-project active prompt** – right-click any translation prompt in the Prompt Manager and choose "Set as active prompt for this project". Shown with a pin icon and bold blue text in the Prompt Manager, and with a checkmark in the Batch Translate dropdown. Saved per project so different projects can use different prompts
+- **Active prompt auto-selection in Batch Translate** – opening a project with an active prompt set automatically selects it in the dropdown
 
 ### Improved
-- **Selectable and copyable proofreading report text** — issue descriptions and suggestions in the Reports tab are now selectable text with right-click context menu (Copy issue description, Copy suggestion, Copy all). Clicking the segment number or card background still navigates to the segment
-- **Batch Translate prompt dropdown layout** — fixed the AutoPrompt button disappearing off-screen when long prompt names were selected; the dropdown and button now resize properly with the panel width
-- **Updated help documentation** — SuperMemory, keyboard shortcuts, batch translate, prompts, and project settings pages updated
+- **Selectable and copyable proofreading report text** – issue descriptions and suggestions in the Reports tab are now selectable text with right-click context menu (Copy issue description, Copy suggestion, Copy all). Clicking the segment number or card background still navigates to the segment
+- **Batch Translate prompt dropdown layout** – fixed the AutoPrompt button disappearing off-screen when long prompt names were selected; the dropdown and button now resize properly with the panel width
+- **Updated help documentation** – SuperMemory, keyboard shortcuts, batch translate, prompts, and project settings pages updated
 
 ### Fixed
-- **Active prompt indicator path comparison** — normalised path separators so the active prompt checkmark displays correctly regardless of stored path format
+- **Active prompt indicator path comparison** – normalised path separators so the active prompt checkmark displays correctly regardless of stored path format
 
 ---
 
-## [4.18.39] — 2026-04-04
+## [4.18.39] – 2026-04-04
 
 ### Fixed
 - **Term direction inversion broken for same-language locale pairs** – Quick-add (Alt+Up, Alt+Enter) and the term entry editor incorrectly swapped source/target terms in projects where source and target are variants of the same language (e.g. en-US → en-GB), because the language name comparison failed on format differences ("English (United States)" vs "English (US)"). Now normalises both names via `ShortenLanguageName` before comparing, so locale variants match correctly while genuinely reversed directions (e.g. NL→EN project with EN→NL termbase) still invert as expected.
@@ -654,14 +654,14 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.38] — 2026-04-02
+## [4.18.38] – 2026-04-02
 
 ### Improved
 - **Markdown table rendering in term notes/definitions** – wide tables (cells longer than 40 characters) now render as labelled paragraphs with full inline formatting (bold, italic, emoji, inline code) instead of a cramped monospace grid that stripped all formatting; compact tables still use the monospace layout
 
 ---
 
-## [4.18.37] — 2026-04-02
+## [4.18.37] – 2026-04-02
 
 ### Added
 - **OpenRouter provider** – access 200+ models from OpenAI, Anthropic, Google, Mistral, and others with a single API key. Includes a curated dropdown of 8 recommended models (Claude Sonnet/Opus, GPT-5.4/Mini, Gemini 3.1 Pro/Flash, Mistral Small 4, Qwen 3.6 Plus Free) plus an editable model field for typing any OpenRouter model ID
@@ -672,7 +672,7 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.36] — 2026-04-02
+## [4.18.36] – 2026-04-02
 
 ### Improved
 - **Respect Trados "Enabled" checkbox for MultiTerm termbases** – MultiTerm termbases disabled in Trados Project Settings → Termbases are now excluded from TermLens; previously all attached termbases were loaded regardless of the Enabled flag
@@ -680,21 +680,21 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.35] — 2026-04-02
+## [4.18.35] – 2026-04-02
 
 ### Fixed
 - **MultiTerm matches disappear after adding or editing a term** – adding a term via the dialog, editing a term via right-click, or saving AI Assistant settings triggered a full Supervertaler termbase reload that replaced the in-memory index without re-merging MultiTerm entries; the green MultiTerm chips would vanish until navigating to a different segment and back. Fixed by re-loading MultiTerm termbases after every full index rebuild. This bug has been present since MultiTerm support was introduced in v3.4.0.
 
 ---
 
-## [4.18.34] — 2026-04-02
+## [4.18.34] – 2026-04-02
 
 ### Improved
 - **Batch Operations provider/model selector** – the provider label in Batch Operations is now clickable and shows the same cascading flyout menu as the Chat tab, allowing quick model switching without opening AI Settings
 
 ---
 
-## [4.18.33] — 2026-04-01
+## [4.18.33] – 2026-04-01
 
 ### Added
 - **Supervertaler Assistant licensing tier** – new standalone plan for AI-only users (€15/month or €150/year); grants access to AI Assistant, Batch Translate, QuickLauncher, and Ctrl+T without requiring TermLens; termbases (including MultiTerm) are still loaded for AI prompt context
@@ -706,7 +706,7 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.32] — 2026-04-01
+## [4.18.32] – 2026-04-01
 
 ### Improved
 - **Clipboard Mode uses shorter per-segment language labels** – segment lines now use "Dutch:" / "English:" instead of "Dutch (Netherlands):" / "English (United Kingdom):", saving roughly 2,000 tokens on a 500-segment document; the full language names with variants are still stated once in the system prompt
@@ -717,14 +717,14 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.31] — 2026-04-01
+## [4.18.31] – 2026-04-01
 
 ### Fixed
 - **Per-project termbase selection no longer carries over to new projects** – when opening a Trados project for the first time, TermLens now starts with clean defaults (all termbases enabled, no Write or Project flags) instead of inheriting the previous project's selections
 
 ---
 
-## [4.18.30] — 2026-04-01
+## [4.18.30] – 2026-04-01
 
 ### Added
 - **Clipboard Mode** – new workflow for translating and proofreading via any web-based LLM (ChatGPT, Claude, Gemini, etc.) without an API key; tick the "Clipboard Mode" checkbox in Batch Operations, click "Copy to Clipboard" to get a fully formatted prompt with numbered bilingual segments (including status annotations, terminology, and document context), paste into any LLM chat, then click "Paste from Clipboard" to import the translations back into Trados with full tag reconstruction and validation
@@ -735,21 +735,21 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.28] — 2026-03-31
+## [4.18.28] – 2026-03-31
 
 ### Fixed
 - **Batch Translate/Proofread no longer fails with "Cannot determine source/target language"** – the language pair is now cached when a document is opened and when segments are navigated, so the AI Assistant can still resolve languages even when the editor's ActiveFile is temporarily unavailable
 
 ---
 
-## [4.18.27] — 2026-03-30
+## [4.18.27] – 2026-03-30
 
 ### Added
 - **Text transforms in QuickLauncher** – new `type: transform` prompt type that performs local find-and-replace on the active target segment without calling an AI provider; rules are defined as `find:`/`replace:` pairs in the prompt content body with `\uXXXX` Unicode escape support; built-in "Strip U+2028" transform removes invisible InDesign line separators; cleaned text is automatically copied to the clipboard; see [Text Transforms](https://supervertaler.gitbook.io/trados/features/text-transforms) in the help docs
 
 ---
 
-## [4.18.26] — 2026-03-30
+## [4.18.26] – 2026-03-30
 
 ### Added
 - **Batch size spinner in AI Settings** – new "Batch size" control lets users adjust the number of segments sent per API call during Batch Translate and Batch Proofread (range 5–100, default 20)
@@ -759,7 +759,7 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.25] — 2026-03-30
+## [4.18.25] – 2026-03-30
 
 ### Added
 - **Customisable Ollama timeout** – new "Timeout (min)" setting in AI Settings lets users override the automatic timeout (3–10 min based on model size) with a custom value up to 120 minutes, useful for long-running jobs on hardware without a dedicated GPU
@@ -771,27 +771,27 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.22] — 2026-03-29
+## [4.18.22] – 2026-03-29
 
 ### Added
-- **QuickLauncher folder submenus** — context menu now mirrors your prompt library's folder structure instead of a flat list, making it easier to organise and find prompts
-- **New default prompts** — three Explain prompts (brief, detailed, terminology) and two Files prompts (current filename, segment file source) ship out of the box in dedicated subfolders
-- **Old explain prompts auto-cleaned** — retired explain prompt variants are automatically deleted on startup to avoid duplicates
+- **QuickLauncher folder submenus** – context menu now mirrors your prompt library's folder structure instead of a flat list, making it easier to organise and find prompts
+- **New default prompts** – three Explain prompts (brief, detailed, terminology) and two Files prompts (current filename, segment file source) ship out of the box in dedicated subfolders
+- **Old explain prompts auto-cleaned** – retired explain prompt variants are automatically deleted on startup to avoid duplicates
 
 ### Changed
-- **Domain → Category rename** — the `Domain` property on prompts has been renamed to `Category` throughout the UI and codebase for clarity
-- **Support links updated** — About dialog, support docs, and help pages now point to the Supervertaler forum on TranslationTech; Groups.io and ProZ.com references removed
+- **Domain → Category rename** – the `Domain` property on prompts has been renamed to `Category` throughout the UI and codebase for clarity
+- **Support links updated** – About dialog, support docs, and help pages now point to the Supervertaler forum on TranslationTech; Groups.io and ProZ.com references removed
 
 ---
 
-## [4.18.21] — 2026-03-29
+## [4.18.21] – 2026-03-29
 
 ### Fixed
 - **Line breaks preserved in Visio and similar formats** – when the source segment stores line breaks as literal `\n` in text content (Visio `.vsdx`, Excel) rather than as separate placeholder tags (DOCX `w:br`), the newlines are now correctly preserved in the translated target instead of being silently dropped
 
 ---
 
-## [4.18.20] — 2026-03-28
+## [4.18.20] – 2026-03-28
 
 ### Fixed
 - **Gemini API key no longer exposed in error messages** – API key moved from URL query parameter to `x-goog-api-key` request header
@@ -809,28 +809,28 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.19] — 2026-03-28
+## [4.18.19] – 2026-03-28
 
 ### Fixed
 - **Line endings preserved in translation** – when the LLM emits a bare newline instead of a `<tN/>` tag placeholder, the correct line ending is now restored in the target segment: soft-return tags (DOCX `↵`) are re-inserted by cloning the source tag; for file formats where the newline is already embedded in text content (Visio, Excel, plain text), the newline is preserved as-is in the target IText node
 
 ---
 
-## [4.18.18] — 2026-03-28
+## [4.18.18] – 2026-03-28
 
 ### Changed
 - **Batch Translate reports consolidated** – a multi-batch translate operation now appears as a single entry in the Reports tab (showing combined token count, cost, and total duration) instead of one entry per sub-batch
 
 ---
 
-## [4.18.17] — 2026-03-27
+## [4.18.17] – 2026-03-27
 
 ### Added
 - **Mistral AI support** – Mistral Large, Mistral Small, and Mistral Nemo are now available as a first-class provider alongside OpenAI, Claude, Gemini, Grok, and Ollama
 
 ---
 
-## [4.18.16] — 2026-03-27
+## [4.18.16] – 2026-03-27
 
 ### Added
 - **Cost protection** – QuickLauncher prompts are now standalone (no chat history sent), preventing accidental high costs from accumulated context; chat messages are constrained by a token budget that automatically trims old messages; a cost warning dialog appears when estimated input exceeds $0.50
@@ -853,14 +853,14 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.15] — 2026-03-26
+## [4.18.15] – 2026-03-26
 
 ### Changed
 - **Default max segments reduced to 20** – the "Include full document content in AI context" setting now defaults to 20 segments instead of 500, avoiding unexpectedly high API costs for new users
 
 ---
 
-## [4.18.14] — 2026-03-26
+## [4.18.14] – 2026-03-26
 
 ### Added
 - **Generate project brief** – new built-in QuickLauncher prompt that produces a comprehensive Markdown summary of the current project (subject matter, terminology, named entities, translation challenges) for pasting into other AI tools
@@ -873,7 +873,7 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.12] — 2026-03-25
+## [4.18.12] – 2026-03-25
 
 ### Fixed
 - **Settings accessible when trial expires** – the gear button on both the TermLens and Supervertaler Assistant panels now opens the Settings dialog even when the trial has expired or no licence is active, so users can enter a licence key
@@ -889,678 +889,678 @@ All the 4.18.50–4.18.57 improvements are rolled into this release:
 
 ---
 
-## [4.18.11] — 2026-03-25
+## [4.18.11] – 2026-03-25
 
 ### Added
-- **MultiTerm termbases in AI Settings** — MultiTerm termbases now appear in the "Termbases included in AI prompts" checklist on the AI Settings tab, matching what's shown on the TermLens tab
+- **MultiTerm termbases in AI Settings** – MultiTerm termbases now appear in the "Termbases included in AI prompts" checklist on the AI Settings tab, matching what's shown on the TermLens tab
 
 ### Changed
-- **Feature renamed: AutoPrompt** — "Analyse Project & Generate Prompt" is now called **AutoPrompt** throughout the UI, docs, and log labels
-- **TermScan** naming consistent in docs — the automatic glossary extraction step is consistently referred to as TermScan
+- **Feature renamed: AutoPrompt** – "Analyse Project & Generate Prompt" is now called **AutoPrompt** throughout the UI, docs, and log labels
+- **TermScan** naming consistent in docs – the automatic glossary extraction step is consistently referred to as TermScan
 
 ---
 
-## [4.18.10] — 2026-03-24
+## [4.18.10] – 2026-03-24
 
 ### Added
-- **Unified prompt library schema** — prompts now use a consistent YAML frontmatter format (`category`, `app`, `built_in`) shared between Supervertaler Workbench and Supervertaler for Trados
-- **App-specific prompt filtering** — prompts tagged `app: "workbench"` are hidden in Trados; prompts tagged `app: "trados"` are hidden in Workbench; `app: "both"` (default) shows everywhere
-- **App dropdown in prompt editor** — new "App" field lets you choose whether a prompt is for Both, Trados only, or Workbench only
-- **Variable insertion menu reorganised** — Ctrl+, now groups variables into Common and Trados-specific sections
-- **MultiTerm diagnostic logging** — loading failures are now logged to `%LocalAppData%\Supervertaler.Trados\multiterm_debug.log` instead of being silently swallowed
+- **Unified prompt library schema** – prompts now use a consistent YAML frontmatter format (`category`, `app`, `built_in`) shared between Supervertaler Workbench and Supervertaler for Trados
+- **App-specific prompt filtering** – prompts tagged `app: "workbench"` are hidden in Trados; prompts tagged `app: "trados"` are hidden in Workbench; `app: "both"` (default) shows everywhere
+- **App dropdown in prompt editor** – new "App" field lets you choose whether a prompt is for Both, Trados only, or Workbench only
+- **Variable insertion menu reorganised** – Ctrl+, now groups variables into Common and Trados-specific sections
+- **MultiTerm diagnostic logging** – loading failures are now logged to `%LocalAppData%\Supervertaler.Trados\multiterm_debug.log` instead of being silently swallowed
 
 ### Changed
-- **Prompt YAML keys standardised** — `domain` → `category`, `sv_quickmenu`/`quick_run` → `quickmenu`, `quicklauncher_label` → `quickmenu_label`; legacy keys are still accepted for backward compatibility
-- **Prompt library cleaned up** — removed duplicate folders and files, fixed malformed YAML frontmatter, standardised variable names (`{{SOURCE_TEXT}}` → `{{SOURCE_SEGMENT}}`)
+- **Prompt YAML keys standardised** – `domain` → `category`, `sv_quickmenu`/`quick_run` → `quickmenu`, `quicklauncher_label` → `quickmenu_label`; legacy keys are still accepted for backward compatibility
+- **Prompt library cleaned up** – removed duplicate folders and files, fixed malformed YAML frontmatter, standardised variable names (`{{SOURCE_TEXT}}` → `{{SOURCE_SEGMENT}}`)
 
 ### Removed
-- **Example project removed** — the bundled example project contained a client reference and has been removed from the repo, all releases, and the help system
+- **Example project removed** – the bundled example project contained a client reference and has been removed from the repo, all releases, and the help system
 
 ---
 
-## [4.18.9] — 2026-03-24
+## [4.18.9] – 2026-03-24
 
 ### Added
-- **Markdown rendering in TermLens popup** — Notes and Definition fields now render Markdown formatting (tables, bold, italic, headings, bullet lists, code blocks) instead of plain text
-- **Resizable TermLens popup** — drag the bottom-right corner grip to resize the popup; width is remembered for the rest of the session
-- **Copy raw Markdown from AI Assistant** — right-click → Copy on a chat bubble now copies the original Markdown (preserving tables and formatting) instead of stripped plain text
+- **Markdown rendering in TermLens popup** – Notes and Definition fields now render Markdown formatting (tables, bold, italic, headings, bullet lists, code blocks) instead of plain text
+- **Resizable TermLens popup** – drag the bottom-right corner grip to resize the popup; width is remembered for the rest of the session
+- **Copy raw Markdown from AI Assistant** – right-click → Copy on a chat bubble now copies the original Markdown (preserving tables and formatting) instead of stripped plain text
 
 ### Changed
-- **Wider TermLens popup** — default maximum width increased from 500px to 700px so tables display more clearly
-- **AI Assistant uses proper Markdown tables** — system prompt now instructs the AI to use valid Markdown table syntax with pipe delimiters and separator rows
-- **User data folder restructured** — Trados settings files (`settings.json`, `license.json`, `chat_history.json`) now live under `trados/settings/` instead of directly in `trados/`; auto-migrated on first run
+- **Wider TermLens popup** – default maximum width increased from 500px to 700px so tables display more clearly
+- **AI Assistant uses proper Markdown tables** – system prompt now instructs the AI to use valid Markdown table syntax with pipe delimiters and separator rows
+- **User data folder restructured** – Trados settings files (`settings.json`, `license.json`, `chat_history.json`) now live under `trados/settings/` instead of directly in `trados/`; auto-migrated on first run
 
 ### Fixed
-- **In-plugin purchase links now use live checkout** — the "Buy" links in Settings → License were still pointing to test mode URLs
+- **In-plugin purchase links now use live checkout** – the "Buy" links in Settings → License were still pointing to test mode URLs
 
 ---
 
-## [4.18.8] — 2026-03-24
+## [4.18.8] – 2026-03-24
 
 ### Fixed
-- **In-plugin purchase links now use live checkout** — the "Buy" links in Settings → License were still pointing to test mode URLs
+- **In-plugin purchase links now use live checkout** – the "Buy" links in Settings → License were still pointing to test mode URLs
 
 ---
 
-## [4.18.7] — 2026-03-24
+## [4.18.7] – 2026-03-24
 
 ### Changed
-- **Trial period reduced to 14 days** — down from 90 days; the free trial now runs for 14 days from first launch
-- **Live Lemon Squeezy checkout** — switched from test mode to live payment processing
+- **Trial period reduced to 14 days** – down from 90 days; the free trial now runs for 14 days from first launch
+- **Live Lemon Squeezy checkout** – switched from test mode to live payment processing
 
 ---
 
-## [4.18.6] — 2026-03-23
+## [4.18.6] – 2026-03-23
 
 ### Added
-- **Prompt inspector in Reports tab** — every AI API call can now be logged with the full system prompt, messages, response, token counts, and estimated cost; enable via "Log prompts and responses to Reports tab" in AI Settings
-- **Expandable prompt sections** — click "Show system prompt...", "Show messages...", or "Show response..." to view the full text; press Escape to collapse; "Copy" copies a single section, "Copy all" copies everything
-- **Batch translate and proofread logging** — batch operations now appear in the Reports tab when prompt logging is enabled
-- **Prompt name in Reports tab** — entries show the prompt template name (e.g. "QuickLauncher · Explain in Context · 14:32:05")
-- **Clone prompt** — right-click any prompt in the Prompt Manager and select "Clone" to create a copy with "(2)" appended
-- **QuickLauncher menu heading** — Ctrl+Q menu now shows "Supervertaler QuickLauncher" at the top; click it to open Settings → Prompts tab
+- **Prompt inspector in Reports tab** – every AI API call can now be logged with the full system prompt, messages, response, token counts, and estimated cost; enable via "Log prompts and responses to Reports tab" in AI Settings
+- **Expandable prompt sections** – click "Show system prompt...", "Show messages...", or "Show response..." to view the full text; press Escape to collapse; "Copy" copies a single section, "Copy all" copies everything
+- **Batch translate and proofread logging** – batch operations now appear in the Reports tab when prompt logging is enabled
+- **Prompt name in Reports tab** – entries show the prompt template name (e.g. "QuickLauncher · Explain in Context · 14:32:05")
+- **Clone prompt** – right-click any prompt in the Prompt Manager and select "Clone" to create a copy with "(2)" appended
+- **QuickLauncher menu heading** – Ctrl+Q menu now shows "Supervertaler QuickLauncher" at the top; click it to open Settings → Prompts tab
 
 ### Fixed
-- **Tracked changes no longer corrupt term additions** — Add Term, Quick-Add, Non-Translatable, QuickLauncher prompts, and Expand Selection now strip deleted tracked changes, adding only the final text
-- **QuickLauncher segment context** — QuickLauncher prompts now pass clean segment text without tracked changes markup
-- **Prompt log cards no longer squashed** — the resize handler was recalculating prompt log card heights using the proofreading layout logic, hiding all expandable sections
-- **New prompts in subfolders now saved correctly** — creating a prompt while a subfolder was selected would create a wrongly-named folder instead of placing the file in the correct subfolder
+- **Tracked changes no longer corrupt term additions** – Add Term, Quick-Add, Non-Translatable, QuickLauncher prompts, and Expand Selection now strip deleted tracked changes, adding only the final text
+- **QuickLauncher segment context** – QuickLauncher prompts now pass clean segment text without tracked changes markup
+- **Prompt log cards no longer squashed** – the resize handler was recalculating prompt log card heights using the proofreading layout logic, hiding all expandable sections
+- **New prompts in subfolders now saved correctly** – creating a prompt while a subfolder was selected would create a wrongly-named folder instead of placing the file in the correct subfolder
 
 ---
 
-## [4.18.4] — 2026-03-23
+## [4.18.4] – 2026-03-23
 
 ### Fixed
-- **Tracked changes no longer confuse AI features** — proofreading, batch translation, AI chat, and prompt generation now read only the final (accepted) text from segments with tracked changes, instead of including both deleted and inserted text
-- **GPT-5.4 replaces GPT-5.3** — updated to OpenAI's latest flagship model
+- **Tracked changes no longer confuse AI features** – proofreading, batch translation, AI chat, and prompt generation now read only the final (accepted) text from segments with tracked changes, instead of including both deleted and inserted text
+- **GPT-5.4 replaces GPT-5.3** – updated to OpenAI's latest flagship model
 
 ### Changed
-- **Updated LLM model lineup** — OpenAI: GPT-4.1, GPT-4.1 Mini, GPT-5.4, o4-mini; Gemini: added 3.1 Pro (Preview); Ollama: Qwen 3 bumped to 14B
-- **Descriptive model tooltips** — each model now shows a short description to help translators choose the right one
+- **Updated LLM model lineup** – OpenAI: GPT-4.1, GPT-4.1 Mini, GPT-5.4, o4-mini; Gemini: added 3.1 Pro (Preview); Ollama: Qwen 3 bumped to 14B
+- **Descriptive model tooltips** – each model now shows a short description to help translators choose the right one
 
 ---
 
-## [4.18.3] — 2026-03-23
+## [4.18.3] – 2026-03-23
 
 ### New Features
-- **Delete prompt folders** — right-click any folder in the prompt library tree and select "Delete Folder" to remove it and all prompts inside (with confirmation dialog)
-- **Refresh button in Prompt Manager** — toolbar "Refresh" button reloads prompts from disk, reflecting any changes made outside Trados (e.g. in Windows Explorer or Supervertaler Workbench)
-- **UI scale setting** — new General tab in Settings with UI scale selector for high-DPI displays
-- **Chat font size controls** — A+/A− buttons in the AI Assistant to adjust chat bubble font size; persisted across sessions
+- **Delete prompt folders** – right-click any folder in the prompt library tree and select "Delete Folder" to remove it and all prompts inside (with confirmation dialog)
+- **Refresh button in Prompt Manager** – toolbar "Refresh" button reloads prompts from disk, reflecting any changes made outside Trados (e.g. in Windows Explorer or Supervertaler Workbench)
+- **UI scale setting** – new General tab in Settings with UI scale selector for high-DPI displays
+- **Chat font size controls** – A+/A− buttons in the AI Assistant to adjust chat bubble font size; persisted across sessions
 
 ### Fixed
-- **Right-click context menu on prompt folders** — right-clicking a folder in the prompt library now correctly selects the folder before showing the context menu (WinForms TreeView doesn't auto-select on right-click)
+- **Right-click context menu on prompt folders** – right-clicking a folder in the prompt library now correctly selects the folder before showing the context menu (WinForms TreeView doesn't auto-select on right-click)
 
 ### Changed
-- **DPI-aware UI rendering** — TermLens, AI Assistant chat bubbles, term blocks, and settings dialog now scale correctly on high-DPI displays using the new `UiScale` helper
+- **DPI-aware UI rendering** – TermLens, AI Assistant chat bubbles, term blocks, and settings dialog now scale correctly on high-DPI displays using the new `UiScale` helper
 
 ---
 
-## [4.18.2] — 2026-03-22
+## [4.18.2] – 2026-03-22
 
 ### Fixed
-- **Manifest version sync** — the `pluginpackage.manifest.xml` version was stuck at 4.18.0.0 while the DLL and plugin.xml were at 4.18.1.0. All three version files are now correctly synced to 4.18.2.
+- **Manifest version sync** – the `pluginpackage.manifest.xml` version was stuck at 4.18.0.0 while the DLL and plugin.xml were at 4.18.1.0. All three version files are now correctly synced to 4.18.2.
 
 ### Changed
-- **TermLens colour coding docs** — renamed "Lavender" to "Purple" for abbreviation match chips, as it is more recognisable as a colour name.
+- **TermLens colour coding docs** – renamed "Lavender" to "Purple" for abbreviation match chips, as it is more recognisable as a colour name.
 
 ---
 
-## [4.18.1] — 2026-03-22
+## [4.18.1] – 2026-03-22
 
 ### Fixed
-- **Editing terms in inverted-direction termbases corrupted entries** — when editing a term via the multi-entry editor (right-click → Edit Term) and the termbase direction was opposite to the project direction (e.g. EN→NL termbase in a NL→EN project), the source and target terms were saved swapped. This caused the edited entry to disappear from TermLens on the next refresh and left corrupted data in the termbase. The multi-entry editor now correctly detects and handles inverted termbase directions, matching the behaviour of the single-entry editor.
+- **Editing terms in inverted-direction termbases corrupted entries** – when editing a term via the multi-entry editor (right-click → Edit Term) and the termbase direction was opposite to the project direction (e.g. EN→NL termbase in a NL→EN project), the source and target terms were saved swapped. This caused the edited entry to disappear from TermLens on the next refresh and left corrupted data in the termbase. The multi-entry editor now correctly detects and handles inverted termbase directions, matching the behaviour of the single-entry editor.
 
 ### Added
-- **Diagnostic logging for duplicate source terms** — temporary logging to `%LocalAppData%\Supervertaler.Trados\termlens_diag.log` when multiple entries share the same source term. Helps diagnose any remaining edge cases. Will be removed in a future release.
+- **Diagnostic logging for duplicate source terms** – temporary logging to `%LocalAppData%\Supervertaler.Trados\termlens_diag.log` when multiple entries share the same source term. Helps diagnose any remaining edge cases. Will be removed in a future release.
 
 ---
 
-## [4.18.0] — 2026-03-22
+## [4.18.0] – 2026-03-22
 
 ### Added
-- **TreeView-based Prompt Manager** — the Prompts settings tab has been completely redesigned. The flat grid has been replaced with a folder-based tree view that mirrors the on-disk `prompt_library` structure. Click any prompt to see its content in the detail pane on the right. Click "System Prompt" to view and edit the system prompt. Folders can be created, and prompts can be dragged and dropped between folders.
-- **QuickLauncher keyboard shortcuts** — assign Ctrl+Alt+1 through Ctrl+Alt+0 to individual QuickLauncher prompts in Settings → Prompts. Each shortcut runs the assigned prompt instantly without opening the menu. Shortcuts are shown next to prompt names in the Ctrl+Q menu.
-- **Prompt reordering** — prompts within a folder can be moved up or down using the ▲/▼ buttons in the toolbar. The order is persisted via a `sort_order` field in the YAML frontmatter and applies to the Ctrl+Q menu as well.
-- **Quick model switching** — click the provider/model label at the bottom of the AI Assistant chat to change models without opening Settings. Shows "Click to change model" tooltip on hover.
+- **TreeView-based Prompt Manager** – the Prompts settings tab has been completely redesigned. The flat grid has been replaced with a folder-based tree view that mirrors the on-disk `prompt_library` structure. Click any prompt to see its content in the detail pane on the right. Click "System Prompt" to view and edit the system prompt. Folders can be created, and prompts can be dragged and dropped between folders.
+- **QuickLauncher keyboard shortcuts** – assign Ctrl+Alt+1 through Ctrl+Alt+0 to individual QuickLauncher prompts in Settings → Prompts. Each shortcut runs the assigned prompt instantly without opening the menu. Shortcuts are shown next to prompt names in the Ctrl+Q menu.
+- **Prompt reordering** – prompts within a folder can be moved up or down using the ▲/▼ buttons in the toolbar. The order is persisted via a `sort_order` field in the YAML frontmatter and applies to the Ctrl+Q menu as well.
+- **Quick model switching** – click the provider/model label at the bottom of the AI Assistant chat to change models without opening Settings. Shows "Click to change model" tooltip on hover.
 
 ### Changed
-- **Improved term popup readability** — definition and notes text is now darker and more readable in the TermLens hover popup.
-- **Multi-line term fields** — Definition and Notes in the term entry editor now have expand/collapse buttons (▲/▼) to toggle between compact and expanded views.
-- **Resizable Prompts panel** — the divider between the tree and detail pane in Settings → Prompts can now be dragged left or right to resize.
-- **Prompt generator respects TM toggle** — the "Analyse Project & Generate Prompt" feature now respects the "Include TM matches in AI context" setting. Previously, TM reference pairs were always collected regardless of this toggle.
+- **Improved term popup readability** – definition and notes text is now darker and more readable in the TermLens hover popup.
+- **Multi-line term fields** – Definition and Notes in the term entry editor now have expand/collapse buttons (▲/▼) to toggle between compact and expanded views.
+- **Resizable Prompts panel** – the divider between the tree and detail pane in Settings → Prompts can now be dragged left or right to resize.
+- **Prompt generator respects TM toggle** – the "Analyse Project & Generate Prompt" feature now respects the "Include TM matches in AI context" setting. Previously, TM reference pairs were always collected regardless of this toggle.
 
 ### Fixed
-- **HttpClient timeout causing prompt generation failures** — the .NET HttpClient's default 100-second timeout was silently overriding our per-request timeout settings (up to 10 minutes). This caused all long-running API calls (prompt generation, large batch translations) to fail after exactly 100 seconds across all providers. Fixed by setting HttpClient.Timeout to infinite and managing timeouts via CancellationToken as intended.
-- **Silent timeout errors** — when an API request timed out, the thinking indicator would disappear with no error message. Now shows a diagnostic message with model name, prompt size, and max output tokens to help troubleshoot.
-- **Expand buttons in term editor** — fixed z-order issue where the Definition expand button was hidden behind the text box. Both expand buttons now render correctly.
+- **HttpClient timeout causing prompt generation failures** – the .NET HttpClient's default 100-second timeout was silently overriding our per-request timeout settings (up to 10 minutes). This caused all long-running API calls (prompt generation, large batch translations) to fail after exactly 100 seconds across all providers. Fixed by setting HttpClient.Timeout to infinite and managing timeouts via CancellationToken as intended.
+- **Silent timeout errors** – when an API request timed out, the thinking indicator would disappear with no error message. Now shows a diagnostic message with model name, prompt size, and max output tokens to help troubleshoot.
+- **Expand buttons in term editor** – fixed z-order issue where the Definition expand button was hidden behind the text box. Both expand buttons now render correctly.
 
 ---
 
-## [4.17.1] — 2026-03-21
+## [4.17.1] – 2026-03-21
 
 ### Changed
-- **Auto-restart after update** — clicking "Install Update" now offers to automatically restart Trados Studio, instead of asking the user to close and reopen it manually. Saves time on the lengthy Trados startup cycle.
+- **Auto-restart after update** – clicking "Install Update" now offers to automatically restart Trados Studio, instead of asking the user to close and reopen it manually. Saves time on the lengthy Trados startup cycle.
 
 ---
 
-## [4.17.0] — 2026-03-21
+## [4.17.0] – 2026-03-21
 
 ### Added
-- **Document attachments** — attach documents directly to AI Assistant messages for context. The AI receives the full extracted text alongside your message. Supported formats: DOCX, DOC, PDF, RTF, PPTX, PPT, XLSX, XLS, CSV, TSV, TMX, SDLXLIFF, XLIFF/XLF, TBX, TXT, Markdown, HTML, JSON, and XML. Drag and drop files onto the chat input, or use the attach button to browse.
-- **Quick model switching** — click the provider/model label at the bottom of the AI Assistant chat to instantly switch between models and providers without opening the Settings dialogue. A dropdown menu shows all available models grouped by provider, with the current selection highlighted.
-- **Multi-line Definition and Notes fields** — the term entry editor now uses expandable multi-line text areas for Definition and Notes fields, with a pop-open button to toggle between compact (3 lines) and expanded (8 lines) views. Line breaks in definitions and notes are now preserved correctly.
+- **Document attachments** – attach documents directly to AI Assistant messages for context. The AI receives the full extracted text alongside your message. Supported formats: DOCX, DOC, PDF, RTF, PPTX, PPT, XLSX, XLS, CSV, TSV, TMX, SDLXLIFF, XLIFF/XLF, TBX, TXT, Markdown, HTML, JSON, and XML. Drag and drop files onto the chat input, or use the attach button to browse.
+- **Quick model switching** – click the provider/model label at the bottom of the AI Assistant chat to instantly switch between models and providers without opening the Settings dialogue. A dropdown menu shows all available models grouped by provider, with the current selection highlighted.
+- **Multi-line Definition and Notes fields** – the term entry editor now uses expandable multi-line text areas for Definition and Notes fields, with a pop-open button to toggle between compact (3 lines) and expanded (8 lines) views. Line breaks in definitions and notes are now preserved correctly.
 
 ### Changed
-- **Unified attach button** — the image-only attach button has been replaced with a universal paperclip (📎) icon that handles both images and documents. The file dialogue is organised into categories: Images, Documents, Spreadsheets, Translation files, and Text files. The tooltip lists all supported formats.
-- **Improved term popup formatting** — definition and notes labels are now bold in the hover popup, and multi-line content uses hanging indentation so continuation lines align with the first line of text rather than the label.
+- **Unified attach button** – the image-only attach button has been replaced with a universal paperclip (📎) icon that handles both images and documents. The file dialogue is organised into categories: Images, Documents, Spreadsheets, Translation files, and Text files. The tooltip lists all supported formats.
+- **Improved term popup formatting** – definition and notes labels are now bold in the hover popup, and multi-line content uses hanging indentation so continuation lines align with the first line of text rather than the label.
 
 ---
 
-## [4.16.2] — 2026-03-20
+## [4.16.2] – 2026-03-20
 
 ### Added
-- **TermScan filtering for prompt generation** — "Analyse Project & Generate Prompt" now scans your document's source segments and filters termbase terms down to only those that actually appear in the document. This produces dramatically smaller, more focused glossaries in the generated prompt (e.g. 123 relevant terms from 2,680 total). The status message shows the filter count: "filtered X relevant from Y total".
+- **TermScan filtering for prompt generation** – "Analyse Project & Generate Prompt" now scans your document's source segments and filters termbase terms down to only those that actually appear in the document. This produces dramatically smaller, more focused glossaries in the generated prompt (e.g. 123 relevant terms from 2,680 total). The status message shows the filter count: "filtered X relevant from Y total".
 
 ### Changed
-- **Chat avatars** — each message in the AI Assistant now has a small avatar header: a gray "AI" circle with "Supervertaler Assistant" for AI responses, and a blue person silhouette with "You" for your messages. Makes it easy to tell who said what at a glance.
-- **Animated thinking indicator** — the AI Assistant now shows a persistent animated bubble in the chat area while waiting for a response. The bubble cycles through reassuring messages ("Thinking…", "Still working on it…", "Generating response…", etc.) so you always know the AI is still processing. Previously, the thin "Thinking…" label at the bottom could disappear during long operations, making it look like the request had silently failed.
-- **System-initiated messages styled as assistant bubbles** — messages triggered by buttons (e.g. "Analyse Project & Generate Prompt") now display with assistant styling (gray, left-aligned) instead of user styling, since you didn't type them yourself.
-- **TM reference pairs filtered to confirmed segments** — the prompt generator now only includes human-confirmed segments (Translated, Approved, or Signed-off) as reference pairs. Unconfirmed AI-generated translations are excluded to avoid feeding unverified output back as "correct" references. Pairs are sampled evenly across the document for diversity.
+- **Chat avatars** – each message in the AI Assistant now has a small avatar header: a gray "AI" circle with "Supervertaler Assistant" for AI responses, and a blue person silhouette with "You" for your messages. Makes it easy to tell who said what at a glance.
+- **Animated thinking indicator** – the AI Assistant now shows a persistent animated bubble in the chat area while waiting for a response. The bubble cycles through reassuring messages ("Thinking…", "Still working on it…", "Generating response…", etc.) so you always know the AI is still processing. Previously, the thin "Thinking…" label at the bottom could disappear during long operations, making it look like the request had silently failed.
+- **System-initiated messages styled as assistant bubbles** – messages triggered by buttons (e.g. "Analyse Project & Generate Prompt") now display with assistant styling (gray, left-aligned) instead of user styling, since you didn't type them yourself.
+- **TM reference pairs filtered to confirmed segments** – the prompt generator now only includes human-confirmed segments (Translated, Approved, or Signed-off) as reference pairs. Unconfirmed AI-generated translations are excluded to avoid feeding unverified output back as "correct" references. Pairs are sampled evenly across the document for diversity.
 
 ### Fixed
-- **Stale prompt dropdown** — deleting prompts from the Prompt Manager no longer leaves ghost entries in the Batch Operations prompt dropdown. The dropdown now refreshes whenever the Prompt Manager closes, regardless of whether you clicked OK or Cancel (because deletions happen immediately on disk).
-- **API timeout for large output requests** — prompt generation and other requests that produce long AI responses (> 8,192 tokens) now use a 10-minute timeout instead of timing out prematurely. This prevents the "thinking" indicator from disappearing mid-generation on complex documents.
+- **Stale prompt dropdown** – deleting prompts from the Prompt Manager no longer leaves ghost entries in the Batch Operations prompt dropdown. The dropdown now refreshes whenever the Prompt Manager closes, regardless of whether you clicked OK or Cancel (because deletions happen immediately on disk).
+- **API timeout for large output requests** – prompt generation and other requests that produce long AI responses (> 8,192 tokens) now use a 10-minute timeout instead of timing out prematurely. This prevents the "thinking" indicator from disappearing mid-generation on complex documents.
 
 ---
 
-## [4.16.1] — 2026-03-20
+## [4.16.1] – 2026-03-20
 
 ### Added
-- **One-click plugin update** — the "Update Available" dialogue now has an "Install Update" button that downloads and installs the new version directly, without opening a browser. Just click, restart Trados, and you're running the latest version.
-- **"What's new" link in update dialogue** — view the release notes before updating.
+- **One-click plugin update** – the "Update Available" dialogue now has an "Install Update" button that downloads and installs the new version directly, without opening a browser. Just click, restart Trados, and you're running the latest version.
+- **"What's new" link in update dialogue** – view the release notes before updating.
 
 ### Fixed
-- **Prompt generation truncation** — the "Analyse Project & Generate Prompt" feature no longer cuts off long prompts. Output token limit increased from 4,096 to 32,768, allowing comprehensive prompts with large glossaries and TM reference pairs.
-- **Correct version in plugin packages** — the `.sdlplugin` manifest now reads the version from the project file instead of using a hardcoded value. The DLL, manifest, and plugin.xml versions are guaranteed to match.
-- **Stale assembly references** — fixed two action entries in plugin.xml that were stuck on old version numbers (4.5.0 and 4.10.0). The version bump script now uses pattern matching to catch all references, preventing this from recurring.
+- **Prompt generation truncation** – the "Analyse Project & Generate Prompt" feature no longer cuts off long prompts. Output token limit increased from 4,096 to 32,768, allowing comprehensive prompts with large glossaries and TM reference pairs.
+- **Correct version in plugin packages** – the `.sdlplugin` manifest now reads the version from the project file instead of using a hardcoded value. The DLL, manifest, and plugin.xml versions are guaranteed to match.
+- **Stale assembly references** – fixed two action entries in plugin.xml that were stuck on old version numbers (4.5.0 and 4.10.0). The version bump script now uses pattern matching to catch all references, preventing this from recurring.
 
 ---
 
-## [4.16.0] — 2026-03-20
+## [4.16.0] – 2026-03-20
 
 ### Added
-- **Interactive term popup** — hovering over a term chip now shows an interactive popup instead of a standard tooltip. The popup supports word-wrapped text, stays open when you move the mouse into it, and renders URLs as clickable links.
-- **URL metadata field** — term entries now support a URL field for linking to reference material. URLs appear as clickable links in the hover popup, and can be edited in the term entry editor and termbase editor grid.
-- **Dismissible proofreading issues** — each issue card in the Reports tab now has a checkbox; ticking it removes the card from the list so you can track which issues you have addressed.
+- **Interactive term popup** – hovering over a term chip now shows an interactive popup instead of a standard tooltip. The popup supports word-wrapped text, stays open when you move the mouse into it, and renders URLs as clickable links.
+- **URL metadata field** – term entries now support a URL field for linking to reference material. URLs appear as clickable links in the hover popup, and can be edited in the term entry editor and termbase editor grid.
+- **Dismissible proofreading issues** – each issue card in the Reports tab now has a checkbox; ticking it removes the card from the list so you can track which issues you have addressed.
 
 ### Changed
-- **Proofreading scope labels** — dropdown labels now use correct Trados terminology: "Translated only" and "Translated + approved/signed-off" instead of the previous MemoQ-style "Confirmed" labels.
-- **Faster popup close** — the hover popup close delay was reduced from 200ms to 150ms for a snappier feel.
+- **Proofreading scope labels** – dropdown labels now use correct Trados terminology: "Translated only" and "Translated + approved/signed-off" instead of the previous MemoQ-style "Confirmed" labels.
+- **Faster popup close** – the hover popup close delay was reduced from 200ms to 150ms for a snappier feel.
 
 ### Fixed
-- **Popup text truncation** — long definitions, notes, and other metadata no longer get cut off in the hover popup. Text now word-wraps correctly within the popup.
-- **Popup spacing** — removed excessive vertical spacing between metadata lines in the hover popup.
+- **Popup text truncation** – long definitions, notes, and other metadata no longer get cut off in the hover popup. Text now word-wraps correctly within the popup.
+- **Popup spacing** – removed excessive vertical spacing between metadata lines in the hover popup.
 
 ---
 
-## [4.15.0] — 2026-03-20
+## [4.15.0] – 2026-03-20
 
 ### Added
-- **Grok (xAI) provider support** — Grok is now available as a first-class AI provider alongside OpenAI, Claude, Gemini, Ollama, and Custom OpenAI-compatible endpoints. Three models included: Grok 4.20 (Reasoning), Grok 4.20, and Grok 4.1 Fast. All models support multimodal input (text + images).
-- **Source synonym indicator** — the ≡ synonym indicator on term chips now also appears when the entry has source-side synonyms, not just target-side ones.
-- **Source synonyms in tooltip** — hovering over a term chip now shows source-side synonyms (prefixed with "Also:") alongside the existing target-side synonym bullets.
+- **Grok (xAI) provider support** – Grok is now available as a first-class AI provider alongside OpenAI, Claude, Gemini, Ollama, and Custom OpenAI-compatible endpoints. Three models included: Grok 4.20 (Reasoning), Grok 4.20, and Grok 4.1 Fast. All models support multimodal input (text + images).
+- **Source synonym indicator** – the ≡ synonym indicator on term chips now also appears when the entry has source-side synonyms, not just target-side ones.
+- **Source synonyms in tooltip** – hovering over a term chip now shows source-side synonyms (prefixed with "Also:") alongside the existing target-side synonym bullets.
 
 ### Fixed
-- **Merge prompt direction** — the "Similar Term Found" merge dialog now correctly displays terms in the project's language direction when working with inverted termbases.
+- **Merge prompt direction** – the "Similar Term Found" merge dialog now correctly displays terms in the project's language direction when working with inverted termbases.
 
 ---
 
-## [4.14.1] — 2026-03-19
+## [4.14.1] – 2026-03-19
 
 ### Added
-- **Synonym indicator on term chips** — a small indigo ≡ icon now appears in the top-right corner of a term chip when the entry has target synonyms, so you can see at a glance which terms have alternative translations without hovering.
-- **"Open Plugins folder" link in update dialog** — when a new version is available, the update notification now includes a clickable link that opens the Plugins/Unpacked folder in Explorer. Essential for Mac/Parallels users who must manually delete the old unpacked folder before installing an update.
+- **Synonym indicator on term chips** – a small indigo ≡ icon now appears in the top-right corner of a term chip when the entry has target synonyms, so you can see at a glance which terms have alternative translations without hovering.
+- **"Open Plugins folder" link in update dialog** – when a new version is available, the update notification now includes a clickable link that opens the Plugins/Unpacked folder in Explorer. Essential for Mac/Parallels users who must manually delete the old unpacked folder before installing an update.
 
 ### Fixed
-- **Metadata indicator always visible** — the amber metadata dot (definition/domain/notes) now appears on all term chips, not only on chips that also have a shortcut badge.
-- **Merge prompt respects project direction** — the "Similar Term Found" dialog now displays terms in the project's language direction when working with an inverted termbase (e.g. NL→EN project using an EN→NL termbase). Previously, source and target labels were swapped.
+- **Metadata indicator always visible** – the amber metadata dot (definition/domain/notes) now appears on all term chips, not only on chips that also have a shortcut badge.
+- **Merge prompt respects project direction** – the "Similar Term Found" dialog now displays terms in the project's language direction when working with an inverted termbase (e.g. NL→EN project using an EN→NL termbase). Previously, source and target labels were swapped.
 
 ---
 
-## [4.14.0] — 2026-03-19
+## [4.14.0] – 2026-03-19
 
 ### Added
-- **Analyse Project & Generate Prompt** — new feature that analyses your document's content, terminology, and TM data to automatically generate a comprehensive domain-specific translation prompt using AI. Accessible via the link next to the prompt selector on the Batch Operations tab. The generated prompt appears in the AI Assistant chat, where you can refine it through conversation. Right-click any assistant message → "Save as Prompt…" to save the result to your prompt library.
-- **Save as Prompt** — right-click any AI Assistant response and choose "Save as Prompt…" to save it as a reusable `.svprompt` file in your prompt library. The default name is your Trados project name, with automatic version numbering (v2, v3, etc.) if a prompt with that name already exists.
+- **Analyse Project & Generate Prompt** – new feature that analyses your document's content, terminology, and TM data to automatically generate a comprehensive domain-specific translation prompt using AI. Accessible via the link next to the prompt selector on the Batch Operations tab. The generated prompt appears in the AI Assistant chat, where you can refine it through conversation. Right-click any assistant message → "Save as Prompt…" to save the result to your prompt library.
+- **Save as Prompt** – right-click any AI Assistant response and choose "Save as Prompt…" to save it as a reusable `.svprompt` file in your prompt library. The default name is your Trados project name, with automatic version numbering (v2, v3, etc.) if a prompt with that name already exists.
 
 ### Changed
-- **British English spelling** — all user-facing text now uses British English spelling throughout the plugin and documentation (analyse, customise, organised, etc.).
-- **Documentation improvements** — removed duplicate page headings from all help pages, added cross-references for the new Analyse Project & Generate Prompt feature, and added comprehensive documentation for the new feature.
+- **British English spelling** – all user-facing text now uses British English spelling throughout the plugin and documentation (analyse, customise, organised, etc.).
+- **Documentation improvements** – removed duplicate page headings from all help pages, added cross-references for the new Analyse Project & Generate Prompt feature, and added comprehensive documentation for the new feature.
 
 ### Fixed
-- **Save as Prompt dialog** — fixed buttons being cut off at the bottom of the dialog under certain DPI scaling settings.
-- **Synonym language tags in inverted termbases** — when editing a term from an inverted termbase (e.g. EN→NL termbase used in an NL→EN project), synonyms were saved with swapped language tags, causing them to appear on the wrong side. Now correctly reverses the language tags when saving.
+- **Save as Prompt dialog** – fixed buttons being cut off at the bottom of the dialog under certain DPI scaling settings.
+- **Synonym language tags in inverted termbases** – when editing a term from an inverted termbase (e.g. EN→NL termbase used in an NL→EN project), synonyms were saved with swapped language tags, causing them to appear on the wrong side. Now correctly reverses the language tags when saving.
 
 ---
 
-## [4.13.0] — 2026-03-19
+## [4.13.0] – 2026-03-19
 
 ### Changed
-- **Simplified built-in prompts** — replaced the 9 domain-specific translate prompts (Medical, Legal, Patent, Financial, Technical, Marketing, IT, Professional Tone, Preserve Formatting) with a single **Default Translation Prompt**. The default prompt is a general-purpose starting point that users can duplicate and customise for their specific domain. The Default Proofreading Prompt and all QuickLauncher prompts are unchanged.
-- **Automatic cleanup of retired prompts** — on first launch after the update, the old domain-specific translate prompt files are automatically removed from the prompt library (only if they still contain the original built-in content — user-modified copies are preserved).
+- **Simplified built-in prompts** – replaced the 9 domain-specific translate prompts (Medical, Legal, Patent, Financial, Technical, Marketing, IT, Professional Tone, Preserve Formatting) with a single **Default Translation Prompt**. The default prompt is a general-purpose starting point that users can duplicate and customise for their specific domain. The Default Proofreading Prompt and all QuickLauncher prompts are unchanged.
+- **Automatic cleanup of retired prompts** – on first launch after the update, the old domain-specific translate prompt files are automatically removed from the prompt library (only if they still contain the original built-in content – user-modified copies are preserved).
 
 ---
 
-## [4.12.5] — 2026-03-19
+## [4.12.5] – 2026-03-19
 
 ### Fixed
-- **Fixed duplicate plugin crash** — the `.sdlplugin` package filename (`Supervertaler.Trados`) did not match the `<PlugInName>` in the manifest (`Supervertaler for Trados`), causing Trados to create a second copy of the package under the manifest name. Two copies of the same plugin loaded simultaneously, crashing Trados on startup. The package filename now matches the manifest name. The build script also cleans up the old-name package and unpacked folder to prevent recurrence.
+- **Fixed duplicate plugin crash** – the `.sdlplugin` package filename (`Supervertaler.Trados`) did not match the `<PlugInName>` in the manifest (`Supervertaler for Trados`), causing Trados to create a second copy of the package under the manifest name. Two copies of the same plugin loaded simultaneously, crashing Trados on startup. The package filename now matches the manifest name. The build script also cleans up the old-name package and unpacked folder to prevent recurrence.
 
 ---
 
-## [4.12.4] — 2026-03-19
+## [4.12.4] – 2026-03-19
 
 ### Added
-- **Automatic stale-plugin detection** — when a new `.sdlplugin` is installed but Trados is still running the old extracted version, the plugin now detects the version mismatch at startup and prompts the user to restart. On restart, the old Unpacked folder is cleaned up and Trados re-extracts the new version automatically. Searches all three possible plugin locations (Roaming, Local, All Users) so the detection works regardless of which install option was chosen.
+- **Automatic stale-plugin detection** – when a new `.sdlplugin` is installed but Trados is still running the old extracted version, the plugin now detects the version mismatch at startup and prompts the user to restart. On restart, the old Unpacked folder is cleaned up and Trados re-extracts the new version automatically. Searches all three possible plugin locations (Roaming, Local, All Users) so the detection works regardless of which install option was chosen.
 
 ### Changed
-- **Simplified install location guidance** — the installation docs now recommend accepting the default installer option ("All your domain computers") instead of manually switching to "This computer for me only". On non-domain PCs the two options are identical, and accepting the default avoids inconsistency between updates.
+- **Simplified install location guidance** – the installation docs now recommend accepting the default installer option ("All your domain computers") instead of manually switching to "This computer for me only". On non-domain PCs the two options are identical, and accepting the default avoids inconsistency between updates.
 
 ---
 
-## [4.12.3] — 2026-03-19
+## [4.12.3] – 2026-03-19
 
 ### Fixed
-- **Usage statistics checkbox now reflects opt-in choice** — when a user clicked "Yes" in the first-launch usage statistics dialog, the setting was saved to disk but the in-memory settings object was not updated. This caused the checkbox in Settings to appear unchecked until Trados was restarted. The opt-in choice is now synced into the live settings immediately.
+- **Usage statistics checkbox now reflects opt-in choice** – when a user clicked "Yes" in the first-launch usage statistics dialog, the setting was saved to disk but the in-memory settings object was not updated. This caused the checkbox in Settings to appear unchecked until Trados was restarted. The opt-in choice is now synced into the live settings immediately.
 
 ---
 
-## [4.12.2] — 2026-03-19
+## [4.12.2] – 2026-03-19
 
 ### Added
-- **Parallels / Mac warning in first-run setup** — when running inside Parallels Desktop on a Mac, the setup dialog now shows a yellow warning panel advising users to keep their data folder on the Windows side (`C:\` drive). If the user selects a Mac-side path (`\\Mac\Home\...`), a confirmation dialog explains that SQLite databases do not work reliably on network-mounted filesystems. Non-Parallels users see no change.
-- **Parallels / Mac documentation** — new "Running on a Mac (Parallels)" section in the installation help, and a new "Database errors on Mac (Parallels)" troubleshooting entry
-- **Updated installer screenshot** — annotated screenshot showing the recommended "This computer for me only" option
+- **Parallels / Mac warning in first-run setup** – when running inside Parallels Desktop on a Mac, the setup dialog now shows a yellow warning panel advising users to keep their data folder on the Windows side (`C:\` drive). If the user selects a Mac-side path (`\\Mac\Home\...`), a confirmation dialog explains that SQLite databases do not work reliably on network-mounted filesystems. Non-Parallels users see no change.
+- **Parallels / Mac documentation** – new "Running on a Mac (Parallels)" section in the installation help, and a new "Database errors on Mac (Parallels)" troubleshooting entry
+- **Updated installer screenshot** – annotated screenshot showing the recommended "This computer for me only" option
 
 ---
 
-## [4.12.1] — 2026-03-19
+## [4.12.1] – 2026-03-19
 
 ### Fixed
-- **Version numbers now consistent across all plugin files** — the plugin.xml and pluginpackage.manifest.xml version attributes were out of sync with the assembly version, which could cause the wrong version to display in Trados. All version files are now aligned. Also rewrote `bump_version.py` to update all three version files (.csproj, plugin.xml, manifest) in a single command.
+- **Version numbers now consistent across all plugin files** – the plugin.xml and pluginpackage.manifest.xml version attributes were out of sync with the assembly version, which could cause the wrong version to display in Trados. All version files are now aligned. Also rewrote `bump_version.py` to update all three version files (.csproj, plugin.xml, manifest) in a single command.
 
 ---
 
-## [4.12.0] — 2026-03-19
+## [4.12.0] – 2026-03-19
 
 ### Added
-- **`{{TM_MATCHES}}` prompt variable** — QuickLauncher prompts can now include translation memory fuzzy matches (≥70%) from the active segment. The variable expands to a formatted list showing match percentage, TM name, source, and target text. Available in the variable picker (Ctrl+,) and documented in the help system.
-- **3 new built-in QuickLauncher prompts** — "Explain (within project context)" uses `{{PROJECT}}` for document-aware term explanation; "Translate segment using fuzzy matches as reference" combines `{{TM_MATCHES}}` with `{{SURROUNDING_SEGMENTS}}` for context-aware translation; "Translate selection in context of current project" uses `{{PROJECT}}` for full-document term translation
-- **Opt-in anonymous usage statistics** — on first launch after this update, a dialog asks whether you'd like to share anonymous usage data to help improve the plugin. Only plugin version, OS version, Trados version, and system locale are sent — once per session, on startup. No personal data, translation content, or termbase information is ever collected. The setting can be changed at any time in Settings. Includes Parallels/VM detection to understand how many users run Trados on a Mac. Data is sent to a first-party Cloudflare Worker endpoint (no third-party trackers). ([#7](https://github.com/Supervertaler/Supervertaler-for-Trados/issues/7))
+- **`{{TM_MATCHES}}` prompt variable** – QuickLauncher prompts can now include translation memory fuzzy matches (≥70%) from the active segment. The variable expands to a formatted list showing match percentage, TM name, source, and target text. Available in the variable picker (Ctrl+,) and documented in the help system.
+- **3 new built-in QuickLauncher prompts** – "Explain (within project context)" uses `{{PROJECT}}` for document-aware term explanation; "Translate segment using fuzzy matches as reference" combines `{{TM_MATCHES}}` with `{{SURROUNDING_SEGMENTS}}` for context-aware translation; "Translate selection in context of current project" uses `{{PROJECT}}` for full-document term translation
+- **Opt-in anonymous usage statistics** – on first launch after this update, a dialog asks whether you'd like to share anonymous usage data to help improve the plugin. Only plugin version, OS version, Trados version, and system locale are sent – once per session, on startup. No personal data, translation content, or termbase information is ever collected. The setting can be changed at any time in Settings. Includes Parallels/VM detection to understand how many users run Trados on a Mac. Data is sent to a first-party Cloudflare Worker endpoint (no third-party trackers). ([#7](https://github.com/Supervertaler/Supervertaler-for-Trados/issues/7))
 
 ---
 
-## [4.10.12] — 2026-03-18
+## [4.10.12] – 2026-03-18
 
 ### Added
-- **Termbase rename** — double-click a termbase name in TermLens Settings (or press **F2**) to rename it
-- **fix_reversed_entries.py** — `tools/` script to detect and swap term entries that were stored in the wrong direction in a termbase
+- **Termbase rename** – double-click a termbase name in TermLens Settings (or press **F2**) to rename it
+- **fix_reversed_entries.py** – `tools/` script to detect and swap term entries that were stored in the wrong direction in a termbase
 
 ---
 
-## [4.10.11] — 2026-03-18
+## [4.10.11] – 2026-03-18
 
 ### Fixed
-- **Term display and immediate chip appearance restored for inverted-direction termbases** — when a project's translation direction is the opposite of a write termbase's declared direction (e.g. NL→EN project using an EN→NL termbase), TermLens now correctly indexes and matches terms after loading from disk (F5 and segment navigation both work), and newly added terms appear as chips immediately after Alt+Down or Alt+Up
-- **Edit Term Entry dialog now follows project direction** — column labels, text fields, synonyms, and abbreviation fields are presented in project source → target order (e.g. Dutch | English in a NL→EN project) regardless of the termbase's declared direction; saves still write to the correct termbase columns
+- **Term display and immediate chip appearance restored for inverted-direction termbases** – when a project's translation direction is the opposite of a write termbase's declared direction (e.g. NL→EN project using an EN→NL termbase), TermLens now correctly indexes and matches terms after loading from disk (F5 and segment navigation both work), and newly added terms appear as chips immediately after Alt+Down or Alt+Up
+- **Edit Term Entry dialog now follows project direction** – column labels, text fields, synonyms, and abbreviation fields are presented in project source → target order (e.g. Dutch | English in a NL→EN project) regardless of the termbase's declared direction; saves still write to the correct termbase columns
 
 ---
 
-## [4.10.10] — 2026-03-18
+## [4.10.10] – 2026-03-18
 
 ### Fixed
-- **Term direction now respects termbase language pair** — when adding terms via Alt+Down, Alt+Up, Ctrl+Alt+T, or the right-click menu, the plugin now compares the active project's source language against the write termbase's source language and swaps source/target text when they are inverted (e.g. working in a NL→EN project but writing to an EN→NL termbase); previously terms were silently inserted in the wrong direction
+- **Term direction now respects termbase language pair** – when adding terms via Alt+Down, Alt+Up, Ctrl+Alt+T, or the right-click menu, the plugin now compares the active project's source language against the write termbase's source language and swaps source/target text when they are inverted (e.g. working in a NL→EN project but writing to an EN→NL termbase); previously terms were silently inserted in the wrong direction
 
 ---
 
-## [4.10.9] — 2026-03-18
+## [4.10.9] – 2026-03-18
 
 ### Changed
-- **Lavender chip colour for abbreviation matches** — TermLens chips that matched via a source abbreviation now render with a light lavender background instead of the regular blue, making them instantly distinguishable from full-term matches; the shortcut badge on abbreviation chips is purple to match
+- **Lavender chip colour for abbreviation matches** – TermLens chips that matched via a source abbreviation now render with a light lavender background instead of the regular blue, making them instantly distinguishable from full-term matches; the shortcut badge on abbreviation chips is purple to match
 
 ---
 
-## [4.10.8] — 2026-03-18
+## [4.10.8] – 2026-03-18
 
 ### Fixed
-- **Smart selection no longer swallows the next word when selection has trailing space** — selecting a single word with a trailing space (e.g. by shift+arrow-key overshoot) now correctly adds just that word to the termbase; previously the expansion algorithm would land past the space and consume the following word (e.g. "trimethoxysilaan of" instead of "trimethoxysilaan")
+- **Smart selection no longer swallows the next word when selection has trailing space** – selecting a single word with a trailing space (e.g. by shift+arrow-key overshoot) now correctly adds just that word to the termbase; previously the expansion algorithm would land past the space and consume the following word (e.g. "trimethoxysilaan of" instead of "trimethoxysilaan")
 
 ---
 
-## [4.10.7] — 2026-03-18
+## [4.10.7] – 2026-03-18
 
 ### Added
-- **Persistent chat history** — the AI Assistant conversation is now saved to disk after each message and restored automatically when Trados restarts; history persists until you click the **Clear** button
+- **Persistent chat history** – the AI Assistant conversation is now saved to disk after each message and restored automatically when Trados restarts; history persists until you click the **Clear** button
 
 ---
 
-## [4.10.6] — 2026-03-18
+## [4.10.6] – 2026-03-18
 
 ### Added
-- **Variable picker in Prompt Editor** — press **Ctrl+,** in the prompt content field to open a variable menu listing all available variables with descriptions; selecting one inserts it at the cursor (mirrors the variable insertion shortcut in the Trados Studio editor)
+- **Variable picker in Prompt Editor** – press **Ctrl+,** in the prompt content field to open a variable menu listing all available variables with descriptions; selecting one inserts it at the cursor (mirrors the variable insertion shortcut in the Trados Studio editor)
 
 ### Changed
-- **CS checkbox replaces Case dropdown in TermLens settings** — the per-termbase case sensitivity control is now a compact checkbox column (header: **CS**) instead of a dropdown showing Insensitive on every row; ticked = case-sensitive, unticked = case-insensitive; the column sits alongside the existing Read/Write/Project checkboxes
+- **CS checkbox replaces Case dropdown in TermLens settings** – the per-termbase case sensitivity control is now a compact checkbox column (header: **CS**) instead of a dropdown showing Insensitive on every row; ticked = case-sensitive, unticked = case-insensitive; the column sits alongside the existing Read/Write/Project checkboxes
 
 ---
 
-## [4.10.5] — 2026-03-18
+## [4.10.5] – 2026-03-18
 
 ### Added
-- **QuickLauncher built-in prompts** — three prompts now ship as built-ins and are created on first run (or via Restore): *Assess how I translated the current segment*, *Define*, and *Explain (in general)*
+- **QuickLauncher built-in prompts** – three prompts now ship as built-ins and are created on first run (or via Restore): *Assess how I translated the current segment*, *Define*, and *Explain (in general)*
 
 ### Changed
-- **Style guide prompts removed** — the five language-specific style guides (Dutch, English, French, German, Spanish) are no longer shipped as built-in prompts; users who want style guide prompts can create their own in the Prompts tab
-- **Built-in prompts use `{{SOURCE_LANGUAGE}}`/`{{TARGET_LANGUAGE}}`** — all specialist prompt content updated from legacy `{source_lang}`/`{target_lang}` single-brace format to the current double-brace standard
+- **Style guide prompts removed** – the five language-specific style guides (Dutch, English, French, German, Spanish) are no longer shipped as built-in prompts; users who want style guide prompts can create their own in the Prompts tab
+- **Built-in prompts use `{{SOURCE_LANGUAGE}}`/`{{TARGET_LANGUAGE}}`** – all specialist prompt content updated from legacy `{source_lang}`/`{target_lang}` single-brace format to the current double-brace standard
 
 ### Fixed
-- **Delete button label clipped in Prompts tab** — the Delete button was too narrow (55 px), causing the label to be cut off; widened to 65 px
+- **Delete button label clipped in Prompts tab** – the Delete button was too narrow (55 px), causing the label to be cut off; widened to 65 px
 
 ---
 
-## [4.10.4] — 2026-03-18
+## [4.10.4] – 2026-03-18
 
 ### Fixed
-- **Prompts tab: double-click opens wrong prompt after column sort** — after sorting the prompt list by clicking a column header, double-clicking a row now opens the correct prompt; previously it used the visual row index, which diverged from the data list order after sorting
-- **"Surrounding segments" spinner overlap** — the spinner for the Surrounding segments setting in AI Settings was positioned too close to its label and appeared partially overlapping it; moved right to give the label room
+- **Prompts tab: double-click opens wrong prompt after column sort** – after sorting the prompt list by clicking a column header, double-clicking a row now opens the correct prompt; previously it used the visual row index, which diverged from the data list order after sorting
+- **"Surrounding segments" spinner overlap** – the spinner for the Surrounding segments setting in AI Settings was positioned too close to its label and appeared partially overlapping it; moved right to give the label room
 
 ### Changed
-- **`{{PROJECT}}` display in chat** — when a QuickLauncher prompt containing `{{PROJECT}}` is sent, the chat bubble now shows a compact summary (e.g. `[source document — 47 segments]`) instead of the full source document text; the complete text is still sent to the AI unchanged
+- **`{{PROJECT}}` display in chat** – when a QuickLauncher prompt containing `{{PROJECT}}` is sent, the chat bubble now shows a compact summary (e.g. `[source document – 47 segments]`) instead of the full source document text; the complete text is still sent to the AI unchanged
 
 ---
 
-## [4.10.3] — 2026-03-18
+## [4.10.3] – 2026-03-18
 
 ### Added
-- **`{{PROJECT_NAME}}` variable** — replaced with the Trados project name in QuickLauncher prompts
-- **`{{DOCUMENT_NAME}}` variable** — replaced with the active file name in QuickLauncher prompts
-- **`{{SURROUNDING_SEGMENTS}}` variable** — replaced with N source segments before and after the active segment, numbered with their actual per-file Trados segment numbers and the active segment marked `← ACTIVE`; N is configurable in Settings → AI Settings → Surrounding segments (default: 5)
-- **`{{PROJECT}}` variable** — replaced with all source segments in the active document, numbered with actual Trados segment numbers; multi-file projects include `=== File N ===` headers at file boundaries where segment numbering restarts
-- **Surrounding segments setting** — new spinner in AI Settings: "Surrounding segments" (default: 5, range 1–20); controls both the `{{SURROUNDING_SEGMENTS}}` QuickLauncher variable and the context window in the AI Assistant chat
+- **`{{PROJECT_NAME}}` variable** – replaced with the Trados project name in QuickLauncher prompts
+- **`{{DOCUMENT_NAME}}` variable** – replaced with the active file name in QuickLauncher prompts
+- **`{{SURROUNDING_SEGMENTS}}` variable** – replaced with N source segments before and after the active segment, numbered with their actual per-file Trados segment numbers and the active segment marked `← ACTIVE`; N is configurable in Settings → AI Settings → Surrounding segments (default: 5)
+- **`{{PROJECT}}` variable** – replaced with all source segments in the active document, numbered with actual Trados segment numbers; multi-file projects include `=== File N ===` headers at file boundaries where segment numbering restarts
+- **Surrounding segments setting** – new spinner in AI Settings: "Surrounding segments" (default: 5, range 1–20); controls both the `{{SURROUNDING_SEGMENTS}}` QuickLauncher variable and the context window in the AI Assistant chat
 
 ### Changed
-- **AI Assistant surrounding context** — was previously hardcoded to 2 segments on each side; now uses the new "Surrounding segments" setting (default 5)
+- **AI Assistant surrounding context** – was previously hardcoded to 2 segments on each side; now uses the new "Surrounding segments" setting (default 5)
 
 ### Notes
 - Segment numbers in `{{SURROUNDING_SEGMENTS}}` and `{{PROJECT}}` match the numbers shown in the Trados editor (per-file, 1-based); the same numbering logic used by the AI Proofreader results
-- `{{PROJECT}}` is evaluated lazily — only when the prompt template actually contains `{{PROJECT}}`; it has no cost unless used
+- `{{PROJECT}}` is evaluated lazily – only when the prompt template actually contains `{{PROJECT}}`; it has no cost unless used
 - Sending a 10,000-word patent as `{{PROJECT}}` to a Sonnet-class model costs approximately $0.04–0.05 per call
 
 ---
 
-## [4.10.2] — 2026-03-17
+## [4.10.2] – 2026-03-17
 
 ### Changed
-- **`quicklauncher_label` YAML field** — the optional short label for the QuickLauncher menu is now set with `quicklauncher_label:` in `.svprompt` frontmatter; the old name `quickmenu_label` still works as a backward-compatible alias
+- **`quicklauncher_label` YAML field** – the optional short label for the QuickLauncher menu is now set with `quicklauncher_label:` in `.svprompt` frontmatter; the old name `quickmenu_label` still works as a backward-compatible alias
 
 ---
 
-## [4.10.1] — 2026-03-17
+## [4.10.1] – 2026-03-17
 
 ### Added
-- **`{{SOURCE_SEGMENT}}` and `{{TARGET_SEGMENT}}` variables** — renamed from `{{SOURCE_TEXT}}` / `{{TARGET_TEXT}}` for clarity; the old names continue to work as aliases
-- **Ctrl+Q shortcut** — opens the QuickLauncher prompt menu directly from the keyboard; note that Trados's default "View Internally Source" shortcut must be removed first (File → Options → Keyboard Shortcuts)
-- **QuickLauncher help page** — new documentation page covering variables, examples, and setup
+- **`{{SOURCE_SEGMENT}}` and `{{TARGET_SEGMENT}}` variables** – renamed from `{{SOURCE_TEXT}}` / `{{TARGET_TEXT}}` for clarity; the old names continue to work as aliases
+- **Ctrl+Q shortcut** – opens the QuickLauncher prompt menu directly from the keyboard; note that Trados's default "View Internally Source" shortcut must be removed first (File → Options → Keyboard Shortcuts)
+- **QuickLauncher help page** – new documentation page covering variables, examples, and setup
 
 ### Fixed
-- **QuickLauncher prompts appear immediately** — newly created or edited prompts now appear in the right-click menu without restarting Trados
-- **Case column width** — the Case column in TermLens settings was too narrow to display "Insensitive" in full; widened to fit
+- **QuickLauncher prompts appear immediately** – newly created or edited prompts now appear in the right-click menu without restarting Trados
+- **Case column width** – the Case column in TermLens settings was too narrow to display "Insensitive" in full; widened to fit
 
 ---
 
-## [4.10.0] — 2026-03-17
+## [4.10.0] – 2026-03-17
 
 ### Added
-- **QuickLauncher** — new editor right-click menu entry listing all prompts marked as QuickLauncher; selecting a prompt fills in the current segment's source text, target text, selection, and language pair as variables and submits the expanded prompt directly to the Supervertaler Assistant chat, enabling one-click AI actions without switching panels
-- **QuickLauncher prompt support** — prompts are marked as QuickLauncher by adding `sv_quickmenu: true` to their YAML frontmatter (compatible with the same flag used in Supervertaler Workbench), or by setting `category: QuickLauncher`; an optional `quickmenu_label:` field sets a short display name in the menu
-- **Segment-level prompt variables** — `{{SOURCE_TEXT}}`, `{{TARGET_TEXT}}`, and `{{SELECTION}}` variables are now substituted in prompts at runtime using the current segment context (compatible with Supervertaler Workbench variable names)
-- **Legacy category normalisation** — the old internal category name `quickmenu_prompts` is automatically normalised to `QuickLauncher` when loading prompt files, ensuring forward compatibility
+- **QuickLauncher** – new editor right-click menu entry listing all prompts marked as QuickLauncher; selecting a prompt fills in the current segment's source text, target text, selection, and language pair as variables and submits the expanded prompt directly to the Supervertaler Assistant chat, enabling one-click AI actions without switching panels
+- **QuickLauncher prompt support** – prompts are marked as QuickLauncher by adding `sv_quickmenu: true` to their YAML frontmatter (compatible with the same flag used in Supervertaler Workbench), or by setting `category: QuickLauncher`; an optional `quickmenu_label:` field sets a short display name in the menu
+- **Segment-level prompt variables** – `{{SOURCE_TEXT}}`, `{{TARGET_TEXT}}`, and `{{SELECTION}}` variables are now substituted in prompts at runtime using the current segment context (compatible with Supervertaler Workbench variable names)
+- **Legacy category normalisation** – the old internal category name `quickmenu_prompts` is automatically normalised to `QuickLauncher` when loading prompt files, ensuring forward compatibility
 
 ---
 
-## [4.9.0] — 2026-03-17 ([#4](https://github.com/Supervertaler/Supervertaler-for-Trados/issues/4))
+## [4.9.0] – 2026-03-17 ([#4](https://github.com/Supervertaler/Supervertaler-for-Trados/issues/4))
 
 ### Added
-- **Unified user data folder** — Supervertaler for Trados now stores all data (settings, licence, projects, prompts) in a single shared folder alongside Supervertaler Workbench (default: `~/Supervertaler/`); the folder is configured via a shared `%APPDATA%\Supervertaler\config.json` pointer so both products automatically read from the same location
-- **First-run setup dialog** — on first launch, a dialog lets you choose the data folder; if an existing Workbench installation is detected its path is pre-filled so you can share data immediately with one click
-- **Automatic data migration** — existing settings, licence, project overlays, and custom prompts are copied from the old `%LocalAppData%\Supervertaler.Trados\` location to the new shared folder on first run; old files are left in place as a backup
-- **Shared prompt library** — prompts are now read from and written to the shared `prompt_library/` folder; any prompt created in Workbench is immediately visible in the Trados plugin and vice versa, with no configuration required
+- **Unified user data folder** – Supervertaler for Trados now stores all data (settings, licence, projects, prompts) in a single shared folder alongside Supervertaler Workbench (default: `~/Supervertaler/`); the folder is configured via a shared `%APPDATA%\Supervertaler\config.json` pointer so both products automatically read from the same location
+- **First-run setup dialog** – on first launch, a dialog lets you choose the data folder; if an existing Workbench installation is detected its path is pre-filled so you can share data immediately with one click
+- **Automatic data migration** – existing settings, licence, project overlays, and custom prompts are copied from the old `%LocalAppData%\Supervertaler.Trados\` location to the new shared folder on first run; old files are left in place as a backup
+- **Shared prompt library** – prompts are now read from and written to the shared `prompt_library/` folder; any prompt created in Workbench is immediately visible in the Trados plugin and vice versa, with no configuration required
 
 ---
 
-## [4.8.1] — 2026-03-17
+## [4.8.1] – 2026-03-17
 
 ### Changed
-- **Ctrl+Alt+T opens full Term Entry Editor** — pressing Ctrl+Alt+T to add a new term now opens the full Term Entry Editor dialog instead of the simple Add Term dialog, giving immediate access to definition, domain, notes, and synonym fields when adding a term
+- **Ctrl+Alt+T opens full Term Entry Editor** – pressing Ctrl+Alt+T to add a new term now opens the full Term Entry Editor dialog instead of the simple Add Term dialog, giving immediate access to definition, domain, notes, and synonym fields when adding a term
 
 ### Fixed
-- **TermLens subscript/superscript matching** — terms containing Unicode subscript digits (₀–₉) or superscript digits (⁰¹²³⁴⁵⁶⁷⁸⁹) such as H₂O, CO₂, and mm² were not recognised in segments because the tokeniser split them at the script character; the word pattern now includes these Unicode ranges and index keys are normalised so matching works correctly
-- **Context-aware help links** — F1 help in the Batch Operations and Reports tabs now opens the correct documentation page for the active context rather than falling back to the generic help home page
+- **TermLens subscript/superscript matching** – terms containing Unicode subscript digits (₀–₉) or superscript digits (⁰¹²³⁴⁵⁶⁷⁸⁹) such as H₂O, CO₂, and mm² were not recognised in segments because the tokeniser split them at the script character; the word pattern now includes these Unicode ranges and index keys are normalised so matching works correctly
+- **Context-aware help links** – F1 help in the Batch Operations and Reports tabs now opens the correct documentation page for the active context rather than falling back to the generic help home page
 
 ---
 
-## [4.8.0] — 2026-03-16
+## [4.8.0] – 2026-03-16
 
 ### Added
-- **AI Proofreader** — new batch proofreading mode in the Batch Operations tab; select "Proofread" to check translated segments for errors using AI; results appear in the new Reports tab as clickable issue cards with segment number, issue description, and suggestion; clicking a card navigates to the corresponding segment in the editor
-- **Reports tab** — new tab in the Supervertaler Assistant panel displaying proofreading results; shows issue count, run duration, and a scrollable list of issue cards; Clear button to reset results
-- **Proofread scopes** — five scope options for proofreading: Confirmed only, Translated + Confirmed, All segments, Filtered segments, and Filtered (confirmed only)
-- **Segment navigation from reports** — clicking an issue card in the Reports tab navigates directly to the relevant segment in the Trados editor, using the segment's ParagraphUnitId and SegmentId for accurate navigation in multi-file projects
-- **Per-file segment numbering** — issue cards in the Reports tab show the actual per-file segment number (matching the Trados editor grid) rather than a cross-file batch index
-- **"Also add issues as Trados comments" checkbox** — in the Batch Operations tab (Proofread mode), option to insert proofreading issues as Trados segment comments alongside the Reports tab display
-- **Prompt category filtering** — the prompt dropdown in Batch Operations now filters by mode: only "Translate" prompts appear in Translate mode, only "Proofread" prompts in Proofread mode
+- **AI Proofreader** – new batch proofreading mode in the Batch Operations tab; select "Proofread" to check translated segments for errors using AI; results appear in the new Reports tab as clickable issue cards with segment number, issue description, and suggestion; clicking a card navigates to the corresponding segment in the editor
+- **Reports tab** – new tab in the Supervertaler Assistant panel displaying proofreading results; shows issue count, run duration, and a scrollable list of issue cards; Clear button to reset results
+- **Proofread scopes** – five scope options for proofreading: Confirmed only, Translated + Confirmed, All segments, Filtered segments, and Filtered (confirmed only)
+- **Segment navigation from reports** – clicking an issue card in the Reports tab navigates directly to the relevant segment in the Trados editor, using the segment's ParagraphUnitId and SegmentId for accurate navigation in multi-file projects
+- **Per-file segment numbering** – issue cards in the Reports tab show the actual per-file segment number (matching the Trados editor grid) rather than a cross-file batch index
+- **"Also add issues as Trados comments" checkbox** – in the Batch Operations tab (Proofread mode), option to insert proofreading issues as Trados segment comments alongside the Reports tab display
+- **Prompt category filtering** – the prompt dropdown in Batch Operations now filters by mode: only "Translate" prompts appear in Translate mode, only "Proofread" prompts in Proofread mode
 
 ### Changed
-- **Prompt file extension** — built-in and user prompts now use `.svprompt` file extension (previously `.md`), matching the Supervertaler desktop application; existing `.md` prompt files are still loaded for backward compatibility
-- **Prompt YAML key renamed** — the `domain` key in prompt YAML frontmatter is now `category`; the parser accepts both for backward compatibility
-- **Prompt categories renamed** — "Domain Expertise" and "Style Guides" categories are now "Translate"; "Proofreading" is now "Proofread"
-- **Case sensitivity per-termbase dropdown simplified** — removed "Default" option; per-termbase case sensitivity is now simply "Insensitive" (default) or "Sensitive"
+- **Prompt file extension** – built-in and user prompts now use `.svprompt` file extension (previously `.md`), matching the Supervertaler desktop application; existing `.md` prompt files are still loaded for backward compatibility
+- **Prompt YAML key renamed** – the `domain` key in prompt YAML frontmatter is now `category`; the parser accepts both for backward compatibility
+- **Prompt categories renamed** – "Domain Expertise" and "Style Guides" categories are now "Translate"; "Proofreading" is now "Proofread"
+- **Case sensitivity per-termbase dropdown simplified** – removed "Default" option; per-termbase case sensitivity is now simply "Insensitive" (default) or "Sensitive"
 
 ---
 
-## [4.7.0] — 2026-03-16
+## [4.7.0] – 2026-03-16
 
 ### Added
-- **Case-sensitive matching** — new global setting "Case-sensitive matching" (default: off) plus per-termbase override in the settings grid; when enabled, terms only match if the source text has the same letter case as the indexed term; per-termbase setting can be Sensitive or Insensitive
-- **Mouse wheel scrolling in AI Assistant chat** — the chat message panel now supports mouse wheel scrolling; previously only the scrollbar worked
+- **Case-sensitive matching** – new global setting "Case-sensitive matching" (default: off) plus per-termbase override in the settings grid; when enabled, terms only match if the source text has the same letter case as the indexed term; per-termbase setting can be Sensitive or Insensitive
+- **Mouse wheel scrolling in AI Assistant chat** – the chat message panel now supports mouse wheel scrolling; previously only the scrollbar worked
 
 ### Changed
-- **Database schema migration** — `case_sensitive` column automatically added to the `termbases` table on first use; fully backward-compatible
+- **Database schema migration** – `case_sensitive` column automatically added to the `termbases` table on first use; fully backward-compatible
 
 ---
 
-## [4.6.0] — 2026-03-16
+## [4.6.0] – 2026-03-16
 
 ### Added
-- **Abbreviation fields on term entries** — each term entry now has optional **Source Abbreviation** and **Target Abbreviation** fields; when a source abbreviation appears in a segment, TermLens highlights it and shows the target abbreviation underneath, with the full term pair available in the +N tooltip
-- **Pipe-separated abbreviation variants** — abbreviation fields support multiple variants separated by `|` (e.g., `GC|G.C.|gc|g.c.`); each variant is indexed and matched independently, so all common forms of an abbreviation are recognised
-- **Abbreviation-aware insertion** — clicking or Alt+digit-inserting an abbreviation-matched chip inserts the target abbreviation (first variant) instead of the full target term
-- **Abbreviation in AI prompts** — AI translation prompts now include abbreviation pairs alongside their full terms, so the AI knows both forms
-- **Abbreviation columns in Term Editor** — the Add/Edit Term dialog includes Source Abbreviation and Target Abbreviation text fields between the primary term fields and the synonyms section
-- **Abbreviation columns in Termbase Editor** — the termbase grid shows SrcAbbr and TgtAbbr columns for viewing and editing abbreviations inline
+- **Abbreviation fields on term entries** – each term entry now has optional **Source Abbreviation** and **Target Abbreviation** fields; when a source abbreviation appears in a segment, TermLens highlights it and shows the target abbreviation underneath, with the full term pair available in the +N tooltip
+- **Pipe-separated abbreviation variants** – abbreviation fields support multiple variants separated by `|` (e.g., `GC|G.C.|gc|g.c.`); each variant is indexed and matched independently, so all common forms of an abbreviation are recognised
+- **Abbreviation-aware insertion** – clicking or Alt+digit-inserting an abbreviation-matched chip inserts the target abbreviation (first variant) instead of the full target term
+- **Abbreviation in AI prompts** – AI translation prompts now include abbreviation pairs alongside their full terms, so the AI knows both forms
+- **Abbreviation columns in Term Editor** – the Add/Edit Term dialog includes Source Abbreviation and Target Abbreviation text fields between the primary term fields and the synonyms section
+- **Abbreviation columns in Termbase Editor** – the termbase grid shows SrcAbbr and TgtAbbr columns for viewing and editing abbreviations inline
 
 ### Changed
-- **Database schema migration** — `source_abbreviation` and `target_abbreviation` columns automatically added to existing databases on first write; fully backward-compatible with older Supervertaler databases
+- **Database schema migration** – `source_abbreviation` and `target_abbreviation` columns automatically added to existing databases on first write; fully backward-compatible with older Supervertaler databases
 
 ---
 
-## [4.5.0] — 2026-03-16
+## [4.5.0] – 2026-03-16
 
 ### Added
-- **Ctrl+T quick translate** — press **Ctrl+T** to instantly translate the active segment using the same provider, model, and prompt configured in the Batch Translate tab; the translation is applied directly to the target cell, with full tag preservation for segments containing inline formatting; also available via right-click context menu ("Translate active segment"); rebindable in Trados Studio's keyboard shortcut settings
-- **AI Settings link in Batch Translate tab** — clickable "AI Settings…" link below the provider display opens the Settings dialog directly on the AI Settings tab for quick access to provider, model, API key, and AI context configuration
+- **Ctrl+T quick translate** – press **Ctrl+T** to instantly translate the active segment using the same provider, model, and prompt configured in the Batch Translate tab; the translation is applied directly to the target cell, with full tag preservation for segments containing inline formatting; also available via right-click context menu ("Translate active segment"); rebindable in Trados Studio's keyboard shortcut settings
+- **AI Settings link in Batch Translate tab** – clickable "AI Settings…" link below the provider display opens the Settings dialog directly on the AI Settings tab for quick access to provider, model, API key, and AI context configuration
 
 ### Changed
-- **Ctrl+Alt+A retired** — the old standalone single-segment translation shortcut has been unbound; the action is kept for backward compatibility but now redirects to the same Ctrl+T batch-translate pipeline with full tag support
+- **Ctrl+Alt+A retired** – the old standalone single-segment translation shortcut has been unbound; the action is kept for backward compatibility but now redirects to the same Ctrl+T batch-translate pipeline with full tag support
 
 ### Fixed
-- **Tagged segments not applied in batch translate** — segments containing inline Trados tags (bold, italic, field codes, page numbers, etc.) were translated by the AI but the translation was never written back to the target; the reconstructed target was written to the document model but the Trados editor's own buffer overwrote it with the old (empty) content; now uses the Trados `ProcessSegmentPair` API which handles the edit transaction correctly
-- **Last segment in batch sometimes lost** — the final segment translated in a batch could silently lose its translation because no subsequent segment navigation forced the Trados editor to commit the pending edit; the new `ProcessSegmentPair` approach bypasses the editor buffer entirely for tagged segments, and non-tagged segments continue to use the proven `Selection.Target.Replace` path
+- **Tagged segments not applied in batch translate** – segments containing inline Trados tags (bold, italic, field codes, page numbers, etc.) were translated by the AI but the translation was never written back to the target; the reconstructed target was written to the document model but the Trados editor's own buffer overwrote it with the old (empty) content; now uses the Trados `ProcessSegmentPair` API which handles the edit transaction correctly
+- **Last segment in batch sometimes lost** – the final segment translated in a batch could silently lose its translation because no subsequent segment navigation forced the Trados editor to commit the pending edit; the new `ProcessSegmentPair` approach bypasses the editor buffer entirely for tagged segments, and non-tagged segments continue to use the proven `Selection.Target.Replace` path
 
 ---
 
-## [4.4.0] — 2026-03-16
+## [4.4.0] – 2026-03-16
 
 ### Added
-- **Tag-aware AI translation** — segments containing inline Trados tags (bold, italic, field codes, etc.) are now fully supported for both Batch Translate and single-segment AI translation (Ctrl+Alt+A); previously, tags were silently stripped and lost in the target
-- **SegmentTagHandler** — new serialization/reconstruction engine that converts Trados `ITagPair` and `IPlaceholderTag` objects into numbered placeholders (`<t1>...</t1>`, `<t2/>`), sends them through the LLM translation pipeline, then reconstructs the target segment with the original tag objects cloned and repositioned to match the translated word order
-- **Graceful fallback** — if the LLM drops or corrupts tag placeholders, the plugin falls back to plain-text insertion (stripping placeholders) instead of failing silently
+- **Tag-aware AI translation** – segments containing inline Trados tags (bold, italic, field codes, etc.) are now fully supported for both Batch Translate and single-segment AI translation (Ctrl+Alt+A); previously, tags were silently stripped and lost in the target
+- **SegmentTagHandler** – new serialization/reconstruction engine that converts Trados `ITagPair` and `IPlaceholderTag` objects into numbered placeholders (`<t1>...</t1>`, `<t2/>`), sends them through the LLM translation pipeline, then reconstructs the target segment with the original tag objects cloned and repositioned to match the translated word order
+- **Graceful fallback** – if the LLM drops or corrupts tag placeholders, the plugin falls back to plain-text insertion (stripping placeholders) instead of failing silently
 
 ### Improved
-- **Translation prompt tag instructions** — replaced generic CAT tool tag preservation instructions with specific numbered placeholder format and examples, improving LLM tag preservation accuracy
+- **Translation prompt tag instructions** – replaced generic CAT tool tag preservation instructions with specific numbered placeholder format and examples, improving LLM tag preservation accuracy
 
 ---
 
-## [4.3.0] — 2026-03-14
+## [4.3.0] – 2026-03-14
 
 ### Added
-- **Per-project settings** — switching between Trados projects now automatically saves and restores the Supervertaler database path, enabled/disabled termbases, write targets, project termbase, and AI context termbase filters; settings are stored per-project in `%LocalAppData%\Supervertaler.Trados\projects\` and applied automatically when the active document changes
-- **Per-project settings documentation** — new help page documenting how per-project settings work, what's saved per-project vs globally, and how the automatic switching behaves
-- **Privacy policy** — [supervertaler.com/privacy](https://supervertaler.com/privacy/)
+- **Per-project settings** – switching between Trados projects now automatically saves and restores the Supervertaler database path, enabled/disabled termbases, write targets, project termbase, and AI context termbase filters; settings are stored per-project in `%LocalAppData%\Supervertaler.Trados\projects\` and applied automatically when the active document changes
+- **Per-project settings documentation** – new help page documenting how per-project settings work, what's saved per-project vs globally, and how the automatic switching behaves
+- **Privacy policy** – [supervertaler.com/privacy](https://supervertaler.com/privacy/)
 
 ### Fixed
-- **"Add & Edit" crash in Similar Term Found dialog** — pressing "Add & Edit" when merging a term caused an `ArgumentOutOfRangeException` (ordinal 10) because `GetTermById()` had an off-by-one error in its column indexing for optional fields (domain, notes, is_nontranslatable); each field was read one position past its actual column index, and the last field fell off the end of the result set
-- **Licence null-status crash** — when the Lemon Squeezy API returned a null or empty `status` field during activation, the licence was treated as invalid even though the key was activated; now treats null status as active when the licence has a valid instance ID
-- **Trial period mismatch** — `LicenseInfo.cs` used a hardcoded 14-day trial window while `LicenseManager.cs` used 90 days; unified both to the 90-day constant
-- **AI Settings termbase list stale after database switch** — switching Supervertaler databases in the TermLens settings tab didn't update the AI Settings tab's termbase checklist until the dialog was closed and reopened; the AI context panel now refreshes immediately when the termbase list changes
-- **Term Picker shortcut documented incorrectly** — the About dialog and help docs showed `Ctrl+Shift+G` but the actual shortcut is `Ctrl+Alt+G`; corrected all references
+- **"Add & Edit" crash in Similar Term Found dialog** – pressing "Add & Edit" when merging a term caused an `ArgumentOutOfRangeException` (ordinal 10) because `GetTermById()` had an off-by-one error in its column indexing for optional fields (domain, notes, is_nontranslatable); each field was read one position past its actual column index, and the last field fell off the end of the result set
+- **Licence null-status crash** – when the Lemon Squeezy API returned a null or empty `status` field during activation, the licence was treated as invalid even though the key was activated; now treats null status as active when the licence has a valid instance ID
+- **Trial period mismatch** – `LicenseInfo.cs` used a hardcoded 14-day trial window while `LicenseManager.cs` used 90 days; unified both to the 90-day constant
+- **AI Settings termbase list stale after database switch** – switching Supervertaler databases in the TermLens settings tab didn't update the AI Settings tab's termbase checklist until the dialog was closed and reopened; the AI context panel now refreshes immediately when the termbase list changes
+- **Term Picker shortcut documented incorrectly** – the About dialog and help docs showed `Ctrl+Shift+G` but the actual shortcut is `Ctrl+Alt+G`; corrected all references
 
 ### Improved
-- **Keyboard shortcuts documentation** — added Mac/Parallels equivalents (Ctrl → Control, Alt → Option) to all shortcut tables for users running Trados in Parallels
-- **Support email** — updated to support@supervertaler.com
+- **Keyboard shortcuts documentation** – added Mac/Parallels equivalents (Ctrl → Control, Alt → Option) to all shortcut tables for users running Trados in Parallels
+- **Support email** – updated to support@supervertaler.com
 ---
 
-## [4.2.2-beta] — 2026-03-13
+## [4.2.2-beta] – 2026-03-13
 
 ### Fixed
-- **Licence tab help link** — the ? button on the Licence tab now opens the Licensing & Pricing page instead of incorrectly opening TermLens Settings
-- **Backup tab help link** — the ? button on the Backup tab now opens the dedicated Backup & Restore page instead of using a stale anchor link
-- **Licensing help URL** — corrected the GitBook URL slug from `licensing-and-pricing` (404) to `licensing` (the actual filename-based slug)
+- **Licence tab help link** – the ? button on the Licence tab now opens the Licensing & Pricing page instead of incorrectly opening TermLens Settings
+- **Backup tab help link** – the ? button on the Backup tab now opens the dedicated Backup & Restore page instead of using a stale anchor link
+- **Licensing help URL** – corrected the GitBook URL slug from `licensing-and-pricing` (404) to `licensing` (the actual filename-based slug)
 
 ### Changed
-- **UK English in documentation** — changed all instances of "license" (US) to "licence" (UK) in the online help pages
+- **UK English in documentation** – changed all instances of "license" (US) to "licence" (UK) in the online help pages
 
 ### Added
-- **Example Project link in help menus** — both the TermLens and Supervertaler Assistant help menus (? button) now include an "Example Project" link that opens the documentation page for the downloadable example project
-- **Example Project documentation** — new docs page with step-by-step instructions, screenshots, and the example package (patent translation with termbase, TM, and MultiTerm termbase)
-- **Help link reference** — new `HELP-LINKS.md` in the repo root documents every help link in the plugin with its online URL and which UI element triggers it
+- **Example Project link in help menus** – both the TermLens and Supervertaler Assistant help menus (? button) now include an "Example Project" link that opens the documentation page for the downloadable example project
+- **Example Project documentation** – new docs page with step-by-step instructions, screenshots, and the example package (patent translation with termbase, TM, and MultiTerm termbase)
+- **Help link reference** – new `HELP-LINKS.md` in the repo root documents every help link in the plugin with its online URL and which UI element triggers it
 
 ---
 
-## [4.2.1-beta] — 2026-03-12
+## [4.2.1-beta] – 2026-03-12
 
 ### Improved
-- **Settings toolbar buttons** — the TermLens tab toolbar buttons now use descriptive labels ("+ Add", "− Remove") instead of cryptic symbols; all five buttons (Open, Export, Import, + Add, − Remove) have tooltips explaining their function
+- **Settings toolbar buttons** – the TermLens tab toolbar buttons now use descriptive labels ("+ Add", "− Remove") instead of cryptic symbols; all five buttons (Open, Export, Import, + Add, − Remove) have tooltips explaining their function
 
 ### Fixed
-- **"Max segments" label overlap** — the "Max segments:" label in AI Settings no longer runs into the number input box
+- **"Max segments" label overlap** – the "Max segments:" label in AI Settings no longer runs into the number input box
 
 ---
 
-## [4.2.0-beta] — 2026-03-12
+## [4.2.0-beta] – 2026-03-12
 
 ### Added
-- **Update checker** — on startup, the plugin checks GitHub Releases for a newer version and shows a dialog with Download, Skip This Version, and Remind Me Later buttons. Checks once per session, respects skipped versions, and never blocks Trados startup (runs in background)
+- **Update checker** – on startup, the plugin checks GitHub Releases for a newer version and shows a dialog with Download, Skip This Version, and Remind Me Later buttons. Checks once per session, respects skipped versions, and never blocks Trados startup (runs in background)
 
 ---
 
-## [4.1.0-beta] — 2026-03-12
+## [4.1.0-beta] – 2026-03-12
 
 ### Added
-- **Settings backup and restore** — new **Backup** tab in the Settings dialog with Export and Import buttons; export saves all plugin settings (termbase paths, toggle states, font size, shortcut preferences, AI provider keys, model selections, prompt configuration) to a JSON file; import validates the file, creates an automatic backup of current settings, and applies the imported configuration immediately
-- **Open settings folder** — clickable link in the Backup tab opens the `%LocalAppData%\Supervertaler.Trados\` folder in Explorer for easy access to settings files
-- **Open prompts folder** — clickable link in the Prompts tab opens the `%LocalAppData%\Supervertaler.Trados\prompts\` folder in Explorer
+- **Settings backup and restore** – new **Backup** tab in the Settings dialog with Export and Import buttons; export saves all plugin settings (termbase paths, toggle states, font size, shortcut preferences, AI provider keys, model selections, prompt configuration) to a JSON file; import validates the file, creates an automatic backup of current settings, and applies the imported configuration immediately
+- **Open settings folder** – clickable link in the Backup tab opens the `%LocalAppData%\Supervertaler.Trados\` folder in Explorer for easy access to settings files
+- **Open prompts folder** – clickable link in the Prompts tab opens the `%LocalAppData%\Supervertaler.Trados\prompts\` folder in Explorer
 
 ### Fixed
-- **Restore button clipped in Prompts tab** — the "Restore" button width was too narrow, causing the label to be truncated
+- **Restore button clipped in Prompts tab** – the "Restore" button width was too narrow, causing the label to be truncated
 
 ---
 
-## [4.0.2-beta] — 2026-03-12
+## [4.0.2-beta] – 2026-03-12
 
 ### Added
-- **Dual-mode Alt+digit term shortcuts** — two configurable shortcut styles for inserting terms 10+ (choose in Settings > TermLens > Term shortcuts):
-  - **Sequential** (default) — type the term number digit by digit: Alt+4, Alt+5 inserts term 45. Clean sequential badge numbers (10, 11, 12, ...). 1-second timer between digits.
-  - **Repeated digit** — press the same digit key multiple times: Alt+5, Alt+5 inserts term 14. Supports up to 5 tiers (45 terms). No timer ambiguity.
-- **Term Picker wrap-around navigation** — pressing Down on the last term jumps to the first, and Up on the first jumps to the last
+- **Dual-mode Alt+digit term shortcuts** – two configurable shortcut styles for inserting terms 10+ (choose in Settings > TermLens > Term shortcuts):
+  - **Sequential** (default) – type the term number digit by digit: Alt+4, Alt+5 inserts term 45. Clean sequential badge numbers (10, 11, 12, ...). 1-second timer between digits.
+  - **Repeated digit** – press the same digit key multiple times: Alt+5, Alt+5 inserts term 14. Supports up to 5 tiers (45 terms). No timer ambiguity.
+- **Term Picker wrap-around navigation** – pressing Down on the last term jumps to the first, and Up on the first jumps to the last
 
 ### Changed
-- **Term Picker numbering** — the Term Picker now always uses plain sequential numbers (1, 2, 3, ...) regardless of the shortcut style setting, since navigation is done with arrow keys and Enter
+- **Term Picker numbering** – the Term Picker now always uses plain sequential numbers (1, 2, 3, ...) regardless of the shortcut style setting, since navigation is done with arrow keys and Enter
 
 ---
 
-## [4.0.1-beta] — 2026-03-12
+## [4.0.1-beta] – 2026-03-12
 
 ### Fixed
-- **Merge dialog buttons clipped** — the "Similar Term Found" dialog's button bar (Add as Synonym, Add & Edit, Keep Both, Cancel) was invisible or partially clipped inside Trados's WPF-hosted plugin environment; replaced the Dock-based panel layout with flat absolute positioning so buttons render reliably at any DPI
-- **Merge dialog button text truncated** — widened the "Add as Synonym" and "Add & Edit..." buttons so their labels are no longer cut off
+- **Merge dialog buttons clipped** – the "Similar Term Found" dialog's button bar (Add as Synonym, Add & Edit, Keep Both, Cancel) was invisible or partially clipped inside Trados's WPF-hosted plugin environment; replaced the Dock-based panel layout with flat absolute positioning so buttons render reliably at any DPI
+- **Merge dialog button text truncated** – widened the "Add as Synonym" and "Add & Edit..." buttons so their labels are no longer cut off
 
 ### Added
-- **Merge dialog button tooltips** — each button now shows a tooltip on hover explaining what it does
+- **Merge dialog button tooltips** – each button now shows a tooltip on hover explaining what it does
 
 ---
 
-## [4.0.0-beta] — 2026-03-12
+## [4.0.0-beta] – 2026-03-12
 
 ### Changed
-- **90-day free trial** — extended from 14 days; no credit card required, no sign-up
+- **90-day free trial** – extended from 14 days; no credit card required, no sign-up
 - **Support & Community link** in About dialog now points to `supervertaler.com/trados/#support` (Groups.io mailing list, ProZ forum, GitHub Issues) instead of directly to GitHub Issues; future-proofed so support channels can be updated without rebuilding the plugin
-- **Version display** — About dialog now shows the full informational version string (e.g. "4.0.0-beta") rather than the numeric assembly version
+- **Version display** – About dialog now shows the full informational version string (e.g. "4.0.0-beta") rather than the numeric assembly version
 
 ### Fixed
-- **Shield emoji clipping** — "Source code available for security audit" link in the About dialog was partially obscured by the shield emoji; offset increased to prevent overlap
-- **Tooltips on About dialog links** — Documentation and Support & Community links now show tooltips on hover
+- **Shield emoji clipping** – "Source code available for security audit" link in the About dialog was partially obscured by the shield emoji; offset increased to prevent overlap
+- **Tooltips on About dialog links** – Documentation and Support & Community links now show tooltips on hover
 
 ---
 
-## [4.0.0] — 2026-03-11
+## [4.0.0] – 2026-03-11
 
 ### Added
-- **Licensing system** — Lemon Squeezy-powered license key activation with two paid tiers: **TermLens** (€10/month — terminology features) and **TermLens + Supervertaler Assistant** (€15/month — all features including AI); 14-day free trial with full access on first install; 30-day offline cache for validation; 2 machine activations per key
-- **License tab in Settings** — dedicated tab for entering license keys, activating/deactivating licenses, verifying license status, and managing subscriptions; shows trial countdown, plan name, masked key, and last verification date
-- **License status in About dialog** — color-coded license status (blue for trial, green for active, red for expired) with a clickable link that opens the License settings tab directly
-- **Feature gating** — TermLens panel and terminology actions require Tier 1+; AI Assistant panel and AI translate action require Tier 2; graceful overlays and messages guide users to purchase or upgrade
-- **Security transparency** — "Source code available for security audit" link in the About dialog with tooltip explaining the plugin's network behaviour; links to the public GitHub repository
-- **Enhanced AI Assistant context** — the AI chat assistant now sees the full document content (all source segments) so it can determine the document type (legal, medical, technical, etc.) and provide context-appropriate assistance; also includes project/file metadata, surrounding segments, and term definitions/domains/notes
-- **AI Context settings** — three new settings in AI Settings: "Include full document content" (with configurable max segments), and "Include term definitions and domains"
+- **Licensing system** – Lemon Squeezy-powered license key activation with two paid tiers: **TermLens** (€10/month – terminology features) and **TermLens + Supervertaler Assistant** (€15/month – all features including AI); 14-day free trial with full access on first install; 30-day offline cache for validation; 2 machine activations per key
+- **License tab in Settings** – dedicated tab for entering license keys, activating/deactivating licenses, verifying license status, and managing subscriptions; shows trial countdown, plan name, masked key, and last verification date
+- **License status in About dialog** – color-coded license status (blue for trial, green for active, red for expired) with a clickable link that opens the License settings tab directly
+- **Feature gating** – TermLens panel and terminology actions require Tier 1+; AI Assistant panel and AI translate action require Tier 2; graceful overlays and messages guide users to purchase or upgrade
+- **Security transparency** – "Source code available for security audit" link in the About dialog with tooltip explaining the plugin's network behaviour; links to the public GitHub repository
+- **Enhanced AI Assistant context** – the AI chat assistant now sees the full document content (all source segments) so it can determine the document type (legal, medical, technical, etc.) and provide context-appropriate assistance; also includes project/file metadata, surrounding segments, and term definitions/domains/notes
+- **AI Context settings** – three new settings in AI Settings: "Include full document content" (with configurable max segments), and "Include term definitions and domains"
 
 ### Changed
-- **About dialog** — removed duplicate "Plugin Help" link (Documentation link remains); added clickable license status that opens Settings → License tab; added security audit note with GitHub link
+- **About dialog** – removed duplicate "Plugin Help" link (Documentation link remains); added clickable license status that opens Settings → License tab; added security audit note with GitHub link
 
 ### Fixed
-- **Settings sync between panels** — changing settings from the TermLens gear icon now immediately reflects in the AI Assistant panel and vice versa; previously each panel had its own in-memory copy that could get out of sync
+- **Settings sync between panels** – changing settings from the TermLens gear icon now immediately reflects in the AI Assistant panel and vice versa; previously each panel had its own in-memory copy that could get out of sync
 
 ---
 
-## [3.4.2] — 2026-03-10
+## [3.4.2] – 2026-03-10
 
 ### Added
-- **Merge prompt for similar terms** — when adding a term whose source or target already exists in the termbase (but with a different translation), a dialog offers to add the new text as a synonym instead of creating a near-duplicate entry; works with Alt+Down, Alt+Up, and Ctrl+Alt+T
-- **"Add & Edit" option in merge dialog** — alongside the quick "Add as Synonym" button, the merge dialog now offers "Add & Edit…" which merges the synonym and opens the full Term Entry Editor so the user can review or add metadata before closing
-- **Term metadata in tooltips** — hovering over a term chip now shows Domain and Notes fields alongside Definition (previously only Definition was displayed)
-- **Metadata indicator on badges** — the shortcut badge number on term chips turns black (instead of white) when the term has metadata (definition, domain, or notes), giving a visual cue to hover for more info
+- **Merge prompt for similar terms** – when adding a term whose source or target already exists in the termbase (but with a different translation), a dialog offers to add the new text as a synonym instead of creating a near-duplicate entry; works with Alt+Down, Alt+Up, and Ctrl+Alt+T
+- **"Add & Edit" option in merge dialog** – alongside the quick "Add as Synonym" button, the merge dialog now offers "Add & Edit…" which merges the synonym and opens the full Term Entry Editor so the user can review or add metadata before closing
+- **Term metadata in tooltips** – hovering over a term chip now shows Domain and Notes fields alongside Definition (previously only Definition was displayed)
+- **Metadata indicator on badges** – the shortcut badge number on term chips turns black (instead of white) when the term has metadata (definition, domain, or notes), giving a visual cue to hover for more info
 
 ### Changed
-- **"MultiTerm Help"** — renamed the context menu item from "MultiTerm Support" to "MultiTerm Help" for consistency
-- **"Supervertaler Assistant Help"** — renamed the AI Assistant help menu item from "Assistant Help" to "Supervertaler Assistant Help"
-- **Dialog title casing** — "Edit Term Entry" and "Add Term Entry" renamed to sentence case ("Edit term entry" / "Add term entry")
+- **"MultiTerm Help"** – renamed the context menu item from "MultiTerm Support" to "MultiTerm Help" for consistency
+- **"Supervertaler Assistant Help"** – renamed the AI Assistant help menu item from "Assistant Help" to "Supervertaler Assistant Help"
+- **Dialog title casing** – "Edit Term Entry" and "Add Term Entry" renamed to sentence case ("Edit term entry" / "Add term entry")
 
 ### Fixed
-- **Shift+Enter in AI Assistant** — Shift+Enter now correctly inserts a newline in the chat input instead of being intercepted by Trados Studio; uses a thread-local `WH_GETMESSAGE` hook to intercept the key press before Trados's message filters can consume it
-- **Paste newlines in AI Assistant** — pasting text with bare `\n` line endings (e.g. copied from Trados segments) now displays correctly; the chat input normalises `\n` to `\r\n` on paste
-- **Smart selection expansion** — partial word selections now expand to the shortest matching word at the boundary instead of the longest, preventing over-expansion when selecting near short words (e.g. selecting "o" no longer expands to "output" when "of" is adjacent)
-- **Merge dialog cutoff** — the "Similar Term Found" dialog is now wider (520Ã—310) to prevent text truncation on longer term pairs
+- **Shift+Enter in AI Assistant** – Shift+Enter now correctly inserts a newline in the chat input instead of being intercepted by Trados Studio; uses a thread-local `WH_GETMESSAGE` hook to intercept the key press before Trados's message filters can consume it
+- **Paste newlines in AI Assistant** – pasting text with bare `\n` line endings (e.g. copied from Trados segments) now displays correctly; the chat input normalises `\n` to `\r\n` on paste
+- **Smart selection expansion** – partial word selections now expand to the shortest matching word at the boundary instead of the longest, preventing over-expansion when selecting near short words (e.g. selecting "o" no longer expands to "output" when "of" is adjacent)
+- **Merge dialog cutoff** – the "Similar Term Found" dialog is now wider (520Ã–310) to prevent text truncation on longer term pairs
 
 ---
 
@@ -1570,459 +1570,459 @@ Version numbers follow [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [3.4.1] — 2026-03-10
+## [3.4.1] – 2026-03-10
 
 ### Added
 - **Select All / Deselect All** links for termbases in AI Settings → AI Context section
 
 ### Fixed
-- **Settings TextBox overlap** — the database file path TextBox no longer extends over the "Create New..." button when the settings dialog is resized
+- **Settings TextBox overlap** – the database file path TextBox no longer extends over the "Create New..." button when the settings dialog is resized
 
 ---
 
-## [3.4.0] — 2026-03-09
+## [3.4.0] – 2026-03-09
 
 ### Added
-- **MultiTerm termbase support** — TermLens now automatically detects MultiTerm .sdltb
+- **MultiTerm termbase support** – TermLens now automatically detects MultiTerm .sdltb
   termbases attached to the active Trados project and displays their terms alongside
   Supervertaler terms; MultiTerm terms appear as green chips in the TermLens panel
-- **Read-only MultiTerm terms** — MultiTerm terms are read-only: right-click context menus
+- **Read-only MultiTerm terms** – MultiTerm terms are read-only: right-click context menus
   do not show Edit, Delete, or Non-Translatable options for green (MultiTerm) chips;
-  tooltips show "[MultiTerm — read-only]"
-- **MultiTerm in settings** — detected MultiTerm termbases appear in the Supervertaler
+  tooltips show "[MultiTerm – read-only]"
+- **MultiTerm in settings** – detected MultiTerm termbases appear in the Supervertaler
   Settings dialog with a "[MultiTerm]" label and light green row tint; Read checkbox
   toggles visibility; Write and Project columns are always disabled (read-only)
-- **Auto-refresh on termbase changes** — when terms are added or removed from a MultiTerm
+- **Auto-refresh on termbase changes** – when terms are added or removed from a MultiTerm
   .sdltb termbase (e.g. via Trados's native Term Recognition panel), TermLens automatically
   detects the file modification and reloads terms on the next segment change
-- **JET 4.0 / ACE OLEDB driver support** — .sdltb files are opened via the built-in
+- **JET 4.0 / ACE OLEDB driver support** – .sdltb files are opened via the built-in
   Microsoft.Jet.OLEDB.4.0 driver (available in all 32-bit Windows processes) with fallback
   to ACE OLEDB 12.0–16.0; no additional driver installation required for Trados Studio
   (which runs as an x86 process)
-- **API fallback** — if no OleDb driver can open an .sdltb file, the plugin attempts to
+- **API fallback** – if no OleDb driver can open an .sdltb file, the plugin attempts to
   use Trados's built-in ITerminologyProviderManager API for per-segment term search with
   LRU caching (200 segments)
 
 ### Changed
-- **Cleaned up MultiTerm diagnostic logging** — removed verbose reflection-based logging
+- **Cleaned up MultiTerm diagnostic logging** – removed verbose reflection-based logging
   from the MultiTerm detection and fallback provider code; the multiterm_debug.log file is
   no longer written
 
 ---
 
-## [3.3.3] — 2026-03-09
+## [3.3.3] – 2026-03-09
 
 ### Added
-- **Help button on dialogs** — the Termbase Editor and Edit Term Entry dialogs now show a
+- **Help button on dialogs** – the Termbase Editor and Edit Term Entry dialogs now show a
   `?` button in the title bar that opens the relevant online help page (matching the pattern
   already used by the Supervertaler Settings dialog)
 
 ---
 
-## [3.3.2] — 2026-03-09
+## [3.3.2] – 2026-03-09
 
 ### Added
-- **Context-sensitive help** — the `?` button on TermLens and Supervertaler Assistant
+- **Context-sensitive help** – the `?` button on TermLens and Supervertaler Assistant
   panels now opens a dropdown menu with a direct link to the relevant online help page
   and an "About" option; F1 opens contextual help from every dialog (settings, Add Term,
   Term Picker, Termbase Editor, Prompt Editor, Bulk Add NT)
-- **HelpSystem** — new `Core/HelpSystem.cs` provides a centralized topic registry and
+- **HelpSystem** – new `Core/HelpSystem.cs` provides a centralized topic registry and
   URL launcher for all help pages
 
 ### Changed
-- **Help URL slug** — documentation URLs updated from `gitbook.io/superdocs` to
+- **Help URL slug** – documentation URLs updated from `gitbook.io/superdocs` to
   `gitbook.io/help` for a cleaner, more intuitive path
-- **About dialog access** — the `?` button now shows a dropdown instead of directly
+- **About dialog access** – the `?` button now shows a dropdown instead of directly
   opening About; About is still accessible via the dropdown menu
 
 ---
 
-## [3.3.1] — 2026-03-08
+## [3.3.1] – 2026-03-08
 
 ### Added
-- **Resizable chat input** — drag the top edge of the chat input area upward to make it
+- **Resizable chat input** – drag the top edge of the chat input area upward to make it
   taller when composing multi-line messages with Shift+Enter; drag down to shrink it back
 
 ### Fixed
-- **Settings dialog too wide** — the Supervertaler Settings window could become excessively
+- **Settings dialog too wide** – the Supervertaler Settings window could become excessively
   wide and extend off-screen; now capped at 800px maximum width, and persisted size is
   validated on restore
-- **Chat spacing** — removed remaining double-spacing in AI responses caused by duplicate
+- **Chat spacing** – removed remaining double-spacing in AI responses caused by duplicate
   paragraph marks in table rendering
-- **Termbases list in AI Settings** — the CheckedListBox no longer stretches the dialog
+- **Termbases list in AI Settings** – the CheckedListBox no longer stretches the dialog
   horizontally; long termbase names scroll within the list via horizontal scrollbar
 
 ---
 
-## [3.3.0] — 2026-03-08
+## [3.3.0] – 2026-03-08
 
 ### Added
-- **AI Assistant** — project-aware chat interface in a separate dockable Trados panel;
+- **AI Assistant** – project-aware chat interface in a separate dockable Trados panel;
   supports multi-turn conversations with full context from the active segment (source,
   target, termbase terms, TM matches); responses render as Markdown with headings, bold,
   italic, inline code, code blocks, tables, and lists; right-click to copy or apply
   suggestions directly to the target segment
-- **Image attachments in chat** — paste images from clipboard (Ctrl+V), drag and drop
+- **Image attachments in chat** – paste images from clipboard (Ctrl+V), drag and drop
   image files, or browse with the attach button; thumbnails appear in an attachment strip
   below the input; images are sent to the AI using each provider's vision/multimodal API
   (OpenAI, Claude, Gemini, Ollama); click thumbnails in chat bubbles to view full-size
-- **AI context control** — new "AI Context" section in AI Settings lets you choose which
+- **AI context control** – new "AI Context" section in AI Settings lets you choose which
   termbases contribute terms to AI prompts (independent of TermLens display settings) and
   toggle whether TM (Translation Memory) fuzzy matches are included in the AI context
-- **TM match integration** — when enabled in settings, TM fuzzy matches for the active
+- **TM match integration** – when enabled in settings, TM fuzzy matches for the active
   segment are included in the AI Assistant's system prompt, showing match percentage,
   source/target text, and TM name so the AI can leverage existing translations
-- **Ollama support for AI Assistant** — local Ollama models can be used for the chat
+- **Ollama support for AI Assistant** – local Ollama models can be used for the chat
   assistant with configurable endpoint
-- **Custom OpenAI-compatible endpoints** — profile-based configuration for any
+- **Custom OpenAI-compatible endpoints** – profile-based configuration for any
   OpenAI-compatible API (e.g., Azure OpenAI, LM Studio, vLLM); multiple profiles
   supported with separate endpoint, model, and API key per profile
-- **Chat tooltips** — all chat input buttons (Send, Stop, Clear, Attach) now show
+- **Chat tooltips** – all chat input buttons (Send, Stop, Clear, Attach) now show
   descriptive tooltips explaining their function and keyboard shortcuts
 
 ### Changed
-- **Attachment icon** — replaced the paperclip emoji (📎) with a clearer photo icon
+- **Attachment icon** – replaced the paperclip emoji (📎) with a clearer photo icon
   from Segoe MDL2 Assets for better visibility in the chat input area
-- **Chat rendering** — eliminated extra blank lines between paragraphs in AI responses
+- **Chat rendering** – eliminated extra blank lines between paragraphs in AI responses
   for more compact, readable output
-- **Shift+Enter for newlines** — the chat input now supports Shift+Enter to insert line
+- **Shift+Enter for newlines** – the chat input now supports Shift+Enter to insert line
   breaks without sending the message (Enter alone sends)
-- **AI Settings layout** — the AI Context section now repositions dynamically based on
+- **AI Settings layout** – the AI Context section now repositions dynamically based on
   the selected provider, eliminating wasted space when provider-specific panels (Ollama,
   Custom OpenAI) are hidden; the termbases checklist is taller to show more entries
   without scrolling
 
 ### Fixed
-- **TermLens header text cutoff** — the word count and match summary in the TermLens
+- **TermLens header text cutoff** – the word count and match summary in the TermLens
   panel header is no longer truncated by the floating gear and help buttons; added right
   padding to account for the button overlay
 
 ---
 
-## [3.2.0] — 2026-03-08
+## [3.2.0] – 2026-03-08
 
 ### Added
-- **Help / About dialog** — "?" button next to the settings gear opens an About dialog
+- **Help / About dialog** – "?" button next to the settings gear opens an About dialog
   showing plugin version, author info, keyboard shortcuts reference, and links to
   website, documentation, and support; email address copies to clipboard on click
-- **NT filter in Termbase Editor** — "NT only" checkbox in the toolbar filters the
+- **NT filter in Termbase Editor** – "NT only" checkbox in the toolbar filters the
   term list to show only non-translatable entries; composes with the search filter
-- **Bulk Add NT** — "Bulk Add NT" button in the Termbase Editor opens a dialog where
+- **Bulk Add NT** – "Bulk Add NT" button in the Termbase Editor opens a dialog where
   you can paste multiple non-translatable terms (one per line) for batch import;
   reports how many were added and how many duplicates were skipped
-- **Copy cell in Termbase Editor** — Ctrl+C now copies the current cell value instead
+- **Copy cell in Termbase Editor** – Ctrl+C now copies the current cell value instead
   of the entire row; right-click context menu includes a "Copy cell" option
-- **Duplicate prevention** — all term insert and update paths now check for existing
+- **Duplicate prevention** – all term insert and update paths now check for existing
   entries with the same source and target term (case-insensitive) in the same
   termbase; quick-add shortcuts (Alt+Down/Up, Ctrl+Alt+T, Ctrl+Alt+N) show a clear
   message when a duplicate is detected; bulk operations report how many duplicates
   were skipped
 
 ### Changed
-- **Renamed "glossary" to "termbase"** — all user-facing labels, context menus,
+- **Renamed "glossary" to "termbase"** – all user-facing labels, context menus,
   dialogs, and settings now use "termbase" consistently instead of the previous mix
   of "glossary" and "termbase"
-- **Shortened language names** — language pair displays throughout the UI
+- **Shortened language names** – language pair displays throughout the UI
   (Termbase Editor title bar, settings grid, Add Term dialog) now show short names
   like "English" instead of "English (United States)"
-- **Sentence case context menus** — right-click menu items in the TermLens panel now
+- **Sentence case context menus** – right-click menu items in the TermLens panel now
   use sentence case ("Mark as non-translatable") instead of title case
-- **Settings dialog database label** — the file path label in settings now reads
+- **Settings dialog database label** – the file path label in settings now reads
   "Database" instead of "Termbase" to avoid confusion with individual termbases
   inside the database
 
 ### Fixed
-- **Alt+Up word expansion** — quick-add to project termbase (Alt+Up) now expands
+- **Alt+Up word expansion** – quick-add to project termbase (Alt+Up) now expands
   partial word selections to full word boundaries, matching Alt+Down behaviour
 
 ---
 
-## [3.1.0] — 2026-03-06
+## [3.1.0] – 2026-03-06
 
 ### Added
-- **Prompt manager / library** — 14 built-in prompts (domain expertise for Medical,
+- **Prompt manager / library** – 14 built-in prompts (domain expertise for Medical,
   Legal, Patent, Financial, Technical, Marketing, IT; style guides for Dutch, English,
   French, German, Spanish; project prompts for professional tone and formatting);
   prompts stored as Markdown files with YAML frontmatter, compatible with Supervertaler
   desktop prompt format
-- **Prompt selector in Batch Translate** — dropdown between Scope and Provider lets you
+- **Prompt selector in Batch Translate** – dropdown between Scope and Provider lets you
   pick a prompt before translating; selected prompt persists across sessions
-- **Prompts tab in Settings** — third tab in the Settings dialog with system prompt
+- **Prompts tab in Settings** – third tab in the Settings dialog with system prompt
   viewer/editor and full prompt library management (create, edit, delete, restore
   built-in prompts)
-- **Composable prompt assembly** — base system prompt (tag preservation, number
+- **Composable prompt assembly** – base system prompt (tag preservation, number
   formatting) + custom prompt (domain/style instructions) + glossary terms; custom
   system prompt override available for advanced users
-- **Supervertaler desktop prompt discovery** — automatically scans
+- **Supervertaler desktop prompt discovery** – automatically scans
   `~/Supervertaler_Data/` and `%AppData%\Supervertaler\` for shared prompt libraries
-- **Variable substitution** — prompts support `{source_lang}`, `{target_lang}`,
+- **Variable substitution** – prompts support `{source_lang}`, `{target_lang}`,
   `{{SOURCE_LANGUAGE}}`, `{{TARGET_LANGUAGE}}` placeholders, replaced at translation
   time with the document's language pair
 
 ### Changed
-- **Prompts tab side-by-side layout** — the Settings dialog Prompts tab now shows the
+- **Prompts tab side-by-side layout** – the Settings dialog Prompts tab now shows the
   custom prompt library on the left and the system prompt on the right, making better
   use of the available space
-- **Prompt variable display simplified** — prompt editor shows only the standard
+- **Prompt variable display simplified** – prompt editor shows only the standard
   `{{SOURCE_LANGUAGE}}` / `{{TARGET_LANGUAGE}}` placeholders; legacy `{source_lang}` /
   `{target_lang}` aliases still work silently for backward compatibility
 
 ### Fixed
-- **TermLens glossary list no longer cut off** — the TermLens settings tab now uses
+- **TermLens glossary list no longer cut off** – the TermLens settings tab now uses
   Dock-based panel layout instead of absolute pixel positioning, so the glossary grid
   scales correctly across screen resolutions and DPI settings
-- **Prompt library Source column resizable** — the Source column in the prompt list now
+- **Prompt library Source column resizable** – the Source column in the prompt list now
   uses proportional FillWeight sizing instead of a fixed width
-- **Plugin manifest version updated** — `plugin.xml` now reports v3.1.0 (was stuck at
+- **Plugin manifest version updated** – `plugin.xml` now reports v3.1.0 (was stuck at
   2.0.1 since the rename)
-- **Windows on ARM support** — the plugin now works on Windows on ARM (Parallels on
+- **Windows on ARM support** – the plugin now works on Windows on ARM (Parallels on
   Apple Silicon Macs, Surface Pro X, etc.); ships ARM64 native SQLite binary alongside
   x64 and x86; properly detects process architecture and copies the correct native
   library where SQLitePCLRaw can find it
-- **SQLitePCLRaw initialization order** — `AssemblyResolve` handler is now registered
+- **SQLitePCLRaw initialization order** – `AssemblyResolve` handler is now registered
   before native library preloading, and `Batteries_V2.Init()` is called explicitly to
   prevent `TypeInitializationException` on non-standard environments
-- **Improved error diagnostics** — database creation errors now show the full inner
+- **Improved error diagnostics** – database creation errors now show the full inner
   exception chain for easier troubleshooting
 
 ---
 
-## [3.0.0] — 2026-03-06
+## [3.0.0] – 2026-03-06
 
 ### Added
-- **AI batch translation** — translate segments in bulk using LLM providers; supports
+- **AI batch translation** – translate segments in bulk using LLM providers; supports
   OpenAI (GPT-4o, GPT-4o mini, o1, o3-mini), Anthropic (Claude 3.5 Sonnet, Haiku,
   Opus), and Google (Gemini 2.0 Flash, Gemini 1.5 Pro); configurable via the new AI
   Settings panel accessible from the Batch Translate tab
-- **AI single-segment translate** — press **Ctrl+Alt+A** or right-click → "AI Translate
+- **AI single-segment translate** – press **Ctrl+Alt+A** or right-click → "AI Translate
   Current Segment" to translate just the active segment using the configured AI provider
-- **Glossary-aware AI prompts** — AI translations automatically include matched
+- **Glossary-aware AI prompts** – AI translations automatically include matched
   terminology from your TermLens glossaries in the prompt, so the AI respects your
   approved terms, including non-translatable terms
-- **Four batch translate scopes** — "Empty segments only" (default), "All segments",
+- **Four batch translate scopes** – "Empty segments only" (default), "All segments",
   "Filtered segments", and "Filtered (empty only)"; filtered scopes translate only
   segments visible in Trados's advanced display filter
-- **Live filtered segment counts** — the Batch Translate tab updates segment counts
+- **Live filtered segment counts** – the Batch Translate tab updates segment counts
   in real time when you change the Trados display filter
-- **AI Settings panel** — configure provider, model, API key, and temperature directly
+- **AI Settings panel** – configure provider, model, API key, and temperature directly
   in the Batch Translate tab; settings persist across sessions
-- **Batch translate progress** — real-time log panel shows translation progress,
+- **Batch translate progress** – real-time log panel shows translation progress,
   segment-by-segment results, and any errors; cancel button to stop mid-batch
 
 ### Changed
-- **Batch Translate tab** — no longer a placeholder; fully functional with scope
+- **Batch Translate tab** – no longer a placeholder; fully functional with scope
   selector, segment counts, translate/cancel buttons, and scrollable log panel
-- **AI Settings integrated into Settings dialog** — the gear icon in TermLens now
+- **AI Settings integrated into Settings dialog** – the gear icon in TermLens now
   opens a tabbed settings dialog with separate tabs for Glossary and AI configuration
 
 ---
 
-## [2.1.0] — 2026-03-06
+## [2.1.0] – 2026-03-06
 
 ### Added
-- **Non-translatable terms** — mark terms as non-translatable (brand names, product
+- **Non-translatable terms** – mark terms as non-translatable (brand names, product
   codes, abbreviations that stay the same across languages); the source term is copied
   verbatim as the target
-- **Ctrl+Alt+N quick-add shortcut** — select text in the source or target column and
+- **Ctrl+Alt+N quick-add shortcut** – select text in the source or target column and
   press Ctrl+Alt+N to instantly mark it as non-translatable in all Write glossaries
-- **Right-click toggle** — right-click any term block and choose "Mark as
+- **Right-click toggle** – right-click any term block and choose "Mark as
   Non-Translatable" or "Mark as Translatable" to toggle the flag without opening a
   dialog
-- **Non-translatable checkbox in Add Term dialog** — when checked, the target field
+- **Non-translatable checkbox in Add Term dialog** – when checked, the target field
   auto-fills with the source text and becomes read-only
-- **Yellow visual distinction** — non-translatable terms appear with a light yellow
+- **Yellow visual distinction** – non-translatable terms appear with a light yellow
   background (#FFF3D0) in the TermLens panel, the Term Picker popup, and the Glossary
   Editor; color precedence: yellow (non-translatable) > pink (project) > blue (regular)
-- **NT column in Glossary Editor** — checkbox column to view and toggle
+- **NT column in Glossary Editor** – checkbox column to view and toggle
   non-translatable status per term
-- **Select/deselect all in Settings** — click the Read, Write, or Project column
+- **Select/deselect all in Settings** – click the Read, Write, or Project column
   headers to toggle all checkboxes at once; tooltips explain the feature
 
 ### Changed
-- **Database schema migration** — the `is_nontranslatable` column is automatically
+- **Database schema migration** – the `is_nontranslatable` column is automatically
   added to existing databases on first access; fully backward-compatible
 
 ---
 
-## [2.0.1] — 2026-03-05
+## [2.0.1] – 2026-03-05
 
 ### Changed
-- **Faster quick-add term workflow** — Alt+Down and Alt+Up now use incremental
+- **Faster quick-add term workflow** – Alt+Down and Alt+Up now use incremental
   in-memory index updates instead of reloading the entire termbase database;
   batch inserts use a single SQLite transaction instead of one connection per
   glossary; right-click edit and delete also use the incremental path
-- **License changed to source-available** — source code remains viewable and
+- **License changed to source-available** – source code remains viewable and
   forkable for personal use; binary redistribution restricted to copyright holder
 
 ---
 
-## [2.0.0] — 2026-03-05
+## [2.0.0] – 2026-03-05
 
 ### Added
-- **Tabbed ViewPart UI** — the plugin now uses a tabbed panel with separate tabs for
+- **Tabbed ViewPart UI** – the plugin now uses a tabbed panel with separate tabs for
   TermLens (glossary), AI Assistant, and Batch Translate; AI features are placeholder
   tabs that will be implemented in upcoming releases
 
 ### Changed
-- **Renamed from TermLens to Supervertaler for Trados** — the plugin is now part of the
+- **Renamed from TermLens to Supervertaler for Trados** – the plugin is now part of the
   Supervertaler product family; the TermLens glossary panel retains its name as a feature
   within the larger plugin
-- **New assembly name** — `Supervertaler.Trados.dll` (was `TermLens.dll`); namespace changed
+- **New assembly name** – `Supervertaler.Trados.dll` (was `TermLens.dll`); namespace changed
   from `TermLens` to `Supervertaler.Trados`
-- **New plugin identity** — Trados treats this as a new plugin; users upgrading from TermLens
+- **New plugin identity** – Trados treats this as a new plugin; users upgrading from TermLens
   should uninstall the old plugin first
-- **Settings auto-migration** — settings are automatically copied from the old
+- **Settings auto-migration** – settings are automatically copied from the old
   `%LocalAppData%\TermLens\` location to `%LocalAppData%\Supervertaler.Trados\` on first run
 
 ### Fixed
-- **Word alignment in TermLens panel** — unmatched words now align vertically with
+- **Word alignment in TermLens panel** – unmatched words now align vertically with
   matched term source text (fixed margin/padding mismatch and switched to consistent
   GDI+ text rendering)
 
 ---
 
-## [1.6.0] — 2026-03-05
+## [1.6.0] – 2026-03-05
 
 ### Added
-- **F2 expand selection to word boundaries** — press F2 after making a rough
+- **F2 expand selection to word boundaries** – press F2 after making a rough
   partial text selection in the source or target pane; the selection automatically
   expands to encompass the complete words at each end (e.g. selecting "et recht"
   becomes "het rechtstreeks")
-- **Smart word expansion for term adding** — the Add Term dialog and Quick Add
+- **Smart word expansion for term adding** – the Add Term dialog and Quick Add
   Term action now auto-expand partial selections to full word boundaries before
   populating the term pair, so you no longer need pixel-perfect text selection
-- **Multiple Write glossaries** — the Write column in Settings now allows checking
+- **Multiple Write glossaries** – the Write column in Settings now allows checking
   multiple glossaries; new terms are inserted into all Write-checked glossaries at
   once
 
 ### Changed
-- **Term Picker shortcut** — changed from Ctrl+Shift+G to **Ctrl+Alt+G**
-- **Quick Add action renamed** — "Quick add term to glossaries set to 'Read'" →
+- **Term Picker shortcut** – changed from Ctrl+Shift+G to **Ctrl+Alt+G**
+- **Quick Add action renamed** – "Quick add term to glossaries set to 'Read'" →
   "Quick Add Term to Glossary Set to 'Write'" (reflecting its actual behaviour)
 
 ### Fixed
-- **Duplicate terms in Term Picker** — when the same source term matched at
+- **Duplicate terms in Term Picker** – when the same source term matched at
   multiple positions in a segment (e.g. "cap" appearing twice), it was listed
   multiple times in the picker; matches are now deduplicated and renumbered
   sequentially
 
 ---
 
-## [1.5.0] — 2026-03-04
+## [1.5.0] – 2026-03-04
 
 ### Added
-- **Standalone database creation** — "Create New…" button in Settings creates a fresh
+- **Standalone database creation** – "Create New…" button in Settings creates a fresh
   Supervertaler-compatible SQLite database from scratch, so TermLens can function
   independently without Supervertaler installed
-- **Glossary management** — "+" and "−" buttons in Settings to create and delete
+- **Glossary management** – "+" and "−" buttons in Settings to create and delete
   individual glossaries inside a database; new glossary dialog collects name, source
   language, and target language
-- **TSV import** — bulk import terms from tab-separated files matching Supervertaler's
+- **TSV import** – bulk import terms from tab-separated files matching Supervertaler's
   format (pipe-delimited synonyms, `[!forbidden]` markers, UUID-based duplicate
   detection); flexible header mapping supports multiple column name conventions
-- **TSV export** — export all terms from a glossary to the same TSV format, so files
+- **TSV export** – export all terms from a glossary to the same TSV format, so files
   are fully interchangeable between Supervertaler and TermLens
-- **Alt+Down quick-add shortcut** — adds the current source/target text directly to
+- **Alt+Down quick-add shortcut** – adds the current source/target text directly to
   the Write glossary (replaces the previous Ctrl+Alt+Shift+T binding)
-- **Alt+Up quick-add to project glossary** — new action that adds the current
+- **Alt+Up quick-add to project glossary** – new action that adds the current
   source/target text directly to the Project glossary (no dialog)
 
 ### Changed
-- **Project column is now single-select** — the Project column in Settings uses
+- **Project column is now single-select** – the Project column in Settings uses
   radio-button behavior (only one glossary can be the project glossary at a time),
   matching the single Write glossary pattern
-- **Context menu reorganised** — the "Add Term to TermLens" actions are now grouped
+- **Context menu reorganised** – the "Add Term to TermLens" actions are now grouped
   under a separator in the editor context menu, with clearer names ("Add Term to
   TermLens (dialogue)" and "Quick add Term to glossaries set to 'Read'")
-- **A+/A− button font sizes** — adjusted for better visual balance (A+ uses 9pt,
+- **A+/A− button font sizes** – adjusted for better visual balance (A+ uses 9pt,
   A− uses 7pt instead of both using 7.5pt)
 
 ### Fixed
-- **Term block text truncation** — TermBlock now recalculates its size when the font
+- **Term block text truncation** – TermBlock now recalculates its size when the font
   changes (via `OnFontChanged` override), preventing clipped text after A+/A− resizing
 
 ---
 
-## [1.4.0] — 2026-03-04
+## [1.4.0] – 2026-03-04
 
 ### Added
-- **Adjustable font size** — A+ and A− buttons in the TermLens panel header let you
+- **Adjustable font size** – A+ and A− buttons in the TermLens panel header let you
   increase or decrease the font size on the fly while working; also configurable via a
   "Panel font size" control in the Settings dialog; size persists across Trados restarts
-- **Dialog size persistence** — the Term Picker dialog remembers its window size and
+- **Dialog size persistence** – the Term Picker dialog remembers its window size and
   column widths between invocations (and across Trados restarts); the Settings dialog
   also remembers its window size
 
 ### Changed
-- **Subtler expand indicator in Term Picker** — replaced the ► symbol next to source
+- **Subtler expand indicator in Term Picker** – replaced the ► symbol next to source
   terms with a small ▸ triangle in the # column; less visually distracting while still
   indicating which rows have expandable synonyms
-- **Double-digit shortcut badges** — numbers 10+ in the TermLens panel now use a
+- **Double-digit shortcut badges** – numbers 10+ in the TermLens panel now use a
   pill-shaped (rounded rectangle) badge instead of a circle, so double-digit numbers
   are no longer clipped
-- **Wider Project column** — increased from 62 px to 72 px in the Settings dialog so
+- **Wider Project column** – increased from 62 px to 72 px in the Settings dialog so
   the "Project" header is no longer truncated
 
 ---
 
-## [1.3.0] — 2026-03-04
+## [1.3.0] – 2026-03-04
 
 ### Added
-- **Alt+digit term insertion** — press Alt+1 through Alt+9 to instantly insert the
+- **Alt+digit term insertion** – press Alt+1 through Alt+9 to instantly insert the
   corresponding matched term into the target segment; Alt+0 inserts term 10; for
   segments with 10+ matches, two-digit chords are supported (e.g. Alt+1 then 3
   within 400ms inserts term 13)
-- **Term Picker dialog** — press Ctrl+Shift+G to open a modal dialog listing all
+- **Term Picker dialog** – press Ctrl+Shift+G to open a modal dialog listing all
   matched terms for the current segment; select by clicking, pressing Enter, or
   typing the term number
-- **Synonym expansion in Term Picker** — rows with multiple target translations
+- **Synonym expansion in Term Picker** – rows with multiple target translations
   show a ► indicator; press Right arrow to expand and reveal all alternative
   translations, Left arrow to collapse
-- **Bulk synonym loading** — target synonyms from the `termbase_synonyms` table are
+- **Bulk synonym loading** – target synonyms from the `termbase_synonyms` table are
   now loaded at startup alongside term entries, so the +N badges and Term Picker
   expansion show the correct synonym counts
-- **Project glossary column in Settings** — a new "Project" checkbox column in the
+- **Project glossary column in Settings** – a new "Project" checkbox column in the
   settings dialog lets you mark glossaries as project glossaries; project terms are
   shown in pink, all others in blue (replaces the previous database-driven priority
   colouring which was unreliable)
 
 ### Changed
-- **Coloring is user-controlled** — pink/blue term colouring is now determined by
+- **Coloring is user-controlled** – pink/blue term colouring is now determined by
   the user's "Project" setting per glossary, not by the database's ranking or
   is_project_termbase fields
-- **Wider settings columns** — the Read, Write, and Project checkbox columns in the
+- **Wider settings columns** – the Read, Write, and Project checkbox columns in the
   settings dialog are now wide enough for their headers to be fully visible
 
 ---
 
-## [1.2.0] — 2026-03-04
+## [1.2.0] – 2026-03-04
 
 ### Added
-- **Add Term to TermLens** — right-click context menu action in the Trados editor to
+- **Add Term to TermLens** – right-click context menu action in the Trados editor to
   add a new term from the active segment's source and target text; opens a confirmation
   dialog where you can edit the term pair and optionally add a definition before saving
-- **Quick add Term to TermLens** — a second context menu action that bypasses the dialog
+- **Quick add Term to TermLens** – a second context menu action that bypasses the dialog
   and saves the source/target text directly as a new term for faster workflow
-- **Keyboard shortcuts** — Add Term defaults to Ctrl+Alt+T, Quick Add to
+- **Keyboard shortcuts** – Add Term defaults to Ctrl+Alt+T, Quick Add to
   Ctrl+Alt+Shift+T (both reassignable via Trados keyboard shortcut settings)
-- **Settings: Read/Write columns** — the termbase list in settings is now a grid with
+- **Settings: Read/Write columns** – the termbase list in settings is now a grid with
   separate Read and Write checkboxes; Read controls which termbases are searched,
   Write selects the single termbase that receives new terms (radio-button style)
 
 ### Changed
-- **ViewPart docks above the editor** — TermLens now opens above the translation grid
+- **ViewPart docks above the editor** – TermLens now opens above the translation grid
   (previously docked at the side) and opens pinned/visible instead of auto-hidden
-- **Term badge sizing** — the "+N" synonym count badges on term blocks are no longer
+- **Term badge sizing** – the "+N" synonym count badges on term blocks are no longer
   truncated; width calculations now use ceiling rounding instead of integer truncation
 
 ---
 
-## [1.1.0] — 2026-03-04
+## [1.1.0] – 2026-03-04
 
 ### Changed
-- **Renamed project from Termview to TermLens** — all files, namespaces, class names,
+- **Renamed project from Termview to TermLens** – all files, namespaces, class names,
   plugin IDs, settings paths, and documentation updated consistently
-- **Migrated from System.Data.SQLite to Microsoft.Data.Sqlite** — eliminates the
+- **Migrated from System.Data.SQLite to Microsoft.Data.Sqlite** – eliminates the
   `EntryPointNotFoundException` caused by version-fingerprint hash conflicts in Trados
   Studio's plugin environment; uses SQLitePCLRaw with `e_sqlite3.dll` instead of
   `SQLite.Interop.dll`
@@ -2037,31 +2037,31 @@ Version numbers follow [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [1.0.0] — 2026-03-03
+## [1.0.0] – 2026-03-03
 
 First public release.
 
 ### Added
-- **Word-by-word source segment display** — every word of the active source segment
+- **Word-by-word source segment display** – every word of the active source segment
   is shown in a flowing left-to-right layout, updated as you navigate between segments
-- **Terminology highlighting** — words that match a loaded termbase are shown in
+- **Terminology highlighting** – words that match a loaded termbase are shown in
   a coloured block (blue for regular terms, pink for project termbases) with the
   target-language translation displayed directly underneath
-- **Multi-word term matching** — multi-word entries (e.g. "machine translation") are
+- **Multi-word term matching** – multi-word entries (e.g. "machine translation") are
   matched and highlighted as a single block, taking priority over single-word matches
-- **Click to insert** — clicking a term block inserts the target translation at the
+- **Click to insert** – clicking a term block inserts the target translation at the
   cursor position in the target segment
-- **Termbase settings** — gear button (⚙) in the panel header opens a settings
+- **Termbase settings** – gear button (⚙) in the panel header opens a settings
   dialog for selecting a Supervertaler termbase (`.db`) file; settings are saved to
   `%LocalAppData%\TermLens\settings.json` and the termbase is auto-loaded on startup
-- **Auto-detect** — if no termbase is configured, TermLens automatically checks the
+- **Auto-detect** – if no termbase is configured, TermLens automatically checks the
   default Supervertaler data directories (`~/Supervertaler_Data/resources/` and
   `%LocalAppData%\Supervertaler/resources/`)
-- **Live termbase preview** — the settings dialog shows the termbase name, total
+- **Live termbase preview** – the settings dialog shows the termbase name, total
   term count, and source/target language pair after a file is selected
 
 ### Technical
-- Reads Supervertaler's SQLite termbase format (`supervertaler.db`) directly —
+- Reads Supervertaler's SQLite termbase format (`supervertaler.db`) directly –
   no separate export step needed
 - Docks as a ViewPart below the Trados Studio editor (compatible with Studio 2024 / Studio18)
 - Built on .NET Framework 4.8 with strong-name signing (`PublicKeyToken=6afde1272ae2306a`)

@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions are welcome — bug reports, documentation improvements, and code changes.
+Contributions are welcome – bug reports, documentation improvements, and code changes.
 
 ## Where to start
 

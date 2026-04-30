@@ -2,16 +2,16 @@
 
 _Help system last updated: 17 April 2026 (for Workbench v1.9.381)_
 
-Welcome to the help center for **Supervertaler Workbench** — a free, open-source translation application built by translators, for translators.
+Welcome to the help center for **Supervertaler Workbench** – a free, open-source translation application built by translators, for translators.
 
 **Supervertaler Workbench** integrates AI-powered translation with traditional CAT tool workflows. It runs on Windows, macOS, and Linux.
 
-- **Translate with AI** — GPT-4, Claude, Gemini, or local models via Ollama
-- **Work with CAT tools** — import/export files from memoQ, Trados, Phrase, CafeTran
-- **Translation Memory** — fuzzy matching, TMX import, Supermemory semantic search
-- **Terminology** — glossaries, automatic term highlighting, TermLens
-- **Superlookup** — system-wide translation lookup (TM, glossary, MT, web)
-- **Quality Assurance** — spellcheck, tag validation, non-translatables
+- **Translate with AI** – GPT-4, Claude, Gemini, or local models via Ollama
+- **Work with CAT tools** – import/export files from memoQ, Trados, Phrase, CafeTran
+- **Translation Memory** – fuzzy matching, TMX import, Supermemory semantic search
+- **Terminology** – glossaries, automatic term highlighting, TermLens
+- **Superlookup** – system-wide translation lookup (TM, glossary, MT, web)
+- **Quality Assurance** – spellcheck, tag validation, non-translatables
 
 | Requirement | Details |
 |-------------|---------|
@@ -30,7 +30,7 @@ Looking for the **Trados Studio plugin**? It has its own help center:
 
 [**Supervertaler for Trados Help →**](https://supervertaler.gitbook.io/help/trados/)
 
-Both tools share the same SQLite-based termbase format (`.db`) — termbases created in one work in the other.
+Both tools share the same SQLite-based termbase format (`.db`) – termbases created in one work in the other.
 
 ---
 

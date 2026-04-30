@@ -39,7 +39,7 @@ namespace Supervertaler.Trados.Settings
         public List<long> DisabledTermbaseIds { get; set; } = new List<long>();
 
         /// <summary>
-        /// DEPRECATED — kept for backward-compatible migration from settings that
+        /// DEPRECATED – kept for backward-compatible migration from settings that
         /// stored a single write target.  New code should use <see cref="WriteTermbaseIds"/>.
         /// </summary>
         [DataMember(Name = "writeTermbaseId")]
@@ -47,7 +47,7 @@ namespace Supervertaler.Trados.Settings
 
         /// <summary>
         /// IDs of termbases that receive new terms via the Add Term / Quick-Add Term actions.
-        /// Multiple termbases can be marked as Write targets — a new term is inserted into all of them.
+        /// Multiple termbases can be marked as Write targets – a new term is inserted into all of them.
         /// Empty list means no write termbases are configured.
         /// </summary>
         [DataMember(Name = "writeTermbaseIds")]
@@ -162,7 +162,7 @@ namespace Supervertaler.Trados.Settings
 
         /// <summary>
         /// Random anonymous UUID generated on first opt-in.
-        /// Not tied to any account, machine, or identity — purely random.
+        /// Not tied to any account, machine, or identity – purely random.
         /// </summary>
         [DataMember(Name = "usageStatisticsId")]
         public string UsageStatisticsId { get; set; } = "";
@@ -327,7 +327,7 @@ namespace Supervertaler.Trados.Settings
                     ? new List<long>(DisabledMultiTermIds) : new List<long>(),
                 DisabledAiTermbaseIds = AiSettings?.DisabledAiTermbaseIds != null
                     ? new List<long>(AiSettings.DisabledAiTermbaseIds) : new List<long>(),
-                // Always true when extracted — the settings are considered initialised once
+                // Always true when extracted – the settings are considered initialised once
                 // the plugin has loaded and applied them at least once.
                 AiTermbaseIdsInitialized = true,
                 ActivePromptPath = AiSettings?.SelectedPromptPath ?? "",

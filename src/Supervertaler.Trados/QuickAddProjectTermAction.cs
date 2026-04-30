@@ -143,7 +143,7 @@ namespace Supervertaler.Trados
 
                 // sourceText / targetText stay in project direction throughout.
                 // FindMergeMatches and InsertTerm each do their own per-termbase
-                // direction handling — for InsertTerm we compute the swap once
+                // direction handling – for InsertTerm we compute the swap once
                 // just before the call.
                 var indexSourceText = sourceText;
                 var indexTargetText = targetText;
@@ -172,7 +172,7 @@ namespace Supervertaler.Trados
 
                 // Check for existing entries with matching source or target.
                 // projSrcLang lets FindMergeMatches swap search columns to match
-                // a reverse-direction termbase's storage layout — without it,
+                // a reverse-direction termbase's storage layout – without it,
                 // matches in such termbases are silently missed.
                 try
                 {
@@ -195,7 +195,7 @@ namespace Supervertaler.Trados
                             {
                                 // Add as synonym to the matched entry. The "source"/
                                 // "target" tag on AddSynonym refers to the termbase's
-                                // storage direction — when the termbase is inverted
+                                // storage direction – when the termbase is inverted
                                 // relative to the project, project source goes in the
                                 // target column and vice versa.
                                 foreach (var match in mergeMatches)
@@ -216,7 +216,7 @@ namespace Supervertaler.Trados
                                 // Full reload to pick up synonym changes
                                 TermLensEditorViewPart.NotifyTermAdded();
 
-                                // "Add & Edit" — open the term entry editor
+                                // "Add & Edit" – open the term entry editor
                                 if (mergeResult == DialogResult.Retry)
                                 {
                                     var firstMatch = mergeMatches[0];
@@ -234,12 +234,12 @@ namespace Supervertaler.Trados
                                 }
                                 return;
                             }
-                            // DialogResult.No = "Keep Both" — fall through to normal insert
+                            // DialogResult.No = "Keep Both" – fall through to normal insert
                         }
                     }
 
                     // Normal insert into project termbase. Swap into termbase
-                    // storage direction at the point of insertion — we keep the
+                    // storage direction at the point of insertion – we keep the
                     // project-direction text upstream so the merge flow and the
                     // index-update notification both see what the translator typed.
                     var insertSourceText = isInverted ? targetText : sourceText;
@@ -255,7 +255,7 @@ namespace Supervertaler.Trados
 
                     if (newId > 0)
                     {
-                        // Incremental index update — no full DB reload
+                        // Incremental index update – no full DB reload
                         var entry = new Models.TermEntry
                         {
                             Id = newId,

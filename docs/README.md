@@ -22,4 +22,4 @@ A standalone, free, open-source desktop translation environment with its own edi
 
 - If you already pay for Trados Studio and want to add AI translation, terminology assistance, and voice commands to it → **Supervertaler for Trados**.
 - If you want a free, modern translation tool that doesn't depend on any other CAT software → **Supervertaler Workbench**.
-- If you do both, you can install both — they share AI providers and a coherent workflow.
+- If you do both, you can install both – they share AI providers and a coherent workflow.

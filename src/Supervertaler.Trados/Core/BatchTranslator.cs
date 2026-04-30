@@ -83,7 +83,7 @@ namespace Supervertaler.Trados.Core
     // ─── Engine ──────────────────────────────────────────────
 
     /// <summary>
-    /// Core batch translation engine. UI-agnostic — communicates via events.
+    /// Core batch translation engine. UI-agnostic – communicates via events.
     /// Ported from Python Supervertaler's PreTranslationWorker.
     /// </summary>
     public class BatchTranslator
@@ -115,7 +115,7 @@ namespace Supervertaler.Trados.Core
             int failed = 0;
             int skipped = 0;
 
-            // Aggregated prompt log accumulators — combined into one Reports entry at the end
+            // Aggregated prompt log accumulators – combined into one Reports entry at the end
             int aggInputTokens = 0;
             int aggOutputTokens = 0;
             bool aggHasError = false;
@@ -206,7 +206,7 @@ namespace Supervertaler.Trados.Core
                         // Build user prompt
                         var userPrompt = TranslationPrompt.BuildBatchUserPrompt(promptSegments);
 
-                        // Call LLM — suppress per-batch log entries; we fire one aggregated entry at the end
+                        // Call LLM – suppress per-batch log entries; we fire one aggregated entry at the end
                         var response = await client.SendPromptAsync(
                             userPrompt, systemPrompt, maxTokens, cancellationToken,
                             feature: Models.PromptLogFeature.BatchTranslate,
@@ -298,7 +298,7 @@ namespace Supervertaler.Trados.Core
                     DisplayModel = aggModelInfo?.DisplayName ?? model,
                     SystemPrompt = systemPrompt,
                     UserPrompt = totalBatches > 1
-                        ? $"({totalBatches} batches combined — expand system prompt to see translation instructions)"
+                        ? $"({totalBatches} batches combined – expand system prompt to see translation instructions)"
                         : null,
                     EstimatedInputTokens = aggInputTokens,
                     EstimatedOutputTokens = aggOutputTokens,

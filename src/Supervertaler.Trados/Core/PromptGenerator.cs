@@ -30,30 +30,30 @@ namespace Supervertaler.Trados.Core
                         "Translate claims exactly, preserving dependency chains (independent/dependent claim relationships)",
                         "Maintain patent-specific open-ended language: \"comprising\" (open-ended), never \"consisting of\" unless source explicitly uses limiting language",
                         "Preserve all reference numerals, figure references (Fig. 1, Figure 2A), and part numbers exactly as written",
-                        "Never paraphrase, simplify, or improve source text — patents require exact semantic equivalence",
+                        "Never paraphrase, simplify, or improve source text – patents require exact semantic equivalence",
                         "Preserve formal patent register: \"wherein\", \"thereof\", \"hereinafter\", \"person skilled in the art\"",
                         "Maintain claim numbering, cross-references, and dependency structure without alteration",
                         "Use gerund constructions naturally: \"An example is replacing...\" NOT \"An example is the replacing of...\"",
                         "Preserve all prior art document references verbatim (e.g., US 20130183090, EP 2923344)",
                         "Maintain the hierarchical structure: TECHNICAL FIELD > PRIOR ART > SUMMARY > DRAWINGS > DETAILED DESCRIPTION > CLAIMS > ABSTRACT",
-                        "When source is long, repetitive, or awkward, reproduce it faithfully — every word in a patent is legally operative"
+                        "When source is long, repetitive, or awkward, reproduce it faithfully – every word in a patent is legally operative"
                     },
                     Sections = new[]
                     {
                         "ROLE (senior patent translator with specific expertise areas)",
                         "SCOPE OF APPLICATION (project context: invention type, technology field, patent number if known)",
-                        "TRANSLATION MANDATE (NON-NEGOTIABLE) — pure translation only, explicitly forbid improvement, simplification, harmonization, correction, streamlining",
-                        "HARD CONSTRAINT: NO HALLUCINATED TRUNCATION — never omit repetitive phrases, collapse clauses, shorten lists, simplify enumerations, or \"fix\" grammar",
-                        "CORE EXECUTION PRINCIPLES — with ABSOLUTE REQUIREMENTS (checkmarks) and ABSOLUTE PROHIBITIONS (crosses)",
-                        "SUPERVERTALER INPUT HANDLING — translate only provided segment, preserve exact order, do not rely on unseen context",
-                        "TRANSLATION STYLE (LOCKED) — mandatory term mappings",
-                        "CLAIM TRANSLATION STYLE — preserve dependency structure, maintain phrasing, avoid stylistic smoothing",
-                        "GERUND STYLE RULE — prefer natural English gerund over \"the [verb]ing of\" construction",
-                        "TERMINOLOGY CONSISTENCY HIERARCHY — (1) Previous correct translations, (2) Project-specific glossary, (3) General mandatory mappings",
-                        "TECHNICAL AND MECHANICAL FORMATTING RULES — dimensions, figure refs, prior art numbers, standard abbreviations",
-                        "PREFLIGHT SELF-CHECK (MANDATORY) — verify every word translated, no compression, all values intact",
+                        "TRANSLATION MANDATE (NON-NEGOTIABLE) – pure translation only, explicitly forbid improvement, simplification, harmonization, correction, streamlining",
+                        "HARD CONSTRAINT: NO HALLUCINATED TRUNCATION – never omit repetitive phrases, collapse clauses, shorten lists, simplify enumerations, or \"fix\" grammar",
+                        "CORE EXECUTION PRINCIPLES – with ABSOLUTE REQUIREMENTS (checkmarks) and ABSOLUTE PROHIBITIONS (crosses)",
+                        "SUPERVERTALER INPUT HANDLING – translate only provided segment, preserve exact order, do not rely on unseen context",
+                        "TRANSLATION STYLE (LOCKED) – mandatory term mappings",
+                        "CLAIM TRANSLATION STYLE – preserve dependency structure, maintain phrasing, avoid stylistic smoothing",
+                        "GERUND STYLE RULE – prefer natural English gerund over \"the [verb]ing of\" construction",
+                        "TERMINOLOGY CONSISTENCY HIERARCHY – (1) Previous correct translations, (2) Project-specific glossary, (3) General mandatory mappings",
+                        "TECHNICAL AND MECHANICAL FORMATTING RULES – dimensions, figure refs, prior art numbers, standard abbreviations",
+                        "PREFLIGHT SELF-CHECK (MANDATORY) – verify every word translated, no compression, all values intact",
                         "POST-TRANSLATION INTEGRITY ASSERTION (MANDATORY)",
-                        "PROJECT CONTEXT (for model understanding only — do not output)",
+                        "PROJECT CONTEXT (for model understanding only – do not output)",
                         "PROJECT-SPECIFIC GLOSSARY (MANDATORY, LOCKED)",
                         "PREVIOUS CORRECT TRANSLATIONS",
                         "OUTPUT FORMAT"
@@ -71,30 +71,30 @@ namespace Supervertaler.Trados.Core
                            "Deep expertise in civil law and common law systems, notarial acts, and regulatory texts.",
                     Rules = new[]
                     {
-                        "Maintain exact legal terminology — never substitute informal equivalents",
+                        "Maintain exact legal terminology – never substitute informal equivalents",
                         "Preserve legal entity types and abbreviations (BV, NV, GmbH, Ltd, Inc., SA, SARL) without translation",
                         "Preserve statutory references, article numbers, and legal citations exactly as written",
                         "Maintain formal legal register: \"hereby\", \"pursuant to\", \"notwithstanding\", \"whereas\"",
                         "Preserve all dates, deadlines, and procedural time limits without alteration",
                         "Distinguish between common law and civil law terminology as appropriate for the target jurisdiction",
                         "Preserve Latin legal terms (bona fide, inter alia, prima facie) unless target convention replaces them",
-                        "Never translate proper names of laws, statutes, or regulations — retain original with optional translation in parentheses",
+                        "Never translate proper names of laws, statutes, or regulations – retain original with optional translation in parentheses",
                         "Maintain contractual numbering, clause references, and article structure exactly"
                     },
                     Sections = new[]
                     {
                         "ROLE (senior legal translator with jurisdiction expertise)",
                         "LEGAL FRAMEWORK (jurisdiction, legal system type, document type)",
-                        "TRANSLATION MANDATE (NON-NEGOTIABLE) — faithful legal translation, no interpretation or simplification",
-                        "HARD CONSTRAINT: NO HALLUCINATED TRUNCATION — every clause, proviso, and exception is legally operative",
-                        "CORE EXECUTION PRINCIPLES — absolute requirements and prohibitions",
-                        "LEGAL REGISTER REQUIREMENTS — formality, precision, no colloquial language",
-                        "LEGAL ENTITY AND TITLE HANDLING — preservation rules for entities, titles, proper names",
-                        "STATUTORY REFERENCE PRESERVATION — article numbers, law names, citations",
+                        "TRANSLATION MANDATE (NON-NEGOTIABLE) – faithful legal translation, no interpretation or simplification",
+                        "HARD CONSTRAINT: NO HALLUCINATED TRUNCATION – every clause, proviso, and exception is legally operative",
+                        "CORE EXECUTION PRINCIPLES – absolute requirements and prohibitions",
+                        "LEGAL REGISTER REQUIREMENTS – formality, precision, no colloquial language",
+                        "LEGAL ENTITY AND TITLE HANDLING – preservation rules for entities, titles, proper names",
+                        "STATUTORY REFERENCE PRESERVATION – article numbers, law names, citations",
                         "TERMINOLOGY CONSISTENCY HIERARCHY",
                         "NUMBER, DATE & LOCALISATION RULES",
                         "PREFLIGHT SELF-CHECK (MANDATORY)",
-                        "PROJECT CONTEXT — document type, parties, jurisdiction, subject matter",
+                        "PROJECT CONTEXT – document type, parties, jurisdiction, subject matter",
                         "PROJECT-SPECIFIC GLOSSARY (MANDATORY, LOCKED)",
                         "PREVIOUS CORRECT TRANSLATIONS",
                         "OUTPUT FORMAT"
@@ -124,16 +124,16 @@ namespace Supervertaler.Trados.Core
                     {
                         "ROLE (senior medical translator with clinical and regulatory expertise)",
                         "CLINICAL CONTEXT (document type, therapeutic area, regulatory framework)",
-                        "TRANSLATION MANDATE (NON-NEGOTIABLE) — patient safety paramount, faithful translation",
-                        "HARD CONSTRAINT: NO HALLUCINATED TRUNCATION — every dosage, warning, and specification is safety-critical",
-                        "CORE EXECUTION PRINCIPLES — absolute requirements and prohibitions",
-                        "PHARMACOLOGICAL TERM HANDLING — drug names, dosages, routes of administration",
-                        "ANATOMICAL NOMENCLATURE RULES — standardized anatomical terminology",
-                        "DOSAGE AND MEASUREMENT PRESERVATION — exact reproduction of all numerical medical data",
-                        "SAFETY-CRITICAL CONTENT RULES — warnings, contraindications, adverse effects must be complete",
+                        "TRANSLATION MANDATE (NON-NEGOTIABLE) – patient safety paramount, faithful translation",
+                        "HARD CONSTRAINT: NO HALLUCINATED TRUNCATION – every dosage, warning, and specification is safety-critical",
+                        "CORE EXECUTION PRINCIPLES – absolute requirements and prohibitions",
+                        "PHARMACOLOGICAL TERM HANDLING – drug names, dosages, routes of administration",
+                        "ANATOMICAL NOMENCLATURE RULES – standardized anatomical terminology",
+                        "DOSAGE AND MEASUREMENT PRESERVATION – exact reproduction of all numerical medical data",
+                        "SAFETY-CRITICAL CONTENT RULES – warnings, contraindications, adverse effects must be complete",
                         "TERMINOLOGY CONSISTENCY HIERARCHY",
-                        "PREFLIGHT SELF-CHECK (SAFETY-FOCUSED) — verify all dosages, warnings, and measurements intact",
-                        "PROJECT CONTEXT — document type, therapeutic area, patient population",
+                        "PREFLIGHT SELF-CHECK (SAFETY-FOCUSED) – verify all dosages, warnings, and measurements intact",
+                        "PROJECT CONTEXT – document type, therapeutic area, patient population",
                         "PROJECT-SPECIFIC GLOSSARY (MANDATORY, LOCKED)",
                         "PREVIOUS CORRECT TRANSLATIONS",
                         "OUTPUT FORMAT"
@@ -153,7 +153,7 @@ namespace Supervertaler.Trados.Core
                         "Preserve all technical specifications, model numbers, and part references exactly",
                         "Maintain consistent terminology for UI elements, menu items, and software terms",
                         "Preserve code snippets, file paths, command syntax, and API names without translation",
-                        "Maintain measurement units as specified — do not convert unless explicitly required",
+                        "Maintain measurement units as specified – do not convert unless explicitly required",
                         "Preserve camelCase, snake_case, and PascalCase identifiers verbatim",
                         "Maintain the distinction between similar technical terms (do not conflate related but distinct concepts)"
                     },
@@ -161,16 +161,16 @@ namespace Supervertaler.Trados.Core
                     {
                         "ROLE (senior technical translator with domain expertise)",
                         "TECHNICAL DOMAIN (field, technology, product/system)",
-                        "TRANSLATION MANDATE (NON-NEGOTIABLE) — precise technical translation, no interpretation",
+                        "TRANSLATION MANDATE (NON-NEGOTIABLE) – precise technical translation, no interpretation",
                         "HARD CONSTRAINT: NO HALLUCINATED TRUNCATION",
-                        "CORE EXECUTION PRINCIPLES — absolute requirements and prohibitions",
-                        "TECHNICAL IDENTIFIER HANDLING — product names, API names, code, file paths",
-                        "MEASUREMENT AND SPECIFICATION RULES — units, tolerances, dimensions",
-                        "UI/SOFTWARE STRING RULES — menu items, button labels, error messages",
+                        "CORE EXECUTION PRINCIPLES – absolute requirements and prohibitions",
+                        "TECHNICAL IDENTIFIER HANDLING – product names, API names, code, file paths",
+                        "MEASUREMENT AND SPECIFICATION RULES – units, tolerances, dimensions",
+                        "UI/SOFTWARE STRING RULES – menu items, button labels, error messages",
                         "TERMINOLOGY CONSISTENCY HIERARCHY",
                         "NUMBER, DATE & LOCALISATION RULES",
                         "PREFLIGHT SELF-CHECK (MANDATORY)",
-                        "PROJECT CONTEXT — product/system, technical domain, target audience",
+                        "PROJECT CONTEXT – product/system, technical domain, target audience",
                         "PROJECT-SPECIFIC GLOSSARY (MANDATORY, LOCKED)",
                         "PREVIOUS CORRECT TRANSLATIONS",
                         "OUTPUT FORMAT"
@@ -198,15 +198,15 @@ namespace Supervertaler.Trados.Core
                     {
                         "ROLE (senior financial translator with regulatory expertise)",
                         "FINANCIAL CONTEXT (document type, regulatory framework, jurisdiction)",
-                        "TRANSLATION MANDATE (NON-NEGOTIABLE) — faithful financial translation, no interpretation",
-                        "HARD CONSTRAINT: NO HALLUCINATED TRUNCATION — every figure and disclaimer is regulatory",
-                        "CORE EXECUTION PRINCIPLES — absolute requirements and prohibitions",
-                        "FINANCIAL DATA PRESERVATION RULES — figures, percentages, calculations",
-                        "REGULATORY AND COMPLIANCE LANGUAGE — risk warnings, disclaimers, obligations",
-                        "CURRENCY AND NUMBER FORMAT RULES — currency codes, decimal/thousands separators",
+                        "TRANSLATION MANDATE (NON-NEGOTIABLE) – faithful financial translation, no interpretation",
+                        "HARD CONSTRAINT: NO HALLUCINATED TRUNCATION – every figure and disclaimer is regulatory",
+                        "CORE EXECUTION PRINCIPLES – absolute requirements and prohibitions",
+                        "FINANCIAL DATA PRESERVATION RULES – figures, percentages, calculations",
+                        "REGULATORY AND COMPLIANCE LANGUAGE – risk warnings, disclaimers, obligations",
+                        "CURRENCY AND NUMBER FORMAT RULES – currency codes, decimal/thousands separators",
                         "TERMINOLOGY CONSISTENCY HIERARCHY",
-                        "PREFLIGHT SELF-CHECK (MANDATORY) — verify all figures, calculations, and disclosures",
-                        "PROJECT CONTEXT — document type, financial instrument, jurisdiction",
+                        "PREFLIGHT SELF-CHECK (MANDATORY) – verify all figures, calculations, and disclosures",
+                        "PROJECT CONTEXT – document type, financial instrument, jurisdiction",
                         "PROJECT-SPECIFIC GLOSSARY (MANDATORY, LOCKED)",
                         "PREVIOUS CORRECT TRANSLATIONS",
                         "OUTPUT FORMAT"
@@ -234,19 +234,19 @@ namespace Supervertaler.Trados.Core
                     {
                         "ROLE (senior marketing translator/transcreator)",
                         "BRAND CONTEXT (brand, audience, campaign, tone of voice)",
-                        "CREATIVE MANDATE — cultural adaptation and persuasive effectiveness prioritized",
+                        "CREATIVE MANDATE – cultural adaptation and persuasive effectiveness prioritized",
                         "HARD CONSTRAINT: NO HALLUCINATED TRUNCATION",
-                        "BRAND VOICE RULES (LOCKED) — tone, personality, register specifications",
-                        "CULTURAL ADAPTATION GUIDELINES — when to adapt vs. preserve",
-                        "CALL-TO-ACTION AND TAGLINE RULES — effectiveness over literalness",
+                        "BRAND VOICE RULES (LOCKED) – tone, personality, register specifications",
+                        "CULTURAL ADAPTATION GUIDELINES – when to adapt vs. preserve",
+                        "CALL-TO-ACTION AND TAGLINE RULES – effectiveness over literalness",
                         "TERMINOLOGY CONSISTENCY HIERARCHY",
                         "PREFLIGHT SELF-CHECK (MANDATORY)",
-                        "PROJECT CONTEXT — brand, campaign, target audience, key messages",
+                        "PROJECT CONTEXT – brand, campaign, target audience, key messages",
                         "PROJECT-SPECIFIC GLOSSARY (MANDATORY, LOCKED)",
                         "PREVIOUS CORRECT TRANSLATIONS",
                         "OUTPUT FORMAT"
                     },
-                    Special = "Marketing translation permits creative freedom — prioritize persuasive effectiveness " +
+                    Special = "Marketing translation permits creative freedom – prioritize persuasive effectiveness " +
                               "and cultural fit over word-for-word fidelity. However, brand names, product names, " +
                               "and trademarked terms must never be altered."
                 },
@@ -268,14 +268,14 @@ namespace Supervertaler.Trados.Core
                     {
                         "ROLE (professional translator)",
                         "DOCUMENT CONTEXT (type, domain, subject matter)",
-                        "TRANSLATION MANDATE (NON-NEGOTIABLE) — faithful translation, no improvement or simplification",
+                        "TRANSLATION MANDATE (NON-NEGOTIABLE) – faithful translation, no improvement or simplification",
                         "HARD CONSTRAINT: NO HALLUCINATED TRUNCATION",
-                        "CORE EXECUTION PRINCIPLES — absolute requirements and prohibitions",
-                        "TRANSLATION STYLE RULES — register, tone, formality",
+                        "CORE EXECUTION PRINCIPLES – absolute requirements and prohibitions",
+                        "TRANSLATION STYLE RULES – register, tone, formality",
                         "TERMINOLOGY CONSISTENCY HIERARCHY",
                         "NUMBER, DATE & LOCALISATION RULES",
                         "PREFLIGHT SELF-CHECK (MANDATORY)",
-                        "PROJECT CONTEXT — document description and subject matter",
+                        "PROJECT CONTEXT – document description and subject matter",
                         "PROJECT-SPECIFIC GLOSSARY (MANDATORY, LOCKED)",
                         "PREVIOUS CORRECT TRANSLATIONS",
                         "OUTPUT FORMAT"
@@ -424,7 +424,7 @@ namespace Supervertaler.Trados.Core
                 sb.AppendLine("=== KNOWLEDGE BASE (SuperMemory) ===");
                 sb.AppendLine("The translator maintains a structured knowledge base with established conventions,");
                 sb.AppendLine("terminology reasoning, client preferences, and style guides. Incorporate these into");
-                sb.AppendLine("the generated prompt where relevant — they represent hard-won translation decisions");
+                sb.AppendLine("the generated prompt where relevant – they represent hard-won translation decisions");
                 sb.AppendLine("and client-specific rules that should be baked into the prompt's glossary, style");
                 sb.AppendLine("rules, and domain instructions rather than being rediscovered from scratch.");
                 sb.AppendLine();
@@ -447,19 +447,19 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine("- What the document is about (invention, contract, product, procedure, etc.)");
             sb.AppendLine("- The specific technology/domain/subject matter");
             sb.AppendLine("- Key components, parties, or concepts involved");
-            sb.AppendLine("This section is marked \"FOR MODEL UNDERSTANDING ONLY — DO NOT OUTPUT\" in the final prompt.");
+            sb.AppendLine("This section is marked \"FOR MODEL UNDERSTANDING ONLY – DO NOT OUTPUT\" in the final prompt.");
             sb.AppendLine();
 
             // Output instructions
             sb.AppendLine("=== OUTPUT INSTRUCTIONS ===");
-            sb.AppendLine("1. The prompt content must be ready to use — NO placeholders like [Translation] or [Source Language]");
+            sb.AppendLine("1. The prompt content must be ready to use – NO placeholders like [Translation] or [Source Language]");
             sb.AppendLine($"2. Use actual values: {ctx.SourceLang} and {ctx.TargetLang}");
             sb.AppendLine("3. Include ALL termbase terms in the glossary (do not summarize or sample)");
             sb.AppendLine("4. The prompt should be comprehensive (2000-5000 words)");
-            sb.AppendLine("5. Output the prompt content between the delimiters shown below — NOTHING else");
+            sb.AppendLine("5. Output the prompt content between the delimiters shown below – NOTHING else");
             sb.AppendLine();
             sb.AppendLine("===PROMPT_START===");
-            sb.AppendLine("(Your full prompt content here — plain text, no JSON escaping needed)");
+            sb.AppendLine("(Your full prompt content here – plain text, no JSON escaping needed)");
             sb.AppendLine("===PROMPT_END===");
             sb.AppendLine();
             sb.AppendLine("Output ONLY the delimiters and prompt content. No text before ===PROMPT_START=== or after ===PROMPT_END===.");
@@ -619,7 +619,7 @@ namespace Supervertaler.Trados.Core
             var sb = new StringBuilder();
             sb.AppendLine($"The following {terms.Count} terms are from the project's termbase(s).");
             sb.AppendLine("Include ALL of them in the PROJECT-SPECIFIC GLOSSARY section of the generated prompt.");
-            sb.AppendLine("Mark the glossary as MANDATORY and LOCKED — no substitutions or variants permitted.");
+            sb.AppendLine("Mark the glossary as MANDATORY and LOCKED – no substitutions or variants permitted.");
             sb.AppendLine();
 
             // Group by termbase for clarity
@@ -652,7 +652,7 @@ namespace Supervertaler.Trados.Core
             var sb = new StringBuilder();
             sb.AppendLine($"The following {tmPairs.Count} validated translation pairs come from the project's");
             sb.AppendLine("Translation Memory. Include them in the PREVIOUS CORRECT TRANSLATIONS section.");
-            sb.AppendLine("These serve as style anchors — the AI must match their register and terminology choices.");
+            sb.AppendLine("These serve as style anchors – the AI must match their register and terminology choices.");
             sb.AppendLine();
 
             foreach (var pair in tmPairs)
@@ -672,7 +672,7 @@ namespace Supervertaler.Trados.Core
             if (segments == null || segments.Count == 0)
                 return "(No document content available)";
 
-            // Send the full document — user confirmed cost is acceptable
+            // Send the full document – user confirmed cost is acceptable
             var sb = new StringBuilder();
             for (int i = 0; i < segments.Count; i++)
             {

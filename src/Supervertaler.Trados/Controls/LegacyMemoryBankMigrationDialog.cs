@@ -94,7 +94,7 @@ namespace Supervertaler.Trados.Controls
             {
                 MessageBox.Show(this,
                     error,
-                    "Supervertaler — Memory bank migration",
+                    "Supervertaler – Memory bank migration",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -110,7 +110,7 @@ namespace Supervertaler.Trados.Controls
         {
             SuspendLayout();
 
-            Text            = "Supervertaler — Name your existing memory bank";
+            Text            = "Supervertaler – Name your existing memory bank";
             FormBorderStyle = FormBorderStyle.FixedDialog;
             StartPosition   = FormStartPosition.CenterScreen;
             MaximizeBox     = false;

@@ -81,7 +81,7 @@ namespace Supervertaler.Trados.Licensing
             }
             catch
             {
-                // Absolute fallback — still deterministic per machine name
+                // Absolute fallback – still deterministic per machine name
                 return "fallback-" + (Environment.MachineName ?? "unknown").GetHashCode().ToString("x8");
             }
         }

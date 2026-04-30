@@ -17,7 +17,7 @@ namespace Supervertaler.Trados.Core
             // OpenAI (current)
             { "gpt-5.4",                   (10.00m,  30.00m) },
             { "gpt-5.4-mini",              (0.75m,   4.50m)  },
-            // OpenAI (legacy — kept for cost estimates if users still have these selected)
+            // OpenAI (legacy – kept for cost estimates if users still have these selected)
             { "gpt-4.1",                   (2.00m,   8.00m)  },
             { "gpt-4.1-mini",              (0.40m,   1.60m)  },
             { "o4-mini",                   (1.10m,   4.40m)  },
@@ -43,7 +43,7 @@ namespace Supervertaler.Trados.Core
             { "mistral-small-latest",         (0.10m,  0.30m)  },
             { "open-mistral-nemo",            (0.15m,  0.15m)  },
 
-            // Ollama (local) — free
+            // Ollama (local) – free
             { "translategemma:12b",        (0m, 0m) },
             { "translategemma:4b",         (0m, 0m) },
             { "qwen3:14b",                (0m, 0m) },

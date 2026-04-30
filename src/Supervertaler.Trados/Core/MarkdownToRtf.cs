@@ -62,7 +62,7 @@ namespace Supervertaler.Trados.Core
                     }
                     else
                     {
-                        // End of code block — flush it
+                        // End of code block – flush it
                         FlushCodeBlock(sb, codeBlockLines, ref firstBlock);
                         inCodeBlock = false;
                     }
@@ -87,7 +87,7 @@ namespace Supervertaler.Trados.Core
                 }
 
                 // ─── Blank line ─────────────────────────────────────
-                // Skip blank lines — paragraph separation is already handled by
+                // Skip blank lines – paragraph separation is already handled by
                 // the trailing \par on each content block + AppendPar before the next.
                 // Emitting an extra \par here would create double-spaced gaps.
                 if (string.IsNullOrWhiteSpace(line))

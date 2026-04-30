@@ -12,7 +12,7 @@ namespace Supervertaler.Trados.Core
 {
     /// <summary>
     /// Polls the RWS AppStore catalogue for a newer published version of plugin 432.
-    /// The AppStore is the single source of truth — the plugin never installs
+    /// The AppStore is the single source of truth – the plugin never installs
     /// unsigned builds from GitHub. GitHub releases remain as documentation only.
     /// </summary>
     public sealed class UpdateChecker
@@ -43,7 +43,7 @@ namespace Supervertaler.Trados.Core
         {
             settings = settings ?? TermLensSettings.Load();
 
-            // Cache first — skip the network entirely if the cached entry is fresh
+            // Cache first – skip the network entirely if the cached entry is fresh
             var entry = LoadCachedEntry();
             if (entry == null)
             {
@@ -181,7 +181,7 @@ namespace Supervertaler.Trados.Core
         }
 
         /// <summary>
-        /// Companion to <see cref="FindCurrentInstallScopePackagesDir"/> —
+        /// Companion to <see cref="FindCurrentInstallScopePackagesDir"/> –
         /// returns the sibling Unpacked directory for the same install scope.
         /// </summary>
         internal static string FindCurrentInstallScopeUnpackedDir()
@@ -242,7 +242,7 @@ namespace Supervertaler.Trados.Core
             }
             catch
             {
-                // Non-fatal — a stale or missing cache just means the next check
+                // Non-fatal – a stale or missing cache just means the next check
                 // hits the API again.
             }
         }

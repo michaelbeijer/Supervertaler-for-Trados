@@ -11,14 +11,14 @@ When you select a segment, TermLens analyses the source text against all active 
 - **Project glossary** matches appear in pink; **Background glossary** matches appear in blue
 - **Non-translatable** terms (if configured) are shown in a distinct style
 
-This gives you an at-a-glance overview of every term in the segment that has a glossary entry — without having to hover or click anything.
+This gives you an at-a-glance overview of every term in the segment that has a glossary entry – without having to hover or click anything.
 
 ## Where to find it
 
 TermLens appears in two places:
 
-1. **Below the grid** — the "TermLens" tab in the bottom panel (toggle with **View → TermLens Under Grid**)
-2. **In the Match Panel** — the right-side panel that also shows TM matches
+1. **Below the grid** – the "TermLens" tab in the bottom panel (toggle with **View → TermLens Under Grid**)
+2. **In the Match Panel** – the right-side panel that also shows TM matches
 
 Both instances update simultaneously when you navigate to a new segment.
 
@@ -56,7 +56,7 @@ You can customise the TermLens font independently from the grid font:
 ## Tips
 
 - Press **F5** to force a refresh if matches appear to be missing.
-- TermLens respects glossary activation — only terms from activated glossaries are shown.
+- TermLens respects glossary activation – only terms from activated glossaries are shown.
 - If you have many glossaries, designate one as the **Project glossary** (shown in pink) to make its terms stand out.
 
 ## TermLens for Trados

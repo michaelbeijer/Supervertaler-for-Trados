@@ -68,7 +68,7 @@ namespace Supervertaler.Trados.Controls
         /// "Set as active prompt for this project"). The string argument is the new
         /// active prompt's relative path, or empty if the active prompt was cleared.
         /// Consumers use this to live-refresh the Batch Translate dropdown while the
-        /// Settings dialog is still open — the change is persisted only on OK.
+        /// Settings dialog is still open – the change is persisted only on OK.
         /// </summary>
         public event EventHandler<string> ActivePromptChanged;
 
@@ -668,7 +668,7 @@ namespace Supervertaler.Trados.Controls
             _aiSettings = settings;
             _customSystemPrompt = settings?.CustomSystemPrompt;
 
-            // Per-project active prompt — use project override if set, else global
+            // Per-project active prompt – use project override if set, else global
             _activePromptPath = !string.IsNullOrEmpty(projectActivePromptPath)
                 ? projectActivePromptPath
                 : settings?.SelectedPromptPath ?? "";
@@ -974,7 +974,7 @@ namespace Supervertaler.Trados.Controls
         }
 
         // ═══════════════════════════════════════════════════════════
-        //  TREE SELECTION — swap right panels
+        //  TREE SELECTION – swap right panels
         // ═══════════════════════════════════════════════════════════
 
         private void OnTreeAfterSelect(object sender, TreeViewEventArgs e)
@@ -993,13 +993,13 @@ namespace Supervertaler.Trados.Controls
             }
             else if (e.Node.Tag is PromptTemplate prompt)
             {
-                // Prompt selected — show detail
+                // Prompt selected – show detail
                 ShowPromptDetail(prompt);
                 _panelPromptDetail.Visible = true;
             }
             else if (e.Node.Tag is string folderPath)
             {
-                // Folder selected — show folder info
+                // Folder selected – show folder info
                 ShowFolderInfo(e.Node, folderPath);
                 _panelFolderInfo.Visible = true;
             }
@@ -1158,7 +1158,7 @@ namespace Supervertaler.Trados.Controls
             {
                 if (_tvPrompts.SelectedNode.Tag is string folderPath && folderPath != SystemPromptTag)
                 {
-                    // Selected a folder — use the full relative path as domain
+                    // Selected a folder – use the full relative path as domain
                     if (!string.IsNullOrEmpty(folderPath))
                         preFillDomain = folderPath;
                 }

@@ -382,7 +382,7 @@ namespace Supervertaler.Trados.Controls
                 if (_dgvTerms.Columns.Contains("Forbidden"))
                 {
                     _dgvTerms.Columns["Forbidden"].HeaderText = "🚫";
-                    _dgvTerms.Columns["Forbidden"].ToolTipText = "Forbidden — do not use (edit via term editor)";
+                    _dgvTerms.Columns["Forbidden"].ToolTipText = "Forbidden – do not use (edit via term editor)";
                     _dgvTerms.Columns["Forbidden"].ReadOnly = true;
                     _dgvTerms.Columns["Forbidden"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
                     _dgvTerms.Columns["Forbidden"].Width = 36;
@@ -730,7 +730,7 @@ namespace Supervertaler.Trados.Controls
             _contextRowIndex = e.RowIndex;
             _contextColIndex = e.ColumnIndex;
 
-            // Preserve multi-selection when the clicked row is already part of it —
+            // Preserve multi-selection when the clicked row is already part of it –
             // matches standard Windows list/grid behaviour (File Explorer, etc.).
             // Only clear and single-select if the clicked row wasn't already selected.
             if (!_dgvTerms.Rows[e.RowIndex].Selected)
@@ -795,7 +795,7 @@ namespace Supervertaler.Trados.Controls
 
                 if (result == DialogResult.OK)
                 {
-                    // Term was saved — update the row
+                    // Term was saved – update the row
                     _isLoading = true;
                     try
                     {
@@ -938,7 +938,7 @@ namespace Supervertaler.Trados.Controls
                 {
                     MessageBox.Show(
                         $"Reversed {reversed} of {toReverse.Count} entries. Some rows may have been " +
-                        "removed or locked — the grid has been updated for the ones that succeeded.",
+                        "removed or locked – the grid has been updated for the ones that succeeded.",
                         "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }

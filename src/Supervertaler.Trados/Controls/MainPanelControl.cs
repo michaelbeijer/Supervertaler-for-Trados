@@ -27,11 +27,11 @@ namespace Supervertaler.Trados.Controls
 
             BackColor = Color.White;
 
-            // Host TermLensControl directly — no TabControl
+            // Host TermLensControl directly – no TabControl
             termLensControl.Dock = DockStyle.Fill;
             Controls.Add(termLensControl);
 
-            // Settings gear button — floats at top-right
+            // Settings gear button – floats at top-right
             _btnSettings = new Button
             {
                 Text = "\uE713",  // Settings gear from Segoe MDL2 Assets
@@ -51,7 +51,7 @@ namespace Supervertaler.Trados.Controls
             _btnSettings.FlatAppearance.MouseOverBackColor = Color.FromArgb(220, 220, 220);
             _btnSettings.Click += (s, e) => SettingsRequested?.Invoke(this, EventArgs.Empty);
 
-            // Help/about button (?) — floats to the left of the gear button
+            // Help/about button (?) – floats to the left of the gear button
             _btnHelp = new Button
             {
                 Text = "?",

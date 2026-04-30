@@ -1,5 +1,5 @@
 ---
-name: "SuperMemory — Translate with Knowledge Base"
+name: "SuperMemory – Translate with Knowledge Base"
 description: "Translation agent that consults the SuperMemory KB before translating"
 version: "1.0"
 ---
@@ -30,7 +30,7 @@ Based on the context above, read the following (in priority order):
 4. **Style guide** (`04_STYLE/`): Load the applicable style guide (client-specific if available, otherwise general).
 
 ### Step 3: Build a working glossary
-From the loaded KB context, compile a working glossary for this specific translation. This glossary becomes your LOCKED terminology — equivalent to Section 13 in a Supervertaler translation prompt.
+From the loaded KB context, compile a working glossary for this specific translation. This glossary becomes your LOCKED terminology – equivalent to Section 13 in a Supervertaler translation prompt.
 
 ### Step 4: Translate
 Apply the translation using the full context loaded from the KB. Follow these principles:
@@ -73,4 +73,4 @@ This report is deposited in `00_INBOX/` for **Process Inbox** to pick up next ti
 ```
 
 ## Critical rule
-The knowledge base is your authority. You are not freelancing — you are executing translations informed by accumulated project knowledge. When the KB speaks, you follow. When the KB is silent, you decide and document.
+The knowledge base is your authority. You are not freelancing – you are executing translations informed by accumulated project knowledge. When the KB speaks, you follow. When the KB is silent, you decide and document.

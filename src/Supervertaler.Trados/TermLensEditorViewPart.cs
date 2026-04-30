@@ -38,7 +38,7 @@ namespace Supervertaler.Trados
         private static readonly Lazy<MainPanelControl> _mainPanel =
             new Lazy<MainPanelControl>(() => new MainPanelControl(_control.Value));
 
-        // Single instance — Trados creates exactly one ViewPart of each type.
+        // Single instance – Trados creates exactly one ViewPart of each type.
         // Used by AddTermAction to trigger a reload after inserting a term.
         private static TermLensEditorViewPart _currentInstance;
 
@@ -52,10 +52,10 @@ namespace Supervertaler.Trados
         private List<TerminologyProviderFallback> _fallbackProviders;
         private Dictionary<string, DateTime> _multiTermFileTimestamps;
 
-        // Prompt library (shared — used by settings dialog)
+        // Prompt library (shared – used by settings dialog)
         private PromptLibrary _promptLibrary;
 
-        // Per-project settings — tracks the active project's .sdlproj path
+        // Per-project settings – tracks the active project's .sdlproj path
         private string _currentProjectPath;
         private string _currentProjectName;
 
@@ -88,7 +88,7 @@ namespace Supervertaler.Trados
                 System.Windows.Forms.Application.AddMessageFilter(_ctrlTapFilter);
             }
 
-            // License check — show/hide activation overlay based on tier.
+            // License check – show/hide activation overlay based on tier.
             // Named handler (not a lambda) so Dispose can unsubscribe; the
             // singletons LicenseManager.Instance / _control would otherwise
             // hold dead view-part instances alive across document reopens
@@ -96,7 +96,7 @@ namespace Supervertaler.Trados
             LicenseManager.Instance.LicenseStateChanged += OnLicenseStateChanged;
 
             // Check for plugin updates in the background.
-            // Runs regardless of license state — even expired-trial users should
+            // Runs regardless of license state – even expired-trial users should
             // know about new versions.
             var ctrl = _control.Value;
             System.Threading.Tasks.Task.Run(async () =>
@@ -109,7 +109,7 @@ namespace Supervertaler.Trados
                     // Wait for the control's window handle to be created.
                     // Initialize() runs before the control is parented in the
                     // Trados docking framework, so IsHandleCreated may still be
-                    // false.  Poll briefly — the handle is created within a
+                    // false.  Poll briefly – the handle is created within a
                     // second or two once Trados finishes layout.
                     for (int i = 0; i < 30 && !ctrl.IsHandleCreated; i++)
                         await System.Threading.Tasks.Task.Delay(500);
@@ -123,18 +123,18 @@ namespace Supervertaler.Trados
                 }
                 catch
                 {
-                    // Silently ignore — network errors, parse errors, etc.
+                    // Silently ignore – network errors, parse errors, etc.
                 }
             });
 
-            // Anonymous usage statistics — opt-in dialog + background ping
+            // Anonymous usage statistics – opt-in dialog + background ping
             ShowUsageStatisticsOptIn(ctrl);
             System.Threading.Tasks.Task.Run(async () =>
             {
                 try { await UsageStatistics.SendPingAsync(); } catch { }
             });
 
-            // Load persisted settings — needed even when unlicensed so the
+            // Load persisted settings – needed even when unlicensed so the
             // settings dialog can open and let the user enter a license key.
             _settings = TermLensSettings.Load();
 
@@ -145,11 +145,11 @@ namespace Supervertaler.Trados
             _promptLibrary = new PromptLibrary();
             _promptLibrary.EnsureDefaultPrompts();
 
-            // Wire up the gear/settings button — must be done even when
+            // Wire up the gear/settings button – must be done even when
             // unlicensed so users can open Settings → License to activate.
             _mainPanel.Value.SettingsRequested += OnSettingsRequested;
 
-            // Wire up editor controller and load termbases regardless of tier —
+            // Wire up editor controller and load termbases regardless of tier –
             // AssistantOnly users need termbase terms for AI prompt context even
             // though the TermLens UI panel is locked.
             _editorController = SdlTradosStudio.Application.GetController<EditorController>();
@@ -188,7 +188,7 @@ namespace Supervertaler.Trados
 
             // ─── TermLens UI wiring (Tier1+ only) ──────────────────────
 
-            // Wire up term insertion — when user clicks a translation in the panel
+            // Wire up term insertion – when user clicks a translation in the panel
             _control.Value.TermInsertRequested += OnTermInsertRequested;
 
             // Wire up right-click edit/delete/non-translatable on term blocks
@@ -314,7 +314,7 @@ namespace Supervertaler.Trados
                             }
                             else
                             {
-                                // Direct access failed — try API fallback later
+                                // Direct access failed – try API fallback later
                                 failedConfigs.Add(config);
                                 infos.Add(new MultiTermTermbaseInfo
                                 {
@@ -354,7 +354,7 @@ namespace Supervertaler.Trados
                 if (mergedIndex.Count > 0)
                     SafeInvoke(() => _control.Value.MergeMultiTermEntries(mergedIndex, infos));
                 else if (failedConfigs.Count > 0)
-                    System.Diagnostics.Debug.WriteLine("[TermLens] All MultiTerm termbases failed direct load — relying on fallback providers");
+                    System.Diagnostics.Debug.WriteLine("[TermLens] All MultiTerm termbases failed direct load – relying on fallback providers");
             }
             catch (Exception ex)
             {
@@ -892,7 +892,7 @@ namespace Supervertaler.Trados
 
                     if (form.SettingsImported)
                     {
-                        // User imported settings from file — reload everything from disk
+                        // User imported settings from file – reload everything from disk
                         var fresh = TermLensSettings.Load();
                         _settings.TermbasePath = fresh.TermbasePath;
                         _settings.AutoLoadOnStartup = fresh.AutoLoadOnStartup;
@@ -914,7 +914,7 @@ namespace Supervertaler.Trados
                         // Apply shortcut style change
                         TermBlock.UseRepeatedDigitBadges = _settings.TermShortcutStyle == "repeated";
 
-                        // Force reload — the user may have toggled glossaries.
+                        // Force reload – the user may have toggled glossaries.
                         LoadTermbase(forceReload: true);
                         LoadMultiTermTermbases();
                         UpdateFromActiveSegment();
@@ -954,10 +954,10 @@ namespace Supervertaler.Trados
                 _activeDocument.ActiveSegmentChanged += OnActiveSegmentChanged;
                 _activeDocument.ActiveFilePropertiesChanged += OnActiveFilePropertiesChanged;
 
-                // Check if the project has changed — if so, save outgoing and load incoming settings
+                // Check if the project has changed – if so, save outgoing and load incoming settings
                 ApplyProjectSettingsFromDocument(_activeDocument);
 
-                // Reload MultiTerm termbases — may have switched projects
+                // Reload MultiTerm termbases – may have switched projects
                 LoadMultiTermTermbases();
                 UpdateFromActiveSegment();
             }
@@ -981,7 +981,7 @@ namespace Supervertaler.Trados
 
                 System.Diagnostics.Debug.WriteLine($"[TermLens] Project detection: path={projectPath ?? "(null)"}, name={projectName ?? "(null)"}, current={_currentProjectPath ?? "(null)"}");
 
-                // Same project (or no project) — nothing to do
+                // Same project (or no project) – nothing to do
                 if (string.Equals(projectPath, _currentProjectPath, StringComparison.OrdinalIgnoreCase))
                     return;
 
@@ -1026,10 +1026,10 @@ namespace Supervertaler.Trados
                 }
                 else
                 {
-                    // First time encountering this project — create clean defaults.
+                    // First time encountering this project – create clean defaults.
                     // We must NOT snapshot _settings here because it still carries
                     // the previous project's overlay (write IDs, project termbase, etc.).
-                    System.Diagnostics.Debug.WriteLine($"[TermLens] No project settings found — creating clean defaults");
+                    System.Diagnostics.Debug.WriteLine($"[TermLens] No project settings found – creating clean defaults");
 
                     // Default: all termbases disabled for new projects; user opts in per project.
                     var allIds = GetAllTermbaseIds(_settings.TermbasePath);
@@ -1054,7 +1054,7 @@ namespace Supervertaler.Trados
             }
             catch
             {
-                // Never crash on project detection — fall back to global settings
+                // Never crash on project detection – fall back to global settings
             }
         }
 
@@ -1131,7 +1131,7 @@ namespace Supervertaler.Trados
 
         private void OnActiveFilePropertiesChanged(object sender, EventArgs e)
         {
-            // Fired when file/project properties change — reload MultiTerm
+            // Fired when file/project properties change – reload MultiTerm
             // termbases in case the user toggled termbases in Project Settings.
             if (HasMultiTermConfigChanged())
             {
@@ -1148,7 +1148,7 @@ namespace Supervertaler.Trados
         /// Starts a lightweight timer that checks every 2 seconds whether the
         /// set of enabled MultiTerm termbases in the Trados project has changed
         /// (e.g. user toggled the Enabled checkbox in Project Settings → Termbases).
-        /// DetectTermbases() reads an in-memory object — no file I/O or DB access.
+        /// DetectTermbases() reads an in-memory object – no file I/O or DB access.
         /// </summary>
         private void StartMultiTermConfigTimer()
         {
@@ -1214,7 +1214,7 @@ namespace Supervertaler.Trados
         /// <summary>
         /// Checks whether the set of enabled MultiTerm termbases in the Trados project
         /// settings has changed since we last loaded (e.g., user toggled the Enabled
-        /// checkbox in Project Settings → Termbases). Lightweight — reads only the
+        /// checkbox in Project Settings → Termbases). Lightweight – reads only the
         /// project config, no database access.
         /// </summary>
         private bool HasMultiTermConfigChanged()
@@ -1232,7 +1232,7 @@ namespace Supervertaler.Trados
                 // Different count → changed
                 if (currentCount != loadedCount) return true;
 
-                // Same count — compare file paths (order-sensitive)
+                // Same count – compare file paths (order-sensitive)
                 for (int i = 0; i < currentCount; i++)
                 {
                     if (!string.Equals(current[i].FilePath, loaded[i].FilePath, StringComparison.OrdinalIgnoreCase))
@@ -1279,7 +1279,7 @@ namespace Supervertaler.Trados
                     }
                     catch
                     {
-                        // Swallow — fallback search should never crash the plugin
+                        // Swallow – fallback search should never crash the plugin
                     }
                 }
 
@@ -1287,7 +1287,7 @@ namespace Supervertaler.Trados
             }
             catch (Exception)
             {
-                // Silently handle — segment may not be available during transitions
+                // Silently handle – segment may not be available during transitions
             }
         }
 
@@ -1337,7 +1337,7 @@ namespace Supervertaler.Trados
             }
             catch (Exception)
             {
-                // Silently handle — editor may not allow insertion at this moment
+                // Silently handle – editor may not allow insertion at this moment
             }
         }
 
@@ -1401,7 +1401,7 @@ namespace Supervertaler.Trados
 
                     if (result == DialogResult.OK)
                     {
-                        // Term was saved (possibly with synonym changes) — force reload
+                        // Term was saved (possibly with synonym changes) – force reload
                         // to rebuild the index including source synonym keys
                         LoadTermbase(forceReload: true);
                         LoadMultiTermTermbases();
@@ -1559,7 +1559,7 @@ namespace Supervertaler.Trados
 
         /// <summary>
         /// Returns all loaded termbase terms for the AI Assistant context.
-        /// Returns already-computed data — no DB queries.
+        /// Returns already-computed data – no DB queries.
         /// </summary>
         public static List<TermEntry> GetCurrentTermbaseTerms()
         {
@@ -1571,7 +1571,7 @@ namespace Supervertaler.Trados
         /// <summary>
         /// Returns the matched terms for the active segment.
         /// Used by the AI Assistant to inject terminology context into prompts.
-        /// Returns already-computed data — no DB queries.
+        /// Returns already-computed data – no DB queries.
         /// </summary>
         public static List<TermPickerMatch> GetCurrentSegmentMatches()
         {
@@ -1651,8 +1651,8 @@ namespace Supervertaler.Trados
 
         // ─── Alt+digit term insertion ────────────────────────────────
         // Two modes controlled by TermShortcutStyle setting:
-        //   "sequential" — Alt+4,5 = term 45 (timer waits for next digit)
-        //   "repeated"   — Alt+5,5 = term 14 (same digit = next tier)
+        //   "sequential" – Alt+4,5 = term 45 (timer waits for next digit)
+        //   "repeated"   – Alt+5,5 = term 14 (same digit = next tier)
 
         private static bool IsRepeatedMode =>
             _currentInstance?._settings?.TermShortcutStyle == "repeated";
@@ -1693,7 +1693,7 @@ namespace Supervertaler.Trados
 
                 if (currentDigits >= maxDigits)
                 {
-                    // We have enough digits — insert immediately
+                    // We have enough digits – insert immediately
                     _pendingDigit = null;
                     _pendingAccumulated = 0;
                     int number = accumulated == 0 ? 10 : accumulated;
@@ -1701,7 +1701,7 @@ namespace Supervertaler.Trados
                 }
                 else
                 {
-                    // Could still have more digits — keep waiting
+                    // Could still have more digits – keep waiting
                     _pendingDigit = digit;
                     _pendingAccumulated = accumulated;
                     StartChordTimer();
@@ -1759,7 +1759,7 @@ namespace Supervertaler.Trados
             }
             else if (_pendingDigit.HasValue)
             {
-                // Different digit pressed — insert the pending one first,
+                // Different digit pressed – insert the pending one first,
                 // then start tracking the new digit
                 StopChordTimer();
                 int oneBasedIndex = (_pendingRepeatCount - 1) * 9 + _pendingDigit.Value;
@@ -1861,7 +1861,7 @@ namespace Supervertaler.Trados
             }
             catch (Exception)
             {
-                // Silently handle — editor may not allow insertion at this moment
+                // Silently handle – editor may not allow insertion at this moment
             }
         }
 
@@ -1946,7 +1946,7 @@ namespace Supervertaler.Trados
 
             instance.SafeInvoke(() =>
             {
-                // Find the WinForms Form that hosts the docked TermLens panel —
+                // Find the WinForms Form that hosts the docked TermLens panel –
                 // this is the Trados main window from a Win32 perspective. Used
                 // for two things: (a) Show(owner) so the popup is owned by it
                 // and the Z-order / focus-return relationship is well-defined;
@@ -1976,14 +1976,14 @@ namespace Supervertaler.Trados
                     popup.Show(ownerForm);
                 else
                     popup.Show();
-                // Show(owner) activates the popup — no need for an extra Activate().
+                // Show(owner) activates the popup – no need for an extra Activate().
             });
         }
 
         /// <summary>
         /// Called by TermLensPopupForm when the user presses "E" on a
         /// highlighted match. Opens the term-entry editor through the same
-        /// code path as the docked panel's right-click "Edit Term…" menu —
+        /// code path as the docked panel's right-click "Edit Term…" menu –
         /// the popup snapshots the entry data before it disposes itself, so
         /// this just re-uses OnTermEditRequested with synthesized event args.
         /// </summary>
@@ -2025,7 +2025,7 @@ namespace Supervertaler.Trados
             // Without this, dead view-part instances stay reachable through the
             // singleton's invocation lists across document close/reopen cycles,
             // and every term-insert / right-click action gets dispatched to all
-            // of them — i.e. the term gets inserted N times instead of once
+            // of them – i.e. the term gets inserted N times instead of once
             // (root cause of the v4.19.30 popup-double-insert bug, which the
             // popup fix sidestepped by skipping the bubble entirely; the docked
             // panel still went through this code path until now).
@@ -2135,7 +2135,7 @@ namespace Supervertaler.Trados
                     AutoSize = false
                 };
 
-                // Status label — used to show download progress / success
+                // Status label – used to show download progress / success
                 var lblStatus = new Label
                 {
                     Text = "",
@@ -2146,7 +2146,7 @@ namespace Supervertaler.Trados
                     Visible = false
                 };
 
-                // Link to open the Unpacked plugins folder — fallback for
+                // Link to open the Unpacked plugins folder – fallback for
                 // Mac/Parallels users or if automatic install fails.
                 // Scope-aware: targets whichever install scope the existing
                 // plugin lives in (Roaming / LocalAppData / ProgramData),
@@ -2258,14 +2258,14 @@ namespace Supervertaler.Trados
                             try { System.IO.Directory.Delete(oldDir, true); } catch { }
                         }
 
-                        // Rename current folder — Windows allows this even with
+                        // Rename current folder – Windows allows this even with
                         // locked DLLs, the files stay accessible via open handles
                         if (System.IO.Directory.Exists(unpackedDir))
                         {
                             try { System.IO.Directory.Move(unpackedDir, oldDir); } catch { }
                         }
 
-                        // 3. Done — auto-restart Trados
+                        // 3. Done – auto-restart Trados
                         lblStatus.ForeColor = System.Drawing.Color.FromArgb(0, 128, 0);
                         lblStatus.Text = "Update installed successfully.";
                         lnkFolder.Visible = false;
@@ -2301,7 +2301,7 @@ namespace Supervertaler.Trados
                                         CreateNoWindow = true
                                     });
                                     form.DialogResult = DialogResult.Yes;
-                                    // Exit immediately — cmd will wait, then relaunch
+                                    // Exit immediately – cmd will wait, then relaunch
                                     System.Threading.SynchronizationContext.Current?.Post(_ =>
                                     {
                                         System.Windows.Forms.Application.Exit();
@@ -2334,7 +2334,7 @@ namespace Supervertaler.Trados
                     }
                     catch (Exception ex)
                     {
-                        // Download failed — fall back to opening the release page
+                        // Download failed – fall back to opening the release page
                         lblStatus.ForeColor = System.Drawing.Color.FromArgb(192, 0, 0);
                         lblStatus.Text = "Download failed. Opening release page instead...";
                         btnInstall.Enabled = true;
@@ -2359,7 +2359,7 @@ namespace Supervertaler.Trados
                     settings.SkippedUpdateVersion = newVersion;
                     settings.Save();
                 }
-                // Remind Me Later — do nothing, will check again next session
+                // Remind Me Later – do nothing, will check again next session
             }
         }
 

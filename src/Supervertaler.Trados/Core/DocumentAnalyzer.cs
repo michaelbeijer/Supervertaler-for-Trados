@@ -9,7 +9,7 @@ namespace Supervertaler.Trados.Core
     /// Keyword-based domain detection and document statistics.
     /// Analyzes source segments to determine the document's domain
     /// (patent, legal, medical, technical, financial, marketing, or general).
-    /// No AI calls — pure heuristic analysis.
+    /// No AI calls – pure heuristic analysis.
     /// </summary>
     internal static class DocumentAnalyzer
     {
@@ -189,7 +189,7 @@ namespace Supervertaler.Trados.Core
     }
 
     /// <summary>
-    /// Results of document analysis — domain, statistics, tone.
+    /// Results of document analysis – domain, statistics, tone.
     /// </summary>
     internal class DocumentAnalysis
     {

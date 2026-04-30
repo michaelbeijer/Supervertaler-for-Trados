@@ -52,7 +52,7 @@ namespace Supervertaler.Trados.Controls
             {
                 Text = "Would you like to share anonymous usage statistics to help " +
                        "improve the plugin?\n\n" +
-                       "Only the following is sent — once per session, on startup:\n" +
+                       "Only the following is sent – once per session, on startup:\n" +
                        "  •  Plugin version\n" +
                        "  •  OS and Trados Studio version\n" +
                        "  •  System locale\n\n" +

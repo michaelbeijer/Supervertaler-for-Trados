@@ -334,7 +334,7 @@ namespace Supervertaler.Trados.Controls
                 if (txtSugg != null)
                     txtSugg.ContextMenuStrip = ctxMenu;
 
-                // Checkbox toggle — change card colour and text when checked
+                // Checkbox toggle – change card colour and text when checked
                 var capturedCard = card;
                 var capturedSegNum = lblSegNum;
                 var capturedDesc = txtDesc;
@@ -364,7 +364,7 @@ namespace Supervertaler.Trados.Controls
                     }
                 };
 
-                // Hover effect — apply to card and all children
+                // Hover effect – apply to card and all children
                 // TextBox controls keep IBeam cursor for text selection;
                 // navigation on click only for non-checkbox, non-textbox controls
                 Action<Control> applyHover = null;
@@ -383,7 +383,7 @@ namespace Supervertaler.Trados.Controls
                         foreach (Control c in capturedCard.Controls)
                             if (c is TextBox tb) tb.BackColor = CardColor;
                     };
-                    // TextBox: let users select text — don't hijack click for navigation
+                    // TextBox: let users select text – don't hijack click for navigation
                     // CheckBox: has its own click handler
                     if (!(ctrl is CheckBox) && !(ctrl is TextBox))
                     {
@@ -397,7 +397,7 @@ namespace Supervertaler.Trados.Controls
 
                 _resultsPanel.Controls.Add(card);
 
-                // Layout the card — need to measure text height
+                // Layout the card – need to measure text height
                 LayoutCard(card, lblSegNum, txtDesc, txtSugg);
 
                 yPos += card.Height + 4;
@@ -705,7 +705,7 @@ namespace Supervertaler.Trados.Controls
         {
             var totalChecked = _issueCount; // total issues, not total segments
             if (_checkedCount > 0)
-                _lblIssueCount.Text = $"{_issueCount} issue{(_issueCount != 1 ? "s" : "")} found — {_checkedCount} addressed";
+                _lblIssueCount.Text = $"{_issueCount} issue{(_issueCount != 1 ? "s" : "")} found – {_checkedCount} addressed";
             // Text is set in SetResults initially; only update when checked count changes
             _lblIssueCount.Parent?.PerformLayout();
         }
@@ -822,7 +822,7 @@ namespace Supervertaler.Trados.Controls
                     return eb.Timestamp.CompareTo(ea.Timestamp); // newest first
                 if (ea != null) return -1; // prompt logs before issue cards
                 if (eb != null) return 1;
-                return 0; // both issue cards — preserve original order
+                return 0; // both issue cards – preserve original order
             });
 
             int yPos = 4;
@@ -831,7 +831,7 @@ namespace Supervertaler.Trados.Controls
 
                 card.Location = new Point(4, yPos);
 
-                // Prompt log cards manage their own height — skip LayoutCard for them
+                // Prompt log cards manage their own height – skip LayoutCard for them
                 if (card.Tag is PromptLogEntry)
                 {
                     // Just update width to match panel

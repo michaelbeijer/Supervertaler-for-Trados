@@ -11,7 +11,7 @@ namespace Supervertaler.Trados.Core
     /// <summary>
     /// Manages the prompt template library: loading, saving, and built-in prompt seeding.
     /// Prompts are stored as .md files (Markdown with YAML frontmatter) in the shared UserDataPath.PromptLibraryDir,
-    /// which is the same folder Supervertaler Workbench uses — so prompts are automatically
+    /// which is the same folder Supervertaler Workbench uses – so prompts are automatically
     /// shared between both products.
     /// </summary>
     public class PromptLibrary
@@ -132,7 +132,7 @@ namespace Supervertaler.Trados.Core
             content = content.Replace("{{SOURCE_SEGMENT}}", sourceText ?? "");
             content = content.Replace("{{TARGET_SEGMENT}}", targetText ?? "");
 
-            // Legacy aliases — kept for backward compatibility
+            // Legacy aliases – kept for backward compatibility
             content = content.Replace("{{SOURCE_TEXT}}", sourceText ?? "");
             content = content.Replace("{{TARGET_TEXT}}", targetText ?? "");
 
@@ -318,7 +318,7 @@ namespace Supervertaler.Trados.Core
                 filePath = prompt.FilePath;
 
                 // If the prompt was renamed, update the filename to match.
-                // Skip for default prompts — their filenames are managed by EnsureDefaultPrompts.
+                // Skip for default prompts – their filenames are managed by EnsureDefaultPrompts.
                 if (!prompt.IsDefault)
                 {
                     var currentFileName = Path.GetFileNameWithoutExtension(filePath);
@@ -340,7 +340,7 @@ namespace Supervertaler.Trados.Core
             {
                 // New prompt: build path from domain + name
                 // Category may contain forward slashes for nested folders (e.g. "QuickLauncher/Trados-specific")
-                // — sanitise each path segment individually to preserve the directory structure
+                // – sanitise each path segment individually to preserve the directory structure
                 string folder;
                 if (string.IsNullOrEmpty(prompt.Category))
                 {
@@ -421,7 +421,7 @@ namespace Supervertaler.Trados.Core
 
         /// <summary>
         /// Ensures built-in prompts exist in the prompts directory.
-        /// Creates any that are missing (idempotent — safe to call on every startup).
+        /// Creates any that are missing (idempotent – safe to call on every startup).
         /// Also removes domain-specific translate prompts shipped in v4.12.x
         /// and replaced by the single Default Translation Prompt in v4.13.0.
         /// </summary>
@@ -453,7 +453,7 @@ namespace Supervertaler.Trados.Core
                 {
                     var newMdPath = Path.Combine(folder, sanitisedName + ".md");
 
-                    // Parent folder (e.g. "QuickLauncher") — flat layout migration
+                    // Parent folder (e.g. "QuickLauncher") – flat layout migration
                     var parentFolder = PromptsDir;
                     for (int i = 0; i < domainParts.Length - 1; i++)
                         parentFolder = Path.Combine(parentFolder, domainParts[i]);
@@ -480,7 +480,7 @@ namespace Supervertaler.Trados.Core
                                 if (IsDefaultPromptFile(content))
                                     File.Move(sourcePath, newMdPath);
                             }
-                            catch { /* ignore — file locked or permissions */ }
+                            catch { /* ignore – file locked or permissions */ }
                         }
                     }
                 }
@@ -514,7 +514,7 @@ namespace Supervertaler.Trados.Core
                                 catch { }
                             }
                         }
-                        catch { /* ignore — file locked or permissions */ }
+                        catch { /* ignore – file locked or permissions */ }
                     }
                 }
 
@@ -536,7 +536,7 @@ namespace Supervertaler.Trados.Core
                             if (IsDefaultPromptFile(oldContent))
                                 File.Delete(strippedPath);
                         }
-                        catch { /* ignore — file locked or permissions */ }
+                        catch { /* ignore – file locked or permissions */ }
                     }
                 }
 
@@ -550,7 +550,7 @@ namespace Supervertaler.Trados.Core
                         if (IsDefaultPromptFile(oldContent))
                             File.Delete(oldSvpromptPath);
                     }
-                    catch { /* ignore — file locked or permissions */ }
+                    catch { /* ignore – file locked or permissions */ }
                 }
 
                 var filePath = Path.Combine(folder, sanitisedName + ".md");
@@ -584,7 +584,7 @@ namespace Supervertaler.Trados.Core
 
         /// <summary>
         /// Removes domain-specific translate prompts that were shipped in v4.12.x.
-        /// Only deletes files still marked as default — user-modified copies are left alone.
+        /// Only deletes files still marked as default – user-modified copies are left alone.
         /// </summary>
         private void CleanUpRetiredPrompts()
         {
@@ -664,10 +664,10 @@ namespace Supervertaler.Trados.Core
                         else
                             File.Delete(svpromptFile); // .md version already exists
                     }
-                    catch { /* ignore — file locked or permissions */ }
+                    catch { /* ignore – file locked or permissions */ }
                 }
             }
-            catch { /* ignore — directory access failure */ }
+            catch { /* ignore – directory access failure */ }
         }
 
         /// <summary>
@@ -749,7 +749,7 @@ namespace Supervertaler.Trados.Core
                     }
                 }
 
-                // Also scan .svprompt files (legacy format) — skip if .md version exists
+                // Also scan .svprompt files (legacy format) – skip if .md version exists
                 foreach (var file in Directory.GetFiles(dir, "*.svprompt", SearchOption.AllDirectories))
                 {
                     try
@@ -809,13 +809,13 @@ namespace Supervertaler.Trados.Core
                 }
                 else
                 {
-                    // Malformed frontmatter — treat entire file as content
+                    // Malformed frontmatter – treat entire file as content
                     prompt.Content = text;
                 }
             }
             else
             {
-                // No frontmatter — entire file is content
+                // No frontmatter – entire file is content
                 prompt.Content = text;
             }
 
@@ -1096,7 +1096,7 @@ namespace Supervertaler.Trados.Core
                 new PromptTemplate
                 {
                     Name = "Default Translation Prompt",
-                    Description = "General-purpose translation prompt — use as-is or as a starting point for your own prompts",
+                    Description = "General-purpose translation prompt – use as-is or as a starting point for your own prompts",
                     Category = "Translate/Default",
                     IsDefault = true,
                     Content = @"You are a professional translator working from {{SOURCE_LANGUAGE}} to {{TARGET_LANGUAGE}}. Translate the source text accurately and naturally, following these guidelines:
@@ -1109,7 +1109,7 @@ namespace Supervertaler.Trados.Core
 - Preserve all formatting, tags, and placeholders exactly as they appear
 
 ## Terminology
-- Use the glossary terms provided (if any) — they take priority over alternative translations
+- Use the glossary terms provided (if any) – they take priority over alternative translations
 - When a term has no established equivalent, keep the source term and add a brief explanation in parentheses if needed
 
 ## Style
@@ -1125,7 +1125,7 @@ namespace Supervertaler.Trados.Core
                     Description = "Reviews translations for accuracy, completeness, terminology, grammar, and style issues",
                     Category = "Proofread/Default",
                     IsDefault = true,
-                    Content = @"You are a professional translation proofreader. Your task is to review {{SOURCE_LANGUAGE}} to {{TARGET_LANGUAGE}} translation pairs and identify issues. You must check EVERY segment provided — do not skip any.
+                    Content = @"You are a professional translation proofreader. Your task is to review {{SOURCE_LANGUAGE}} to {{TARGET_LANGUAGE}} translation pairs and identify issues. You must check EVERY segment provided – do not skip any.
 
 For each segment, check the following:
 
@@ -1176,7 +1176,7 @@ For each segment, check the following:
 
 ## Output Format
 
-You MUST use this exact format for every segment. Check ALL segments — do not skip any.
+You MUST use this exact format for every segment. Check ALL segments – do not skip any.
 
 For segments with no issues:
 [SEGMENT XXXX] OK
@@ -1184,7 +1184,7 @@ For segments with no issues:
 For segments with issues:
 [SEGMENT XXXX] ISSUE
 Issue: <brief description of the problem>
-Suggestion: <describe what should be changed — do NOT provide a full corrected translation>
+Suggestion: <describe what should be changed – do NOT provide a full corrected translation>
 
 IMPORTANT RULES:
 - NEVER provide corrected full translations. Only describe the issue and suggest what specifically should be fixed.
@@ -1261,11 +1261,11 @@ Flag any British vocabulary that has a standard American equivalent:
 - Do NOT flag proper nouns, brand names, place names, or quoted text
 - Do NOT flag ""humorous"" (same spelling in both)
 - Do NOT flag technical terms that are conventionally spelled the same way in both variants
-- Do NOT provide corrected full translations — only describe what should be changed
+- Do NOT provide corrected full translations – only describe what should be changed
 
 ## Output Format
 
-You MUST use this exact format for every segment. Check ALL segments — do not skip any.
+You MUST use this exact format for every segment. Check ALL segments – do not skip any.
 
 For segments with no British English forms:
 [SEGMENT XXXX] OK
@@ -1458,7 +1458,7 @@ Analyse the complete source text above and produce a **Project Brief** in clean 
 Format the entire output as a single Markdown document that can be copied and pasted directly into another AI tool's chat interface."
                 },
 
-                // ─── Text operations (transforms — no AI call) ───────────
+                // ─── Text operations (transforms – no AI call) ───────────
                 new PromptTemplate
                 {
                     Name = "Strip U+2028",

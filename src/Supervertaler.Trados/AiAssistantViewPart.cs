@@ -44,7 +44,7 @@ namespace Supervertaler.Trados
         private IStudioDocument _activeDocument;
         private TermLensSettings _settings;
 
-        // Cached language pair — ActiveFile can be null when the AI panel has focus
+        // Cached language pair – ActiveFile can be null when the AI panel has focus
         private string _cachedSourceLang;
         private string _cachedTargetLang;
 
@@ -115,7 +115,7 @@ namespace Supervertaler.Trados
         {
             _currentInstance = this;
 
-            // License check — show/hide upgrade overlay based on tier.
+            // License check – show/hide upgrade overlay based on tier.
             // When the user activates a licence mid-session (after Initialize
             // returned early due to no access), run the deferred full init so
             // event handlers, memory-bank dropdown, inbox watcher, etc. are
@@ -165,7 +165,7 @@ namespace Supervertaler.Trados
         /// wires event handlers, populates the memory-bank dropdown, starts
         /// the inbox watcher, and restores chat history.  Guarded by
         /// <see cref="_fullyInitialized"/> so it runs at most once per
-        /// ViewPart lifetime — either from <see cref="Initialize"/> (when
+        /// ViewPart lifetime – either from <see cref="Initialize"/> (when
         /// licensed at startup) or from the <c>LicenseStateChanged</c>
         /// handler (when the user activates mid-session).
         /// </summary>
@@ -255,7 +255,7 @@ namespace Supervertaler.Trados
             // user to click Process Inbox and see a confusing error.
             //
             // Deferred via BeginInvoke so the MessageBox does not block
-            // Trados Studio's plugin-init message pump — without this, the
+            // Trados Studio's plugin-init message pump – without this, the
             // whole Studio UI would freeze until the user dismisses the
             // prompt at start-up.
             try
@@ -395,7 +395,7 @@ namespace Supervertaler.Trados
 
                     // Note: live-sync of the active prompt is handled by the static
                     // Controls.PromptManagerPanel.ActivePromptChangedGlobal hook
-                    // wired in Initialize, not here — that way it also fires when
+                    // wired in Initialize, not here – that way it also fires when
                     // the Settings dialog is opened from TermLensEditorViewPart.
 
                     var parent = _control.Value.FindForm();
@@ -405,7 +405,7 @@ namespace Supervertaler.Trados
 
                     if (form.SettingsImported)
                     {
-                        // User imported settings from file — reload from disk
+                        // User imported settings from file – reload from disk
                         var fresh = TermLensSettings.Load();
                         _settings.AiSettings = fresh.AiSettings;
                         _settings.TermbasePath = fresh.TermbasePath;
@@ -419,7 +419,7 @@ namespace Supervertaler.Trados
                         _settings.DisabledMultiTermIds = fresh.DisabledMultiTermIds;
                     }
 
-                    // Always refresh the prompt dropdown — prompt deletions happen
+                    // Always refresh the prompt dropdown – prompt deletions happen
                     // immediately on disk even if the user clicks Cancel afterwards
                     _promptLibrary.Refresh();
                     PopulateBatchPromptDropdown();
@@ -515,7 +515,7 @@ namespace Supervertaler.Trados
             // These are used by InDesign (IDML) as forced line breaks and by some
             // PDF converters as layout artifacts. They're invisible in Trados but
             // cause the AI to introduce spurious line breaks in the translation.
-            // The break position is a layout concern, not a linguistic one — it
+            // The break position is a layout concern, not a linguistic one – it
             // almost never belongs in the same place in the target language.
             if (sourceText != null)
                 sourceText = sourceText.Replace("\u2028", " ").Replace("\u2029", " ");
@@ -549,7 +549,7 @@ namespace Supervertaler.Trados
                 totalSegmentCount = documentSegments?.Count ?? 0;
             }
 
-            // Surrounding segments — count from settings (default 5)
+            // Surrounding segments – count from settings (default 5)
             var surroundingSegments = GetSurroundingSegments(
                 _settings?.AiSettings?.QuickLauncherSurroundingSegments ?? 5);
 
@@ -583,7 +583,7 @@ namespace Supervertaler.Trados
             var systemPrompt = ChatPrompt.BuildSystemPrompt(chatCtx);
 
             // 4. Build message window
-            // QuickLauncher prompts are standalone — send only the current message,
+            // QuickLauncher prompts are standalone – send only the current message,
             // not the chat history. This prevents accumulated history from inflating
             // token costs (e.g. previous {{PROJECT}} expansions).
             // AutoPrompt (showAsStatus) is also standalone.
@@ -591,7 +591,7 @@ namespace Supervertaler.Trados
             var isStandalone = !string.IsNullOrEmpty(args.PromptName) || args.ShowAsStatus;
             if (isStandalone)
             {
-                // Send only the current message — no history
+                // Send only the current message – no history
                 messagesToSend = new List<ChatMessage> { _chatHistory[_chatHistory.Count - 1] };
             }
             else
@@ -660,7 +660,7 @@ namespace Supervertaler.Trados
                 ? PromptLogFeature.QuickLauncher
                 : PromptLogFeature.Chat;
 
-            // 7. Call LLM async — calculate prompt size for diagnostics
+            // 7. Call LLM async – calculate prompt size for diagnostics
             var promptCharCount = 0;
             foreach (var m in capturedMessages)
                 promptCharCount += m.Content?.Length ?? 0;
@@ -691,7 +691,7 @@ namespace Supervertaler.Trados
                 }
             }
 
-            // Capture tool settings — Claude, OpenAI, Gemini, Grok, Mistral all support tool use
+            // Capture tool settings – Claude, OpenAI, Gemini, Grok, Mistral all support tool use
             var useTools = LlmClient.SupportsToolUse(capturedProvider);
             var toolDefsJson = useTools ? TradosTools.GetToolDefinitionsJson(capturedProvider) : null;
 
@@ -792,7 +792,7 @@ namespace Supervertaler.Trados
                 using (var fs = new FileStream(archivePath, FileMode.Create, FileAccess.Write))
                     serializer.WriteObject(fs, _chatHistory);
             }
-            catch { /* archive is best-effort — never block the clear */ }
+            catch { /* archive is best-effort – never block the clear */ }
         }
 
         private void OnStopRequested(object sender, EventArgs e)
@@ -933,7 +933,7 @@ namespace Supervertaler.Trados
                 var displayText = PromptGenerator.BuildDisplayMessage(ctx);
 
                 // Phase 6: Send via chat (switches to AI Assistant panel)
-                // Use 32768 tokens for prompt generation — comprehensive prompts with
+                // Use 32768 tokens for prompt generation – comprehensive prompts with
                 // large glossaries and TM pairs can exceed 16K tokens.
                 // showAsStatus: true → display as assistant-styled (gray) bubble since the
                 // user clicked a button, not typed this message themselves
@@ -945,7 +945,7 @@ namespace Supervertaler.Trados
         /// <summary>
         /// Collects source/target pairs from human-confirmed segments to use as
         /// TM reference pairs for the prompt generator. Only includes segments that
-        /// are Translated, ApprovedTranslation, or ApprovedSignOff — i.e., segments
+        /// are Translated, ApprovedTranslation, or ApprovedSignOff – i.e., segments
         /// a translator has explicitly confirmed. Unconfirmed AI-generated translations
         /// are excluded to avoid feeding unverified output back as "correct" references.
         /// Samples up to 50 diverse pairs, spread evenly across the document.
@@ -972,7 +972,7 @@ namespace Supervertaler.Trados
                     // Skip very short segments (headers, numbers)
                     if (sourceText.Length < 20) continue;
 
-                    // Only include human-confirmed segments — not unconfirmed AI output
+                    // Only include human-confirmed segments – not unconfirmed AI output
                     var confirmLevel = pair.Properties?.ConfirmationLevel
                         ?? Sdl.Core.Globalization.ConfirmationLevel.Unspecified;
                     if (confirmLevel < Sdl.Core.Globalization.ConfirmationLevel.Translated)
@@ -1186,7 +1186,7 @@ namespace Supervertaler.Trados
         /// Live variant of <see cref="PopulateBatchPromptDropdown"/>: refreshes the
         /// Batch Translate dropdown using an in-memory active-prompt path (typically
         /// the pending value from the Prompt Manager while the Settings dialog is
-        /// still open). The change is NOT persisted here — the normal on-close
+        /// still open). The change is NOT persisted here – the normal on-close
         /// refresh reads from disk, so a Cancel naturally snaps back.
         /// </summary>
         private void RefreshBatchPromptDropdownWithActive(string activePath)
@@ -1195,7 +1195,7 @@ namespace Supervertaler.Trados
             {
                 try
                 {
-                    // Use the existing cache — the prompt library on disk hasn't
+                    // Use the existing cache – the prompt library on disk hasn't
                     // changed (the user is just toggling active in memory), so a
                     // rescan is unnecessary and would slow down each right-click.
                     var prompts = _promptLibrary?.GetAllPrompts();
@@ -1214,7 +1214,7 @@ namespace Supervertaler.Trados
                 }
                 catch
                 {
-                    // Swallow — a stale settings dialog or disposed control shouldn't
+                    // Swallow – a stale settings dialog or disposed control shouldn't
                     // surface an error to the user for a UI-refresh helper.
                 }
             });
@@ -1288,7 +1288,7 @@ namespace Supervertaler.Trados
             }
             catch
             {
-                return null; // KB is optional — never block translation
+                return null; // KB is optional – never block translation
             }
         }
 
@@ -1299,7 +1299,7 @@ namespace Supervertaler.Trados
         /// <summary>
         /// Rebuilds the Memory Bank dropdown in the SuperMemory toolbar from
         /// the current on-disk bank list, pre-selecting the active bank. Safe
-        /// to call repeatedly — the toolbar suppresses its own change event
+        /// to call repeatedly – the toolbar suppresses its own change event
         /// while the combo is being repopulated, so no accidental switch fires.
         /// </summary>
         private void RefreshMemoryBankDropdown()
@@ -1323,7 +1323,7 @@ namespace Supervertaler.Trados
             }
             catch
             {
-                // Non-critical — the rest of the AI Assistant still works
+                // Non-critical – the rest of the AI Assistant still works
                 // against the active bank via ActiveMemoryBankDir.
             }
         }
@@ -1343,7 +1343,7 @@ namespace Supervertaler.Trados
             if (string.Equals(newName, oldName, StringComparison.Ordinal))
                 return;
 
-            // User-initiated action (dropdown selection) — re-engage
+            // User-initiated action (dropdown selection) – re-engage
             // auto-scroll so the "Switched to memory bank X" confirmation
             // and any follow-up heal prompt chat messages land in view.
             _control.Value.ReengageAutoScroll();
@@ -1356,7 +1356,7 @@ namespace Supervertaler.Trados
                 _settings.AiSettings.ActiveMemoryBankName = newName;
                 _settings.Save();
 
-                // 2. Invalidate the cached reader — the next LoadKbContextForPrompt
+                // 2. Invalidate the cached reader – the next LoadKbContextForPrompt
                 //    call will lazily recreate it against the new bank directory.
                 _kbReader = null;
                 _kbReaderBankName = null;
@@ -1449,7 +1449,7 @@ namespace Supervertaler.Trados
                     _control.Value.AddMessage(new ChatMessage
                     {
                         Role = ChatRole.Assistant,
-                        Content = $"Left memory bank **{bankName}** as-is. Process Inbox and Health Check will not work until the missing template files ({missingList}) are restored — switch away and back, or create a fresh bank, to see the restore prompt again."
+                        Content = $"Left memory bank **{bankName}** as-is. Process Inbox and Health Check will not work until the missing template files ({missingList}) are restored – switch away and back, or create a fresh bank, to see the restore prompt again."
                     });
                     return;
                 }
@@ -1488,7 +1488,7 @@ namespace Supervertaler.Trados
         /// </summary>
         private void OnNewMemoryBankRequested(object sender, EventArgs e)
         {
-            // User-initiated action (+ New memory bank sentinel) — re-engage
+            // User-initiated action (+ New memory bank sentinel) – re-engage
             // auto-scroll so the "Created memory bank X" confirmation lands
             // in view after the dialog closes.
             _control.Value.ReengageAutoScroll();
@@ -1542,7 +1542,7 @@ namespace Supervertaler.Trados
                     return;
                 }
 
-                // Creation failed — tell the user why and loop back to the
+                // Creation failed – tell the user why and loop back to the
                 // prompt so they can adjust the name without losing their
                 // typing flow.
                 MessageBox.Show(
@@ -1588,7 +1588,7 @@ namespace Supervertaler.Trados
 
                 var lblPreview = new Label
                 {
-                    Text = "Folder name: —",
+                    Text = "Folder name: –",
                     Location = new System.Drawing.Point(12, 82),
                     Size = new System.Drawing.Size(396, 18),
                     ForeColor = System.Drawing.Color.FromArgb(120, 120, 120)
@@ -1616,7 +1616,7 @@ namespace Supervertaler.Trados
                     var safe = UserDataPath.SanitizeBankName(txtName.Text);
                     if (string.IsNullOrEmpty(safe))
                     {
-                        lblPreview.Text = "Folder name: —";
+                        lblPreview.Text = "Folder name: –";
                         lblPreview.ForeColor = System.Drawing.Color.FromArgb(120, 120, 120);
                         btnOk.Enabled = false;
                     }
@@ -1705,7 +1705,7 @@ namespace Supervertaler.Trados
                 var inboxDir = Path.Combine(ActiveMemoryBankDir, "00_INBOX");
                 if (!Directory.Exists(inboxDir)) return;
 
-                // Watch every file type, not just *.md — users drop TMX, PDF,
+                // Watch every file type, not just *.md – users drop TMX, PDF,
                 // DOCX into the inbox too, and the Process Inbox button needs
                 // to reflect that (it will route non-.md files to Distill via
                 // a helpful message rather than silently ignoring them).
@@ -1739,7 +1739,7 @@ namespace Supervertaler.Trados
             }
             catch
             {
-                // Non-critical — toolbar still works via manual refresh
+                // Non-critical – toolbar still works via manual refresh
             }
         }
 
@@ -1755,7 +1755,7 @@ namespace Supervertaler.Trados
 
         private void OnProcessInbox(object sender, EventArgs e)
         {
-            // User-initiated action — re-engage auto-scroll so the progress
+            // User-initiated action – re-engage auto-scroll so the progress
             // message and the response land in view.
             _control.Value.ReengageAutoScroll();
 
@@ -1776,12 +1776,12 @@ namespace Supervertaler.Trados
             // them. This stops the button from silently ignoring files the
             // user deliberately placed in the inbox.
             var allFiles = Directory.GetFiles(inboxDir, "*", SearchOption.TopDirectoryOnly);
-            var inboxFiles = new List<Tuple<string, string>>(); // (path, content) — .md only
+            var inboxFiles = new List<Tuple<string, string>>(); // (path, content) – .md only
             var nonMdFiles = new List<string>();                // paths of everything else
 
             foreach (var f in allFiles)
             {
-                // Skip bank-internal sidecars (.edtz etc.) entirely — they are
+                // Skip bank-internal sidecars (.edtz etc.) entirely – they are
                 // neither Markdown to compile nor material to hand to Distill.
                 if (Core.MemoryBankReader.IsIgnoredSidecar(f))
                     continue;
@@ -1818,7 +1818,7 @@ namespace Supervertaler.Trados
                 ShowSuperMemoryMessage(
                     $"The inbox for memory bank **{bankName}** contains {nonMdFiles.Count} file(s), but none of them are Markdown notes:\n\n" +
                     $"    {nameList}\n\n" +
-                    "**Process Inbox** reads Markdown briefs, notes, and feedback — it cannot extract knowledge from binary files like TMX, DOCX, PDF, or XLSX.\n\n" +
+                    "**Process Inbox** reads Markdown briefs, notes, and feedback – it cannot extract knowledge from binary files like TMX, DOCX, PDF, or XLSX.\n\n" +
                     "Click the **Distill** button instead and select these files there. Distill will read each file, extract client, domain, terminology, and style information from it, and write structured Markdown articles straight into the bank.");
                 return;
             }
@@ -1835,7 +1835,7 @@ namespace Supervertaler.Trados
                     Content =
                         $"Heads up: the inbox also contains {nonMdFiles.Count} non-Markdown file(s) that Process Inbox cannot handle:\n\n" +
                         $"    {nameList}\n\n" +
-                        "I'll process the Markdown files now. For the others, run **Distill** afterwards — it can read TMX, DOCX, PDF, XLSX, and termbases directly."
+                        "I'll process the Markdown files now. For the others, run **Distill** afterwards – it can read TMX, DOCX, PDF, XLSX, and termbases directly."
                 });
             }
 
@@ -1880,7 +1880,7 @@ namespace Supervertaler.Trados
 
         private void OnHealthCheck(object sender, EventArgs e)
         {
-            // User-initiated action — re-engage auto-scroll so the progress
+            // User-initiated action – re-engage auto-scroll so the progress
             // bubble and the response land in view even if the user had
             // scrolled up to read history from a previous Health Check run.
             _control.Value.ReengageAutoScroll();
@@ -1904,7 +1904,7 @@ namespace Supervertaler.Trados
             }
             // Show the progress message IMMEDIATELY before the vault scan.
             // The scan below reads every .md file in the bank and can take
-            // multiple seconds on a mature bank — if we did it synchronously
+            // multiple seconds on a mature bank – if we did it synchronously
             // before adding a chat bubble (as the original code did), the
             // user would click Health Check and see absolutely nothing
             // until the scan finished. Adding an upfront bubble, plus
@@ -1983,7 +1983,7 @@ namespace Supervertaler.Trados
                     {
                         if (capturedFileCount == 0)
                         {
-                            // Bank is empty after all — roll back the
+                            // Bank is empty after all – roll back the
                             // progress state and show the "nothing to
                             // check" message.
                             _control.Value.SetThinking(false);
@@ -1994,7 +1994,7 @@ namespace Supervertaler.Trados
                         }
 
                         // Empty displayText because we already showed the
-                        // progress message above — RunSuperMemoryAgent
+                        // progress message above – RunSuperMemoryAgent
                         // will skip its own AddMessage call.
                         RunSuperMemoryAgent(capturedSystemPrompt, capturedUserMessage, "",
                             PromptLogFeature.SuperMemory, "SuperMemory: Health Check",
@@ -2022,7 +2022,7 @@ namespace Supervertaler.Trados
                 try
                 {
                     var fileName = Path.GetFileName(f);
-                    // Skip example/template files — they're shipped scaffolding, not real content
+                    // Skip example/template files – they're shipped scaffolding, not real content
                     if (fileName.StartsWith("_EXAMPLE_", StringComparison.OrdinalIgnoreCase))
                         continue;
                     var relPath = f.Substring(vaultRoot.Length).TrimStart('\\', '/');
@@ -2087,7 +2087,7 @@ namespace Supervertaler.Trados
                 return;
             }
 
-            // Show status message — unless the caller has already displayed
+            // Show status message – unless the caller has already displayed
             // its own progress bubble (in which case displayText is left
             // empty). This lets slow operations like OnHealthCheck, which
             // need to scan the vault before the displayText would know how
@@ -2311,7 +2311,7 @@ namespace Supervertaler.Trados
             // Always append a completion summary at the end, regardless of
             // whether the AI produced any "### FILE:" markers to auto-fix.
             // Without this the user sees the tail of the report but has no
-            // clear "done" indicator — the Stop button reverts to Send and
+            // clear "done" indicator – the Stop button reverts to Send and
             // the thinking bubble disappears, but there is no chat message
             // marking the transition, which is confusing especially after
             // a long-running Health Check where the user may have scrolled
@@ -2345,7 +2345,7 @@ namespace Supervertaler.Trados
             }
             else
             {
-                // No files auto-fixed — the AI's response was purely a
+                // No files auto-fixed – the AI's response was purely a
                 // report with findings flagged for human review, or the
                 // parser did not recognise the AI's fix format. Either way,
                 // the user needs an explicit "done" marker.
@@ -2367,7 +2367,7 @@ namespace Supervertaler.Trados
 
         /// <summary>
         /// Rebuilds the master index files in <c>05_INDICES/</c> by scanning
-        /// all content folders for article frontmatter. No LLM call — this is
+        /// all content folders for article frontmatter. No LLM call – this is
         /// a pure file-scan operation and completes in under a second even on
         /// large banks.
         /// </summary>
@@ -2517,7 +2517,7 @@ namespace Supervertaler.Trados
             }
             catch
             {
-                // Non-critical — indices are a convenience, not a requirement
+                // Non-critical – indices are a convenience, not a requirement
             }
         }
 
@@ -2558,7 +2558,7 @@ namespace Supervertaler.Trados
                 if (string.IsNullOrWhiteSpace(line)) continue;
                 if (line.StartsWith("#")) continue;
 
-                // Found a content line — return it (trimmed to ~200 chars)
+                // Found a content line – return it (trimmed to ~200 chars)
                 return line.Length > 200 ? line.Substring(0, 200) + "…" : line;
             }
 
@@ -2630,7 +2630,7 @@ Output one or more knowledge base articles using `### FILE: <relative-path>` mar
 **IMPORTANT:** Always write articles to the `00_INBOX/` folder. The user will review them before moving them to the correct vault location using Process Inbox.
 
 Use these vault paths:
-- `00_INBOX/<filename>.md` — ALL distilled articles go here for review
+- `00_INBOX/<filename>.md` – ALL distilled articles go here for review
 
 Each article must have this frontmatter structure:
 ```
@@ -2648,34 +2648,34 @@ sources:
   - <original filename 2>
 created: <today's date YYYY-MM-DD>
 updated: <today's date YYYY-MM-DD>
-tldr: <one-sentence summary of what this article covers — max 150 characters>
+tldr: <one-sentence summary of what this article covers – max 150 characters>
 ---
 ```
 
 ### Confidence scoring
 
 Assign a confidence level based on the quality and authority of the source material:
-- **high** — derived from an authoritative source: official client glossary, published style guide, large TMX with consistent patterns, or confirmed by multiple corroborating sources.
-- **medium** — derived from a single source of reasonable quality: a short PDF, a single reference document, a small TMX.
-- **low** — derived from ambiguous or incomplete material, or when the extraction required significant inference. Flag uncertain terminology decisions explicitly.
+- **high** – derived from an authoritative source: official client glossary, published style guide, large TMX with consistent patterns, or confirmed by multiple corroborating sources.
+- **medium** – derived from a single source of reasonable quality: a short PDF, a single reference document, a small TMX.
+- **low** – derived from ambiguous or incomplete material, or when the extraction required significant inference. Flag uncertain terminology decisions explicitly.
 
 ### Source traceability
 
-Always list the original source filename(s) in the `sources:` frontmatter field. When recording terminology decisions, **always quote the exact source and target terms verbatim** — do not paraphrase or generalise term pairs.
+Always list the original source filename(s) in the `sources:` frontmatter field. When recording terminology decisions, **always quote the exact source and target terms verbatim** – do not paraphrase or generalise term pairs.
 
 ## Guidelines
 
-- Keep articles **focused and concise** — one topic per article where possible.
+- Keep articles **focused and concise** – one topic per article where possible.
 - Use bullet points and tables for terminology lists.
 - Include the *reasoning* behind translation choices, not just the choices themselves.
 - When in doubt, create separate articles rather than one huge article.
 - Write in English (the knowledge base language), but include source/target examples in their original languages.
 - If the source material is too large to fully process, prioritise the most valuable and non-obvious knowledge.
-- Always include a `tldr:` — this is used for fast scanning during context loading.";
+- Always include a `tldr:` – this is used for fast scanning during context loading.";
 
         private void OnDistill(object sender, EventArgs e)
         {
-            // User-initiated action — re-engage auto-scroll so the progress
+            // User-initiated action – re-engage auto-scroll so the progress
             // bubble and the response land in view.
             _control.Value.ReengageAutoScroll();
 
@@ -2689,7 +2689,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
             }
 
             // Scan inbox for non-Markdown files that can be distilled. Skip
-            // bank-internal sidecars (.edtz etc.) — DocumentTextExtractor will
+            // bank-internal sidecars (.edtz etc.) – DocumentTextExtractor will
             // throw "Unsupported file format" on those, and they aren't
             // knowledge content anyway.
             var inboxDir = Path.Combine(vaultDir, "00_INBOX");
@@ -2734,7 +2734,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
             // Extract text from each file. We track full source paths in
             // parallel so PostProcessDistillResponse can archive any source
             // file that lives inside the active bank's 00_INBOX/ folder
-            // after a successful distill — that closes the loop on "user
+            // after a successful distill – that closes the loop on "user
             // dropped a TMX in the inbox, ran Distill, and now wants the
             // source file to follow the same archive workflow as the
             // Markdown files Process Inbox writes from it".
@@ -2778,7 +2778,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
             if (userMessage.Length > 400000)
             {
                 userMessage = userMessage.Substring(0, 400000) +
-                    "\n\n[Truncated — files too large to process in one pass. The above is a partial extraction.]";
+                    "\n\n[Truncated – files too large to process in one pass. The above is a partial extraction.]";
             }
 
             // Show status in chat
@@ -2821,12 +2821,12 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
             if (userMessage.Length > 400000)
             {
                 userMessage = userMessage.Substring(0, 400000) +
-                    "\n\n[Truncated — termbase too large to process in one pass.]";
+                    "\n\n[Truncated – termbase too large to process in one pass.]";
             }
 
             var displayText = $"\u2697 **SuperMemory: Distill Termbase** \u2014 {termbaseName}";
             // For the termbase shortcut there is no source file on disk to
-            // archive — the source is the live termbase database. Pass the
+            // archive – the source is the live termbase database. Pass the
             // termbase name through as a synthetic "path"; the archive
             // logic in PostProcessDistillResponse will see it is not a real
             // file and skip it. archiveInboxSources defaults to false.
@@ -2846,7 +2846,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
         /// <param name="sourceFilePaths">
         /// Full paths (or synthetic display names for the termbase shortcut)
         /// of the files that fed this Distill run. Used both for the chat
-        /// summary and — when <paramref name="archiveInboxSources"/> is true —
+        /// summary and – when <paramref name="archiveInboxSources"/> is true –
         /// for the inbox archive sweep.
         /// </param>
         /// <param name="archiveInboxSources">
@@ -2892,7 +2892,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
             // Archive any source files that came from inside the bank's inbox.
             // Only fires when (a) the caller asked us to archive (file picker
             // path, not the termbase shortcut) and (b) the AI actually wrote
-            // at least one Markdown article — if the distill produced nothing
+            // at least one Markdown article – if the distill produced nothing
             // we want the source files to stay in the inbox so the user can
             // retry without losing them.
             int archivedCount = 0;
@@ -2927,7 +2927,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                     }
                     catch
                     {
-                        // Per-file failures are non-fatal — the rest of the
+                        // Per-file failures are non-fatal – the rest of the
                         // distill still succeeded, the user can clean up
                         // manually if a file is locked by another process.
                     }
@@ -3133,7 +3133,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                     $"Starting: {segments.Count} segments, provider={provider}, model={model}, " +
                     $"batch size={batchSize}{kbSummary}");
 
-                // Start backup TMX — written every 10 segments so translations survive a crash
+                // Start backup TMX – written every 10 segments so translations survive a crash
                 if (batchControl.IsTmxBackupEnabled)
                 {
                     var backupPath = Settings.UserDataPath.BatchBackupFilePath(
@@ -3212,7 +3212,11 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
             {
                 try
                 {
-                    if (e.SegmentPairRef == null || _activeDocument == null) return;
+                    // Capture to avoid NullReferenceException if the user switches projects
+                    // while batch translation is running (OnActiveDocumentChanged can null
+                    // _activeDocument between the null check and ProcessSegmentPair).
+                    var doc = _activeDocument;
+                    if (e.SegmentPairRef == null || doc == null) return;
 
                     // All segments now store ISegmentPair for ProcessSegmentPair.
                     // This avoids the editor buffer issue (Selection.Target.Replace
@@ -3221,7 +3225,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                     var pair = e.SegmentPairRef as ISegmentPair;
                     if (pair == null) return;
 
-                    _activeDocument.ProcessSegmentPair(pair, "Supervertaler",
+                    doc.ProcessSegmentPair(pair, "Supervertaler",
                         (sp, cancel) =>
                         {
                             // Tagged segments: reconstruct with full tag handling
@@ -3351,7 +3355,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                     return;
                 }
 
-                // Apply the Limit spinner — same as the API batch path
+                // Apply the Limit spinner – same as the API batch path
                 var clipLimit = batchControl.GetMaxSegments();
                 if (clipLimit > 0 && segments.Count > clipLimit)
                     segments = segments.Take(clipLimit).ToList();
@@ -3867,7 +3871,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                     var targetText = pair.Target != null
                         ? SegmentTagHandler.GetFinalText(pair.Target) : "";
 
-                    // Skip segments with empty target — nothing to proofread
+                    // Skip segments with empty target – nothing to proofread
                     if (string.IsNullOrWhiteSpace(targetText))
                     {
                         index++;
@@ -3876,7 +3880,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
 
                     var sourceText = pair.Source != null
                         ? SegmentTagHandler.GetFinalText(pair.Source) : "";
-                    // Strip Unicode line/paragraph separators — see comment in SendChatMessage
+                    // Strip Unicode line/paragraph separators – see comment in SendChatMessage
                     sourceText = sourceText.Replace("\u2028", " ").Replace("\u2029", " ");
                     if (string.IsNullOrWhiteSpace(sourceText))
                     {
@@ -3893,11 +3897,11 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                     {
                         case ProofreadScope.ConfirmedOnly:
                         case ProofreadScope.FilteredConfirmedOnly:
-                            // "Translated only" — segments at exactly Translated status
+                            // "Translated only" – segments at exactly Translated status
                             include = confirmLevel == Sdl.Core.Globalization.ConfirmationLevel.Translated;
                             break;
                         case ProofreadScope.TranslatedAndConfirmed:
-                            // "Translated + Approved" — Translated, Approved, and Signed-off
+                            // "Translated + Approved" – Translated, Approved, and Signed-off
                             include = confirmLevel >= Sdl.Core.Globalization.ConfirmationLevel.Translated;
                             break;
                         case ProofreadScope.AllSegments:
@@ -3974,7 +3978,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                         ? serialization.SerializedText
                         : (sourceSegment?.ToString() ?? "");
 
-                    // Strip Unicode line/paragraph separators — see comment in SendChatMessage
+                    // Strip Unicode line/paragraph separators – see comment in SendChatMessage
                     sourceText = sourceText.Replace("\u2028", " ").Replace("\u2029", " ");
 
                     if (string.IsNullOrWhiteSpace(SegmentTagHandler.StripTagPlaceholders(sourceText)))
@@ -4228,7 +4232,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
         // ─── Legacy entry point (AiTranslateSegmentAction compatibility) ──
 
         /// <summary>
-        /// Legacy redirect — calls HandleTranslateActiveSegment (Ctrl+T pipeline).
+        /// Legacy redirect – calls HandleTranslateActiveSegment (Ctrl+T pipeline).
         /// Kept because Trados caches action types and removing the method causes crashes.
         /// </summary>
         public static void HandleAiTranslateSegment()
@@ -4358,7 +4362,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                     var batchControl = _control.Value.BatchTranslateControl;
                     batchControl.AppendLog($"Translating segment: \"{Truncate(sourceText, 60)}\"...");
 
-                    // Run async — single segment, reuse TranslationPrompt + LlmClient
+                    // Run async – single segment, reuse TranslationPrompt + LlmClient
                     var capturedAiSettings = aiSettings;
                     Task.Run(async () =>
                     {
@@ -4421,7 +4425,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                                                 }
                                             }
 
-                                            // Reconstruction failed — strip placeholders, use plain text
+                                            // Reconstruction failed – strip placeholders, use plain text
                                             translation = SegmentTagHandler.StripTagPlaceholders(translation);
                                         }
 
@@ -4808,7 +4812,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                 foreach (var msg in history)
                     _control.Value.AddMessage(msg);
             }
-            catch { /* ignore load failures — start with empty history */ }
+            catch { /* ignore load failures – start with empty history */ }
         }
 
         private string BuildLangPairString()

@@ -235,7 +235,7 @@ namespace Supervertaler.Trados
 
         private void OnNavigateRequested(object sender, NavigateToSegmentEventArgs e)
         {
-            // Must run on the UI thread — same pattern as AiAssistantViewPart.OnNavigateToSegment
+            // Must run on the UI thread – same pattern as AiAssistantViewPart.OnNavigateToSegment
             SafeInvoke(() =>
             {
                 if (_activeDocument == null || _editorController == null)

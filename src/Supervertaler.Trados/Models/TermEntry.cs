@@ -39,7 +39,7 @@ namespace Supervertaler.Trados.Models
         public bool IsNonTranslatable { get; set; }
 
         /// <summary>
-        /// Client code — a short identifier for the client this term belongs to
+        /// Client code – a short identifier for the client this term belongs to
         /// (e.g. "ACME", "GLOBEX"). Used to filter KB context and match
         /// SuperMemory client profiles. Stored in the termbase_terms table.
         /// </summary>
@@ -48,7 +48,7 @@ namespace Supervertaler.Trados.Models
         /// <summary>
         /// Abbreviated form(s) of the source term (e.g., "GC" for "gas chromatography").
         /// Multiple variants can be pipe-separated: "GC|G.C.|gc".
-        /// Each variant is indexed for matching — if any variant appears in a segment,
+        /// Each variant is indexed for matching – if any variant appears in a segment,
         /// TermLens will show the abbreviation chip with the full term in the +N tooltip.
         /// </summary>
         public string SourceAbbreviation { get; set; }
@@ -95,12 +95,12 @@ namespace Supervertaler.Trados.Models
         public List<string> TargetSynonyms { get; set; } = new List<string>();
 
         /// <summary>
-        /// Rich synonym entries (source language) — only populated by the editor.
+        /// Rich synonym entries (source language) – only populated by the editor.
         /// </summary>
         public List<SynonymEntry> SourceSynonyms { get; set; } = new List<SynonymEntry>();
 
         /// <summary>
-        /// Rich synonym entries (target language) — only populated by the editor.
+        /// Rich synonym entries (target language) – only populated by the editor.
         /// </summary>
         public List<SynonymEntry> TargetSynonymEntries { get; set; } = new List<SynonymEntry>();
     }
@@ -117,7 +117,7 @@ namespace Supervertaler.Trados.Models
     }
 
     /// <summary>
-    /// A token in the source segment — either a matched term or a plain word.
+    /// A token in the source segment – either a matched term or a plain word.
     /// </summary>
     public class SegmentToken
     {

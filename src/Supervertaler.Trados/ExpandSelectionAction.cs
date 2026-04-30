@@ -109,7 +109,7 @@ namespace Supervertaler.Trados
             }
             catch
             {
-                // Silently handle — selection manipulation may fail
+                // Silently handle – selection manipulation may fail
             }
         }
     }

@@ -15,11 +15,11 @@ namespace Supervertaler.Trados.Licensing
     /// The single source of truth for whether features should be enabled.
     ///
     /// Uses the Lemon Squeezy License API:
-    ///   - POST /v1/licenses/activate   — activate a key on this machine
-    ///   - POST /v1/licenses/validate   — check if a key is still valid
-    ///   - POST /v1/licenses/deactivate — release this machine's activation
+    ///   - POST /v1/licenses/activate   – activate a key on this machine
+    ///   - POST /v1/licenses/validate   – check if a key is still valid
+    ///   - POST /v1/licenses/deactivate – release this machine's activation
     ///
-    /// No auth header required — these endpoints only need the license key.
+    /// No auth header required – these endpoints only need the license key.
     /// </summary>
     public sealed class LicenseManager
     {
@@ -37,7 +37,7 @@ namespace Supervertaler.Trados.Licensing
         private const int TrialDays = LicenseInfo.TrialDays;
 
         /// <summary>
-        /// Lemon Squeezy variant names — must match exactly what's configured
+        /// Lemon Squeezy variant names – must match exactly what's configured
         /// in the Lemon Squeezy dashboard.
         /// </summary>
         private const string VariantTier1 = "TermLens";
@@ -81,7 +81,7 @@ namespace Supervertaler.Trados.Licensing
             }
         }
 
-        /// <summary>True if the user has an active license or trial — all features unlocked.</summary>
+        /// <summary>True if the user has an active license or trial – all features unlocked.</summary>
         public bool IsLicensed => CurrentTier != LicenseTier.None;
 
         /// <summary>Backward-compatible alias for IsLicensed. All paid tiers now grant full access.</summary>
@@ -99,7 +99,7 @@ namespace Supervertaler.Trados.Licensing
         /// <summary>Whether the user is currently on a trial (no license key entered).</summary>
         public bool IsOnTrial => CurrentTier == LicenseTier.Trial;
 
-        /// <summary>The variant name from Lemon Squeezy for display (legacy — all variants now grant full access).</summary>
+        /// <summary>The variant name from Lemon Squeezy for display (legacy – all variants now grant full access).</summary>
         public string VariantName => _info?.VariantName ?? "";
 
         /// <summary>The license status string ("active", "expired", etc.).</summary>
@@ -182,7 +182,7 @@ namespace Supervertaler.Trados.Licensing
                     return (true, "Licence activated successfully.");
                 }
 
-                // Activation failed — return the error from Lemon Squeezy
+                // Activation failed – return the error from Lemon Squeezy
                 return (false, result.Error ?? "Activation failed. Please check your licence key.");
             }
             catch (HttpRequestException ex)
@@ -219,7 +219,7 @@ namespace Supervertaler.Trados.Licensing
             }
             catch
             {
-                // Network error — still clear local state
+                // Network error – still clear local state
             }
 
             lock (_lock)
@@ -277,7 +277,7 @@ namespace Supervertaler.Trados.Licensing
             }
             catch (HttpRequestException)
             {
-                // Network error — offline mode, trust cached state
+                // Network error – offline mode, trust cached state
                 return (false, "Could not reach the licence server. Using cached licence state.");
             }
             catch (Exception ex)
@@ -312,7 +312,7 @@ namespace Supervertaler.Trados.Licensing
 
         private bool IsStatusActive()
         {
-            // Treat null/empty as active — the activation succeeded (we have an instance ID)
+            // Treat null/empty as active – the activation succeeded (we have an instance ID)
             // but the Lemon Squeezy response may not have included a status field (e.g. API
             // was down or returned an unexpected response format during activation).
             if (string.IsNullOrEmpty(_info.Status))

@@ -28,7 +28,7 @@ The panel docks at the bottom of the editor by default, but you can drag it anyw
 **Quick search from the editor:** Select a word or phrase in the source or target segment, then press **Alt+S** (or right-click > **SuperSearch**). The selected text is automatically entered in the search box and the search runs immediately.
 {% endhint %}
 
-<figure><img src=".gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
 
 ## Searching
 

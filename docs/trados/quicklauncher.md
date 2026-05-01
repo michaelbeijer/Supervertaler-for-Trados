@@ -1,17 +1,19 @@
+# QuickLauncher
+
 {% hint style="info" %}
 You are viewing help for **Supervertaler for Trados** – the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://supervertaler.gitbook.io/help/workbench/).
 {% endhint %}
 
 QuickLauncher gives you one-click access to your most-used AI prompts directly from the Trados editor, without switching panels or typing anything.
 
-## How it works
+### How it works
 
 1. **Right-click** anywhere in the editor (or press `Ctrl+Q`)
 2. Click **QuickLauncher** in the context menu
 3. Select a prompt from the list
 4. The prompt is filled in with the current segment context and submitted to the Supervertaler Assistant chat
 
-<figure><img src=".gitbook/assets/Supervertaler-QuickLauncher.png" alt="The QuickLauncher context menu showing folder sections and prompt shortcuts"><figcaption><p>The QuickLauncher context menu with folder sections and keyboard shortcuts.</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/Supervertaler-QuickLauncher.png" alt="The QuickLauncher context menu showing folder sections and prompt shortcuts"><figcaption><p>The QuickLauncher context menu with folder sections and keyboard shortcuts.</p></figcaption></figure>
 
 {% hint style="info" %}
 The menu heading **Supervertaler QuickLauncher** is clickable – click it to open **Settings → Prompts**, where you can view, edit, and organise your QuickLauncher prompts.
@@ -19,48 +21,48 @@ The menu heading **Supervertaler QuickLauncher** is clickable – click it to op
 
 The expanded prompt appears as a user message bubble in the **Supervertaler Assistant** chat panel, and the AI response follows immediately below it. The conversation continues from there – you can ask follow-up questions in the chat input as normal.
 
-## Keyboard shortcut
+### Keyboard shortcut
 
-| Shortcut (Windows) | Shortcut (Mac) | Action |
-|---------------------|----------------|--------|
-| `Ctrl+Q` | `Control+Q` | Open QuickLauncher prompt menu |
+| Shortcut (Windows) | Shortcut (Mac) | Action                         |
+| ------------------ | -------------- | ------------------------------ |
+| `Ctrl+Q`           | `Control+Q`    | Open QuickLauncher prompt menu |
 
 {% hint style="warning" %}
 Trados Studio assigns `Ctrl+Q` to **View Internally Source** by default. To use `Ctrl+Q` for QuickLauncher, go to **File → Options → Keyboard Shortcuts**, search for **View Internally Source**, and remove or reassign its shortcut.
 {% endhint %}
 
-## Prompt variables
+### Prompt variables
 
 QuickLauncher prompts have access to the full segment and project context at the moment you trigger them.
 
-### Language variables
+#### Language variables
 
-| Variable | Replaced with | Example |
-|----------|---------------|---------|
-| `{{SOURCE_LANGUAGE}}` | Source language name, including locale | `Dutch (Belgium)` |
+| Variable              | Replaced with                          | Example                   |
+| --------------------- | -------------------------------------- | ------------------------- |
+| `{{SOURCE_LANGUAGE}}` | Source language name, including locale | `Dutch (Belgium)`         |
 | `{{TARGET_LANGUAGE}}` | Target language name, including locale | `English (United States)` |
 
-### Segment variables
+#### Segment variables
 
-| Variable | Replaced with | Example |
-|----------|---------------|---------|
-| `{{SOURCE_SEGMENT}}` | Full text of the **active source segment** | `De uitvinding heeft betrekking op...` |
-| `{{TARGET_SEGMENT}}` | Full text of the **active target segment** (your translation so far) | `The invention relates to...` |
-| `{{SELECTION}}` | Text currently **selected** in the editor | `werkwijze` |
+| Variable             | Replaced with                                                        | Example                                |
+| -------------------- | -------------------------------------------------------------------- | -------------------------------------- |
+| `{{SOURCE_SEGMENT}}` | Full text of the **active source segment**                           | `De uitvinding heeft betrekking op...` |
+| `{{TARGET_SEGMENT}}` | Full text of the **active target segment** (your translation so far) | `The invention relates to...`          |
+| `{{SELECTION}}`      | Text currently **selected** in the editor                            | `werkwijze`                            |
 
 {% hint style="info" %}
 **Segment vs selection:** `{{SOURCE_SEGMENT}}` and `{{TARGET_SEGMENT}}` always give the **entire active segment**. `{{SELECTION}}` gives only the **highlighted portion** – useful for term lookups or focused questions. If nothing is selected, `{{SELECTION}}` is an empty string.
 {% endhint %}
 
-### Project variables
+#### Project variables
 
-| Variable | Replaced with |
-|----------|---------------|
-| `{{PROJECT_NAME}}` | Trados project name (e.g. `Patent_NL_EN_2026`) |
-| `{{DOCUMENT_NAME}}` | Active file name (e.g. `source_document.docx`) |
+| Variable                   | Replaced with                                                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `{{PROJECT_NAME}}`         | Trados project name (e.g. `Patent_NL_EN_2026`)                                                                                           |
+| `{{DOCUMENT_NAME}}`        | Active file name (e.g. `source_document.docx`)                                                                                           |
 | `{{SURROUNDING_SEGMENTS}}` | N source segments before and after the active segment, with their actual Trados segment numbers and the active segment marked `← ACTIVE` |
-| `{{PROJECT}}` | All source segments in the active document, numbered with their actual Trados segment numbers |
-| `{{TM_MATCHES}}` | Translation memory fuzzy matches (≥70%) for the active segment, showing match percentage, source, and target text |
+| `{{PROJECT}}`              | All source segments in the active document, numbered with their actual Trados segment numbers                                            |
+| `{{TM_MATCHES}}`           | Translation memory fuzzy matches (≥70%) for the active segment, showing match percentage, source, and target text                        |
 
 **`{{SURROUNDING_SEGMENTS}}` example output** (with N = 2):
 
@@ -97,7 +99,7 @@ In a **multi-file project**, a file header is inserted at each boundary (because
 To keep the chat history readable, the chat bubble shows a compact summary (e.g. `[source document – 47 segments]`) instead of the full source text. The complete document is still sent to the AI.
 {% endhint %}
 
-### Example: explain a selected term
+#### Example: explain a selected term
 
 Select a word in the source segment, press `Ctrl+Q`, and choose a prompt like this:
 
@@ -111,7 +113,7 @@ considering the full segment context below:
 {{SOURCE_SEGMENT}}
 ```
 
-### Example: assess the current translation
+#### Example: assess the current translation
 
 ```
 Source ({{SOURCE_LANGUAGE}}):
@@ -124,10 +126,9 @@ Assess how I translated the current segment. Point out any inaccuracies,
 awkward phrasing, or terminology issues, and suggest improvements.
 ```
 
-### Example: translate a selected term using surrounding context
+#### Example: translate a selected term using surrounding context
 
-Uses `{{SELECTION}}` together with `{{SURROUNDING_SEGMENTS}}` so the AI sees the passage
-around the active segment, not just the active segment itself:
+Uses `{{SELECTION}}` together with `{{SURROUNDING_SEGMENTS}}` so the AI sees the passage around the active segment, not just the active segment itself:
 
 ```
 I am translating a {{SOURCE_LANGUAGE}} patent into {{TARGET_LANGUAGE}}.
@@ -142,11 +143,9 @@ Suggest the best {{TARGET_LANGUAGE}} translation for "{{SELECTION}}" given the
 surrounding context. Give a brief explanation of your reasoning.
 ```
 
-### Example: full-document term query
+#### Example: full-document term query
 
-Uses `{{PROJECT}}` to give the AI the complete source text. Reserve this for high-stakes
-queries where full document context matters, such as a key term that appears in multiple
-places with different nuances:
+Uses `{{PROJECT}}` to give the AI the complete source text. Reserve this for high-stakes queries where full document context matters, such as a key term that appears in multiple places with different nuances:
 
 ```
 I am translating a {{SOURCE_LANGUAGE}} patent ({{DOCUMENT_NAME}}) into {{TARGET_LANGUAGE}}.
@@ -161,10 +160,9 @@ translation for "{{SELECTION}}"? Consider all occurrences in context and note an
 variation in meaning between them.
 ```
 
-### Example: check specific segments by number
+#### Example: check specific segments by number
 
-After using `{{PROJECT}}` the AI knows the segment numbers, so you can follow up in the
-chat – or build a prompt that asks about specific segments from the start:
+After using `{{PROJECT}}` the AI knows the segment numbers, so you can follow up in the chat – or build a prompt that asks about specific segments from the start:
 
 ```
 I am translating a {{SOURCE_LANGUAGE}} patent into {{TARGET_LANGUAGE}}.
@@ -181,7 +179,7 @@ Do you think these translations are accurate and consistent with the terminology
 used elsewhere in the document?
 ```
 
-### Example: translate using TM fuzzy matches
+#### Example: translate using TM fuzzy matches
 
 Uses `{{TM_MATCHES}}` to give the AI any high fuzzy matches from the translation memory, so it can leverage existing translations as a starting point:
 
@@ -204,7 +202,7 @@ translation of the source segment – do not simply copy a fuzzy match.
 
 The plugin fills in all variables and sends the expanded prompt straight to the AI.
 
-## Folder display mode
+### Folder display mode
 
 By default, subfolders in the QuickLauncher menu appear as **expandable submenus** (hover to open). You can change any folder to display as a **flat section** instead – its prompts appear directly in the main menu under a bold header, with separators between sections.
 
@@ -216,19 +214,19 @@ To toggle the display mode:
 
 This setting is per-folder, so you can mix styles – for example, keep a large folder as an expandable submenu while showing a small one as a flat section.
 
-## Setting up QuickLauncher prompts
+### Setting up QuickLauncher prompts
 
 Set `category: QuickLauncher` in the YAML frontmatter, or place the file in a folder called `QuickLauncher` inside your `prompt_library`. See [Prompts → Marking a prompt as a QuickLauncher shortcut](settings/prompts.md#marking-a-prompt-as-a-quicklauncher-shortcut) for full details.
 
-## Shared with Supervertaler Workbench
+### Shared with Supervertaler Workbench
 
 QuickLauncher prompts live in the shared `prompt_library` folder used by both Supervertaler for Trados and Supervertaler Workbench. Any prompt you create in one application is immediately available in the other.
 
----
+***
 
-## See Also
+### See Also
 
-- [Text Transforms](text-transforms.md)
-- [Prompts](settings/prompts.md)
-- [Supervertaler Assistant](ai-assistant.md)
-- [Keyboard Shortcuts](keyboard-shortcuts.md)
+* [Text Transforms](text-transforms.md)
+* [Prompts](settings/prompts.md)
+* [Supervertaler Assistant](ai-assistant.md)
+* [Keyboard Shortcuts](keyboard-shortcuts.md)

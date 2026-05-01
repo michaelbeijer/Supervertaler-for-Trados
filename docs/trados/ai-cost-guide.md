@@ -52,7 +52,7 @@ These are estimates for a representative document. Actual usage varies with segm
 | **Gemini 2.5 Pro**                 | $0.24     | $0.26     | $0.03      |
 | **Gemini 3.1 Pro** (preview)       | $0.35     | $0.38     | $0.04      |
 | **Gemma 4 31B**                    | $0.02     | $0.05     | < $0.01    |
-| **Gemma 4 26B MoE**               | $0.02     | $0.05     | < $0.01    |
+| **Gemma 4 26B MoE**                | $0.02     | $0.05     | < $0.01    |
 
 #### Grok (xAI)
 
@@ -74,17 +74,17 @@ These are estimates for a representative document. Actual usage varies with segm
 
 [OpenRouter](https://openrouter.ai) lets you access models from all major providers with a single API key. Prices are the same as the provider's own rates plus a **5.5% platform fee**. The curated models in the Supervertaler dropdown include:
 
-| Model                                | Translate | Proofread | AutoPrompt |
-| ------------------------------------ | --------- | --------- | ---------- |
-| **Claude Sonnet 4.6** (recommended)  | ~$0.53    | ~$0.57    | ~$0.06     |
-| **Claude Opus 4.6**                  | ~$0.88    | ~$0.95    | ~$0.11     |
-| **GPT-5.4**                          | ~$1.57    | ~$1.73    | ~$0.17     |
-| **GPT-5.4 Mini**                     | ~$0.14    | ~$0.16    | ~$0.02     |
-| **Gemini 3.1 Pro**                   | ~$0.37    | ~$0.40    | ~$0.04     |
-| **Gemini 3 Flash**                   | ~$0.06    | ~$0.07    | ~$0.01     |
-| **Gemma 4 31B**                      | ~$0.02    | ~$0.05    | < $0.01    |
-| **Gemma 4 26B MoE**                 | ~$0.02    | ~$0.05    | < $0.01    |
-| **Mistral Small 4**                  | ~$0.01    | ~$0.01    | < $0.01    |
+| Model                               | Translate | Proofread | AutoPrompt |
+| ----------------------------------- | --------- | --------- | ---------- |
+| **Claude Sonnet 4.6** (recommended) | \~$0.53   | \~$0.57   | \~$0.06    |
+| **Claude Opus 4.6**                 | \~$0.88   | \~$0.95   | \~$0.11    |
+| **GPT-5.4**                         | \~$1.57   | \~$1.73   | \~$0.17    |
+| **GPT-5.4 Mini**                    | \~$0.14   | \~$0.16   | \~$0.02    |
+| **Gemini 3.1 Pro**                  | \~$0.37   | \~$0.40   | \~$0.04    |
+| **Gemini 3 Flash**                  | \~$0.06   | \~$0.07   | \~$0.01    |
+| **Gemma 4 31B**                     | \~$0.02   | \~$0.05   | < $0.01    |
+| **Gemma 4 26B MoE**                 | \~$0.02   | \~$0.05   | < $0.01    |
+| **Mistral Small 4**                 | \~$0.01   | \~$0.01   | < $0.01    |
 | **Qwen 3.6 Plus (Free)**            | Free      | Free      | Free       |
 
 {% hint style="info" %}
@@ -162,7 +162,7 @@ Regular chat messages include recent conversation history so the AI can follow y
 
 If a request is estimated to cost more than $0.50 in input tokens, a confirmation dialogueue appears showing the estimated token count and cost. You can cancel before the expensive request is sent.
 
-<figure><img src=".gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 **Keep an eye on the cost indicators.** Every AI response in the chat shows the estimated token count and cost. You can also review all prompts and their costs in the **Reports** tab.

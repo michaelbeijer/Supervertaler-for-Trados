@@ -6,7 +6,7 @@ You are viewing help for **Supervertaler for Trados** -- the Trados Studio plugi
 
 The Supervertaler Assistant is a conversational chat panel that runs inside Trados Studio as a separate dockable panel. It is context-aware: it automatically includes your current source and target text, matched terminology, and TM matches in every request, so the AI can give you informed answers about the segment you are working on.
 
-<figure><img src=".gitbook/assets/Sv_Supervertaler-Assistant.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Sv_Supervertaler-Assistant.png" alt=""><figcaption></figcaption></figure>
 
 ## Opening the Panel
 
@@ -48,24 +48,24 @@ Chat history is stored in `~/Supervertaler/trados/chat_history.json`. It is a si
 
 Right-click any assistant response bubble to access:
 
-| Action              | Description                                                                 |
-| ------------------- | --------------------------------------------------------------------------- |
-| **Copy**            | Copies the raw Markdown to the clipboard, preserving tables and formatting  |
-| **Apply to target** | Inserts the plain text (Markdown stripped) into the active target segment    |
-| **Save as Prompt...** | Saves the response as a reusable prompt template                          |
+| Action                  | Description                                                                                                                                                                                                                |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Copy**                | Copies the raw Markdown to the clipboard, preserving tables and formatting                                                                                                                                                 |
+| **Apply to target**     | Inserts the plain text (Markdown stripped) into the active target segment                                                                                                                                                  |
+| **Save as Prompt...**   | Saves the response as a reusable prompt template                                                                                                                                                                           |
 | **Save to memory bank** | Saves the question + response as an inbox note in the active memory bank so useful answers are not lost. Run [Process Inbox](ai-assistant/super-memory/process-inbox.md) afterwards to compile it into the knowledge base. |
 
 If you select text within a bubble before right-clicking, **Copy** and **Apply to target** operate on the selection only.
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| **[Context Awareness](ai-assistant/context-awareness.md)** | Automatic project, segment, terminology, TM, and document context in every request |
-| **[File Attachments](ai-assistant/file-attachments.md)** | Attach images and documents (PDF, DOCX, XLSX, TMX, etc.) for additional context |
-| **[Studio Tools](ai-assistant/studio-tools.md)** | Query your Trados Studio projects, TMs, termbases, and statistics using natural language |
-| **[Incognito Mode](ai-assistant/incognito-mode.md)** | Anonymise project names, file paths, and personal data in AI responses for safe sharing |
-| **[Providers and Models](ai-assistant/providers.md)** | Supports 7 AI providers including OpenAI, Claude, Gemini, Grok, Mistral, Ollama, and custom endpoints |
+| Feature                                                    | Description                                                                                           |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| [**Context Awareness**](ai-assistant/context-awareness.md) | Automatic project, segment, terminology, TM, and document context in every request                    |
+| [**File Attachments**](ai-assistant/file-attachments.md)   | Attach images and documents (PDF, DOCX, XLSX, TMX, etc.) for additional context                       |
+| [**Studio Tools**](ai-assistant/studio-tools.md)           | Query your Trados Studio projects, TMs, termbases, and statistics using natural language              |
+| [**Incognito Mode**](ai-assistant/incognito-mode.md)       | Anonymise project names, file paths, and personal data in AI responses for safe sharing               |
+| [**Providers and Models**](ai-assistant/providers.md)      | Supports 7 AI providers including OpenAI, Claude, Gemini, Grok, Mistral, Ollama, and custom endpoints |
 
 ## See Also
 

@@ -6,7 +6,7 @@ You are viewing help for **Supervertaler for Trados** – the Trados Studio plug
 
 TermLens is an inline terminology display that shows the source text of the current segment word by word, with glossary translations directly underneath each matched term. It updates automatically when you navigate to a new segment.
 
-<figure><img src=".gitbook/assets/Sv_TermLens.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Sv_TermLens.png" alt=""><figcaption></figcaption></figure>
 
 ### How It Works
 
@@ -17,7 +17,7 @@ When you select a segment in the Trados editor, TermLens analyses the source tex
 
 This gives you an at-a-glance overview of every term in the segment that has a termbase entry – without hovering or clicking anything.
 
-<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Colour Coding
 
@@ -54,7 +54,7 @@ Both indicators can appear simultaneously. Hover over any term chip to see an in
 
 The **Notes** and **Definition** fields in the term popup support Markdown formatting. If the content contains Markdown syntax (tables, bold, italic, headings, bullet lists, code blocks), it is rendered with proper formatting instead of plain text. This is especially useful when AI-generated term notes include structured data like translation tables.
 
-<figure><img src=".gitbook/assets/Markdown formatting rendered in TermLens term popup.png" alt=""><figcaption><p>Markdown formatting rendered in TermLens term popup</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/Markdown formatting rendered in TermLens term popup.png" alt=""><figcaption><p>Markdown formatting rendered in TermLens term popup</p></figcaption></figure>
 
 #### Resizable Popup
 
@@ -91,7 +91,7 @@ Tap **Ctrl** (press and release without any other key) to open the [**TermLens p
 
 For segments with many matches and when a sortable list view is preferable, press **Ctrl+Shift+P** to open the [**Term Picker**](termlens/term-picker.md) dialogue. It shows all matched terms in a searchable list and lets you insert any term with a double-click or Enter.
 
-<figure><img src=".gitbook/assets/Sv_Term-Picker.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Sv_Term-Picker.png" alt=""><figcaption></figcaption></figure>
 
 ### Right-Click Context Menu
 

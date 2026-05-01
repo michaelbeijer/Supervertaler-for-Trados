@@ -1,7 +1,6 @@
 # Table of contents
 
-* [Supervertaler – Welcome](README.md)
-
+* [Welcome to Supervertaler Help!](README.md)
 
 ## 🧩 Get Started
 
@@ -67,7 +66,6 @@
 * [Troubleshooting](trados/troubleshooting.md)
 * [Support & Community](trados/support.md)
 * [Privacy Policy](trados/privacy.md)
-
 
 ## 🖥️ Get Started
 

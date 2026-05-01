@@ -1,10 +1,12 @@
+# Installation
+
 {% hint style="info" %}
 You are viewing help for **Supervertaler for Trados** – the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://supervertaler.gitbook.io/help/workbench/).
 {% endhint %}
 
-## Installation
+### Installation
 
-### Download
+#### Download
 
 Install Supervertaler for Trados from the [RWS App Store](https://appstore.rws.com/plugin/432) – it's the only supported install channel. Every published build is RWS-signed, which avoids the "Unsigned Trados Studio Plug-in Found" warning that would otherwise appear when Trados loads a plugin from a different source.
 
@@ -14,18 +16,18 @@ You can either install from inside Trados Studio (**Add-Ins > RWS App Store**, s
 The [GitHub repository](https://github.com/Supervertaler/Supervertaler-for-Trados) is for source-code review, release notes, and issue tracking only. GitHub releases no longer include a `.sdlplugin` binary attachment – the App Store is the single source of truth for the plugin binary.
 {% endhint %}
 
-### Install
+#### Install
 
 1. **Close Trados Studio** if it is running
 2. **Double-click** the downloaded `Supervertaler for Trados.sdlplugin` file
 3. The Trados Plugin Installer opens – select your Trados Studio version and choose an installation location:
 
-<figure><img src=".gitbook/assets/Trados-plugin-installation-dialogue.png" alt="Trados Plugin Installer showing version selection and installation location options"><figcaption><p>The Trados Plugin Installer lets you choose which Trados version to install for and where to place the plugin.</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/Trados-plugin-installation-dialogue.png" alt="Trados Plugin Installer showing version selection and installation location options"><figcaption><p>The Trados Plugin Installer lets you choose which Trados version to install for and where to place the plugin.</p></figcaption></figure>
 
 4. Click **Next**, then **Finish** to complete the installation
 5. **Start Trados Studio** – the plugin loads automatically
 
-#### Installation locations
+**Installation locations**
 
 The installer offers three options for where to place the plugin. Each option stores the plugin in a different Windows folder, which determines who can use it and whether it follows you to other computers.
 
@@ -39,7 +41,7 @@ The installer offers three options for where to place the plugin. Each option st
 **Which should I choose?** **Just leave it on the default** ("All your domain computers") and click Next. The dialogue always opens with this option pre-selected and it works correctly for everyone. On a single-PC personal install it behaves the same as "This computer for me only" in practical terms (the plugin loads identically) – the only real difference is the install folder (`Roaming` vs `Local`), which only matters in environments that sync the Roaming profile across machines. **All three options work fine** – pick a different one only if you have a specific reason. As long as the **"Remove this plugin from all installation folders"** checkbox stays ticked (it is by default), any orphan-copy issues from previous installs are cleaned up automatically, regardless of which option you pick.
 {% endhint %}
 
-#### "Remove this plugin from all installation folders" checkbox
+**"Remove this plugin from all installation folders" checkbox**
 
 The Trados Plugin Installer shows a checkbox below the install-scope radio buttons:
 
@@ -47,18 +49,18 @@ The Trados Plugin Installer shows a checkbox below the install-scope radio butto
 
 It is ticked by default. **Always leave it ticked.** Before placing the fresh install in the location you've selected, the installer sweeps all three locations (Roaming, Local, ProgramData) and removes any existing Supervertaler copies. On a first-time install there's nothing to remove and the checkbox is a harmless no-op; on an upgrade or after a previous manual install, it prevents the multi-scope-orphan problem where Trados ends up with two copies of the plugin in different folders and loads the wrong one on next start.
 
-### Verify Installation
+#### Verify Installation
 
 After restarting Trados Studio, open a project in the Editor view. You should see:
 
 * **TermLens panel** – docked above the editor area (or in the bottom panel area)
 * **Supervertaler Assistant panel** – docked on the right side
 
-#### If the TermLens panel is not visible
+**If the TermLens panel is not visible**
 
 Go to **View > TermLens** to show the panel.
 
-#### If the Supervertaler Assistant panel is not visible
+**If the Supervertaler Assistant panel is not visible**
 
 Go to **View > Supervertaler Assistant** to show the panel.
 
@@ -66,7 +68,7 @@ Go to **View > Supervertaler Assistant** to show the panel.
 Both panels are standard Trados dockable panels. You can drag them to any docking position (left, right, top, bottom, floating) or move them to a second monitor. Trados remembers their position between sessions.
 {% endhint %}
 
-### Running on a Mac (Parallels)
+#### Running on a Mac (Parallels)
 
 If you are running Trados Studio inside **Parallels Desktop** on a Mac, there is one important rule for the first-run setup:
 
@@ -80,20 +82,20 @@ Supervertaler stores termbases as SQLite databases, and SQLite requires a local 
 
 The plugin automatically detects Parallels and shows a warning if you select a Mac-side path during setup.
 
-#### Sharing termbases between Workbench and the Trados plugin on a Mac
+**Sharing termbases between Workbench and the Trados plugin on a Mac**
 
 On Windows, both Supervertaler Workbench and the Trados plugin can point to the same shared data folder and work from the same `.db` termbase file simultaneously.
 
 On a Mac with Parallels, this is **not possible** because the two products run on different filesystems:
 
-- **Supervertaler Workbench** runs natively on macOS – its data folder is on the Mac filesystem (e.g., `/Users/<username>/Supervertaler/`)
-- **Supervertaler for Trados** runs inside Parallels (Windows) – its data folder must be on the Windows filesystem (e.g., `C:\Users\<username>\Supervertaler\`)
+* **Supervertaler Workbench** runs natively on macOS – its data folder is on the Mac filesystem (e.g., `/Users/<username>/Supervertaler/`)
+* **Supervertaler for Trados** runs inside Parallels (Windows) – its data folder must be on the Windows filesystem (e.g., `C:\Users\<username>\Supervertaler\`)
 
 The Trados plugin cannot reliably use a Mac-side path (`\\Mac\Home\...`) due to SQLite limitations on virtual network shares. To keep your termbases in sync between the two products on a Mac, copy the `.db` file from one side to the other after making changes. This is a limitation of the Parallels virtualisation layer, not of the termbase format.
 
 ***
 
-### Updating
+#### Updating
 
 When a new version is published to the App Store, Supervertaler shows an **Update Available** dialogue on the next Trados startup, with the version difference and an **Install Update** button.
 
@@ -102,7 +104,7 @@ When a new version is published to the App Store, Supervertaler shows an **Updat
 
 Your settings, termbases, prompts, memory banks, and licence key are all preserved across updates – no need to uninstall first.
 
-#### Manual update from the App Store website
+**Manual update from the App Store website**
 
 If you've dismissed the in-plugin dialogue (for example, by clicking **Remind Me Later**) and want to update straight away, you can install manually from the App Store website:
 
@@ -115,7 +117,7 @@ If you've dismissed the in-plugin dialogue (for example, by clicking **Remind Me
 Trados Studio **must be fully closed** before installing or updating manually. If Trados is still running, the installer may silently fail because the plugin files are locked.
 {% endhint %}
 
-### Troubleshooting: old version still showing after update
+#### Troubleshooting: old version still showing after update
 
 {% hint style="info" %}
 From **v4.19.24** onwards the in-plugin updater is install-scope aware – it writes updates back to the same scope (Roaming, Local, or ProgramData) as the original install, so this scenario does not occur for automatic updates. The steps below remain useful if you have inherited a multi-scope install from an earlier version, or have placed `.sdlplugin` files manually in different locations.
@@ -139,7 +141,7 @@ If Trados still loads an older version of the plugin after installing a new one,
 
 After removing the old files, double-click the new `.sdlplugin` to install it fresh, then start Trados.
 
-### Uninstalling
+#### Uninstalling
 
 To remove the plugin:
 
@@ -151,6 +153,6 @@ To remove the plugin:
 
 ***
 
-### Next Steps
+#### Next Steps
 
 * [Getting Started](getting-started.md) – set up your first termbase and API key

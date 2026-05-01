@@ -848,9 +848,24 @@ namespace Supervertaler.Trados
         {
             try
             {
-                if (_sidekickBridge != null) return;
-                if (!LicenseManager.Instance.HasAssistantAccess) return;
-                if (_settings?.AiSettings?.SidekickBridgeEnabled == false) return;
+                BridgeLog.Write("StartSidekickBridge() called");
+
+                if (_sidekickBridge != null)
+                {
+                    BridgeLog.Write("guard: bridge already non-null – no-op");
+                    return;
+                }
+                if (!LicenseManager.Instance.HasAssistantAccess)
+                {
+                    BridgeLog.Write("guard: HasAssistantAccess=false – bridge skipped");
+                    return;
+                }
+                if (_settings?.AiSettings?.SidekickBridgeEnabled == false)
+                {
+                    BridgeLog.Write("guard: AiSettings.SidekickBridgeEnabled=false – bridge skipped");
+                    return;
+                }
+                BridgeLog.Write($"guards passed: tier={LicenseManager.Instance.CurrentTier}, enabled={_settings?.AiSettings?.SidekickBridgeEnabled}");
 
                 _sidekickBridge = new SidekickBridge(
                     getContext: BuildBridgeContextSnapshot,
@@ -859,7 +874,7 @@ namespace Supervertaler.Trados
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[SidekickBridge] start failed: {ex.Message}");
+                BridgeLog.Write($"StartSidekickBridge() THREW: {ex.GetType().Name}: {ex.Message}\r\n{ex.StackTrace}");
                 _sidekickBridge = null;
             }
         }

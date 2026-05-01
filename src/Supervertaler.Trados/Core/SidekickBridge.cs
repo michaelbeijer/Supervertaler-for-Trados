@@ -11,6 +11,46 @@ using Supervertaler.Trados.Settings;
 
 namespace Supervertaler.Trados.Core
 {
+    /// <summary>
+    /// Append-only log file for the Sidekick Bridge, written to
+    /// <c>UserDataPath.TradosRuntimeDir\bridge.log</c>. Visible diagnostics so
+    /// users can tell whether the bridge actually started, what port it bound
+    /// to, and what went wrong if it didn't. Truncated on every plugin start
+    /// so the log doesn't grow without bound.
+    /// </summary>
+    internal static class BridgeLog
+    {
+        private static readonly object _lock = new object();
+        private static bool _truncatedThisSession;
+
+        public static void Write(string message)
+        {
+            try
+            {
+                lock (_lock)
+                {
+                    Directory.CreateDirectory(UserDataPath.TradosRuntimeDir);
+                    var logPath = Path.Combine(UserDataPath.TradosRuntimeDir, "bridge.log");
+                    var line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}\r\n";
+
+                    if (!_truncatedThisSession)
+                    {
+                        // Truncate on first write of this plugin session so the log
+                        // reflects only the current Trados run.
+                        File.WriteAllText(logPath,
+                            $"--- Bridge session started at {DateTime.Now:O} (PID {System.Diagnostics.Process.GetCurrentProcess().Id}) ---\r\n");
+                        _truncatedThisSession = true;
+                    }
+                    File.AppendAllText(logPath, line);
+                }
+            }
+            catch
+            {
+                // Logging must never break the caller.
+            }
+        }
+    }
+
     // ─── DataContract types for the bridge JSON wire format ──────────────────
     //
     // These mirror the in-Trados ChatContext shape the existing AI Assistant
@@ -162,8 +202,13 @@ namespace Supervertaler.Trados.Core
         /// </summary>
         public void Start()
         {
-            if (IsRunning) return;
+            if (IsRunning)
+            {
+                BridgeLog.Write("Start() called but bridge already running – no-op");
+                return;
+            }
 
+            BridgeLog.Write("Start() entered");
             _token = Guid.NewGuid().ToString("N");
 
             // HttpListener doesn't accept "port 0 = OS-pick" so we try a
@@ -179,22 +224,24 @@ namespace Supervertaler.Trados.Core
                     listener.Start();
                     _listener = listener;
                     _port = candidate;
+                    BridgeLog.Write($"HttpListener bound on port {candidate} (attempt {attempt + 1})");
                     break;
                 }
                 catch (HttpListenerException ex)
                 {
-                    Debug.WriteLine($"[SidekickBridge] port {candidate} in use ({ex.Message}); retrying");
+                    BridgeLog.Write($"port {candidate} bind failed: HttpListenerException code={ex.ErrorCode} message=\"{ex.Message}\"");
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"[SidekickBridge] failed to start listener: {ex.Message}");
-                    return;
+                    BridgeLog.Write($"port {candidate} bind failed: {ex.GetType().Name} message=\"{ex.Message}\"");
                 }
             }
 
             if (_listener == null)
             {
-                Debug.WriteLine("[SidekickBridge] no free port found after 16 attempts; bridge disabled this session");
+                BridgeLog.Write("FAILED: no free port could be bound after 16 attempts. " +
+                    "On Windows, HttpListener may need URL ACL registration for non-admin processes – see " +
+                    "`netsh http show urlacl`. Bridge disabled this session.");
                 return;
             }
 
@@ -205,16 +252,20 @@ namespace Supervertaler.Trados.Core
                 Name = "SidekickBridge"
             };
             _listenerThread.Start();
+            BridgeLog.Write("listener thread started");
 
             try
             {
                 WriteHandshakeFile();
+                BridgeLog.Write($"handshake file written at {UserDataPath.SidekickBridgeFile}");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[SidekickBridge] failed to write handshake file: {ex.Message}");
+                BridgeLog.Write($"FAILED to write handshake file: {ex.GetType().Name}: {ex.Message}");
                 // Bridge is still usable, just not discoverable – not fatal.
             }
+
+            BridgeLog.Write($"Start() complete. Bridge live on http://127.0.0.1:{_port}/ with token {_token.Substring(0, 8)}…");
         }
 
         public void Stop()
@@ -231,7 +282,7 @@ namespace Supervertaler.Trados.Core
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[SidekickBridge] failed to delete handshake file: {ex.Message}");
+                BridgeLog.Write($"[SidekickBridge] failed to delete handshake file: {ex.Message}");
             }
 
             // Don't Join the thread – HttpListener.Stop unblocks GetContext
@@ -269,7 +320,7 @@ namespace Supervertaler.Trados.Core
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"[SidekickBridge] GetContext failed: {ex.Message}");
+                    BridgeLog.Write($"[SidekickBridge] GetContext failed: {ex.Message}");
                     return;
                 }
 
@@ -279,7 +330,7 @@ namespace Supervertaler.Trados.Core
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"[SidekickBridge] HandleRequest threw: {ex.Message}");
+                    BridgeLog.Write($"[SidekickBridge] HandleRequest threw: {ex.Message}");
                     TryWriteError(context, 500, "internal error");
                 }
                 finally
@@ -342,7 +393,7 @@ namespace Supervertaler.Trados.Core
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[SidekickBridge] context provider threw: {ex.Message}");
+                BridgeLog.Write($"[SidekickBridge] context provider threw: {ex.Message}");
                 snapshot = new SidekickContextSnapshot { Available = false };
             }
 
@@ -426,7 +477,7 @@ namespace Supervertaler.Trados.Core
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[SidekickBridge] WriteJson failed: {ex.Message}");
+                BridgeLog.Write($"[SidekickBridge] WriteJson failed: {ex.Message}");
             }
         }
 

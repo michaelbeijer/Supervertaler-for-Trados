@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.19.50] – 2026-05-01
+
+### Diagnostics (Sidekick Bridge)
+
+- **Sidekick Bridge now writes a visible log file** at `~/Supervertaler/trados/runtime/bridge.log` recording every step of startup: which lifecycle gate was hit, whether `HasAssistantAccess` passed, each port-bind attempt and its outcome, the bound port number, and any exceptions with full type and message. The log is truncated on every plugin start so it always reflects the current Trados session. Useful for diagnosing why no `bridge.json` file appears – the most common cause on Windows is `HttpListener` requiring URL ACL registration for non-admin processes, which the log will now make obvious.
+
+---
+
 ## [4.19.49] – 2026-05-01
 
 ### Added (Sidekick Bridge – plugin half)

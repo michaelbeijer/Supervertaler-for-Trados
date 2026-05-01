@@ -62,6 +62,19 @@ namespace Supervertaler.Trados.Settings
         public int BatchSize { get; set; } = 20;
 
         /// <summary>
+        /// When true (default), the plugin starts a localhost-only HTTP bridge
+        /// (<see cref="Core.SidekickBridge"/>) that lets Supervertaler Workbench's
+        /// floating Sidekick Chat fetch the active project context and insert
+        /// translations back into the active Trados segment. Hidden setting –
+        /// no UI checkbox; advanced users can flip it off by editing settings.json
+        /// directly. The bridge only listens on 127.0.0.1, requires a per-session
+        /// auth token, and only starts when the user has Assistant access (paid
+        /// or trial).
+        /// </summary>
+        [DataMember(Name = "sidekickBridgeEnabled")]
+        public bool SidekickBridgeEnabled { get; set; } = true;
+
+        /// <summary>
         /// Relative path of the selected custom prompt from the prompt library.
         /// Empty string means no custom prompt (use default system prompt only).
         /// </summary>

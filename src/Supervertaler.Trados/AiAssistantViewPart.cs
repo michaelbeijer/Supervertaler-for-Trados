@@ -73,6 +73,12 @@ namespace Supervertaler.Trados
         private FileSystemWatcher _inboxWatcher;
         private bool _fullyInitialized;
 
+        // Localhost HTTP bridge for the Workbench Sidekick Chat. See
+        // Core/SidekickBridge.cs for protocol details. Started at the end of
+        // InitializeFullIfNeeded when the user has Assistant access AND the
+        // hidden setting AiSettings.SidekickBridgeEnabled is true.
+        private SidekickBridge _sidekickBridge;
+
         // Memory-bank reader (lazy: created once, cached for the session).
         // Cached against _kbReaderBankName so that switching the active memory
         // bank at runtime (Step 5 toolbar dropdown) forces a fresh reader on the
@@ -247,6 +253,7 @@ namespace Supervertaler.Trados
             RefreshMemoryBankDropdown();
             RefreshSuperMemoryInboxCount();
             StartInboxWatcher();
+            StartSidekickBridge();
 
             // Check the already-active bank at start-up too. If the user has
             // a bank (e.g. one created before template bundling shipped, or
@@ -823,6 +830,196 @@ namespace Supervertaler.Trados
             catch (Exception)
             {
                 // Editor may not allow insertion at this moment
+            }
+        }
+
+        // ─── Sidekick Bridge ─────────────────────────────────────────────
+        //
+        // The Sidekick Bridge (Core/SidekickBridge.cs) is a localhost-only
+        // HTTP listener that lets external Supervertaler clients – primarily
+        // the floating Sidekick Chat in Supervertaler Workbench – read the
+        // active Trados project context and insert translations back into
+        // the editor. The bridge runs in this ViewPart's lifecycle because
+        // we already hold the references to _activeDocument, _settings, and
+        // the helpers (GetSurroundingSegments, GetProjectName, etc.) the
+        // bridge needs to build its context snapshot.
+
+        private void StartSidekickBridge()
+        {
+            try
+            {
+                if (_sidekickBridge != null) return;
+                if (!LicenseManager.Instance.HasAssistantAccess) return;
+                if (_settings?.AiSettings?.SidekickBridgeEnabled == false) return;
+
+                _sidekickBridge = new SidekickBridge(
+                    getContext: BuildBridgeContextSnapshot,
+                    insertText: BridgeInsertTranslation);
+                _sidekickBridge.Start();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SidekickBridge] start failed: {ex.Message}");
+                _sidekickBridge = null;
+            }
+        }
+
+        /// <summary>
+        /// Called by the bridge listener thread; marshals to the UI thread to
+        /// build a snapshot of the current Trados project state. Mirrors the
+        /// fields the in-Trados Chat already gathers in OnSendRequested so
+        /// both consumers see the same shape of context.
+        /// </summary>
+        private SidekickContextSnapshot BuildBridgeContextSnapshot()
+        {
+            var ctrl = _control?.Value;
+            if (ctrl == null || ctrl.IsDisposed)
+                return new SidekickContextSnapshot { Available = false };
+
+            if (ctrl.InvokeRequired)
+            {
+                return (SidekickContextSnapshot)ctrl.Invoke(
+                    new Func<SidekickContextSnapshot>(BuildBridgeContextSnapshot));
+            }
+
+            var snapshot = new SidekickContextSnapshot { Available = false };
+            if (_activeDocument == null) return snapshot;
+
+            try
+            {
+                var pair = _activeDocument.ActiveSegmentPair;
+                if (pair == null) return snapshot;
+
+                // Strip U+2028 / U+2029 the same way the Chat path does
+                var sourceText = pair.Source?.ToString();
+                if (sourceText != null)
+                    sourceText = sourceText.Replace("\u2028", " ").Replace("\u2029", " ");
+
+                var targetText = pair.Target != null
+                    ? SegmentTagHandler.GetFinalText(pair.Target)
+                    : null;
+
+                snapshot.Available = true;
+                snapshot.Project = new SidekickProjectInfo
+                {
+                    Name = GetProjectName(),
+                    FileName = GetFileName(),
+                    SourceLang = GetDocumentSourceLanguage(),
+                    TargetLang = GetDocumentTargetLanguage()
+                };
+                snapshot.ActiveSegment = new SidekickSegmentInfo
+                {
+                    Source = sourceText ?? "",
+                    Target = targetText
+                };
+
+                // Surrounding segments
+                var surroundingCount = _settings?.AiSettings?.QuickLauncherSurroundingSegments ?? 5;
+                var surrounding = GetSurroundingSegments(surroundingCount);
+                snapshot.SurroundingSegments = new List<SidekickSegmentInfo>();
+                foreach (var s in surrounding)
+                {
+                    snapshot.SurroundingSegments.Add(new SidekickSegmentInfo
+                    {
+                        Source = s[0] ?? "",
+                        Target = s[1]
+                    });
+                }
+
+                // TM matches (only if user has IncludeTmMatches enabled, mirroring Chat)
+                if (_settings?.AiSettings?.IncludeTmMatches != false)
+                {
+                    try
+                    {
+                        var tmMatches = DocumentContextHelper.GetTmMatches(_activeDocument);
+                        snapshot.TmMatches = new List<SidekickTmMatch>();
+                        if (tmMatches != null)
+                        {
+                            foreach (var m in tmMatches)
+                            {
+                                snapshot.TmMatches.Add(new SidekickTmMatch
+                                {
+                                    Score = m.MatchPercentage,
+                                    Source = m.SourceText ?? "",
+                                    Target = m.TargetText ?? "",
+                                    TmName = m.TmName
+                                });
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[SidekickBridge] TM gather threw: {ex.Message}");
+                    }
+                }
+
+                // Termbase hits – filter by AI-disabled IDs the same way Chat does
+                try
+                {
+                    var disabledIds = _settings?.AiSettings?.DisabledAiTermbaseIds ?? new List<long>();
+                    var allMatches = TermLensEditorViewPart.GetCurrentSegmentMatches();
+                    var matchedTerms = disabledIds.Count > 0
+                        ? allMatches.Where(m => !disabledIds.Contains(m.PrimaryEntry?.TermbaseId ?? 0)).ToList()
+                        : allMatches;
+
+                    snapshot.TermbaseHits = new List<SidekickTermbaseHit>();
+                    foreach (var m in matchedTerms)
+                    {
+                        var entry = m.PrimaryEntry;
+                        if (entry == null) continue;
+                        snapshot.TermbaseHits.Add(new SidekickTermbaseHit
+                        {
+                            Source = entry.SourceTerm ?? "",
+                            Target = entry.TargetTerm ?? "",
+                            TermbaseName = entry.TermbaseName,
+                            Definition = entry.Definition,
+                            Domain = entry.Domain,
+                            Notes = entry.Notes
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[SidekickBridge] termbase gather threw: {ex.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SidekickBridge] BuildBridgeContextSnapshot threw: {ex.Message}");
+                return new SidekickContextSnapshot { Available = false };
+            }
+
+            return snapshot;
+        }
+
+        /// <summary>
+        /// Inserts text into the active Trados target segment via the same
+        /// Selection.Target.Replace path that powers the in-Chat Apply-To-Target
+        /// button. Returns null on success, an error string otherwise.
+        /// Marshals to the UI thread.
+        /// </summary>
+        private string BridgeInsertTranslation(string text)
+        {
+            var ctrl = _control?.Value;
+            if (ctrl == null || ctrl.IsDisposed) return "ai assistant disposed";
+
+            if (ctrl.InvokeRequired)
+            {
+                return (string)ctrl.Invoke(
+                    new Func<string, string>(BridgeInsertTranslation), text);
+            }
+
+            if (_activeDocument == null) return "no active document";
+            if (string.IsNullOrEmpty(text)) return "empty text";
+
+            try
+            {
+                _activeDocument.Selection.Target.Replace(text, "Supervertaler Sidekick");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return "insert failed: " + ex.Message;
             }
         }
 
@@ -5119,6 +5316,12 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                 _inboxWatcher.EnableRaisingEvents = false;
                 _inboxWatcher.Dispose();
                 _inboxWatcher = null;
+            }
+
+            if (_sidekickBridge != null)
+            {
+                try { _sidekickBridge.Dispose(); } catch { /* never let bridge cleanup break Dispose */ }
+                _sidekickBridge = null;
             }
 
             if (_editorController != null)

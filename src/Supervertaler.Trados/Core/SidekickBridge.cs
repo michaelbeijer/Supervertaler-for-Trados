@@ -1,0 +1,461 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Net;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using System.Text;
+using System.Threading;
+using Supervertaler.Trados.Settings;
+
+namespace Supervertaler.Trados.Core
+{
+    // ─── DataContract types for the bridge JSON wire format ──────────────────
+    //
+    // These mirror the in-Trados ChatContext shape the existing AI Assistant
+    // already builds, but in a serialisation-friendly form. External clients
+    // (notably Supervertaler Workbench's Sidekick Chat) consume these, so any
+    // changes here are a wire-format change – bump the URL path version.
+
+    [DataContract]
+    public class SidekickContextSnapshot
+    {
+        [DataMember(Name = "available", Order = 0)]
+        public bool Available { get; set; }
+
+        [DataMember(Name = "project", Order = 1, EmitDefaultValue = false)]
+        public SidekickProjectInfo Project { get; set; }
+
+        [DataMember(Name = "activeSegment", Order = 2, EmitDefaultValue = false)]
+        public SidekickSegmentInfo ActiveSegment { get; set; }
+
+        [DataMember(Name = "surroundingSegments", Order = 3, EmitDefaultValue = false)]
+        public List<SidekickSegmentInfo> SurroundingSegments { get; set; }
+
+        [DataMember(Name = "tmMatches", Order = 4, EmitDefaultValue = false)]
+        public List<SidekickTmMatch> TmMatches { get; set; }
+
+        [DataMember(Name = "termbaseHits", Order = 5, EmitDefaultValue = false)]
+        public List<SidekickTermbaseHit> TermbaseHits { get; set; }
+    }
+
+    [DataContract]
+    public class SidekickProjectInfo
+    {
+        [DataMember(Name = "name", Order = 0, EmitDefaultValue = false)] public string Name { get; set; }
+        [DataMember(Name = "fileName", Order = 1, EmitDefaultValue = false)] public string FileName { get; set; }
+        [DataMember(Name = "sourceLang", Order = 2, EmitDefaultValue = false)] public string SourceLang { get; set; }
+        [DataMember(Name = "targetLang", Order = 3, EmitDefaultValue = false)] public string TargetLang { get; set; }
+    }
+
+    [DataContract]
+    public class SidekickSegmentInfo
+    {
+        [DataMember(Name = "source", Order = 0)] public string Source { get; set; }
+        [DataMember(Name = "target", Order = 1, EmitDefaultValue = false)] public string Target { get; set; }
+    }
+
+    [DataContract]
+    public class SidekickTmMatch
+    {
+        [DataMember(Name = "score", Order = 0)] public int Score { get; set; }
+        [DataMember(Name = "source", Order = 1)] public string Source { get; set; }
+        [DataMember(Name = "target", Order = 2)] public string Target { get; set; }
+        [DataMember(Name = "tmName", Order = 3, EmitDefaultValue = false)] public string TmName { get; set; }
+    }
+
+    [DataContract]
+    public class SidekickTermbaseHit
+    {
+        [DataMember(Name = "source", Order = 0)] public string Source { get; set; }
+        [DataMember(Name = "target", Order = 1)] public string Target { get; set; }
+        [DataMember(Name = "termbaseName", Order = 2, EmitDefaultValue = false)] public string TermbaseName { get; set; }
+        [DataMember(Name = "definition", Order = 3, EmitDefaultValue = false)] public string Definition { get; set; }
+        [DataMember(Name = "domain", Order = 4, EmitDefaultValue = false)] public string Domain { get; set; }
+        [DataMember(Name = "notes", Order = 5, EmitDefaultValue = false)] public string Notes { get; set; }
+    }
+
+    [DataContract]
+    internal class SidekickHandshake
+    {
+        [DataMember(Name = "version", Order = 0)] public int Version { get; set; }
+        [DataMember(Name = "port", Order = 1)] public int Port { get; set; }
+        [DataMember(Name = "token", Order = 2)] public string Token { get; set; }
+        [DataMember(Name = "pid", Order = 3)] public int Pid { get; set; }
+        [DataMember(Name = "startedAt", Order = 4)] public string StartedAt { get; set; }
+    }
+
+    [DataContract]
+    internal class SidekickInsertRequest
+    {
+        [DataMember(Name = "text", IsRequired = true)] public string Text { get; set; }
+    }
+
+    [DataContract]
+    internal class SidekickResultResponse
+    {
+        [DataMember(Name = "ok", Order = 0)] public bool Ok { get; set; }
+        [DataMember(Name = "error", Order = 1, EmitDefaultValue = false)] public string Error { get; set; }
+    }
+
+    /// <summary>
+    /// Localhost-only HTTP bridge that exposes the active Trados project context
+    /// to external Supervertaler clients (currently: Workbench's Sidekick Chat).
+    ///
+    /// Lifecycle:
+    ///   * Started by AiAssistantViewPart on plugin init when the user has
+    ///     Assistant access (paid or trial) AND AiSettings.SidekickBridgeEnabled.
+    ///   * Binds to <c>http://127.0.0.1:&lt;random-port&gt;/</c> – never accepts
+    ///     non-loopback connections.
+    ///   * Generates a fresh per-session auth token on Start; clients must
+    ///     present it as <c>Authorization: Bearer &lt;token&gt;</c>.
+    ///   * Writes a handshake file at <c>UserDataPath.SidekickBridgeFile</c>
+    ///     with port + token + PID + timestamp so clients can discover it.
+    ///     Deleted on Stop. Stale files from hard kills are detected by the
+    ///     client checking PID liveness.
+    ///
+    /// Endpoints:
+    ///   * <c>GET /v1/active-context</c> – returns a SidekickContextSnapshot
+    ///     describing the current Trados document state (active segment,
+    ///     surrounding segments, TM matches, termbase hits, project metadata).
+    ///   * <c>POST /v1/insert-translation</c> – inserts text into the active
+    ///     target segment via the same path the in-Trados Apply-To-Target
+    ///     button uses.
+    ///
+    /// Threading:
+    ///   * Listener runs on a dedicated background thread; one request at a
+    ///     time (Trados editor operations are not concurrency-safe).
+    ///   * Both endpoint handlers marshal back to the UI thread via the
+    ///     supplied delegates – callers MUST be safe to invoke from any
+    ///     thread; the bridge itself does not synchronise with WinForms.
+    /// </summary>
+    public sealed class SidekickBridge : IDisposable
+    {
+        private const int HandshakeVersion = 1;
+
+        private readonly Func<SidekickContextSnapshot> _getContext;
+        private readonly Func<string, string> _insertText; // returns null on success, error message otherwise
+
+        private HttpListener _listener;
+        private Thread _listenerThread;
+        private CancellationTokenSource _cts;
+        private string _token;
+        private int _port;
+        private bool _disposed;
+
+        public SidekickBridge(
+            Func<SidekickContextSnapshot> getContext,
+            Func<string, string> insertText)
+        {
+            _getContext = getContext ?? throw new ArgumentNullException(nameof(getContext));
+            _insertText = insertText ?? throw new ArgumentNullException(nameof(insertText));
+        }
+
+        public bool IsRunning => _listener != null && _listener.IsListening;
+        public int Port => _port;
+
+        /// <summary>
+        /// Start the listener. Returns silently on failure (logged to Debug)
+        /// rather than throwing – the bridge is a non-essential feature and
+        /// must never break the rest of the plugin.
+        /// </summary>
+        public void Start()
+        {
+            if (IsRunning) return;
+
+            _token = Guid.NewGuid().ToString("N");
+
+            // HttpListener doesn't accept "port 0 = OS-pick" so we try a
+            // handful of random high ports until one is free.
+            var rng = new Random();
+            for (int attempt = 0; attempt < 16; attempt++)
+            {
+                int candidate = rng.Next(49152, 65535);
+                try
+                {
+                    var listener = new HttpListener();
+                    listener.Prefixes.Add($"http://127.0.0.1:{candidate}/");
+                    listener.Start();
+                    _listener = listener;
+                    _port = candidate;
+                    break;
+                }
+                catch (HttpListenerException ex)
+                {
+                    Debug.WriteLine($"[SidekickBridge] port {candidate} in use ({ex.Message}); retrying");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SidekickBridge] failed to start listener: {ex.Message}");
+                    return;
+                }
+            }
+
+            if (_listener == null)
+            {
+                Debug.WriteLine("[SidekickBridge] no free port found after 16 attempts; bridge disabled this session");
+                return;
+            }
+
+            _cts = new CancellationTokenSource();
+            _listenerThread = new Thread(ListenLoop)
+            {
+                IsBackground = true,
+                Name = "SidekickBridge"
+            };
+            _listenerThread.Start();
+
+            try
+            {
+                WriteHandshakeFile();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SidekickBridge] failed to write handshake file: {ex.Message}");
+                // Bridge is still usable, just not discoverable – not fatal.
+            }
+        }
+
+        public void Stop()
+        {
+            try { _cts?.Cancel(); } catch { /* ignore */ }
+            try { _listener?.Stop(); } catch { /* ignore */ }
+            try { _listener?.Close(); } catch { /* ignore */ }
+            _listener = null;
+
+            try
+            {
+                if (File.Exists(UserDataPath.SidekickBridgeFile))
+                    File.Delete(UserDataPath.SidekickBridgeFile);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SidekickBridge] failed to delete handshake file: {ex.Message}");
+            }
+
+            // Don't Join the thread – HttpListener.Stop unblocks GetContext
+            // but the thread cleanup is best-effort. It's a background thread
+            // and will die with the process anyway.
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            Stop();
+            _cts?.Dispose();
+        }
+
+        // ── Listener loop ────────────────────────────────────────────────
+
+        private void ListenLoop()
+        {
+            while (_listener != null && _listener.IsListening && !_cts.IsCancellationRequested)
+            {
+                HttpListenerContext context;
+                try
+                {
+                    context = _listener.GetContext();
+                }
+                catch (HttpListenerException)
+                {
+                    // Listener.Stop() unblocks with this exception – clean shutdown
+                    return;
+                }
+                catch (ObjectDisposedException)
+                {
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SidekickBridge] GetContext failed: {ex.Message}");
+                    return;
+                }
+
+                try
+                {
+                    HandleRequest(context);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SidekickBridge] HandleRequest threw: {ex.Message}");
+                    TryWriteError(context, 500, "internal error");
+                }
+                finally
+                {
+                    try { context.Response.Close(); } catch { /* ignore */ }
+                }
+            }
+        }
+
+        private void HandleRequest(HttpListenerContext context)
+        {
+            var request = context.Request;
+            var response = context.Response;
+
+            // Defence in depth: HttpListener already binds to 127.0.0.1 so
+            // remote requests can't reach us, but we double-check the
+            // remote address for paranoia (and to fail loud if the binding
+            // ever drifts).
+            if (request.RemoteEndPoint == null
+                || !IPAddress.IsLoopback(request.RemoteEndPoint.Address))
+            {
+                TryWriteError(context, 403, "loopback only");
+                return;
+            }
+
+            // Bearer token auth
+            var authHeader = request.Headers["Authorization"] ?? "";
+            const string prefix = "Bearer ";
+            if (!authHeader.StartsWith(prefix, StringComparison.Ordinal)
+                || authHeader.Substring(prefix.Length) != _token)
+            {
+                TryWriteError(context, 401, "unauthorized");
+                return;
+            }
+
+            var path = request.Url.AbsolutePath;
+            var method = request.HttpMethod;
+
+            if (method == "GET" && path == "/v1/active-context")
+            {
+                HandleGetActiveContext(context);
+                return;
+            }
+
+            if (method == "POST" && path == "/v1/insert-translation")
+            {
+                HandleInsertTranslation(context);
+                return;
+            }
+
+            TryWriteError(context, 404, "not found");
+        }
+
+        private void HandleGetActiveContext(HttpListenerContext context)
+        {
+            SidekickContextSnapshot snapshot;
+            try
+            {
+                snapshot = _getContext() ?? new SidekickContextSnapshot { Available = false };
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SidekickBridge] context provider threw: {ex.Message}");
+                snapshot = new SidekickContextSnapshot { Available = false };
+            }
+
+            WriteJson(context, 200, snapshot);
+        }
+
+        private void HandleInsertTranslation(HttpListenerContext context)
+        {
+            SidekickInsertRequest req;
+            try
+            {
+                using (var reader = new StreamReader(context.Request.InputStream, Encoding.UTF8))
+                {
+                    var body = reader.ReadToEnd();
+                    if (string.IsNullOrWhiteSpace(body))
+                    {
+                        WriteJson(context, 400, new SidekickResultResponse { Ok = false, Error = "empty body" });
+                        return;
+                    }
+                    req = DeserializeJson<SidekickInsertRequest>(body);
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteJson(context, 400, new SidekickResultResponse { Ok = false, Error = "malformed body: " + ex.Message });
+                return;
+            }
+
+            if (req == null || string.IsNullOrEmpty(req.Text))
+            {
+                WriteJson(context, 400, new SidekickResultResponse { Ok = false, Error = "missing 'text'" });
+                return;
+            }
+
+            string err;
+            try
+            {
+                err = _insertText(req.Text); // null on success
+            }
+            catch (Exception ex)
+            {
+                err = "insert failed: " + ex.Message;
+            }
+
+            if (err == null)
+                WriteJson(context, 200, new SidekickResultResponse { Ok = true });
+            else
+                WriteJson(context, 409, new SidekickResultResponse { Ok = false, Error = err });
+        }
+
+        // ── Handshake file ───────────────────────────────────────────────
+
+        private void WriteHandshakeFile()
+        {
+            Directory.CreateDirectory(UserDataPath.TradosRuntimeDir);
+
+            var handshake = new SidekickHandshake
+            {
+                Version = HandshakeVersion,
+                Port = _port,
+                Token = _token,
+                Pid = Process.GetCurrentProcess().Id,
+                StartedAt = DateTime.UtcNow.ToString("o")
+            };
+
+            var bytes = SerializeJson(handshake);
+            File.WriteAllBytes(UserDataPath.SidekickBridgeFile, bytes);
+        }
+
+        // ── JSON helpers ─────────────────────────────────────────────────
+
+        private static void WriteJson<T>(HttpListenerContext context, int statusCode, T payload)
+        {
+            try
+            {
+                var bytes = SerializeJson(payload);
+                context.Response.StatusCode = statusCode;
+                context.Response.ContentType = "application/json; charset=utf-8";
+                context.Response.ContentLength64 = bytes.Length;
+                context.Response.OutputStream.Write(bytes, 0, bytes.Length);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SidekickBridge] WriteJson failed: {ex.Message}");
+            }
+        }
+
+        private static void TryWriteError(HttpListenerContext context, int statusCode, string message)
+        {
+            try
+            {
+                WriteJson(context, statusCode, new SidekickResultResponse { Ok = false, Error = message });
+            }
+            catch { /* nothing more we can do */ }
+        }
+
+        private static byte[] SerializeJson<T>(T value)
+        {
+            var serializer = new DataContractJsonSerializer(typeof(T));
+            using (var ms = new MemoryStream())
+            {
+                serializer.WriteObject(ms, value);
+                return ms.ToArray();
+            }
+        }
+
+        private static T DeserializeJson<T>(string json)
+        {
+            var serializer = new DataContractJsonSerializer(typeof(T));
+            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+            {
+                return (T)serializer.ReadObject(ms);
+            }
+        }
+    }
+}

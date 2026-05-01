@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.19.49] – 2026-05-01
+
+### Added (Sidekick Bridge – plugin half)
+
+- **Localhost HTTP bridge that exposes the active Trados project context to external Supervertaler clients.** Powers the new "Trados-aware mode" in Supervertaler Workbench's floating Sidekick Chat (Workbench side ships in v1.9.411). The bridge listens only on `127.0.0.1` on a random high port, requires a per-session Bearer token, and starts only when the user has Assistant access (paid or trial). Two endpoints are live:
+  - `GET /v1/active-context` – returns a snapshot with active segment, surrounding segments, TM matches, termbase hits, and project metadata (same fields the in-Trados Chat already gathers, so answer quality is identical)
+  - `POST /v1/insert-translation` – inserts text into the active target segment via the same path as the Apply-To-Target button
+- **Discovery via handshake file.** The bridge writes `~/Supervertaler/trados/runtime/bridge.json` with port, token, PID, and start time on startup; deletes it on shutdown. Stale files from hard kills are detected by clients checking PID liveness.
+- **Hidden setting** `AiSettings.SidekickBridgeEnabled` (default `true`). No UI checkbox – privacy-conscious users can flip it off by editing `settings.json` directly.
+
+### Notes
+
+- The bridge runs in `AiAssistantViewPart`'s lifecycle: starts in `InitializeFullIfNeeded` (the same gate that already controls in-Trados Chat), stops in `Dispose`.
+- All endpoint handlers marshal back to the UI thread before touching `_activeDocument`; the listener itself runs on a dedicated background thread and is concurrency-safe with single-request-at-a-time semantics.
+- Workbench Sidekick Chat client + UI ships in v1.9.411 of Supervertaler Workbench; until then the bridge is dormant (no client). The two halves can be released independently.
+
+---
+
 ## [4.19.48] – 2026-05-01
 
 ### Fixed (AI Settings dialog right-edge clipping)

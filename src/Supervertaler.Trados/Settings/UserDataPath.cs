@@ -77,6 +77,23 @@ namespace Supervertaler.Trados.Settings
         /// <summary>Shared resources folder (supervertaler.db lives here).</summary>
         public static string ResourcesDir => Path.Combine(Root, "resources");
 
+        /// <summary>
+        /// Per-product runtime state for the Trados plugin (bridge handshake
+        /// files, lockfiles, ephemeral state). Cleared on every plugin start
+        /// and stop – nothing persistent should live here.
+        /// </summary>
+        public static string TradosRuntimeDir => Path.Combine(Root, "trados", "runtime");
+
+        /// <summary>
+        /// Handshake file written by <c>SidekickBridge</c> while the bridge
+        /// is listening. Contains <c>port</c>, <c>token</c>, <c>pid</c>, and
+        /// <c>startedAt</c> so external clients (notably Supervertaler
+        /// Workbench's Sidekick Chat) can discover and authenticate to the
+        /// bridge. Deleted on plugin shutdown; readers must validate
+        /// <c>pid</c> liveness before trusting it.
+        /// </summary>
+        public static string SidekickBridgeFile => Path.Combine(TradosRuntimeDir, "bridge.json");
+
         // ── Memory banks (multi-bank layout) ─────────────────────────
         //
         // The Supervertaler Assistant supports several memory banks side by side,

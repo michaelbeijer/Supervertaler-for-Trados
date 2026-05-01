@@ -24,6 +24,8 @@ Welcome to the help center for **Supervertaler Workbench** – a free, open-sour
 
 Start here: [Quick Start Guide](get-started/quick-start.md)
 
+![Supervertaler Workbench – term and non-translatables insert popup](https://supervertaler.com/screenshots/Supervertaler_v1.9.329_Term_and_NT_insert_popup.png)
+
 ---
 
 ## Supervertaler for Trados

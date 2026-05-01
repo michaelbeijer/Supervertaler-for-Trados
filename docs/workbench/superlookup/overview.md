@@ -1,17 +1,12 @@
-# Superlookup Overview
+SuperLookup is your unified concordance and research hub, bringing together all lookup resources in one place. It lives inside the **Sidekick** panel as its own tab.
 
-Superlookup is your unified concordance and research hub, bringing together all lookup resources in one place.
+## Opening SuperLookup
 
-## Opening Superlookup
-
-- Press `Ctrl+K` (opens Superlookup with the current selection, if any)
-- Or use **Edit → Superlookup…** (`Ctrl+Alt+L`)
-
-{% hint style="info" %}
-On Windows, `Ctrl+Alt+L` can also work as a **global hotkey** (from any application) when AutoHotkey is installed.
-{% endhint %}
-
-Selected text is automatically used as the search query.
+| How | Shortcut | Notes |
+|-----|----------|-------|
+| From the translation grid | **Ctrl+K** | Opens Sidekick directly to the SuperLookup tab; selected text is used as the search query automatically |
+| From any application (system-wide) | **Ctrl+Alt+L** | Select any text in any app, press the shortcut, and SuperLookup opens with that text pre-filled |
+| Via Sidekick | **Alt+K** then click the SuperLookup tab | Alt+K opens Sidekick to whatever tab was last active; click SuperLookup, or right-click the tab title and set it as the default |
 
 ## Tabs
 
@@ -19,13 +14,13 @@ Selected text is automatically used as the search query.
 
 Search your Translation Memories for similar text:
 - Fuzzy matching with percentage scores
-- Horizontal (table) or Vertical (list) view toggle
+- Horizontal (table) or vertical (list) view toggle
 - Source TM column shows which TM the match came from
 - Search direction: Both, Source only, or Target only
 
 ### Glossary Matches
 
-Search your termbases/glossaries:
+Search your termbases and glossaries:
 - Shows Source, Target, Domain, Notes columns
 - Right-click to "Edit in Glossary"
 - Direction and language filters (Both / Source / Target + From/To)
@@ -35,69 +30,41 @@ Search your termbases/glossaries:
 Semantic search across all your TMs:
 - Finds conceptually similar text (not just word matches)
 - Uses AI embeddings to understand meaning
-- Great for finding paraphrased or reworded content
+- Useful for finding paraphrased or reworded content
 
 ### Machine Translation
 
 Get instant MT from multiple providers:
-- Google Translate
-- DeepL
-- Microsoft Translator
-- Amazon Translate
-- MyMemory
-- ModernMT
+- Google Translate, DeepL, Microsoft Translator
+- Amazon Translate, MyMemory, ModernMT
 
 Configure providers in **Settings → MT Settings**.
 
 ### Web Resources
 
-Quick access to online reference sites:
-- IATE (EU terminology)
-- Linguee
-- ProZ.com
-- Reverso Context
-- Wikipedia (Source & Target)
-- Wiktionary (Source & Target)
-- Google Search
-- Google Patents
-- Juremy
-- AcronymFinder
-- BabelNet
-- beijer.uk
+Quick access to online reference sites: IATE, Linguee, ProZ.com, Reverso Context, Wikipedia, Wiktionary, Google, Google Patents, Juremy, AcronymFinder, BabelNet, and more.
 
-## Search Controls
+Web resource tabs maintain login sessions between searches, so you stay logged in to sites like ProZ.com.
 
-### Language Filtering
+## Search controls
 
-Use the **From** and **To** dropdowns to filter by language pair:
-- Auto-populated from your TMs and termbases
-- Useful when you have multiple language pairs
+**Language filters** – use the **From** and **To** dropdowns to filter by language pair. Auto-populated from your TMs and termbases.
 
-### Search Direction
+**Search direction** – **Both** searches source and target columns; **Source** and **Target** restrict to one side.
 
-- **Both**: Search in source AND target columns
-- **Source**: Search only in source text
-- **Target**: Search only in target text
-
-### Search Box
-
-Type your query and press Enter (or click 🔍).
+**Search box** – type a query and press Enter (or click 🔍). When Ctrl+K or Ctrl+Alt+L opens SuperLookup, the selected text is placed in the search box and the search runs immediately.
 
 ## Tips
 
-### Copy Results
-
-- Double-click a result to copy it
-- Or right-click for more options
-
-### Persistent Sessions
-
-Web Resources tabs maintain login sessions, so you stay logged into sites like ProZ.com between searches.
+- Double-click a result to copy it to the clipboard.
+- Right-click a result for additional options.
+- To always open Sidekick to SuperLookup, right-click the SuperLookup tab title and choose **Set as default tab**.
 
 ---
 
-## See Also
+## Related pages
 
+- [Sidekick Overview](../sidekick/overview.md)
 - [TM Concordance Search](tm-search.md)
 - [Glossary Search](glossary-search.md)
 - [Machine Translation](mt.md)

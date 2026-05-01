@@ -1,5 +1,7 @@
 Sidekick is the floating side panel in Supervertaler Workbench. It stays visible while you translate and gives you quick access to four areas without switching away from your translation grid.
 
+![](<../../.gitbook/assets/Supervertaler-Workbench-Sidekick-SuperLookup.png>)
+
 ## Opening Sidekick
 
 Press **Alt+K** (or use the toolbar button) to show or hide the panel. Press **Esc** to hide it and return focus to whatever was active.

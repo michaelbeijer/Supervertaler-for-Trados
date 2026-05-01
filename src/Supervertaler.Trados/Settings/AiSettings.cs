@@ -70,9 +70,31 @@ namespace Supervertaler.Trados.Settings
         /// directly. The bridge only listens on 127.0.0.1, requires a per-session
         /// auth token, and only starts when the user has Assistant access (paid
         /// or trial).
+        ///
+        /// NOTE: the default value (true) is set in <see cref="SetDefaultsBeforeDeserialization"/>
+        /// rather than as a property initialiser, because <c>DataContractJsonSerializer</c>
+        /// skips constructors during deserialization – without the OnDeserializing
+        /// callback, any settings.json written before this property existed would
+        /// see the field as <c>false</c> (the bool type default) instead of true.
         /// </summary>
         [DataMember(Name = "sidekickBridgeEnabled")]
         public bool SidekickBridgeEnabled { get; set; } = true;
+
+        /// <summary>
+        /// Sets the default values for properties that were added after the
+        /// first version of AiSettings. <c>DataContractJsonSerializer</c> skips
+        /// constructors (and therefore property initialisers) during
+        /// deserialization, so properties not present in older settings.json
+        /// files would otherwise come back with their bool/int/string TYPE
+        /// defaults rather than the initialiser values. This callback runs
+        /// BEFORE deserialization, so any value present in the JSON still
+        /// overrides what we set here.
+        /// </summary>
+        [OnDeserializing]
+        internal void SetDefaultsBeforeDeserialization(StreamingContext context)
+        {
+            SidekickBridgeEnabled = true;
+        }
 
         /// <summary>
         /// Relative path of the selected custom prompt from the prompt library.

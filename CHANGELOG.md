@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.19.52] – 2026-05-01
+
+### Fixed (Sidekick Bridge default-true behaviour for existing users)
+
+- **`AiSettings.SidekickBridgeEnabled` now correctly defaults to `true` for users with an existing `settings.json`.** Reported by a user upgrading from v4.19.49: the bridge silently skipped startup with `guard: AiSettings.SidekickBridgeEnabled=false – bridge skipped`, despite the property having an initialiser of `= true`. Root cause: `DataContractJsonSerializer` skips constructors during deserialisation, so property initialisers don't run when reading a JSON file written before the property existed – the property defaults to the bool type default (`false`) instead. Fix: added an `[OnDeserializing]` callback `SetDefaultsBeforeDeserialization` that explicitly sets the default to `true` before the JSON parser runs. Any value present in the JSON still overrides, so users who have explicitly disabled the bridge keep that setting.
+
+---
+
 ## [4.19.51] – 2026-05-01
 
 ### Diagnostics (Sidekick Bridge)

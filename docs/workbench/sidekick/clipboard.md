@@ -2,6 +2,8 @@ The Clipboard Manager in Supervertaler Sidekick captures everything you copy to 
 
 Open it via **Sidekick → Clipboard tab** (the clipboard icon).
 
+![](<../../.gitbook/assets/Supervertaler-Workbench-Sidekick-Clipboard.png>)
+
 ---
 
 ## Two columns

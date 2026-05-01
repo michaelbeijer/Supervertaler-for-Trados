@@ -1,6 +1,9 @@
 The Clipboard Manager in Supervertaler Sidekick captures everything you copy to the clipboard and keeps a persistent history that survives application restarts. Click any item to paste it into the active window.
 
-Open it via **Sidekick → Clipboard tab** (the clipboard icon).
+| How | Shortcut |
+|-----|----------|
+| Open Sidekick directly to the Clipboard tab from any application | **Ctrl+Shift+C** |
+| Open Sidekick generally (then click the Clipboard tab) | **Alt+K** |
 
 ![](<../../.gitbook/assets/Supervertaler-Workbench-Sidekick-Clipboard.png>)
 

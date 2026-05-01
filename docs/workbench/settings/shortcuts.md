@@ -18,6 +18,9 @@ Global hotkey changes apply immediately — no restart needed.
 | Shortcut | Action |
 |----------|--------|
 | **Alt+K** | Show / hide Sidekick |
+| **Ctrl+Shift+C** | Open Sidekick directly to the Clipboard tab |
+| **Ctrl+K** | Open Sidekick to SuperLookup (searches selected text; editor only) |
+| **Ctrl+Alt+L** | Open SuperLookup from any application (searches selected text) |
 | **Ctrl+Alt+D** | Push-to-talk dictation (one utterance) |
 | **Ctrl+Alt+A** | Toggle AutoFingers Always-On listening |
 

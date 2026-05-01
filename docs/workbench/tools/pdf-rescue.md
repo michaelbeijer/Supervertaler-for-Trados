@@ -1,18 +1,4 @@
-# PDF Rescue (OCR)
-
-This page is the GitBook version of the original PDF Rescue guide.
-
-If you prefer the repository copy, see: https://github.com/Supervertaler/Supervertaler-Workbench/blob/main/docs/guides/PDF_RESCUE.md
-
----
-
-# PDF Rescue - AI-Powered OCR Tool
-
-**Part of [Supervertaler](https://supervertaler.com/) • by Michael Beijer**
-
----
-
-## 📖 Overview
+## Overview
 
 **PDF Rescue** is a specialised AI-powered OCR tool designed to extract clean, editable text from poorly formatted PDFs. Built into Supervertaler, it uses vision-capable LLM OCR to intelligently recognise text, formatting, redactions, stamps, and signatures–producing professional, translator-ready documents.
 

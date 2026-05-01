@@ -86,6 +86,12 @@
 * [Filtering Segments](workbench/editor/filtering.md)
 * [Pagination](workbench/editor/pagination.md)
 
+## 🖥️ Sidekick
+
+* [Sidekick Overview](workbench/sidekick/overview.md)
+* [AutoFingers Voice Commands](workbench/sidekick/autofingers.md)
+* [Clipboard Manager](workbench/sidekick/clipboard.md)
+
 ## 🖥️ AI Translation
 
 * [AI Translation Overview](workbench/ai-translation/overview.md)

@@ -1,15 +1,42 @@
-# Keyboard Shortcuts
+Supervertaler has two kinds of keyboard shortcuts: **editor shortcuts** (active inside the translation grid) and **global hotkeys** (active system-wide, from any application).
 
-Supervertaler supports extensive keyboard shortcuts for grid navigation and editing.
+## Managing shortcuts
 
-## Where to manage shortcuts
+Open **Settings → Keyboard Shortcuts**. The panel is split into two tabs:
 
-Open **Settings → Keyboard Shortcuts**.
+- **Editor** – shortcuts for navigating and editing segments
+- **Global** – OS-level hotkeys registered via the global hotkey manager
 
-## Reference
-
-- See the full list: [Editor Keyboard Shortcuts](../editor/keyboard-shortcuts.md)
+Click any shortcut row to edit it. Press the new key combination, then save.
 
 {% hint style="info" %}
-If you use a CAT tool daily, consider customizing shortcuts to match your existing muscle memory.
+Global hotkey changes apply immediately — no restart needed.
 {% endhint %}
+
+## Default global hotkeys
+
+| Shortcut | Action |
+|----------|--------|
+| **Ctrl+Alt+S** | Show / hide Sidekick |
+| **Ctrl+Alt+D** | Push-to-talk dictation (one utterance) |
+| **Ctrl+Alt+A** | Toggle AutoFingers Always-On listening |
+
+## Default editor shortcuts
+
+See the full list on [Editor Keyboard Shortcuts](../editor/keyboard-shortcuts.md).
+
+## Sidekick keyboard navigation
+
+| Shortcut | Action |
+|----------|--------|
+| **Ctrl+Tab** | Next Sidekick tab |
+| **Ctrl+Shift+Tab** | Previous Sidekick tab |
+| **Tab** | Move focus to Sidekick Menu |
+| **Left** | Return focus to last active Sidekick panel |
+| **Esc** | Hide Sidekick |
+
+## Related pages
+
+- [Editor Keyboard Shortcuts](../editor/keyboard-shortcuts.md)
+- [AutoFingers Voice Commands](../sidekick/autofingers.md)
+- [Sidekick Overview](../sidekick/overview.md)

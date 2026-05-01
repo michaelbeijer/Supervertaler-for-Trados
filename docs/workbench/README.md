@@ -1,6 +1,6 @@
 # Supervertaler Workbench
 
-_Help system last updated: 17 April 2026 (for Workbench v1.9.381)_
+_Help system last updated: 1 May 2026 (for Workbench v1.9.406)_
 
 Welcome to the help center for **Supervertaler Workbench** – a free, open-source translation application built by translators, for translators.
 
@@ -10,6 +10,8 @@ Welcome to the help center for **Supervertaler Workbench** – a free, open-sour
 - **Work with CAT tools** – import/export files from memoQ, Trados, Phrase, CafeTran
 - **Translation Memory** – fuzzy matching, TMX import, Supermemory semantic search
 - **Terminology** – glossaries, automatic term highlighting, TermLens
+- **Sidekick panel** – AI assistant, SuperLookup, Clipboard manager, AutoFingers voice commands
+- **AutoFingers** – always-on voice commands and push-to-talk dictation for any application
 - **Superlookup** – system-wide translation lookup (TM, glossary, MT, web)
 - **Quality Assurance** – spellcheck, tag validation, non-translatables
 

@@ -4,6 +4,8 @@ _Help system last updated: 1 May 2026 (for Workbench v1.9.406)_
 
 Welcome to the help center for **Supervertaler Workbench** – a free, open-source translation application built by translators, for translators.
 
+![Supervertaler Workbench – term and non-translatables insert popup](https://supervertaler.com/screenshots/Supervertaler_v1.9.329_Term_and_NT_insert_popup.png)
+
 **Supervertaler Workbench** integrates AI-powered translation with traditional CAT tool workflows. It runs on Windows, macOS, and Linux.
 
 - **Translate with AI** – GPT-4, Claude, Gemini, or local models via Ollama
@@ -23,8 +25,6 @@ Welcome to the help center for **Supervertaler Workbench** – a free, open-sour
 | **Source** | [github.com/Supervertaler/Supervertaler-Workbench](https://github.com/Supervertaler/Supervertaler-Workbench) |
 
 Start here: [Quick Start Guide](get-started/quick-start.md)
-
-![Supervertaler Workbench – term and non-translatables insert popup](https://supervertaler.com/screenshots/Supervertaler_v1.9.329_Term_and_NT_insert_popup.png)
 
 ---
 

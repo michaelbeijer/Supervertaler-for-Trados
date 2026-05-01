@@ -16,7 +16,10 @@ Simultaneous search across your Translation Memory, glossaries, machine translat
 
 The AI assistant tab. Ask questions about terminology, get translation suggestions, or use Studio Tools to interact with your current project. Supports all major AI providers (OpenAI, Claude, Gemini, Ollama).
 
-→ [AI Translation Overview](../ai-translation/overview.md)
+When **Supervertaler for Trados** is also running with the AI Assistant panel active, the Chat tab automatically picks up the active Trados project context — segment, TM matches, termbase hits, surrounding segments — so you can ask the floating chat questions about your real translation work without leaving Trados Studio.
+
+→ [AI Translation Overview](../ai-translation/overview.md)\
+→ [Trados-aware Chat](trados-aware-chat.md)
 
 #### 📋 Clipboard
 

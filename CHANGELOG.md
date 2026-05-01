@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.19.45] – 2026-05-01
+
+### Added (DeepSeek provider)
+
+- **DeepSeek V4 Pro and DeepSeek V4 Flash added as a dedicated AI provider.** DeepSeek now appears in the AI provider dropdown alongside OpenAI, Claude, Gemini, Mistral, and others. The integration uses DeepSeek's OpenAI-compatible API (`api.deepseek.com/v1`). Enter your DeepSeek API key in **Settings → AI Settings** to use it. V4 Pro is the default (flagship); V4 Flash is listed for high-volume, cost-sensitive workloads.
+- **DeepSeek V4 Pro and V4 Flash also available via OpenRouter.** Both models are now included in the OpenRouter model dropdown under the IDs `deepseek/deepseek-v4-pro` and `deepseek/deepseek-v4-flash`, enabling access through an existing OpenRouter API key without a separate DeepSeek account.
+
+---
+
 ## [4.19.44] – 2026-04-30
 
 ### Changed (Help system – base URL now includes `/help` slug)

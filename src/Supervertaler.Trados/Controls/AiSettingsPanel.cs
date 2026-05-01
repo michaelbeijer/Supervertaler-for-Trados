@@ -870,6 +870,7 @@ namespace Supervertaler.Trados.Controls
             _providerApiKeys[LlmModels.ProviderGemini] = keys.Gemini ?? "";
             _providerApiKeys[LlmModels.ProviderGrok] = keys.Grok ?? "";
             _providerApiKeys[LlmModels.ProviderMistral] = keys.Mistral ?? "";
+            _providerApiKeys[LlmModels.ProviderDeepSeek] = keys.DeepSeek ?? "";
             _providerApiKeys[LlmModels.ProviderOpenRouter] = keys.OpenRouter ?? "";
             _providerApiKeys[LlmModels.ProviderCustomOpenAi] = keys.CustomOpenAi ?? "";
             _providerApiKeys[LlmModels.ProviderOllama] = ""; // Ollama doesn't use API keys
@@ -972,6 +973,9 @@ namespace Supervertaler.Trados.Controls
                 case LlmModels.ProviderMistral:
                     settings.MistralModel = selectedModel?.Id ?? "mistral-large-latest";
                     break;
+                case LlmModels.ProviderDeepSeek:
+                    settings.DeepSeekModel = selectedModel?.Id ?? "deepseek-v4-pro";
+                    break;
                 case LlmModels.ProviderOpenRouter:
                     // OpenRouter allows typed-in custom model IDs
                     settings.OpenRouterModel = selectedModel?.Id
@@ -993,6 +997,7 @@ namespace Supervertaler.Trados.Controls
             settings.ApiKeys.Gemini = _providerApiKeys.TryGetValue(LlmModels.ProviderGemini, out val) ? val : "";
             settings.ApiKeys.Grok = _providerApiKeys.TryGetValue(LlmModels.ProviderGrok, out val) ? val : "";
             settings.ApiKeys.Mistral = _providerApiKeys.TryGetValue(LlmModels.ProviderMistral, out val) ? val : "";
+            settings.ApiKeys.DeepSeek = _providerApiKeys.TryGetValue(LlmModels.ProviderDeepSeek, out val) ? val : "";
             settings.ApiKeys.OpenRouter = _providerApiKeys.TryGetValue(LlmModels.ProviderOpenRouter, out val) ? val : "";
             settings.ApiKeys.CustomOpenAi = _providerApiKeys.TryGetValue(LlmModels.ProviderCustomOpenAi, out val) ? val : "";
 
@@ -1360,6 +1365,7 @@ namespace Supervertaler.Trados.Controls
                 case LlmModels.ProviderGemini: targetId = settings.GeminiModel; break;
                 case LlmModels.ProviderGrok: targetId = settings.GrokModel; break;
                 case LlmModels.ProviderMistral: targetId = settings.MistralModel; break;
+                case LlmModels.ProviderDeepSeek: targetId = settings.DeepSeekModel; break;
                 case LlmModels.ProviderOpenRouter: targetId = settings.OpenRouterModel; break;
                 case LlmModels.ProviderOllama: targetId = settings.OllamaModel; break;
                 default: return;

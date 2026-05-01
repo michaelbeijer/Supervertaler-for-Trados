@@ -112,6 +112,7 @@ namespace Supervertaler.Trados.Core
                     case LlmModels.ProviderOpenAi:
                     case LlmModels.ProviderGrok:
                     case LlmModels.ProviderMistral:
+                    case LlmModels.ProviderDeepSeek:
                     case LlmModels.ProviderOpenRouter:
                     case LlmModels.ProviderCustomOpenAi:
                         result = await CallOpenAiAsync(prompt, systemPrompt, maxTokens, cancellationToken);
@@ -180,6 +181,7 @@ namespace Supervertaler.Trados.Core
                     case LlmModels.ProviderOpenAi:
                     case LlmModels.ProviderGrok:
                     case LlmModels.ProviderMistral:
+                    case LlmModels.ProviderDeepSeek:
                     case LlmModels.ProviderOpenRouter:
                     case LlmModels.ProviderCustomOpenAi:
                         result = await CallOpenAiChatAsync(messages, systemPrompt, maxTokens, cancellationToken);
@@ -320,6 +322,7 @@ namespace Supervertaler.Trados.Core
                 case LlmModels.ProviderGemini: return keys.Gemini;
                 case LlmModels.ProviderGrok: return keys.Grok;
                 case LlmModels.ProviderMistral: return keys.Mistral;
+                case LlmModels.ProviderDeepSeek: return keys.DeepSeek;
                 case LlmModels.ProviderOpenRouter: return keys.OpenRouter;
                 case LlmModels.ProviderCustomOpenAi: return keys.CustomOpenAi;
                 default: return null;
@@ -391,6 +394,7 @@ namespace Supervertaler.Trados.Core
         {
             if (_provider == LlmModels.ProviderGrok) return "Grok";
             if (_provider == LlmModels.ProviderMistral) return "Mistral";
+            if (_provider == LlmModels.ProviderDeepSeek) return "DeepSeek";
             if (_provider == LlmModels.ProviderCustomOpenAi) return "Custom OpenAI";
             return "OpenAI";
         }
@@ -405,6 +409,8 @@ namespace Supervertaler.Trados.Core
                 return "https://api.x.ai/v1";
             if (_provider == LlmModels.ProviderMistral)
                 return "https://api.mistral.ai/v1";
+            if (_provider == LlmModels.ProviderDeepSeek)
+                return "https://api.deepseek.com/v1";
             if (_provider == LlmModels.ProviderOpenRouter)
                 return "https://openrouter.ai/api/v1";
             if (_provider == LlmModels.ProviderCustomOpenAi && !string.IsNullOrEmpty(_baseUrl))
@@ -1252,6 +1258,7 @@ namespace Supervertaler.Trados.Core
                 case LlmModels.ProviderGemini:
                 case LlmModels.ProviderGrok:
                 case LlmModels.ProviderMistral:
+                case LlmModels.ProviderDeepSeek:
                 case LlmModels.ProviderOpenRouter:
                 case LlmModels.ProviderCustomOpenAi:
                     return true;

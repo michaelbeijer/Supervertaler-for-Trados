@@ -10,6 +10,7 @@ namespace Supervertaler.Trados.Core
         Gemini,
         Grok,
         Mistral,
+        DeepSeek,
         OpenRouter,
         Ollama,
         CustomOpenAi
@@ -39,6 +40,7 @@ namespace Supervertaler.Trados.Core
         public const string ProviderOllama = "ollama";
         public const string ProviderGrok = "grok";
         public const string ProviderMistral = "mistral";
+        public const string ProviderDeepSeek = "deepseek";
         public const string ProviderOpenRouter = "openrouter";
         public const string ProviderCustomOpenAi = "custom_openai";
 
@@ -139,6 +141,22 @@ namespace Supervertaler.Trados.Core
                 Id = "open-mistral-nemo", DisplayName = "Mistral Nemo",
                 Description = "Open, multilingual – good general-purpose translation",
                 Provider = LlmProvider.Mistral
+            }
+        };
+
+        public static readonly LlmModelInfo[] DeepSeekModels =
+        {
+            new LlmModelInfo
+            {
+                Id = "deepseek-v4-pro", DisplayName = "DeepSeek V4 Pro",
+                Description = "Flagship – top-tier reasoning and multilingual quality",
+                Provider = LlmProvider.DeepSeek
+            },
+            new LlmModelInfo
+            {
+                Id = "deepseek-v4-flash", DisplayName = "DeepSeek V4 Flash",
+                Description = "Fast and cost-effective – great for high-volume translation",
+                Provider = LlmProvider.DeepSeek
             }
         };
 
@@ -262,6 +280,18 @@ namespace Supervertaler.Trados.Core
                 Id = "qwen/qwen3.6-plus:free", DisplayName = "Qwen 3.6 Plus (Free)",
                 Description = "Free – no API costs, good general-purpose quality",
                 Provider = LlmProvider.OpenRouter
+            },
+            new LlmModelInfo
+            {
+                Id = "deepseek/deepseek-v4-pro", DisplayName = "DeepSeek V4 Pro",
+                Description = "DeepSeek flagship – strong multilingual, competitive pricing",
+                Provider = LlmProvider.OpenRouter
+            },
+            new LlmModelInfo
+            {
+                Id = "deepseek/deepseek-v4-flash", DisplayName = "DeepSeek V4 Flash",
+                Description = "DeepSeek fast – great for high-volume translation",
+                Provider = LlmProvider.OpenRouter
             }
         };
 
@@ -277,6 +307,7 @@ namespace Supervertaler.Trados.Core
                 case ProviderGemini: return GeminiModels;
                 case ProviderGrok: return GrokModels;
                 case ProviderMistral: return MistralModels;
+                case ProviderDeepSeek: return DeepSeekModels;
                 case ProviderOpenRouter: return OpenRouterModels;
                 case ProviderOllama: return OllamaModels;
                 case ProviderCustomOpenAi: return new LlmModelInfo[0]; // Custom models are user-defined
@@ -291,7 +322,7 @@ namespace Supervertaler.Trados.Core
         {
             if (string.IsNullOrEmpty(modelId)) return null;
 
-            var allArrays = new[] { OpenAiModels, ClaudeModels, GeminiModels, GrokModels, MistralModels, OpenRouterModels, OllamaModels };
+            var allArrays = new[] { OpenAiModels, ClaudeModels, GeminiModels, GrokModels, MistralModels, DeepSeekModels, OpenRouterModels, OllamaModels };
             foreach (var arr in allArrays)
             {
                 foreach (var m in arr)
@@ -315,6 +346,7 @@ namespace Supervertaler.Trados.Core
                 case LlmProvider.Gemini: return ProviderGemini;
                 case LlmProvider.Grok: return ProviderGrok;
                 case LlmProvider.Mistral: return ProviderMistral;
+                case LlmProvider.DeepSeek: return ProviderDeepSeek;
                 case LlmProvider.OpenRouter: return ProviderOpenRouter;
                 case LlmProvider.Ollama: return ProviderOllama;
                 case LlmProvider.CustomOpenAi: return ProviderCustomOpenAi;
@@ -334,6 +366,7 @@ namespace Supervertaler.Trados.Core
                 case ProviderGemini: return "Gemini (Google)";
                 case ProviderGrok: return "Grok (xAI)";
                 case ProviderMistral: return "Mistral AI";
+                case ProviderDeepSeek: return "DeepSeek";
                 case ProviderOpenRouter: return "OpenRouter";
                 case ProviderOllama: return "Ollama (Local)";
                 case ProviderCustomOpenAi: return "Custom (OpenAI-compatible)";
@@ -346,7 +379,7 @@ namespace Supervertaler.Trados.Core
         /// </summary>
         public static readonly string[] AllProviderKeys =
         {
-            ProviderOpenAi, ProviderClaude, ProviderGemini, ProviderGrok, ProviderMistral, ProviderOpenRouter, ProviderOllama, ProviderCustomOpenAi
+            ProviderOpenAi, ProviderClaude, ProviderGemini, ProviderGrok, ProviderMistral, ProviderDeepSeek, ProviderOpenRouter, ProviderOllama, ProviderCustomOpenAi
         };
     }
 }

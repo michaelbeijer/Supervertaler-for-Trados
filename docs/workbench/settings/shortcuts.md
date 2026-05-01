@@ -17,7 +17,7 @@ Global hotkey changes apply immediately — no restart needed.
 
 | Shortcut | Action |
 |----------|--------|
-| **Ctrl+Alt+S** | Show / hide Sidekick |
+| **Alt+K** | Show / hide Sidekick |
 | **Ctrl+Alt+D** | Push-to-talk dictation (one utterance) |
 | **Ctrl+Alt+A** | Toggle AutoFingers Always-On listening |
 

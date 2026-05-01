@@ -2,7 +2,7 @@ Sidekick is the floating side panel in Supervertaler Workbench. It stays visible
 
 ## Opening Sidekick
 
-Press **Ctrl+Alt+S** (or use the toolbar button) to show or hide the panel. Press **Esc** to hide it and return focus to whatever was active.
+Press **Alt+K** (or use the toolbar button) to show or hide the panel. Press **Esc** to hide it and return focus to whatever was active.
 
 ## Tabs
 

@@ -2,6 +2,8 @@ AutoFingers is Supervertaler's voice command and dictation engine. It lets you c
 
 Open it via **Sidekick → AutoFingers tab** (the microphone icon), or press **Ctrl+Alt+A** to toggle Always-On listening from anywhere.
 
+![](<../../.gitbook/assets/Supervertaler-Workbench-Sidekick-AutoFingers.png>)
+
 ---
 
 ## Two modes

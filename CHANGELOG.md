@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.19.47] – 2026-05-01
+
+### Fixed (chat status-bar model picker now syncs with AI Settings dialog)
+
+- **Changing the provider/model via the chat status-bar picker now stays in sync with the AI Settings dialog.** Previously, picking a model from the chat picker (e.g. *OpenAI → GPT 5.4 Mini*) would update the chat status bar and the file on disk, but the in-memory copy of `_settings` held by `TermLensEditorViewPart` wasn't refreshed. Opening the Settings dialog from the TermLens panel's gear icon would therefore show stale values (e.g. *OpenRouter / DeepSeek V4 Flash*) that didn't match the chat picker's selection. Reported by a user. The chat picker's `OnModelChangeRequested` now calls a new `TermLensEditorViewPart.NotifyAiSettingsChanged()` after saving — a lightweight refresh that reloads only the `AiSettings` portion of the on-disk settings, without rebuilding termbases.
+
+---
+
 ## [4.19.46] – 2026-05-01
 
 ### Added (TermLens popup – keyboard-driven metadata, snappier auto-close)

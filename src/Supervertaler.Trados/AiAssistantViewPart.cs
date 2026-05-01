@@ -371,6 +371,16 @@ namespace Supervertaler.Trados
 
                 UpdateProviderDisplay();
                 UpdateBatchProviderDisplay();
+
+                // Tell TermLensEditorViewPart to reload AiSettings from disk.
+                // Otherwise its in-memory settings stay on the OLD provider/
+                // model, so opening the Settings dialog from the TermLens
+                // panel's gear icon would show stale values that don't match
+                // the chat status bar. We use the lightweight NotifyAi-
+                // variant rather than the full NotifySettingsChanged so we
+                // don't pointlessly reload the termbase – AI provider/model
+                // changes don't affect terminology.
+                TermLensEditorViewPart.NotifyAiSettingsChanged();
             });
         }
 

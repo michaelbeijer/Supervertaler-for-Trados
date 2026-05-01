@@ -1505,6 +1505,26 @@ namespace Supervertaler.Trados
         }
 
         /// <summary>
+        /// Reloads only the AiSettings portion of this ViewPart's _settings
+        /// from disk. Called by AiAssistantViewPart when the user changes
+        /// the provider/model via the chat status-bar picker — TermLens
+        /// doesn't care about termbase reloads in that case, just needs
+        /// its in-memory copy of AiSettings refreshed so opening the
+        /// Settings dialog from this ViewPart's gear icon shows the
+        /// current values rather than stale ones.
+        /// </summary>
+        public static void NotifyAiSettingsChanged()
+        {
+            var instance = _currentInstance;
+            if (instance == null) return;
+            var fresh = TermLensSettings.Load();
+            if (instance._settings == null)
+                instance._settings = fresh;
+            else
+                instance._settings.AiSettings = fresh.AiSettings;
+        }
+
+        /// <summary>
         /// Reloads settings from disk. Called by AiAssistantViewPart after its
         /// settings dialog saves, so this ViewPart picks up changes made there.
         /// </summary>

@@ -818,7 +818,12 @@ namespace Supervertaler.Trados.Controls
         private void LayoutApiKeyRow()
         {
             if (_txtApiKey == null || _btnShowKey == null) return;
-            _btnShowKey.Location = new Point(Width - 16 - _btnShowKey.Width, _txtApiKey.Top);
+            // Use ClientSize.Width, NOT Width: when AutoScroll's vertical
+            // scrollbar appears (which happens because the AI Context section
+            // is taller than the panel), Width still reports the full panel
+            // size but ClientSize.Width is reduced by the scrollbar width.
+            // Using Width here makes the Show button slide under the scrollbar.
+            _btnShowKey.Location = new Point(ClientSize.Width - 16 - _btnShowKey.Width, _txtApiKey.Top);
             _txtApiKey.Width = _btnShowKey.Left - _txtApiKey.Left - 6;
         }
 
@@ -826,7 +831,8 @@ namespace Supervertaler.Trados.Controls
         {
             if (_clbAiTermbases == null) return;
             // Fit the list to the panel width (minus margins), clamped to a reasonable range
-            var w = Math.Max(200, Width - 32);
+            // Use ClientSize.Width (not Width) so we don't slide under the AutoScroll bar.
+            var w = Math.Max(200, ClientSize.Width - 32);
             _clbAiTermbases.Width = w;
         }
 
@@ -834,7 +840,10 @@ namespace Supervertaler.Trados.Controls
         {
             if (_cmbProvider == null || _cmbModel == null) return;
             var rightMargin = 16;
-            var w = Math.Max(120, Width - _cmbProvider.Left - rightMargin);
+            // Use ClientSize.Width (not Width) so the dropdowns don't extend
+            // under the AutoScroll vertical scrollbar when the AI Context
+            // section overflows the panel.
+            var w = Math.Max(120, ClientSize.Width - _cmbProvider.Left - rightMargin);
             _cmbProvider.Width = w;
             _cmbModel.Width = w;
         }

@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.19.48] – 2026-05-01
+
+### Fixed (AI Settings dialog right-edge clipping)
+
+- **Provider/Model dropdowns and the "Show" button no longer slide under the AutoScroll vertical scrollbar in the AI Settings tab.** When the dialog was resized larger than its default size, the dropdowns and the API-key Show button extended right up to the panel's right edge — but the right edge included the AutoScroll scrollbar's reserved area, so the controls visually clipped against (or hid behind) the scrollbar. Reported by a user. Fix: `LayoutProviderModelRows`, `LayoutApiKeyRow`, and `LayoutTermbasesList` now compute their right margin from `ClientSize.Width` (which excludes the scrollbar) rather than `Width` (which includes it). The dropdowns now keep a clean 16 px gap to the visible right edge regardless of the AutoScroll bar.
+
+---
+
 ## [4.19.47] – 2026-05-01
 
 ### Fixed (chat status-bar model picker now syncs with AI Settings dialog)

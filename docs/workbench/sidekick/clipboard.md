@@ -42,6 +42,12 @@ Click any item in the list to paste it. What happens:
 
 After pasting, the item is marked as used and appears greyed out. This makes it easy to track which clips you have already inserted in a session.
 
+## Deleting clips
+
+**Single item** – right-click any entry and choose **🗑 Delete**, or select it and press the **Delete** key.
+
+**All clips** – click **Clear all** in the top-right corner of the Clipboard tab, or right-click any entry and choose **Clear all**. This removes the entire history from both columns and cannot be undone.
+
 ---
 
 ## Keyboard shortcuts
@@ -52,6 +58,7 @@ After pasting, the item is marked as used and appears greyed out. This makes it 
 | **Right** | Move focus from the text column to the image column |
 | **Left** | Move focus from the image column back to the text column |
 | **Enter** | Paste the selected item |
+| **Delete** | Remove the selected item from history |
 
 Use **Tab** and **Shift+Tab** to move focus between the Clipboard panel and the Sidekick right-pane Menu.
 

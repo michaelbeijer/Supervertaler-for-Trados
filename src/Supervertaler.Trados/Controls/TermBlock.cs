@@ -527,9 +527,11 @@ namespace Supervertaler.Trados.Controls
         /// Builds the list of popup lines describing this block's term entries,
         /// including all metadata (definitions, domains, notes, URLs, synonyms).
         /// Used by both the hover-triggered TermPopup and by the keyboard
-        /// 'I' shortcut in the TermLens popup form.
+        /// 'I' shortcut in the TermLens popup form. Internal because
+        /// PopupLine itself is internal (no need to expose it across
+        /// assembly boundaries).
         /// </summary>
-        public List<PopupLine> BuildMetadataLines()
+        internal List<PopupLine> BuildMetadataLines()
         {
             var lines = new List<PopupLine>();
             if (_isForbidden)

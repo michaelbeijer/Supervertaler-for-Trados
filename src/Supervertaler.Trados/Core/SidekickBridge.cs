@@ -23,30 +23,70 @@ namespace Supervertaler.Trados.Core
         private static readonly object _lock = new object();
         private static bool _truncatedThisSession;
 
+        // Fallback path: %TEMP%\Supervertaler-bridge.log. Used as a *second*
+        // write target whenever we log, plus a *first* write target if the
+        // primary UserDataPath resolution throws or the directory can't be
+        // created. %TEMP% is always writable, so this guarantees we always
+        // get diagnostic output somewhere even if UserDataPath is broken.
+        private static string FallbackPath
+        {
+            get
+            {
+                try { return Path.Combine(Path.GetTempPath(), "Supervertaler-bridge.log"); }
+                catch { return null; }
+            }
+        }
+
         public static void Write(string message)
         {
-            try
+            var line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}\r\n";
+            lock (_lock)
             {
-                lock (_lock)
+                // First-write-of-session header, mirrored to both targets.
+                string header = null;
+                if (!_truncatedThisSession)
+                {
+                    header = $"--- Bridge session started at {DateTime.Now:O} " +
+                             $"(PID {System.Diagnostics.Process.GetCurrentProcess().Id}) ---\r\n";
+                    _truncatedThisSession = true;
+
+                    // Try to log the resolved UserDataPath so we can see WHERE
+                    // the plugin thinks the user data folder is.
+                    try
+                    {
+                        header += $"UserDataPath.Root  = {UserDataPath.Root}\r\n";
+                        header += $"TradosRuntimeDir   = {UserDataPath.TradosRuntimeDir}\r\n";
+                        header += $"SidekickBridgeFile = {UserDataPath.SidekickBridgeFile}\r\n";
+                    }
+                    catch (Exception ex)
+                    {
+                        header += $"UserDataPath resolution THREW: {ex.GetType().Name}: {ex.Message}\r\n";
+                    }
+                }
+
+                // Primary target: the user's Supervertaler data folder.
+                try
                 {
                     Directory.CreateDirectory(UserDataPath.TradosRuntimeDir);
                     var logPath = Path.Combine(UserDataPath.TradosRuntimeDir, "bridge.log");
-                    var line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}\r\n";
-
-                    if (!_truncatedThisSession)
-                    {
-                        // Truncate on first write of this plugin session so the log
-                        // reflects only the current Trados run.
-                        File.WriteAllText(logPath,
-                            $"--- Bridge session started at {DateTime.Now:O} (PID {System.Diagnostics.Process.GetCurrentProcess().Id}) ---\r\n");
-                        _truncatedThisSession = true;
-                    }
+                    if (header != null)
+                        File.WriteAllText(logPath, header);
                     File.AppendAllText(logPath, line);
                 }
-            }
-            catch
-            {
-                // Logging must never break the caller.
+                catch { /* primary write failed – fallback below will catch us */ }
+
+                // Fallback target: %TEMP%\Supervertaler-bridge.log.
+                try
+                {
+                    var fb = FallbackPath;
+                    if (fb != null)
+                    {
+                        if (header != null)
+                            File.WriteAllText(fb, header);
+                        File.AppendAllText(fb, line);
+                    }
+                }
+                catch { /* never let logging break the caller */ }
             }
         }
     }

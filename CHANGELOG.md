@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.19.51] – 2026-05-01
+
+### Diagnostics (Sidekick Bridge)
+
+- **Bridge log now ALSO writes to `%TEMP%\Supervertaler-bridge.log`** as a guaranteed-writable fallback. Diagnosing v4.19.50 where the user reported no `bridge.log` even appearing: this rules out the case where `UserDataPath.Root` resolves to a custom location, or where the user data folder isn't writable.
+- **Lifecycle tracing extended** – `BridgeLog.Write` now also fires from `AiAssistantViewPart.Initialize()` entry, so we can tell whether the ViewPart is even being instantiated by Trados (ViewParts are lazy – they only initialise when the user activates the panel).
+- **First log line of every session now records** the resolved `UserDataPath.Root`, `TradosRuntimeDir`, and `SidekickBridgeFile` paths so we can immediately see where the plugin is looking for its data folder.
+
+---
+
 ## [4.19.50] – 2026-05-01
 
 ### Diagnostics (Sidekick Bridge)

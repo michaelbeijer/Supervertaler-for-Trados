@@ -119,6 +119,7 @@ namespace Supervertaler.Trados
 
         protected override void Initialize()
         {
+            BridgeLog.Write("AiAssistantViewPart.Initialize() ENTERED");
             _currentInstance = this;
 
             // License check – show/hide upgrade overlay based on tier.
@@ -159,10 +160,12 @@ namespace Supervertaler.Trados
 
             if (!LicenseManager.Instance.HasAssistantAccess)
             {
+                BridgeLog.Write($"Initialize: HasAssistantAccess=false (tier={LicenseManager.Instance.CurrentTier}). Bridge will NOT start until license activates.");
                 _control.Value.ShowUpgradeRequired();
                 return;
             }
 
+            BridgeLog.Write($"Initialize: HasAssistantAccess=true (tier={LicenseManager.Instance.CurrentTier}). Calling InitializeFullIfNeeded.");
             InitializeFullIfNeeded();
         }
 

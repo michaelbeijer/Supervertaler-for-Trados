@@ -43,6 +43,19 @@ namespace Supervertaler.Trados.Controls
         private Color _originalHintColor;
         private System.Windows.Forms.Timer _hintRestoreTimer;
 
+        // Auto-close: poll the cursor position so any mouse movement closes
+        // the popup. Captured once in OnShown so the cursor's position at
+        // the moment the popup appears is the baseline.
+        private System.Windows.Forms.Timer _autoCloseTimer;
+        private Point _initialCursorPos;
+        private bool _cursorBaselineCaptured;
+
+        // Set to true while we're deliberately showing a companion form
+        // (the metadata TermPopup, or the term editor dialog). Suppresses
+        // the OnDeactivate-Close so showing those doesn't tear down the
+        // parent popup.
+        private bool _suppressDeactivateClose;
+
         public TermLensPopupForm(
             TermLensControl dockedControl,
             string sourceText,
@@ -85,7 +98,7 @@ namespace Supervertaler.Trados.Controls
                 Dock = DockStyle.Bottom,
                 AutoSize = false,
                 Height = UiScale.Pixels(18),
-                Text = "← → cycle  ·  Enter insert  ·  E edit  ·  Esc close",
+                Text = "← → cycle  ·  Enter insert  ·  E edit  ·  I info  ·  Esc close",
                 ForeColor = Color.FromArgb(120, 120, 120),
                 Font = new Font(Font.FontFamily, Font.Size - 1f, FontStyle.Regular),
                 TextAlign = ContentAlignment.MiddleLeft
@@ -249,13 +262,70 @@ namespace Supervertaler.Trados.Controls
             _insertByOneBasedIndex(idx);
         }
 
-        // Note: no OnDeactivate-Close. The chip-hover tooltip (TermPopup)
-        // briefly steals focus, which would close the popup mid-hover and
-        // strand the user. The popup is keyboard-only anyway – Esc closes,
-        // Ctrl-tap toggles. Mouse users can still click a chip to insert
-        // (which closes), or Esc, or click outside (which leaves it open
-        // until they press a key – a small papercut traded for not losing
-        // the popup to spurious focus events).
+        // Auto-close behaviour:
+        //   - Any mouse movement (>4 px from the baseline captured in OnShown)
+        //     closes the popup. Polled via a 75 ms timer so we don't need a
+        //     low-level Win32 mouse hook.
+        //   - Focus loss (switching apps, clicking outside) closes the popup
+        //     via OnDeactivate. The companion metadata TermPopup uses
+        //     WS_EX_NOACTIVATE so showing it does NOT trigger our deactivate.
+        //     The editor dialog flow sets _suppressDeactivateClose to keep the
+        //     two close paths from racing.
+        //   - Any key not handled by ProcessCmdKey closes the popup, except
+        //     pure-modifier presses (Ctrl/Shift/Alt alone) which would
+        //     otherwise close the popup the moment the user releases the
+        //     opening Ctrl-tap.
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            _initialCursorPos = Cursor.Position;
+            _cursorBaselineCaptured = true;
+
+            _autoCloseTimer = new System.Windows.Forms.Timer { Interval = 75 };
+            _autoCloseTimer.Tick += OnAutoCloseTick;
+            _autoCloseTimer.Start();
+        }
+
+        private void OnAutoCloseTick(object sender, EventArgs e)
+        {
+            if (!_cursorBaselineCaptured) return;
+            if (IsDisposed || !Visible) return;
+
+            var pos = Cursor.Position;
+            int dx = Math.Abs(pos.X - _initialCursorPos.X);
+            int dy = Math.Abs(pos.Y - _initialCursorPos.Y);
+            // 4 px tolerance: the cursor sometimes shifts by 1 px when a new
+            // top-most window appears. Anything past that is the user moving
+            // the mouse, which signals "I'm doing something else now".
+            if (dx > 4 || dy > 4)
+            {
+                _autoCloseTimer.Stop();
+                Close();
+            }
+        }
+
+        protected override void OnDeactivate(EventArgs e)
+        {
+            base.OnDeactivate(e);
+            if (_suppressDeactivateClose) return;
+            if (IsDisposed) return;
+            Close();
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            // Tear down auxiliary state regardless of how we got here.
+            _autoCloseTimer?.Stop();
+            _autoCloseTimer?.Dispose();
+            _autoCloseTimer = null;
+            _hintRestoreTimer?.Stop();
+            _hintRestoreTimer?.Dispose();
+            _hintRestoreTimer = null;
+            // If the metadata popup is still showing, hide it too.
+            try { TermPopup.GetInstance().HidePopup(); } catch { /* ignore */ }
+            base.OnFormClosed(e);
+        }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
@@ -282,11 +352,71 @@ namespace Supervertaler.Trados.Controls
                     EditCurrentMatch();
                     return true;
 
+                case Keys.I:
+                    ToggleMetadataForCurrent();
+                    return true;
+
                 case Keys.Escape:
                     Close();
                     return true;
             }
+
+            // Any other keypress closes the popup, except pure modifier
+            // presses (Ctrl/Shift/Alt on their own). Without this carve-out,
+            // the keyup that follows the opening Ctrl-tap would close the
+            // popup the moment it appeared.
+            if (!IsPureModifier(keyData))
+            {
+                Close();
+                return true;
+            }
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private static bool IsPureModifier(Keys keyData)
+        {
+            var key = keyData & Keys.KeyCode;
+            return key == Keys.None
+                || key == Keys.ControlKey || key == Keys.LControlKey || key == Keys.RControlKey
+                || key == Keys.ShiftKey   || key == Keys.LShiftKey   || key == Keys.RShiftKey
+                || key == Keys.Menu       || key == Keys.LMenu       || key == Keys.RMenu
+                || key == Keys.LWin       || key == Keys.RWin
+                || key == Keys.Capital    || key == Keys.NumLock     || key == Keys.Scroll;
+        }
+
+        /// <summary>
+        /// Toggles the companion metadata popup (TermPopup) for the
+        /// currently-highlighted block. If the popup is already showing,
+        /// hide it; otherwise build the metadata lines for the current block
+        /// and show it below the chip. TermPopup uses WS_EX_NOACTIVATE so
+        /// showing it does not steal focus from this form.
+        /// </summary>
+        private void ToggleMetadataForCurrent()
+        {
+            if (_currentIndex < 0 || _currentIndex >= _blocks.Count) return;
+            var block = _blocks[_currentIndex];
+            var popup = TermPopup.GetInstance();
+
+            if (popup.Visible)
+            {
+                popup.HidePopup();
+                return;
+            }
+
+            var lines = block.BuildMetadataLines();
+            // Show the metadata popup. WS_EX_NOACTIVATE prevents it from
+            // stealing focus, so OnDeactivate won't fire and tear us down.
+            // The suppress flag is a defence-in-depth in case the platform
+            // briefly raises a deactivate anyway on some Windows versions.
+            _suppressDeactivateClose = true;
+            try
+            {
+                popup.ShowBelow(block, lines);
+            }
+            finally
+            {
+                _suppressDeactivateClose = false;
+            }
         }
 
         /// <summary>
@@ -326,6 +456,13 @@ namespace Supervertaler.Trados.Controls
             // Snapshot the entry list – block.Entries is a live read-only
             // view that's invalid after the popup disposes.
             var allEntries = new List<TermEntry>(block.Entries);
+
+            // We deliberately Hide() before Close()-ing in BeginInvoke. Without
+            // this flag, the Hide() would trigger OnDeactivate → Close(), and
+            // then BeginInvoke's Close() would race with the editor open. The
+            // flag tells OnDeactivate to stand down for this transition; the
+            // BeginInvoke handler is the authoritative closer.
+            _suppressDeactivateClose = true;
 
             // 1. Hide immediately so the popup is visually gone right away.
             Hide();

@@ -515,77 +515,88 @@ namespace Supervertaler.Trados.Controls
             // Show interactive popup with all translations and metadata
             if (_entries.Count > 0)
             {
-                var lines = new List<PopupLine>();
-                if (_isForbidden)
-                    lines.Add(new PopupLine("\ud83d\udeab Forbidden \u2014 do not use", PopupLineType.Tag));
-                if (_isMultiTerm)
-                    lines.Add(new PopupLine("[MultiTerm \u2014 read-only]", PopupLineType.Tag));
-                if (_isNonTranslatable)
-                    lines.Add(new PopupLine("[Non-translatable]", PopupLineType.Tag));
-                bool isFirstEntry = true;
-                foreach (var entry in _entries)
-                {
-                    if (!isFirstEntry)
-                        lines.Add(new PopupLine("", PopupLineType.Separator));
-                    isFirstEntry = false;
-
-                    bool isAbbrMatch = _abbreviationMatchIds.Contains(entry.Id);
-                    string heading;
-                    if (isAbbrMatch && !string.IsNullOrEmpty(entry.TargetAbbreviation))
-                        heading = $"{entry.SourceAbbreviation} \u2192 {entry.TargetAbbreviation}";
-                    else
-                        heading = $"{entry.SourceTerm} \u2192 {entry.TargetTerm}";
-                    if (!string.IsNullOrEmpty(entry.TermbaseName))
-                        heading += $" [{entry.TermbaseName}]";
-                    heading += $" (ID {entry.Id})";
-                    lines.Add(new PopupLine(heading, PopupLineType.Heading));
-
-                    // Show the complementary form (abbreviation or full term)
-                    if (!string.IsNullOrEmpty(entry.SourceAbbreviation) &&
-                        !string.IsNullOrEmpty(entry.TargetAbbreviation))
-                    {
-                        if (isAbbrMatch)
-                            lines.Add(new PopupLine($"  Full: {entry.SourceTerm} \u2192 {entry.TargetTerm}", PopupLineType.Synonym));
-                        else
-                            lines.Add(new PopupLine($"  Abbr: {entry.SourceAbbreviation} \u2192 {entry.TargetAbbreviation}", PopupLineType.Synonym));
-                    }
-
-                    // Source synonyms (alternative source forms that match this entry)
-                    if (entry.SourceSynonyms != null && entry.SourceSynonyms.Count > 0)
-                    {
-                        var srcSynTexts = string.Join(", ",
-                            entry.SourceSynonyms
-                                .Where(s => !string.IsNullOrEmpty(s.Text))
-                                .Select(s => s.Text));
-                        if (!string.IsNullOrEmpty(srcSynTexts))
-                            lines.Add(new PopupLine($"  Also: {srcSynTexts}", PopupLineType.Synonym));
-                    }
-
-                    // Target synonyms (alternative translations)
-                    foreach (var syn in entry.TargetSynonyms)
-                        lines.Add(new PopupLine($"  \u2022 {syn}", PopupLineType.Synonym));
-
-                    bool hasDefOrDomain = !string.IsNullOrEmpty(entry.Definition) || !string.IsNullOrEmpty(entry.Domain);
-                    if (hasDefOrDomain)
-                        lines.Add(new PopupLine("", PopupLineType.Plain)); // space before def/domain
-                    if (!string.IsNullOrEmpty(entry.Definition))
-                        lines.Add(new PopupLine("  Def:", entry.Definition, PopupLineType.MarkdownLabelled));
-                    if (!string.IsNullOrEmpty(entry.Domain))
-                        lines.Add(new PopupLine("  Domain:", entry.Domain, PopupLineType.MetaLabelled));
-                    if (!string.IsNullOrEmpty(entry.Notes))
-                    {
-                        lines.Add(new PopupLine("", PopupLineType.Plain)); // space before notes
-                        lines.Add(new PopupLine("  Notes:", entry.Notes, PopupLineType.MarkdownLabelled));
-                    }
-                    if (!string.IsNullOrEmpty(entry.Url))
-                        lines.Add(new PopupLine("  URL:", entry.Url, PopupLineType.MetaLabelled));
-                }
-
+                var lines = BuildMetadataLines();
                 var popup = TermPopup.GetInstance();
                 popup.ShowBelow(this, lines);
             }
 
             base.OnMouseEnter(e);
+        }
+
+        /// <summary>
+        /// Builds the list of popup lines describing this block's term entries,
+        /// including all metadata (definitions, domains, notes, URLs, synonyms).
+        /// Used by both the hover-triggered TermPopup and by the keyboard
+        /// 'I' shortcut in the TermLens popup form.
+        /// </summary>
+        public List<PopupLine> BuildMetadataLines()
+        {
+            var lines = new List<PopupLine>();
+            if (_isForbidden)
+                lines.Add(new PopupLine("\ud83d\udeab Forbidden \u2014 do not use", PopupLineType.Tag));
+            if (_isMultiTerm)
+                lines.Add(new PopupLine("[MultiTerm \u2014 read-only]", PopupLineType.Tag));
+            if (_isNonTranslatable)
+                lines.Add(new PopupLine("[Non-translatable]", PopupLineType.Tag));
+            bool isFirstEntry = true;
+            foreach (var entry in _entries)
+            {
+                if (!isFirstEntry)
+                    lines.Add(new PopupLine("", PopupLineType.Separator));
+                isFirstEntry = false;
+
+                bool isAbbrMatch = _abbreviationMatchIds.Contains(entry.Id);
+                string heading;
+                if (isAbbrMatch && !string.IsNullOrEmpty(entry.TargetAbbreviation))
+                    heading = $"{entry.SourceAbbreviation} \u2192 {entry.TargetAbbreviation}";
+                else
+                    heading = $"{entry.SourceTerm} \u2192 {entry.TargetTerm}";
+                if (!string.IsNullOrEmpty(entry.TermbaseName))
+                    heading += $" [{entry.TermbaseName}]";
+                heading += $" (ID {entry.Id})";
+                lines.Add(new PopupLine(heading, PopupLineType.Heading));
+
+                // Show the complementary form (abbreviation or full term)
+                if (!string.IsNullOrEmpty(entry.SourceAbbreviation) &&
+                    !string.IsNullOrEmpty(entry.TargetAbbreviation))
+                {
+                    if (isAbbrMatch)
+                        lines.Add(new PopupLine($"  Full: {entry.SourceTerm} \u2192 {entry.TargetTerm}", PopupLineType.Synonym));
+                    else
+                        lines.Add(new PopupLine($"  Abbr: {entry.SourceAbbreviation} \u2192 {entry.TargetAbbreviation}", PopupLineType.Synonym));
+                }
+
+                // Source synonyms (alternative source forms that match this entry)
+                if (entry.SourceSynonyms != null && entry.SourceSynonyms.Count > 0)
+                {
+                    var srcSynTexts = string.Join(", ",
+                        entry.SourceSynonyms
+                            .Where(s => !string.IsNullOrEmpty(s.Text))
+                            .Select(s => s.Text));
+                    if (!string.IsNullOrEmpty(srcSynTexts))
+                        lines.Add(new PopupLine($"  Also: {srcSynTexts}", PopupLineType.Synonym));
+                }
+
+                // Target synonyms (alternative translations)
+                foreach (var syn in entry.TargetSynonyms)
+                    lines.Add(new PopupLine($"  \u2022 {syn}", PopupLineType.Synonym));
+
+                bool hasDefOrDomain = !string.IsNullOrEmpty(entry.Definition) || !string.IsNullOrEmpty(entry.Domain);
+                if (hasDefOrDomain)
+                    lines.Add(new PopupLine("", PopupLineType.Plain)); // space before def/domain
+                if (!string.IsNullOrEmpty(entry.Definition))
+                    lines.Add(new PopupLine("  Def:", entry.Definition, PopupLineType.MarkdownLabelled));
+                if (!string.IsNullOrEmpty(entry.Domain))
+                    lines.Add(new PopupLine("  Domain:", entry.Domain, PopupLineType.MetaLabelled));
+                if (!string.IsNullOrEmpty(entry.Notes))
+                {
+                    lines.Add(new PopupLine("", PopupLineType.Plain)); // space before notes
+                    lines.Add(new PopupLine("  Notes:", entry.Notes, PopupLineType.MarkdownLabelled));
+                }
+                if (!string.IsNullOrEmpty(entry.Url))
+                    lines.Add(new PopupLine("  URL:", entry.Url, PopupLineType.MetaLabelled));
+            }
+            return lines;
         }
 
         protected override void OnMouseLeave(EventArgs e)

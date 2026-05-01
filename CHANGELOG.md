@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.19.46] – 2026-05-01
+
+### Added (TermLens popup – keyboard-driven metadata, snappier auto-close)
+
+- **Press `I` in the TermLens popup to show extra metadata for the highlighted match.** The same metadata that previously only appeared on mouse hover (definitions, domain, notes, URL, synonyms) can now be revealed entirely from the keyboard. Press `I` again to hide it. The hint at the bottom of the popup has been updated to `← → cycle  ·  Enter insert  ·  E edit  ·  I info  ·  Esc close`. Only affects the floating Ctrl-tap popup; the dockable TermLens pane is unchanged.
+- **The TermLens popup now closes automatically on any mouse movement, focus loss, or unrelated keypress.** Previously it would stay open after switching to another application until the user pressed Ctrl or Esc. Now: moving the mouse more than ~4 px, switching to another window, or pressing any key outside the popup's keyboard set (cycle / Enter / E / I / Esc) closes it immediately. Pure modifier presses (Ctrl/Shift/Alt on their own) are ignored so the popup doesn't tear itself down on the keyup that follows the opening Ctrl-tap. The popup is fully keyboard-driven; the cost of this snappier auto-close is that mouse-clicking a chip to insert no longer works (the dockable pane still supports mouse interaction). Only affects the floating Ctrl-tap popup.
+
+---
+
 ## [4.19.45] – 2026-05-01
 
 ### Added (DeepSeek provider)

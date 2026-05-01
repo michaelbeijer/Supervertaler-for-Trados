@@ -1,5 +1,3 @@
-# Providers and Models
-
 {% hint style="info" %}
 You are viewing help for **Supervertaler for Trados** -- the Trados Studio plugin. Looking for help with the standalone app? Visit [Supervertaler Workbench help](https://supervertaler.gitbook.io/help/workbench/).
 {% endhint %}
@@ -15,23 +13,27 @@ The current provider and model are shown in the status area at the bottom of the
 
 ## Supported Providers
 
-| Provider      | Models                                                         |
-| ------------- | -------------------------------------------------------------- |
-| **OpenAI**    | GPT-5.4, GPT-5.4 Mini                                          |
-| **Anthropic** | Claude Sonnet 4.6, Claude Haiku 4.5, Claude Opus 4.6           |
-| **Google**    | Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3.1 Pro (Preview), Gemma 4 31B, Gemma 4 26B MoE |
-| **Grok**      | Grok 4.20, Grok 4.1 Fast, Grok 4.20 (Reasoning)               |
-| **Mistral**   | Mistral Large, Mistral Small, Mistral Nemo                     |
-| **Ollama**    | TranslateGemma, Qwen 3, Aya Expanse (local, no API key needed) |
-| **Custom**    | Any OpenAI-compatible API endpoint                             |
+| Provider | Models |
+| -------- | ------ |
+| **OpenAI** | GPT-5.4, GPT-5.4 Mini |
+| **Anthropic** | Claude Sonnet 4.6, Claude Haiku 4.5, Claude Opus 4.6, Claude Opus 4.7 |
+| **Google** | Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3.1 Pro (Preview), Gemma 4 31B, Gemma 4 26B MoE |
+| **Grok** | Grok 4.20, Grok 4.1 Fast, Grok 4.20 (Reasoning) |
+| **Mistral** | Mistral Large, Mistral Small, Mistral Nemo |
+| **DeepSeek** | DeepSeek V4 Pro, DeepSeek V4 Flash |
+| **OpenRouter** | Claude, GPT, Gemini, DeepSeek, and 200+ others via a single API key |
+| **Ollama** | TranslateGemma, Qwen 3, Aya Expanse (local, no API key needed) |
+| **Custom** | Any OpenAI-compatible API endpoint |
 
 {% hint style="info" %}
-If you want privacy or offline use, try [Ollama](https://supervertaler.gitbook.io/supervertaler/ai-translation/ollama) with a local model. No API key or internet connection needed.
+If you want privacy or offline use, try **Ollama** with a local model. No API key or internet connection needed.
+
+If you prefer a single account that covers many providers, **OpenRouter** gives you access to 200+ models with one key.
 {% endhint %}
 
 ## Choosing a Model
 
-For everyday translation questions, a smaller and cheaper model like **GPT-5.4 Mini** or **Claude Haiku 4.5** works well. For complex tasks like document analysis, prompt generation, or when you need the highest quality suggestions, use a larger model like **Claude Sonnet 4.6** or **GPT-5.4**.
+For everyday translation questions, a smaller and cheaper model like **GPT-5.4 Mini**, **Claude Haiku 4.5**, or **DeepSeek V4 Flash** works well. For complex tasks like document analysis, prompt generation, or when you need the highest quality suggestions, use a larger model like **Claude Sonnet 4.6**, **GPT-5.4**, or **DeepSeek V4 Pro**.
 
 Some features are provider-specific:
 

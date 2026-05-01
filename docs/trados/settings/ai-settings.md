@@ -19,6 +19,7 @@ Choose one of the supported AI providers:
 | **Gemini (Google)** | Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3.1 Pro (Preview), Gemma 4 31B, Gemma 4 26B MoE |
 | **Grok (xAI)** | Grok 4.20, Grok 4.1 Fast, Grok 4.20 (Reasoning) |
 | **Mistral AI** | Mistral Large, Mistral Small, Mistral Nemo |
+| **DeepSeek** | DeepSeek V4 Pro, DeepSeek V4 Flash |
 | **[OpenRouter](#openrouter)** | Access 200+ models from all major providers with a single API key |
 | **Ollama (Local)** | Run models locally, no API key required |
 | **Custom (OpenAI-compatible)** | Any provider with an OpenAI-compatible API |
@@ -44,6 +45,18 @@ http://localhost:11434
 ```
 
 Change this only if you are running Ollama on a different port or a remote machine.
+
+## DeepSeek
+
+[DeepSeek](https://platform.deepseek.com) is a Chinese AI lab offering high-quality models with competitive pricing.
+
+To use DeepSeek directly:
+
+1. Create an account at [platform.deepseek.com](https://platform.deepseek.com)
+2. Go to **API Keys** and create a key
+3. In Supervertaler, select **DeepSeek** as the provider and paste your key
+
+DeepSeek models are also available via [OpenRouter](#openrouter) if you prefer a single-key setup.
 
 ## Custom OpenAI-compatible provider
 
@@ -93,6 +106,8 @@ The model dropdown includes a curated selection of the best models for translati
 | **Gemma 4 26B MoE** | Open-source – near-31B quality at a fraction of the cost |
 | **Mistral Small 4** | Very fast and cheap – good multilingual support |
 | **Qwen 3.6 Plus (Free)** | Free – no API costs, good general-purpose quality |
+| **DeepSeek V4 Pro** | DeepSeek flagship – strong multilingual, competitive pricing |
+| **DeepSeek V4 Flash** | DeepSeek fast – great for high-volume translation |
 
 ### Using any OpenRouter model
 

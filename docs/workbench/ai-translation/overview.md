@@ -1,15 +1,20 @@
-# AI Translation Overview
-
 Supervertaler integrates with leading AI language models for high-quality translation.
 
 ## Supported Providers
 
-| Provider | Models | Speed | Quality | Cost |
-|----------|--------|-------|---------|------|
-| **OpenAI** | GPT-4o, GPT-4-turbo | ⚡ Fast | ⭐⭐⭐⭐⭐ | $$ |
-| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Opus | ⚡ Fast | ⭐⭐⭐⭐⭐ | $$ |
-| **Google** | Gemini 1.5 Pro | ⚡ Fast | ⭐⭐⭐⭐ | $ |
-| **Ollama** | Llama 3, Mistral, etc. | 🐢 Varies | ⭐⭐⭐-⭐⭐⭐⭐ | Free |
+| Provider | Models |
+|----------|--------|
+| **OpenAI** | GPT-5.4, GPT-5.4 Mini |
+| **Anthropic** | Claude Sonnet 4.6, Claude Haiku 4.5, Claude Opus 4.7 |
+| **Google** | Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 3.1 Pro (Preview) |
+| **Grok** | Grok 4.20, Grok 4.1 Fast |
+| **Mistral** | Mistral Large, Mistral Small, Mistral Nemo |
+| **DeepSeek** | DeepSeek V4 Pro, DeepSeek V4 Flash |
+| **OpenRouter** | 200+ models via a single API key |
+| **Ollama** | TranslateGemma, Qwen 3, Aya Expanse (local, free) |
+| **Custom** | Any OpenAI-compatible endpoint |
+
+See [Supported LLM Providers](providers.md) for setup instructions for each provider.
 
 ## Quick Start
 

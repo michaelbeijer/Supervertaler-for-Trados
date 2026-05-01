@@ -1,106 +1,55 @@
-# Setting Up API Keys
+To use AI translation you need an API key from at least one provider. Enter your key in **Settings → AI Settings**.
 
-To use AI translation, you need API keys from one or more LLM providers.
+## Supported providers
 
-## Supported Providers
+| Provider | Where to get a key |
+|----------|--------------------|
+| **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+| **Anthropic (Claude)** | [console.anthropic.com](https://console.anthropic.com) |
+| **Google (Gemini)** | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| **Grok (xAI)** | [console.x.ai](https://console.x.ai) |
+| **Mistral AI** | [console.mistral.ai](https://console.mistral.ai) |
+| **DeepSeek** | [platform.deepseek.com](https://platform.deepseek.com) |
+| **OpenRouter** (200+ models, one key) | [openrouter.ai/keys](https://openrouter.ai/keys) |
+| **Ollama** | No key needed – runs locally |
 
-| Provider | Models | Best For |
-|----------|--------|----------|
-| **OpenAI** | GPT-4o, GPT-4-turbo, GPT-3.5 | General translation, fast responses |
-| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Opus | Complex texts, nuanced writing |
-| **Google** | Gemini Pro, Gemini Ultra | Multilingual content |
-| **Ollama** | Llama, Mistral, etc. | Free, offline, privacy |
+## Entering a key
 
-## Getting API Keys
+1. Open **Settings → AI Settings**
+2. Select your provider from the **Provider** dropdown
+3. Paste your API key into the **API Key** field
+4. Click **Test Connection** to verify
+5. Save settings
 
-### OpenAI
+Keys are stored locally and are only sent to the provider's own API endpoint.
 
-1. Go to [platform.openai.com](https://platform.openai.com)
-2. Sign up or log in
-3. Navigate to **API Keys** in the sidebar
-4. Click **Create new secret key**
-5. Copy the key (it won't be shown again!)
+## Switching providers
 
-{% hint style="warning" %}
-OpenAI requires a paid account with credits. New accounts may get free trial credits.
-{% endhint %}
+You can configure keys for multiple providers in the same settings panel. Switch between them without re-entering credentials – the key for each provider is remembered independently.
 
-### Anthropic
+## Using Ollama (no key required)
 
-1. Go to [console.anthropic.com](https://console.anthropic.com)
-2. Sign up or log in
-3. Navigate to **API Keys**
-4. Click **Create Key**
-5. Copy the key
+Ollama runs models entirely on your machine. No API key or internet connection is needed.
 
-### Google (Gemini)
+See [Ollama Setup](../ai-translation/ollama.md) for download and configuration instructions.
 
-1. Go to [makersuite.google.com](https://makersuite.google.com)
-2. Sign in with your Google account
-3. Click **Get API key**
-4. Create a key for a new or existing project
-5. Copy the key
+## Using OpenRouter (one key for everything)
 
-### Ollama (Free, Local)
+If you prefer not to manage multiple accounts, OpenRouter lets you access 200+ models from all major providers with a single API key. Create an account at [openrouter.ai](https://openrouter.ai) and paste your key into the **OpenRouter** provider slot.
 
-Ollama runs models locally - no API key needed!
-
-1. Download from [ollama.ai](https://ollama.ai)
-2. Install and run Ollama
-3. Download a model: `ollama pull llama2`
-4. Supervertaler will detect it automatically
-
-## Adding Keys to Supervertaler
-
-### Method 1: Settings Dialog (Recommended)
-
-1. Go to **Settings** tab
-2. Find the **LLM Settings** section
-3. Enter your API keys in the appropriate fields
-4. Click **Save**
-
-### Method 2: api_keys.txt File
-
-Create or edit `api_keys.txt` in the Supervertaler folder:
-
-```
-openai_api_key=sk-your-key-here
-anthropic_api_key=sk-ant-your-key-here
-google_api_key=AIza-your-key-here
-```
-
-{% hint style="info" %}
-**Security:** The `api_keys.txt` file is gitignored and never uploaded to GitHub.
-{% endhint %}
-
-## Testing Your Setup
-
-1. Import a document or create a new project
-2. Select a segment
-3. Press `Ctrl+T` to translate
-4. If successful, you'll see the translation appear
-
-### Troubleshooting
+## Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
-| "Invalid API key" | Double-check the key, ensure no extra spaces |
-| "Rate limit exceeded" | Wait a minute, or upgrade your API plan |
-| "Model not found" | Check if the model name is correct in settings |
-| No response | Check your internet connection |
-
-## Choosing a Provider
-
-**For beginners:** Start with OpenAI GPT-4o - it's fast, reliable, and has good translation quality.
-
-**For cost-conscious users:** Use Ollama with a local model like Llama 3 - completely free!
-
-**For sensitive content:** Use Ollama (data stays on your machine) or Anthropic Claude.
+| "Invalid API key" | Double-check the key; ensure no leading or trailing spaces |
+| "Rate limit exceeded" | Wait a moment, or upgrade your API plan |
+| "Model not found" | Check the model name in settings; it may have been updated |
+| No response | Check your internet connection and that the provider's service is up |
 
 ---
 
-## Next Steps
+## Next steps
 
-- [Create your first translation project](first-project.md)
-- [Learn about AI translation options](../ai-translation/overview.md)
-- [Set up custom prompts](../ai-translation/prompts.md)
+- [Create your first project](first-project.md)
+- [Supported LLM Providers](../ai-translation/providers.md)
+- [AI Translation Overview](../ai-translation/overview.md)

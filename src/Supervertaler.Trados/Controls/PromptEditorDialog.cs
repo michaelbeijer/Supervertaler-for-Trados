@@ -191,6 +191,9 @@ namespace Supervertaler.Trados.Controls
                 WordWrap = true,
                 AcceptsReturn = true,
                 AcceptsTab = true,
+                // TextBox.MaxLength defaults to Int16.MaxValue (32767) and silently
+                // truncates pastes past that – patent-sized prompts hit it instantly.
+                MaxLength = int.MaxValue,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom
             };
             _txtContent.Width = ClientSize.Width - 24;

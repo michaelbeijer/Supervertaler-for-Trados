@@ -277,8 +277,23 @@ namespace Supervertaler.Trados.Settings
                     return s;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                // Log the failure to a sidecar file so a future regression
+                // surfaces immediately instead of silently wiping the user's
+                // saved settings (the exact failure mode of the v4.19.52 bug).
+                try
+                {
+                    var dir = Path.GetDirectoryName(SettingsFilePath);
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        Directory.CreateDirectory(dir);
+                        var logPath = Path.Combine(dir, "settings-load-errors.log");
+                        File.AppendAllText(logPath,
+                            $"[{DateTime.Now:O}] {ex.GetType().FullName}: {ex.Message}\r\n{ex.StackTrace}\r\n\r\n");
+                    }
+                }
+                catch { /* logging must never throw out of Load */ }
                 return new TermLensSettings();
             }
         }
@@ -362,6 +377,46 @@ namespace Supervertaler.Trados.Settings
             catch
             {
                 // Silently ignore save failures
+            }
+        }
+
+        /// <summary>
+        /// Round-trips a default <see cref="TermLensSettings"/> through the same
+        /// DataContractJsonSerializer pipeline that <see cref="Load"/> and
+        /// <see cref="Save"/> use. Returns <c>null</c> on success or an error
+        /// description on failure.
+        ///
+        /// Guards against the silent-data-loss class of bug introduced in
+        /// v4.19.52 (commit 71af680), where adding a second
+        /// <c>[OnDeserializing]</c> method to <see cref="AiSettings"/> caused
+        /// <see cref="System.Runtime.Serialization.InvalidDataContractException"/>
+        /// on every deserialize attempt – which <c>Load()</c>'s catch-all then
+        /// swallowed, returning fresh defaults and making every saved setting
+        /// vanish from the user's perspective. Plugin startup calls this and
+        /// logs the result, so any future contract violation surfaces
+        /// immediately in the plugin log instead of after users notice their
+        /// settings have disappeared.
+        /// </summary>
+        public static string RunStartupSelfTest()
+        {
+            try
+            {
+                var sample = new TermLensSettings();
+                var s = new DataContractJsonSerializerSettings { UseSimpleDictionaryFormat = true };
+                var serializer = new DataContractJsonSerializer(typeof(TermLensSettings), s);
+                using (var ms = new MemoryStream())
+                {
+                    serializer.WriteObject(ms, sample);
+                    ms.Position = 0;
+                    var roundTripped = serializer.ReadObject(ms);
+                    if (roundTripped == null)
+                        return "ReadObject returned null";
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return ex.GetType().FullName + ": " + ex.Message;
             }
         }
     }

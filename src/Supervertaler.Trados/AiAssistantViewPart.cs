@@ -122,6 +122,23 @@ namespace Supervertaler.Trados
             BridgeLog.Write("AiAssistantViewPart.Initialize() ENTERED");
             _currentInstance = this;
 
+            // Regression guard for the v4.19.52 silent-data-loss bug. If the
+            // DataContractJsonSerializer can't round-trip a default
+            // TermLensSettings, Load() will swallow the exception and return
+            // fresh defaults – making every saved setting vanish. Logging the
+            // failure here surfaces it in bridge.log immediately instead of
+            // after users notice their settings have disappeared.
+            var selfTestError = TermLensSettings.RunStartupSelfTest();
+            if (selfTestError != null)
+            {
+                BridgeLog.Write("CRITICAL: TermLensSettings.RunStartupSelfTest FAILED: " + selfTestError);
+                BridgeLog.Write("CRITICAL: Saved settings will appear empty until this is fixed. Likely cause: duplicate [OnDeserializing]/[OnSerializing]/[OnDeserialized]/[OnSerialized] callback in a [DataContract] type.");
+            }
+            else
+            {
+                BridgeLog.Write("TermLensSettings.RunStartupSelfTest passed.");
+            }
+
             // License check – show/hide upgrade overlay based on tier.
             // When the user activates a licence mid-session (after Initialize
             // returned early due to no access), run the deferred full init so

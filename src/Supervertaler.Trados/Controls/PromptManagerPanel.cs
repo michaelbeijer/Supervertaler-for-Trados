@@ -904,10 +904,14 @@ namespace Supervertaler.Trados.Controls
                     Tag = prompt
                 };
 
-                // Active prompt gets bold + accent color
+                // Active prompt gets accent color. Bold NodeFont triggers a
+                // WinForms TreeView clipping bug (the node's display rect is
+                // measured with the regular font and never re-measured for the
+                // bold font, so the right edge of the bold text gets cut off
+                // after the dialog is reopened). The 📌 emoji + blue colour
+                // are already a strong enough active marker.
                 if (isActive)
                 {
-                    node.NodeFont = new Font(_tvPrompts.Font, FontStyle.Bold);
                     node.ForeColor = Color.FromArgb(0, 90, 158); // Supervertaler blue
                 }
                 else

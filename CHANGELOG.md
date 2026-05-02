@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.19.54] – 2026-05-02
+
+### Fixed (critical settings-loss regression introduced in v4.19.52)
+
+- **Every saved setting appeared empty.** v4.19.52's "Sidekick Bridge default-true now applies to upgrading users" commit added a second `[OnDeserializing]` callback to `AiSettings` while one already existed. `DataContractJsonSerializer` rejects multiple methods marked with the same callback attribute and throws `InvalidDataContractException` on the first deserialise attempt. `TermLensSettings.Load()`'s broad `catch` swallowed the exception and returned `new TermLensSettings()`, so from the user's perspective every saved setting vanished: termbase disconnected, all termbases reverted to Read = true (because `DisabledTermbaseIds` came back empty), the "share usage statistics?" prompt re-appeared on every Trados start (because `UsageStatisticsAsked` was reset to `false`), QuickLauncher folders rendered as collapsed submenus instead of inline sections (because `QuickLauncherFlatFolders` was empty), QuickLauncher slot shortcuts disappeared (because `QuickLauncherSlots` was empty), and the Settings dialog opened at minimum size every time (because `SettingsFormWidth/Height` were `0`). The settings.json on disk was never corrupted – it simply wasn't being read. Fix: merged the two `[OnDeserializing]` methods into a single callback. Documented the constraint in the source so future contributors don't repeat the mistake.
+- **Edit Prompt dialog truncated pastes longer than 32 767 characters.** `TextBox.MaxLength` defaults to `Int16.MaxValue`, which silently drops anything past that point. Patent-sized prompts hit it instantly. Fix: `MaxLength = int.MaxValue` on the prompt-content textbox.
+- **Active-prompt tree node label clipped on the right edge** after closing and reopening Settings. Setting `TreeNode.NodeFont` to bold triggers a long-standing WinForms TreeView bug: the node's display rectangle is measured with the regular font and never re-measured for the bold font, so bold characters past the regular-font width get cut off. Fix: dropped the bold; the 📌 emoji + accent colour are already a strong active-prompt marker.
+
+### Added (regression guard)
+
+- **Plugin startup now runs a serialize/deserialize self-test on `TermLensSettings` and writes the result to `bridge.log`.** Round-trips a default `TermLensSettings` through the same `DataContractJsonSerializer` pipeline that `Load`/`Save` use. Any future `[DataContract]` attribute violation – duplicate `[OnDeserializing]`, malformed `[DataMember]`, etc. – surfaces immediately in the plugin log instead of after users notice their settings have disappeared.
+- **`TermLensSettings.Load()` no longer silently swallows exceptions.** Unexpected failures are logged with full type, message, and stack trace to `<root>/trados/settings/settings-load-errors.log` so a future regression in this code path is observable.
+
+---
+
 ## [4.19.52] – 2026-05-01
 
 ### Fixed (Sidekick Bridge default-true behaviour for existing users)

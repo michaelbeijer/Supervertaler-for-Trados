@@ -81,22 +81,6 @@ namespace Supervertaler.Trados.Settings
         public bool SidekickBridgeEnabled { get; set; } = true;
 
         /// <summary>
-        /// Sets the default values for properties that were added after the
-        /// first version of AiSettings. <c>DataContractJsonSerializer</c> skips
-        /// constructors (and therefore property initialisers) during
-        /// deserialization, so properties not present in older settings.json
-        /// files would otherwise come back with their bool/int/string TYPE
-        /// defaults rather than the initialiser values. This callback runs
-        /// BEFORE deserialization, so any value present in the JSON still
-        /// overrides what we set here.
-        /// </summary>
-        [OnDeserializing]
-        internal void SetDefaultsBeforeDeserialization(StreamingContext context)
-        {
-            SidekickBridgeEnabled = true;
-        }
-
-        /// <summary>
         /// Relative path of the selected custom prompt from the prompt library.
         /// Empty string means no custom prompt (use default system prompt only).
         /// </summary>
@@ -162,13 +146,28 @@ namespace Supervertaler.Trados.Settings
             set => _quickLauncherSurroundingSegments = value;
         }
 
+        /// <summary>
+        /// Pre-seeds defaults for properties added after the first version of
+        /// AiSettings. <c>DataContractJsonSerializer</c> skips constructors and
+        /// property initialisers during deserialization, so properties not
+        /// present in older settings.json files would otherwise come back with
+        /// the bool/int/string TYPE default rather than the initialiser value.
+        /// This callback runs BEFORE deserialization, so any value present in
+        /// the JSON still overrides what we set here.
+        ///
+        /// IMPORTANT: a [DataContract] type may have only ONE [OnDeserializing]
+        /// method. Adding a second one throws InvalidDataContractException at
+        /// the first deserialize attempt, which TermLensSettings.Load() then
+        /// silently catches – returning fresh defaults and wiping every saved
+        /// setting from the user's perspective. All new defaults must be added
+        /// to this single method, never to a second callback.
+        /// </summary>
         [OnDeserializing]
         private void OnDeserializing(StreamingContext context)
         {
-            // Pre-seed defaults that DataContractSerializer would otherwise leave at 0
-            // or null when the key is absent from an older settings.json.
             _quickLauncherSurroundingSegments = 5;
             ActiveMemoryBankName = UserDataPath.DefaultMemoryBankName;
+            SidekickBridgeEnabled = true;
         }
 
         /// <summary>

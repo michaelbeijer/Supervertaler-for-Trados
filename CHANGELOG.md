@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.19.62] – 2026-05-02
+
+### Fixed (TSV export/import preserves multi-line fields)
+
+- **Termbase TSV export now escapes newlines, tabs, and backslashes** in every text field (uuid, source/target cell, domain, notes, project, client) using backslash-prefixed sequences (`\n`, `\r`, `\t`, `\\`). Pre-fix, a notes field that contained a multi-paragraph response or any other multi-line content would write actual line breaks into the TSV, breaking the one-record-per-line invariant the matching importer relies on – re-importing the file would split the markdown across many phantom rows with the wrong column alignment, scrambling the termbase. **TSV import** now applies the inverse unescape on the same fields, so the round-trip preserves the original formatting exactly.
+
+  The escape format is asymmetric (only Supervertaler unescapes on import), but it survives Excel and other TSV viewers without mis-splitting rows, which is the more important property for a working file.
+
+  TSVs exported before v4.19.62 that contain literal newlines in fields are not silently fixed by this change – they were already broken on disk. Re-export to get a clean copy. Hand-built TSVs without any backslashes import unchanged because the unescape pass is a no-op on backslash-free values.
+
+---
+
 ## [4.19.61] – 2026-05-02
 
 ### Added (Termbase Editor: sort by creation time)

@@ -1733,8 +1733,14 @@ namespace Supervertaler.Trados.Core
 
                         var fields = lines[i].Split('\t');
 
-                        var sourceCell = GetField(fields, colMap, "source");
-                        var targetCell = GetField(fields, colMap, "target");
+                        // Unescape backslash-encoded newlines/tabs/backslashes
+                        // that ExportTsv writes for fields that would
+                        // otherwise break TSV's one-record-per-line shape.
+                        // No-op on TSVs that don't contain any backslashes,
+                        // so old exports and hand-built TSVs without escapes
+                        // import unchanged.
+                        var sourceCell = UnescapeTsvField(GetField(fields, colMap, "source"));
+                        var targetCell = UnescapeTsvField(GetField(fields, colMap, "target"));
                         if (string.IsNullOrWhiteSpace(sourceCell) || string.IsNullOrWhiteSpace(targetCell))
                             continue;
 
@@ -1745,12 +1751,12 @@ namespace Supervertaler.Trados.Core
                             continue;
 
                         // Optional metadata
-                        var uuid = GetField(fields, colMap, "uuid");
+                        var uuid = UnescapeTsvField(GetField(fields, colMap, "uuid"));
                         var priority = ParseInt(GetField(fields, colMap, "priority"), 99);
-                        var domain = GetField(fields, colMap, "domain") ?? "";
-                        var notes = GetField(fields, colMap, "notes") ?? "";
-                        var project = GetField(fields, colMap, "project") ?? "";
-                        var client = GetField(fields, colMap, "client") ?? "";
+                        var domain = UnescapeTsvField(GetField(fields, colMap, "domain") ?? "");
+                        var notes = UnescapeTsvField(GetField(fields, colMap, "notes") ?? "");
+                        var project = UnescapeTsvField(GetField(fields, colMap, "project") ?? "");
+                        var client = UnescapeTsvField(GetField(fields, colMap, "client") ?? "");
                         var forbidden = ParseBool(GetField(fields, colMap, "forbidden"));
 
                         // UUID: check for existing term or generate new
@@ -1985,9 +1991,24 @@ namespace Supervertaler.Trados.Core
                         var sourceCell = BuildPipeDelimitedCell(term.source, srcSyns);
                         var targetCell = BuildPipeDelimitedCell(term.target, tgtSyns);
 
-                        sw.WriteLine($"{term.uuid}\t{sourceCell}\t{targetCell}\t{term.priority}\t" +
-                                     $"{term.domain}\t{term.notes}\t{term.project}\t{term.client}\t" +
-                                     $"{(term.forbidden ? "TRUE" : "FALSE")}");
+                        // Escape newlines / tabs / backslashes so a notes
+                        // field containing a multi-paragraph AI response
+                        // (or any other multi-line content the user pasted
+                        // in via the editor) doesn't break the
+                        // one-record-per-line invariant TSV requires. The
+                        // matching ImportTsv unescapes these sequences on
+                        // the way back in, so the round-trip preserves the
+                        // original formatting exactly.
+                        sw.WriteLine(
+                            $"{EscapeTsvField(term.uuid)}\t" +
+                            $"{EscapeTsvField(sourceCell)}\t" +
+                            $"{EscapeTsvField(targetCell)}\t" +
+                            $"{term.priority}\t" +
+                            $"{EscapeTsvField(term.domain)}\t" +
+                            $"{EscapeTsvField(term.notes)}\t" +
+                            $"{EscapeTsvField(term.project)}\t" +
+                            $"{EscapeTsvField(term.client)}\t" +
+                            $"{(term.forbidden ? "TRUE" : "FALSE")}");
 
                         count++;
                     }
@@ -2000,6 +2021,65 @@ namespace Supervertaler.Trados.Core
         // ==================================================================
         //  TSV helpers
         // ==================================================================
+
+        /// <summary>
+        /// Escapes characters that would break TSV's one-record-per-line
+        /// shape (or its tab-delimited columns) into backslash-prefixed
+        /// sequences. Backslash itself is escaped first so the unescape
+        /// pass can reliably tell a real backslash from an escape lead-in.
+        ///
+        /// The output stays human-readable (notes look like ``line one\nline two``
+        /// in the file, not Base64 or quoted) and is symmetric with
+        /// <see cref="UnescapeTsvField"/>. Excel and other TSV viewers
+        /// won't unescape the sequences, but they also won't mis-split the
+        /// row across multiple lines, which is the more important property.
+        /// </summary>
+        private static string EscapeTsvField(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return value ?? "";
+            // Backslash MUST be escaped first so subsequent replacements
+            // don't double-escape the leading backslash they introduce.
+            return value
+                .Replace("\\", "\\\\")
+                .Replace("\r", "\\r")
+                .Replace("\n", "\\n")
+                .Replace("\t", "\\t");
+        }
+
+        /// <summary>
+        /// Inverse of <see cref="EscapeTsvField"/>. Walks the string and
+        /// expands backslash escape sequences back to their real
+        /// characters. Unknown sequences (e.g. <c>\q</c>) are left as-is
+        /// so a hand-edited file with a stray backslash isn't silently
+        /// mangled. A trailing lone backslash is also passed through.
+        /// </summary>
+        private static string UnescapeTsvField(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return value ?? "";
+            if (value.IndexOf('\\') < 0) return value;
+            var sb = new System.Text.StringBuilder(value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                var c = value[i];
+                if (c == '\\' && i + 1 < value.Length)
+                {
+                    var next = value[i + 1];
+                    switch (next)
+                    {
+                        case 'n': sb.Append('\n'); i++; break;
+                        case 'r': sb.Append('\r'); i++; break;
+                        case 't': sb.Append('\t'); i++; break;
+                        case '\\': sb.Append('\\'); i++; break;
+                        default: sb.Append(c); break;  // unknown escape – preserve
+                    }
+                }
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
+        }
 
         /// <summary>
         /// Parses a pipe-delimited cell: "main|syn1|[!forbidden_syn]"

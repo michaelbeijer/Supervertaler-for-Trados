@@ -152,21 +152,17 @@ namespace Supervertaler.Trados
                 try { projSrcLang = doc.ActiveFile?.SourceFile?.Language?.DisplayName ?? ""; }
                 catch { /* leave empty if unavailable */ }
 
+                // Only invert when the project source matches the termbase's
+                // *target* language. Pre-v4.19.56 any "not exactly aligned"
+                // case was treated as inverted, so a project termbase whose
+                // language pair didn't actually match would still get its
+                // source/target swapped on add.
                 bool isInverted = false;
                 try
                 {
-                    var tbSrcLang = projectTermbase.SourceLang ?? "";
-                    if (!string.IsNullOrEmpty(projSrcLang) && !string.IsNullOrEmpty(tbSrcLang))
-                    {
-                        // Normalize both to shortened form so that "English (United States)"
-                        // and "English (US)" compare correctly.
-                        var projNorm = LanguageUtils.ShortenLanguageName(projSrcLang);
-                        var tbNorm = LanguageUtils.ShortenLanguageName(tbSrcLang);
-                        bool match =
-                            projNorm.StartsWith(tbNorm, StringComparison.OrdinalIgnoreCase) ||
-                            tbNorm.StartsWith(projNorm, StringComparison.OrdinalIgnoreCase);
-                        isInverted = !match;
-                    }
+                    var direction = LanguageUtils.CompareTermbaseDirection(
+                        projSrcLang, projectTermbase.SourceLang, projectTermbase.TargetLang);
+                    isInverted = direction == LanguageUtils.TermbaseDirection.Inverted;
                 }
                 catch { /* leave isInverted=false if language info unavailable */ }
 

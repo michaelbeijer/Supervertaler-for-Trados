@@ -110,6 +110,60 @@ namespace Supervertaler.Trados.Core
         }
 
         /// <summary>
+        /// Classifies how a termbase's declared language pair relates to the
+        /// active project's source language.
+        /// </summary>
+        public enum TermbaseDirection
+        {
+            /// <summary>Project or termbase has no declared source language. Caller should default to no-swap.</summary>
+            NotApplicable,
+            /// <summary>Project source matches termbase source. No inversion needed.</summary>
+            Aligned,
+            /// <summary>Project source matches termbase target. Termbase is inverted relative to the project.</summary>
+            Inverted,
+            /// <summary>Project source matches neither side of the termbase – the termbase is for an unrelated language pair.</summary>
+            Unrelated
+        }
+
+        /// <summary>
+        /// Compares a termbase's declared language pair against the project's
+        /// source language to decide whether term lookups/writes should swap
+        /// source and target.
+        ///
+        /// Pre-v4.19.55 every call site had its own ad-hoc check that treated
+        /// any mismatch between project source and termbase source as
+        /// "inverted" – which silently mis-handled termbases whose language
+        /// pair didn't match the project on either side (e.g. an EN-NL
+        /// termbase loaded into a DE-FR project would get its sides swapped
+        /// and indexed under languages it has no terms for). This helper
+        /// distinguishes the four cases so each caller can pick the right
+        /// behaviour for read vs write vs merge.
+        /// </summary>
+        public static TermbaseDirection CompareTermbaseDirection(
+            string projectSourceLang, string termbaseSourceLang, string termbaseTargetLang)
+        {
+            if (string.IsNullOrEmpty(projectSourceLang) || string.IsNullOrEmpty(termbaseSourceLang))
+                return TermbaseDirection.NotApplicable;
+
+            var projNorm = ShortenLanguageName(projectSourceLang) ?? "";
+            var tbSrcNorm = ShortenLanguageName(termbaseSourceLang) ?? "";
+            var tbTgtNorm = ShortenLanguageName(termbaseTargetLang ?? "") ?? "";
+
+            if (LanguagePrefixMatches(projNorm, tbSrcNorm)) return TermbaseDirection.Aligned;
+            if (LanguagePrefixMatches(projNorm, tbTgtNorm)) return TermbaseDirection.Inverted;
+            return TermbaseDirection.Unrelated;
+        }
+
+        private static bool LanguagePrefixMatches(string a, string b)
+        {
+            if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b)) return false;
+            // Match either direction so that "English (US)" lines up with "English"
+            // and "English (United States)" lines up with "English (US)".
+            return a.StartsWith(b, StringComparison.OrdinalIgnoreCase)
+                || b.StartsWith(a, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
         /// Finds the 2-letter ISO 3166-1 country code for a country name.
         /// Searches all specific cultures' RegionInfo for a match.
         /// </summary>

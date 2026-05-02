@@ -321,30 +321,23 @@ namespace Supervertaler.Trados
                     return;
                 }
 
-                var currentTarget = activePair.Target?.ToString() ?? "";
-                var newTarget = PerformReplace(currentTarget, e.SearchText, e.ReplaceText,
-                    e.CaseSensitive, e.UseRegex);
+                var outcome = ReplaceInActiveSegmentPair(
+                    activePair, e.SearchText, e.ReplaceText,
+                    e.CaseSensitive, e.UseRegex, out var newTarget);
 
-                if (newTarget == currentTarget)
+                switch (outcome)
                 {
-                    SafeInvoke(() => _control.Value.SetStatus("No match found in target text."));
-                    return;
+                    case ActiveReplaceOutcome.NoMatch:
+                        SafeInvoke(() => _control.Value.SetStatus("No match found in target text."));
+                        return;
+                    case ActiveReplaceOutcome.SpansInlineTags:
+                        SafeInvoke(() => _control.Value.SetStatus(
+                            "Match spans inline tags – skipped to preserve formatting. Edit the segment manually."));
+                        return;
+                    case ActiveReplaceOutcome.Error:
+                        SafeInvoke(() => _control.Value.SetStatus("Replace failed – the segment couldn't be modified."));
+                        return;
                 }
-
-                // Apply via ProcessSegmentPair delegate
-                var capturedNewTarget = newTarget;
-                _activeDocument.ProcessSegmentPair(activePair, "Supervertaler",
-                    (sp, cancel) =>
-                    {
-                        var textTpl = FindFirstText(sp.Source);
-                        if (textTpl != null)
-                        {
-                            sp.Target.Clear();
-                            var textClone = (IText)textTpl.Clone();
-                            textClone.Properties.Text = capturedNewTarget;
-                            sp.Target.Add(textClone);
-                        }
-                    });
 
                 result.TargetText = newTarget;
                 SafeInvoke(() =>
@@ -413,6 +406,7 @@ namespace Supervertaler.Trados
 
             int replacedCount = 0;
             int errorCount = 0;
+            int skippedTagSpan = 0;
 
             foreach (var group in fileGroups)
             {
@@ -431,27 +425,22 @@ namespace Supervertaler.Trados
                             var pair = _activeDocument.ActiveSegmentPair;
                             if (pair == null) { errorCount++; continue; }
 
-                            var currentTarget = pair.Target?.ToString() ?? "";
-                            var newTarget = PerformReplace(currentTarget, e.SearchText, e.ReplaceText,
-                                e.CaseSensitive, e.UseRegex);
+                            var outcome = ReplaceInActiveSegmentPair(
+                                pair, e.SearchText, e.ReplaceText,
+                                e.CaseSensitive, e.UseRegex, out var newTarget);
 
-                            if (newTarget != currentTarget)
+                            if (outcome == ActiveReplaceOutcome.Replaced)
                             {
-                                var capturedNewTarget = newTarget;
-                                _activeDocument.ProcessSegmentPair(pair, "Supervertaler",
-                                    (sp, cancel) =>
-                                    {
-                                        var textTpl = FindFirstText(sp.Source);
-                                        if (textTpl != null)
-                                        {
-                                            sp.Target.Clear();
-                                            var textClone = (IText)textTpl.Clone();
-                                            textClone.Properties.Text = capturedNewTarget;
-                                            sp.Target.Add(textClone);
-                                        }
-                                    });
                                 result.TargetText = newTarget;
                                 replacedCount++;
+                            }
+                            else if (outcome == ActiveReplaceOutcome.SpansInlineTags)
+                            {
+                                skippedTagSpan++;
+                            }
+                            else if (outcome == ActiveReplaceOutcome.Error)
+                            {
+                                errorCount++;
                             }
                         }
                         catch { errorCount++; }
@@ -463,8 +452,10 @@ namespace Supervertaler.Trados
                     try
                     {
                         int count = ReplaceInXliffFile(filePath, group.ToList(),
-                            e.SearchText, e.ReplaceText, e.CaseSensitive, e.UseRegex);
+                            e.SearchText, e.ReplaceText, e.CaseSensitive, e.UseRegex,
+                            out var tagSpanInFile);
                         replacedCount += count;
+                        skippedTagSpan += tagSpanInFile;
                     }
                     catch { errorCount += group.Count(); }
                 }
@@ -474,6 +465,7 @@ namespace Supervertaler.Trados
             {
                 _control.Value.SetResults(_lastResults);
                 var statusMsg = $"Replaced {replacedCount} segment(s)";
+                if (skippedTagSpan > 0) statusMsg += $", skipped {skippedTagSpan} (match spans inline tags)";
                 if (errorCount > 0) statusMsg += $" ({errorCount} error(s))";
                 if (fileGroups.Any(g => !string.Equals(g.Key, activeFilePath, StringComparison.OrdinalIgnoreCase)))
                     statusMsg += ". Non-active files were modified on disk \u2014 reopen to see changes.";
@@ -486,8 +478,10 @@ namespace Supervertaler.Trados
         /// Used for files not currently open in the editor.
         /// </summary>
         private int ReplaceInXliffFile(string filePath, List<SearchResult> results,
-            string searchText, string replaceText, bool caseSensitive, bool useRegex)
+            string searchText, string replaceText, bool caseSensitive, bool useRegex,
+            out int tagSpanSkipped)
         {
+            tagSpanSkipped = 0;
             var doc = new XmlDocument();
             doc.PreserveWhitespace = true;
             doc.Load(filePath);
@@ -527,14 +521,31 @@ namespace Supervertaler.Trados
                     if (node.ChildNodes.Count == 1 && node.FirstChild is XmlText)
                     {
                         node.FirstChild.Value = newText;
+                        result.TargetText = newText;
+                        count++;
                     }
                     else
                     {
+                        // The match was found in InnerText (which concatenates
+                        // text across child nodes), but the segment's text is
+                        // split across XmlText siblings separated by inline-tag
+                        // elements. Per-text-node replace only changes nodes
+                        // whose individual value contains the match. Verify
+                        // every match hit a single text node before counting
+                        // and saving – pre-v4.19.56 we'd always count++ and
+                        // save the file even if no text-node value changed,
+                        // making Replace All silently lie about its work.
                         ReplaceTextInNodes(node, searchText, replaceText, caseSensitive, useRegex);
+                        if (node.InnerText == newText)
+                        {
+                            result.TargetText = newText;
+                            count++;
+                        }
+                        else
+                        {
+                            tagSpanSkipped++;
+                        }
                     }
-
-                    result.TargetText = newText;
-                    count++;
                 }
             }
 
@@ -563,6 +574,93 @@ namespace Supervertaler.Trados
         }
 
         // ─── Text Helpers ────────────────────────────────────────
+
+        /// <summary>
+        /// Outcome of an in-editor replace. <see cref="Replaced"/> means the
+        /// segment was actually modified; <see cref="SpansInlineTags"/> means
+        /// the search string straddled a tag boundary so we refused to apply
+        /// a destructive flatten-and-rewrite (and the caller should report
+        /// "skipped, would lose formatting" rather than counting a success).
+        /// </summary>
+        private enum ActiveReplaceOutcome { Replaced, NoMatch, SpansInlineTags, Error }
+
+        /// <summary>
+        /// Replaces text in the active segment pair while preserving inline
+        /// tags. Pre-v4.19.56 the replace path read <c>pair.Target.ToString()</c>,
+        /// did a string replace, then cleared the target and re-added a single
+        /// cloned <see cref="IText"/> – which destroyed every tag pair,
+        /// placeholder, and formatting span the segment originally contained.
+        ///
+        /// This helper instead walks the existing target's <see cref="IText"/>
+        /// children and replaces each one's text in-place, so structure is
+        /// preserved. If the search string straddles a tag boundary (no single
+        /// IText contains the full match), the per-IText replace produces a
+        /// flat result that doesn't match what a flat replace would produce –
+        /// in that case we refuse to apply rather than try to be clever, and
+        /// return <see cref="ActiveReplaceOutcome.SpansInlineTags"/> so the
+        /// caller can surface a clear "match spans tags – skipped" message.
+        /// </summary>
+        private ActiveReplaceOutcome ReplaceInActiveSegmentPair(
+            ISegmentPair pair, string searchText, string replaceText,
+            bool caseSensitive, bool useRegex, out string newFlatTarget)
+        {
+            newFlatTarget = null;
+            if (pair == null || _activeDocument == null) return ActiveReplaceOutcome.Error;
+
+            var currentTarget = pair.Target?.ToString() ?? "";
+            var expected = PerformReplace(currentTarget, searchText, replaceText, caseSensitive, useRegex);
+            if (expected == currentTarget) return ActiveReplaceOutcome.NoMatch;
+
+            // Pre-flight: simulate per-IText replacement and see if the
+            // concatenated result matches the flat-replace expectation.
+            // pair.Target.ToString() concatenates IText content depth-first;
+            // if a per-IText replace can't reproduce the same flat output,
+            // the match must straddle a tag boundary.
+            var iTexts = new List<IText>();
+            CollectTextsDepthFirst(pair.Target, iTexts);
+
+            if (iTexts.Count == 0) return ActiveReplaceOutcome.SpansInlineTags;
+
+            var simulated = string.Concat(iTexts.Select(t =>
+                PerformReplace(t.Properties.Text ?? "", searchText, replaceText, caseSensitive, useRegex)));
+
+            if (simulated != expected) return ActiveReplaceOutcome.SpansInlineTags;
+
+            // Safe to apply.
+            try
+            {
+                _activeDocument.ProcessSegmentPair(pair, "Supervertaler", (sp, cancel) =>
+                {
+                    var liveTexts = new List<IText>();
+                    CollectTextsDepthFirst(sp.Target, liveTexts);
+                    foreach (var t in liveTexts)
+                    {
+                        var oldVal = t.Properties.Text ?? "";
+                        var newVal = PerformReplace(oldVal, searchText, replaceText, caseSensitive, useRegex);
+                        if (!string.Equals(oldVal, newVal, StringComparison.Ordinal))
+                            t.Properties.Text = newVal;
+                    }
+                });
+                newFlatTarget = expected;
+                return ActiveReplaceOutcome.Replaced;
+            }
+            catch
+            {
+                return ActiveReplaceOutcome.Error;
+            }
+        }
+
+        private static void CollectTextsDepthFirst(IAbstractMarkupDataContainer container, List<IText> sink)
+        {
+            if (container == null) return;
+            foreach (var item in container)
+            {
+                if (item is IText t)
+                    sink.Add(t);
+                else if (item is IAbstractMarkupDataContainer inner)
+                    CollectTextsDepthFirst(inner, sink);
+            }
+        }
 
         /// <summary>
         /// Finds the first IText node in a segment (used as a template for cloning).

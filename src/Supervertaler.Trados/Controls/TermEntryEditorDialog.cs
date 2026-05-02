@@ -223,15 +223,13 @@ namespace Supervertaler.Trados.Controls
         private static bool IsProjectDirectionInverted(TermbaseInfo termbase, string projectSourceLang)
         {
             if (termbase == null) return false;
-            if (string.IsNullOrEmpty(projectSourceLang)) return false;
-            if (string.IsNullOrEmpty(termbase.SourceLang)) return false;
-
-            var projNorm = LanguageUtils.ShortenLanguageName(projectSourceLang) ?? "";
-            var tbNorm = LanguageUtils.ShortenLanguageName(termbase.SourceLang) ?? "";
-            if (projNorm.Length == 0 || tbNorm.Length == 0) return false;
-
-            return !projNorm.StartsWith(tbNorm, StringComparison.OrdinalIgnoreCase)
-                && !tbNorm.StartsWith(projNorm, StringComparison.OrdinalIgnoreCase);
+            // Only true Inverted (project source matches termbase target) counts –
+            // pre-v4.19.56 this returned true for any termbase whose source
+            // language wasn't the project source, so editor pre-fills for
+            // unrelated termbases would land in swapped columns.
+            var direction = LanguageUtils.CompareTermbaseDirection(
+                projectSourceLang, termbase.SourceLang, termbase.TargetLang);
+            return direction == LanguageUtils.TermbaseDirection.Inverted;
         }
 
         private void BuildUI(TermbaseInfo termbase)

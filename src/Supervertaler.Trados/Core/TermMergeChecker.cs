@@ -91,24 +91,19 @@ namespace Supervertaler.Trados.Core
                     // Decide per-termbase whether this termbase stores rows in the
                     // inverse direction of the project. If so, swap the search
                     // parameters so the SQL compares the right columns.
+                    // Only swap when the project source matches the termbase's
+                    // *target* language – pre-v4.19.56 any mismatch was treated
+                    // as "inverted" and we'd search unrelated termbases with
+                    // swapped columns, returning bogus merge candidates.
                     string searchSource = sourceTerm;
                     string searchTarget = targetTerm;
-                    bool isInverted = false;
-                    if (!string.IsNullOrEmpty(projectSourceLang)
-                        && !string.IsNullOrEmpty(tb.SourceLang))
+                    var direction = LanguageUtils.CompareTermbaseDirection(
+                        projectSourceLang, tb.SourceLang, tb.TargetLang);
+                    bool isInverted = direction == LanguageUtils.TermbaseDirection.Inverted;
+                    if (isInverted)
                     {
-                        var projNorm = LanguageUtils.ShortenLanguageName(projectSourceLang);
-                        var tbNorm = LanguageUtils.ShortenLanguageName(tb.SourceLang);
-                        bool directionMatches =
-                            !string.IsNullOrEmpty(projNorm) && !string.IsNullOrEmpty(tbNorm) &&
-                            (projNorm.StartsWith(tbNorm, StringComparison.OrdinalIgnoreCase) ||
-                             tbNorm.StartsWith(projNorm, StringComparison.OrdinalIgnoreCase));
-                        if (!directionMatches)
-                        {
-                            isInverted = true;
-                            searchSource = targetTerm;
-                            searchTarget = sourceTerm;
-                        }
+                        searchSource = targetTerm;
+                        searchTarget = sourceTerm;
                     }
 
                     const string sql = @"

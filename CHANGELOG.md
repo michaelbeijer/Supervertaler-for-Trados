@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.19.56] – 2026-05-02
+
+### Fixed (second Codex 5.5 review-pass sweep)
+
+- **Termbase language-direction logic now consistent across all term-write paths.** The v4.19.55 fix only landed in `LoadAllTerms`. Four other call sites still treated "project source ≠ termbase source" as "inverted" (the old broken pattern), so a project termbase whose language pair didn't match the project would still get its sides swapped on add, merge candidates would be searched with swapped columns, and the term editor would pre-fill into the wrong slots. Consolidated the logic into a single `LanguageUtils.CompareTermbaseDirection` helper returning a 4-state enum (NotApplicable, Aligned, Inverted, Unrelated) and routed all five call sites through it: [TermbaseReader.LoadAllTerms](src/Supervertaler.Trados/Core/TermbaseReader.cs), [TermbaseReader.InsertTerm](src/Supervertaler.Trados/Core/TermbaseReader.cs), [QuickAddProjectTermAction](src/Supervertaler.Trados/QuickAddProjectTermAction.cs), [TermMergeChecker](src/Supervertaler.Trados/Core/TermMergeChecker.cs), [TermEntryEditorDialog.IsProjectDirectionInverted](src/Supervertaler.Trados/Controls/TermEntryEditorDialog.cs).
+- **SuperSearch active-file replace no longer destroys inline tags.** The pre-fix path read `pair.Target.ToString()`, did a string replace on the flattened text, then `Clear()`-ed the target and re-added a single cloned `IText` – every tag pair, placeholder tag, and formatting span the segment originally contained was wiped. New helper `ReplaceInActiveSegmentPair` walks the existing target's `IText` children depth-first, simulates a per-`IText` replace, and only applies if the result reconstructs the expected flat output. If the search match straddles a tag boundary, the pre-flight detects the mismatch and the helper returns `SpansInlineTags`; the user gets a clear "match spans inline tags – skipped to preserve formatting" status instead of a silent flatten. Both single-Replace and Replace All active-file paths use the helper.
+- **SuperSearch disk replace no longer claims success when no real replacement happened.** When an SDLXLIFF target's text is split across multiple `XmlText` siblings separated by inline-tag elements, `node.InnerText` matches across the boundary but the per-text-node replace inside `ReplaceTextInNodes` only changes nodes whose individual value contains the match. Pre-fix, the code would unconditionally `count++` and save the file even if no `XmlText` value actually changed – Replace All would lie about its work. Now the disk path verifies the post-replace `node.InnerText` matches the expected string before counting; segments that span tag boundaries are surfaced as `skipped, X (match spans inline tags)` in the Replace All summary so the user can edit them by hand.
+
+---
+
 ## [4.19.55] – 2026-05-02
 
 ### Fixed (bug sweep based on a Codex 5.5 review pass)

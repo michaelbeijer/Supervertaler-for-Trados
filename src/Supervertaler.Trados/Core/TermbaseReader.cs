@@ -300,9 +300,6 @@ namespace Supervertaler.Trados.Core
                 // silently not matching even though their text was fine. The termbase declaration
                 // is the canonical direction every entry inherits by definition.
                 List<string> srcSynsForIndex;
-                // Normalize both to shortened form so that "English (United States)"
-                // and "English (US)" compare correctly.
-                var projNorm = LanguageUtils.ShortenLanguageName(projectSourceLang ?? "");
                 string termbaseSrcLang = "";
                 string termbaseTgtLang = "";
                 if (termbaseDirection.TryGetValue(entry.TermbaseId, out var dir))
@@ -310,42 +307,15 @@ namespace Supervertaler.Trados.Core
                     termbaseSrcLang = dir.src ?? "";
                     termbaseTgtLang = dir.tgt ?? "";
                 }
-                var tbSrcNorm = LanguageUtils.ShortenLanguageName(termbaseSrcLang);
-                var tbTgtNorm = LanguageUtils.ShortenLanguageName(termbaseTgtLang);
 
-                bool LangMatches(string a, string b) =>
-                    !string.IsNullOrEmpty(a) && !string.IsNullOrEmpty(b)
-                    && (a.StartsWith(b, StringComparison.OrdinalIgnoreCase)
-                        || b.StartsWith(a, StringComparison.OrdinalIgnoreCase));
-
-                bool projMatchesSrc = LangMatches(projNorm, tbSrcNorm);
-                bool projMatchesTgt = LangMatches(projNorm, tbTgtNorm);
-
-                bool isInverted;
-                if (string.IsNullOrEmpty(projectSourceLang) || string.IsNullOrEmpty(termbaseSrcLang))
-                {
-                    // Project or termbase has no declared language – preserve
-                    // the legacy "assume not inverted" fallback.
-                    isInverted = false;
-                }
-                else if (projMatchesSrc)
-                {
-                    isInverted = false;
-                }
-                else if (projMatchesTgt)
-                {
-                    isInverted = true;
-                }
-                else
-                {
-                    // Termbase language pair doesn't match the project on either
-                    // side – skip the entry instead of mis-inverting it.
-                    // Pre-v4.19.55 the inversion check treated *any* mismatch as
-                    // "inverted", so a DE-FR termbase loaded into an EN-NL
-                    // project would get its sides swapped and indexed under
-                    // languages it has no terms for.
+                // Read paths skip Unrelated entries to avoid indexing terms
+                // under languages they have no content for. NotApplicable and
+                // Aligned both mean "don't invert"; only Inverted swaps.
+                var direction = LanguageUtils.CompareTermbaseDirection(
+                    projectSourceLang, termbaseSrcLang, termbaseTgtLang);
+                if (direction == LanguageUtils.TermbaseDirection.Unrelated)
                     continue;
-                }
+                bool isInverted = direction == LanguageUtils.TermbaseDirection.Inverted;
 
                 if (isInverted)
                 {
@@ -946,22 +916,20 @@ namespace Supervertaler.Trados.Core
                     {
                         // Decide per-termbase whether to swap so the text lands in the
                         // right columns FOR THIS termbase's declared direction.
+                        // Only invert when project source matches the termbase's
+                        // *target* language. NotApplicable / Aligned / Unrelated
+                        // all leave the user's input as-is – pre-v4.19.56 the check
+                        // treated any "not aligned" as "inverted", which silently
+                        // swapped data on its way into termbases for unrelated
+                        // language pairs.
                         string termForSourceColumn = sourceTerm;
                         string termForTargetColumn = targetTerm;
-                        if (!string.IsNullOrEmpty(projectSourceLang)
-                            && !string.IsNullOrEmpty(tb.SourceLang))
+                        var direction = LanguageUtils.CompareTermbaseDirection(
+                            projectSourceLang, tb.SourceLang, tb.TargetLang);
+                        if (direction == LanguageUtils.TermbaseDirection.Inverted)
                         {
-                            var projNorm = LanguageUtils.ShortenLanguageName(projectSourceLang);
-                            var tbNorm = LanguageUtils.ShortenLanguageName(tb.SourceLang);
-                            bool directionMatches =
-                                !string.IsNullOrEmpty(projNorm) && !string.IsNullOrEmpty(tbNorm) &&
-                                (projNorm.StartsWith(tbNorm, StringComparison.OrdinalIgnoreCase) ||
-                                 tbNorm.StartsWith(projNorm, StringComparison.OrdinalIgnoreCase));
-                            if (!directionMatches)
-                            {
-                                termForSourceColumn = targetTerm;
-                                termForTargetColumn = sourceTerm;
-                            }
+                            termForSourceColumn = targetTerm;
+                            termForTargetColumn = sourceTerm;
                         }
 
                         // Skip if duplicate already exists in this termbase (either direction).

@@ -3470,7 +3470,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                     // loses changes) and ensures correct soft return handling for
                     // Excel/Visio segments with literal newlines.
                     var pair = e.SegmentPairRef as ISegmentPair;
-                    if (pair == null) return;
+                    if (pair == null) { e.WriteSucceeded = false; return; }
 
                     doc.ProcessSegmentPair(pair, "Supervertaler",
                         (sp, cancel) =>

@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.19.59] – 2026-05-02
+
+### Changed (stronger key for the non-matching-termbase confirmation list)
+
+- **Confirmation list now keyed by termbase name instead of ID.** The persistence field added in v4.19.58 (`confirmedNonMatchingWriteTermbaseIds`) used the SQLite `id` column. With `INTEGER PRIMARY KEY AUTOINCREMENT` ID reuse within one database is impossible, but a user who wipes and recreates `supervertaler.db` could end up with stale ID-based confirmations applying to different termbases. The schema declares `name TEXT NOT NULL UNIQUE` on the `termbases` table, so names are stable across rebuilds in a way IDs aren't. Renamed the field to `ConfirmedNonMatchingWriteTermbaseNames` (data-member `confirmedNonMatchingWriteTermbaseNames`) and switched all lookup/add/remove sites to key on `tb.Name`. Renaming a confirmed termbase now triggers a re-ask on the next tick – which matches the principle that consent should be tied to a stable identity.
+
+---
+
 ## [4.19.58] – 2026-05-02
 
 ### Added (UX guard for non-matching Write / Project termbases)

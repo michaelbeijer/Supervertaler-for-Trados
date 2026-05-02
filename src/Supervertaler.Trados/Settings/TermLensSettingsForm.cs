@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Supervertaler.Trados.Controls;
@@ -880,7 +881,11 @@ namespace Supervertaler.Trados.Settings
                 else
                 {
                     // Unticking removes the override so a future re-tick re-asks.
-                    _settings.ConfirmedNonMatchingWriteTermbaseIds?.Remove(tb.Id);
+                    if (_settings.ConfirmedNonMatchingWriteTermbaseNames != null && tb?.Name != null)
+                    {
+                        _settings.ConfirmedNonMatchingWriteTermbaseNames.RemoveAll(
+                            n => string.Equals(n, tb.Name, StringComparison.Ordinal));
+                    }
                 }
             }
 
@@ -917,8 +922,9 @@ namespace Supervertaler.Trados.Settings
                 _projectSourceLanguage, tb.SourceLang, tb.TargetLang);
             if (direction != LanguageUtils.TermbaseDirection.Unrelated) return true;
 
-            return _settings.ConfirmedNonMatchingWriteTermbaseIds != null
-                && _settings.ConfirmedNonMatchingWriteTermbaseIds.Contains(tb.Id);
+            return !string.IsNullOrEmpty(tb.Name)
+                && _settings.ConfirmedNonMatchingWriteTermbaseNames != null
+                && _settings.ConfirmedNonMatchingWriteTermbaseNames.Contains(tb.Name, StringComparer.Ordinal);
         }
 
         /// <summary>
@@ -950,8 +956,9 @@ namespace Supervertaler.Trados.Settings
             if (direction != LanguageUtils.TermbaseDirection.Unrelated) return true;
 
             // Already confirmed for this termbase – don't nag.
-            if (_settings.ConfirmedNonMatchingWriteTermbaseIds != null
-                && _settings.ConfirmedNonMatchingWriteTermbaseIds.Contains(tb.Id))
+            if (!string.IsNullOrEmpty(tb.Name)
+                && _settings.ConfirmedNonMatchingWriteTermbaseNames != null
+                && _settings.ConfirmedNonMatchingWriteTermbaseNames.Contains(tb.Name, StringComparer.Ordinal))
             {
                 return true;
             }
@@ -976,10 +983,13 @@ namespace Supervertaler.Trados.Settings
 
             if (result != DialogResult.Yes) return false;
 
-            if (_settings.ConfirmedNonMatchingWriteTermbaseIds == null)
-                _settings.ConfirmedNonMatchingWriteTermbaseIds = new List<long>();
-            if (!_settings.ConfirmedNonMatchingWriteTermbaseIds.Contains(tb.Id))
-                _settings.ConfirmedNonMatchingWriteTermbaseIds.Add(tb.Id);
+            if (_settings.ConfirmedNonMatchingWriteTermbaseNames == null)
+                _settings.ConfirmedNonMatchingWriteTermbaseNames = new List<string>();
+            if (!string.IsNullOrEmpty(tb.Name)
+                && !_settings.ConfirmedNonMatchingWriteTermbaseNames.Contains(tb.Name, StringComparer.Ordinal))
+            {
+                _settings.ConfirmedNonMatchingWriteTermbaseNames.Add(tb.Name);
+            }
             return true;
         }
 

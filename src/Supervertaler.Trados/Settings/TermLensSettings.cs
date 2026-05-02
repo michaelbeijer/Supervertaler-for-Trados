@@ -54,16 +54,26 @@ namespace Supervertaler.Trados.Settings
         public List<long> WriteTermbaseIds { get; set; } = new List<long>();
 
         /// <summary>
-        /// IDs of termbases for which the user has explicitly confirmed
+        /// Names of termbases for which the user has explicitly confirmed
         /// Write/Project assignment despite the termbase's declared language
         /// pair not matching the active project (i.e.
         /// <see cref="Core.LanguageUtils.TermbaseDirection.Unrelated"/>).
-        /// The confirm dialog in Settings → Termbases adds the ID here on
+        ///
+        /// Keyed by termbase name rather than ID because the underlying
+        /// SQLite schema declares <c>name TEXT NOT NULL UNIQUE</c>, so names
+        /// are stable across database rebuilds in a way IDs aren't. With
+        /// <c>INTEGER PRIMARY KEY AUTOINCREMENT</c> ID reuse within one
+        /// database is impossible, but a user who wipes and recreates
+        /// <c>supervertaler.db</c> could end up with stale ID-based
+        /// confirmations applying to different termbases. Names sidestep
+        /// that – the only re-ask trigger is a deliberate rename.
+        ///
+        /// The confirm dialog in Settings → Termbases adds the name here on
         /// "Yes, add anyway"; unticking the box removes it so a re-tick
         /// re-asks. Empty / missing means no overrides have been confirmed.
         /// </summary>
-        [DataMember(Name = "confirmedNonMatchingWriteTermbaseIds")]
-        public List<long> ConfirmedNonMatchingWriteTermbaseIds { get; set; } = new List<long>();
+        [DataMember(Name = "confirmedNonMatchingWriteTermbaseNames")]
+        public List<string> ConfirmedNonMatchingWriteTermbaseNames { get; set; } = new List<string>();
 
         /// <summary>
         /// ID of the termbase the user has marked as the "Project" termbase.
@@ -235,8 +245,8 @@ namespace Supervertaler.Trados.Settings
                     // Ensure list is never null
                     if (s.WriteTermbaseIds == null)
                         s.WriteTermbaseIds = new List<long>();
-                    if (s.ConfirmedNonMatchingWriteTermbaseIds == null)
-                        s.ConfirmedNonMatchingWriteTermbaseIds = new List<long>();
+                    if (s.ConfirmedNonMatchingWriteTermbaseNames == null)
+                        s.ConfirmedNonMatchingWriteTermbaseNames = new List<string>();
 
                     // Migrate: chord delay missing from older settings (deserializes as 0)
                     if (s.ChordDelayMs <= 0)

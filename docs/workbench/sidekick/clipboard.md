@@ -47,6 +47,10 @@ Click any item in the list to paste it. What happens:
 
 After pasting, the item is marked as used and appears greyed out. This makes it easy to track which clips you have already inserted in a session.
 
+{% hint style="info" %}
+**Latest clip is highlighted on open.** Every time you switch to the Clipboard tab, the most recent text snippet (top of the list) is selected automatically – press **Enter** to paste it without touching the mouse. If you'd rather paste an older clip, arrow up/down to it first.
+{% endhint %}
+
 ## Deleting clips
 
 **Single item** – right-click any entry and choose **🗑 Delete**, or select it and press the **Delete** key.

@@ -26,6 +26,26 @@ Each Supervertaler termbase in the database has three toggles. See [Termbase Man
 | **Write** | Receive new terms added via the [quick-add shortcuts](../termlens/adding-terms.md) |
 | **Project** | Mark as the project termbase (shown in pink, prioritised) |
 
+### Confirm dialog for non-matching termbases
+
+When you tick **Write** or **Project** on a termbase whose declared language pair does not match the active project (for example, ticking an EN→NL termbase as Write while you have a DE→FR project open), a confirmation dialog appears:
+
+> *"&lt;termbase&gt;" is a EN → NL termbase, but the active project's source language is German. Setting it as a Write termbase means new terms added during this project will be written into a termbase whose language pair doesn't match.*
+>
+> *This is occasionally intentional (multilingual or global termbases, bootstrapping a new direction) – tick "Yes" to continue. The plugin will remember this choice for this termbase and won't ask again until you untick the box.*
+
+Click **Yes** to keep the tick, or **No** to revert it.
+
+The plugin remembers each "Yes" answer per termbase, so once you have explicitly confirmed a non-matching termbase you are not asked again on subsequent ticks. **Unticking the box clears that confirmation** – a future re-tick will re-ask. This is intentional: an untick is taken as a clear signal that you are reconsidering, so the next tick deserves a fresh look.
+
+The header **tick-all** on the Write column also respects this guard – non-matching termbases that haven't been individually confirmed are skipped during a bulk tick, so a quick "tick everything" can't accidentally enable unrelated termbases for write.
+
+The **Read** column is intentionally exempt from the dialog – there is no harm in *reading* a non-matching termbase (its terms simply won't match anything in your segments), only in writing into it.
+
+{% hint style="info" %}
+**No project loaded.** If you open the Settings dialog without an active project (for example by clicking the gear from the QuickLauncher header), the plugin has no source language to compare against, so the confirmation is suppressed and ticks behave normally.
+{% endhint %}
+
 ## MultiTerm termbases
 
 If your Trados project has MultiTerm termbases (`.sdltb` files) attached, they appear at the bottom of the termbase list with a **[MultiTerm]** label and a light green row background. The **Read** toggle controls visibility in TermLens; **Write** and **Project** are always disabled because MultiTerm termbases are read-only.

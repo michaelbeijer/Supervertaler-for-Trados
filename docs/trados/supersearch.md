@@ -104,6 +104,14 @@ Tick the **Replace** checkbox to reveal the replace bar. Replace always operates
 Replace respects the same **Aa** (case sensitivity) and **.\*** (regex) settings as search. When using regex, you can use capture groups in the replacement (e.g., `$1`, `$2`).
 {% endhint %}
 
+### Matches that span inline tags are skipped
+
+Trados segments often contain inline tags – formatting marks, placeholders, field codes – that interrupt a run of plain text. If your search string would only match across one of these tag boundaries (for example, searching for `important thing` when the segment renders as `important<bold>thing</bold>`), Replace and Replace All will **skip that segment** rather than apply a destructive flatten-and-rewrite that would lose the tag.
+
+You'll see this in the status bar after a Replace All as `…, skipped N (match spans inline tags)`. The skipped segments are left untouched so the formatting survives; you can edit them manually if you want the replacement to happen.
+
+This applies to both the active-file path (Trados API replacements) and the on-disk path (SDLXLIFF XML rewrites). It only kicks in when the match genuinely straddles a tag – ordinary matches inside a single text run are replaced normally and tags are preserved.
+
 ## Regex Tips
 
 When the **.\*** checkbox is enabled, the search query is treated as a .NET regular expression. Some useful patterns:

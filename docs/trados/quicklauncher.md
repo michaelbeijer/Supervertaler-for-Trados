@@ -222,6 +222,24 @@ Set `category: QuickLauncher` in the YAML frontmatter, or place the file in a fo
 
 QuickLauncher prompts live in the shared `prompt_library` folder used by both Supervertaler for Trados and Supervertaler Workbench. Any prompt you create in one application is immediately available in the other.
 
+### Routing prompts to Workbench Sidekick
+
+By default, a QuickLauncher prompt's response appears in the in-Trados **Supervertaler Assistant** chat panel. You can also have it land in **Supervertaler Workbench's Sidekick Chat** instead.
+
+Open **Settings → AI Settings** and find the **QuickLauncher prompts go to:** dropdown. Pick:
+
+* **In-Trados AI Assistant** (default) – existing behaviour, prompt and response stay in the Trados Assistant chat.
+* **Workbench Sidekick** – the prompt is sent to Supervertaler Workbench over a localhost bridge. The Sidekick window pops forward, maximises to the screen it's on, switches to the Chat tab, and runs the prompt there.
+
+When to pick which:
+
+* **In-Trados Assistant** keeps everything in one window and is the right choice if you want chat history to stay alongside the segment you're translating.
+* **Workbench Sidekick** gives you a much larger reading area – useful for prompts whose responses are multi-paragraph explanations, full translation comparisons, or anything you want to read without squinting at the narrow Assistant panel.
+
+{% hint style="info" %}
+Workbench must be running for this to work. If it isn't (or the [Sidekick Bridge](ai-assistant/sidekick-bridge.md) is unreachable), the QuickLauncher silently falls back to the in-Trados Assistant – your prompt is never lost.
+{% endhint %}
+
 ***
 
 ### See Also

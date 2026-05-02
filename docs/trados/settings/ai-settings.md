@@ -199,6 +199,23 @@ Batch Operations do not use this setting because each batch already contains a g
 **Tip:** For the best results, enable all context options. The more information the AI has about your project, document, terminology, and previous translations, the more accurate and consistent its suggestions will be.
 {% endhint %}
 
+#### QuickLauncher prompts go to
+
+Picks where Ctrl+Q [QuickLauncher](../quicklauncher.md) prompts run.
+
+| Option | Where the prompt and response appear |
+|--------|-------------------------------------|
+| **In-Trados AI Assistant** (default) | The Supervertaler Assistant chat panel in Trados Studio. Same behaviour as before this setting existed. |
+| **Workbench Sidekick** | Supervertaler Workbench's floating Sidekick Chat. The window pops to the front and maximises to the screen it's on, the prompt is echoed into the chat, and the AI's response appears there instead of in Trados. |
+
+The Workbench-Sidekick option is for users who want the bigger reading area Sidekick provides for long explanations, or who prefer to keep all their AI chat history in one product rather than split between Trados and Workbench.
+
+If the option is set to **Workbench Sidekick** but Workbench isn't running (or the [Sidekick Bridge](../ai-assistant/sidekick-bridge.md) isn't reachable for any reason), the QuickLauncher silently falls back to the in-Trados Assistant – a missing Workbench never blocks a prompt.
+
+{% hint style="info" %}
+This setting only affects QuickLauncher. The in-Trados Assistant chat, Batch Translate, AI Proofreader, and other AI features keep using their own panels regardless.
+{% endhint %}
+
 ### SuperMemory context
 
 These two toggles control whether [SuperMemory](../ai-assistant/super-memory.md) knowledge base articles are included in the AI context.

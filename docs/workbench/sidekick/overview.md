@@ -62,6 +62,18 @@ By default, **Alt+K** reopens Sidekick to whichever tab you last used. To always
 
 ***
 
+### Receiving QuickLauncher prompts from Trados
+
+When **Supervertaler for Trados** is also running, Sidekick can be the destination for Ctrl+Q QuickLauncher prompts triggered inside Trados Studio. The user picks a prompt in Trados, the expanded prompt is sent to Sidekick over a localhost bridge, Sidekick pops to the front, maximises to the screen it's on, switches to the Chat tab, and the response renders there instead of in the in-Trados Assistant.
+
+This is opt-in on the Trados side – a dropdown in Trados → **Settings → AI Settings → "QuickLauncher prompts go to:"** picks between the in-Trados Assistant (default) and Workbench Sidekick. Sidekick is always ready to receive; nothing in Workbench needs to be configured.
+
+If Workbench isn't running when Trados tries to send a prompt, Trados silently falls back to its own Assistant – the prompt is never lost.
+
+→ [Sidekick Bridge (Trados help)](https://supervertaler.gitbook.io/help/trados/ai-assistant/sidekick-bridge) – wire format and troubleshooting
+
+***
+
 ### Related pages
 
 * [SuperLookup Overview](../superlookup/overview.md)

@@ -845,8 +845,12 @@ namespace Supervertaler.Trados.Controls
             _nudSurroundingSegments.Location = new Point(210, y);
             y += 34;
 
+            // The label "QuickLauncher prompts go to:" is wider than the
+            // shared x=210 column the other rows use, so the combo is
+            // anchored to the label's right edge instead of a fixed x to
+            // avoid the label clipping into the combo's leading text.
             _lblQuickLauncherTarget.Location = new Point(36, y + 3);
-            _cmbQuickLauncherTarget.Location = new Point(210, y);
+            _cmbQuickLauncherTarget.Location = new Point(_lblQuickLauncherTarget.Right + 8, y);
             y += 34;
 
             _lblInfo.Location = new Point(16, y);

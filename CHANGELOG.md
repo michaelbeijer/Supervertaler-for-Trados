@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.19.57] – 2026-05-02
+
+### Added (regression guard for the language-direction helper)
+
+- **`LanguageUtils.RunStartupSelfTest`** — exercises `CompareTermbaseDirection` against 16 canonical language-name shapes (full names, BCP-47 codes, abbreviated regions, missing/empty inputs, mismatched pairs, same-language-different-region) at plugin startup. Result is logged to `bridge.log` next to the `TermLensSettings.RunStartupSelfTest` entry. Any future regression in the direction-comparison logic surfaces immediately instead of after users notice term lookups going to the wrong column. Verified all 16 cases pass against the v4.19.56 implementation.
+
+---
+
 ## [4.19.56] – 2026-05-02
 
 ### Fixed (second Codex 5.5 review-pass sweep)

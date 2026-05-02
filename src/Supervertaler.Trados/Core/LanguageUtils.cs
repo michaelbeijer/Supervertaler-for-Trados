@@ -164,6 +164,61 @@ namespace Supervertaler.Trados.Core
         }
 
         /// <summary>
+        /// Exercises <see cref="CompareTermbaseDirection"/> against a fixed
+        /// table of canonical language-name shapes (full names, BCP-47 codes,
+        /// abbreviated regions, missing/empty inputs, mismatched pairs).
+        /// Returns <c>null</c> on success or a short description of the first
+        /// failed case. Wired into plugin startup alongside the
+        /// <see cref="Settings.TermLensSettings.RunStartupSelfTest"/> guard so
+        /// any future regression in the direction-comparison logic surfaces
+        /// in <c>bridge.log</c> instead of after users notice term lookups
+        /// going to the wrong column.
+        /// </summary>
+        public static string RunStartupSelfTest()
+        {
+            var cases = new[]
+            {
+                new SelfTestCase("English",                 "English (United States)",  "Dutch",            TermbaseDirection.Aligned),
+                new SelfTestCase("English (United States)", "English",                  "Dutch",            TermbaseDirection.Aligned),
+                new SelfTestCase("English (US)",            "English (United States)",  "Dutch",            TermbaseDirection.Aligned),
+                new SelfTestCase("en-US",                   "English (United States)",  "Dutch",            TermbaseDirection.Aligned),
+                new SelfTestCase("en-US",                   "English (UK)",             "Dutch",            TermbaseDirection.Unrelated),
+                new SelfTestCase("English",                 "Dutch",                    "English",          TermbaseDirection.Inverted),
+                new SelfTestCase("Dutch (Netherlands)",     "English",                  "Dutch",            TermbaseDirection.Inverted),
+                new SelfTestCase("nl-NL",                   "English",                  "Dutch",            TermbaseDirection.Inverted),
+                new SelfTestCase("German",                  "English",                  "Dutch",            TermbaseDirection.Unrelated),
+                new SelfTestCase("",                        "English",                  "Dutch",            TermbaseDirection.NotApplicable),
+                new SelfTestCase("English",                 "",                         "Dutch",            TermbaseDirection.NotApplicable),
+                new SelfTestCase(null,                      "English",                  "Dutch",            TermbaseDirection.NotApplicable),
+                new SelfTestCase("English",                 "English",                  "",                 TermbaseDirection.Aligned),
+                new SelfTestCase("Dutch",                   "English",                  "",                 TermbaseDirection.Unrelated),
+                new SelfTestCase("English (US)",            "English (UK)",             "French (Canada)",  TermbaseDirection.Unrelated),
+                new SelfTestCase("French",                  "English (UK)",             "French (CA)",      TermbaseDirection.Inverted),
+            };
+            foreach (var c in cases)
+            {
+                var got = CompareTermbaseDirection(c.Proj, c.TbSrc, c.TbTgt);
+                if (got != c.Expected)
+                {
+                    return $"CompareTermbaseDirection('{c.Proj}', '{c.TbSrc}', '{c.TbTgt}') = {got}, expected {c.Expected}";
+                }
+            }
+            return null;
+        }
+
+        private struct SelfTestCase
+        {
+            public string Proj;
+            public string TbSrc;
+            public string TbTgt;
+            public TermbaseDirection Expected;
+            public SelfTestCase(string proj, string tbSrc, string tbTgt, TermbaseDirection expected)
+            {
+                Proj = proj; TbSrc = tbSrc; TbTgt = tbTgt; Expected = expected;
+            }
+        }
+
+        /// <summary>
         /// Finds the 2-letter ISO 3166-1 country code for a country name.
         /// Searches all specific cultures' RegionInfo for a match.
         /// </summary>

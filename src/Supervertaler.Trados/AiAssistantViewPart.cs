@@ -139,6 +139,17 @@ namespace Supervertaler.Trados
                 BridgeLog.Write("TermLensSettings.RunStartupSelfTest passed.");
             }
 
+            var langSelfTestError = LanguageUtils.RunStartupSelfTest();
+            if (langSelfTestError != null)
+            {
+                BridgeLog.Write("CRITICAL: LanguageUtils.RunStartupSelfTest FAILED: " + langSelfTestError);
+                BridgeLog.Write("CRITICAL: Termbase language-direction logic is misclassifying inputs. Term lookups, writes, or merges may go to the wrong columns until this is fixed.");
+            }
+            else
+            {
+                BridgeLog.Write("LanguageUtils.RunStartupSelfTest passed.");
+            }
+
             // License check – show/hide upgrade overlay based on tier.
             // When the user activates a licence mid-session (after Initialize
             // returned early due to no access), run the deferred full init so

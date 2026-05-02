@@ -78,6 +78,20 @@ namespace Supervertaler.Trados.Core
 
         /// <summary>Tag map for reconstructing tags in the target segment.</summary>
         public Dictionary<int, TagInfo> TagMap { get; set; }
+
+        /// <summary>
+        /// Set by the event handler to <c>false</c> when writing the translation
+        /// to Trados fails. <see cref="BatchTranslator"/> reads this back after
+        /// the event returns and treats a failed write as a failed segment in
+        /// the final report. Default <c>true</c> so handlers that don't write
+        /// (or that don't exist) don't get penalised.
+        ///
+        /// Requires the event to be raised SYNCHRONOUSLY – any async handler
+        /// (BeginInvoke, fire-and-forget Task) will return before setting the
+        /// flag and the translator will record success regardless of the
+        /// actual write outcome.
+        /// </summary>
+        public bool WriteSucceeded { get; set; } = true;
     }
 
     // ─── Engine ──────────────────────────────────────────────
@@ -236,7 +250,7 @@ namespace Supervertaler.Trados.Core
                             if (translationMap.TryGetValue(number, out translation)
                                 && !string.IsNullOrWhiteSpace(translation))
                             {
-                                SegmentTranslated?.Invoke(this, new BatchSegmentResultEventArgs
+                                var args = new BatchSegmentResultEventArgs
                                 {
                                     SegmentIndex = segments[i].Index,
                                     SourceText = segments[i].SourceText,
@@ -244,10 +258,26 @@ namespace Supervertaler.Trados.Core
                                     SegmentPairRef = segments[i].SegmentPairRef,
                                     HasTags = segments[i].HasTags,
                                     TagMap = segments[i].TagMap
-                                });
+                                };
+                                SegmentTranslated?.Invoke(this, args);
 
-                                batchTranslated++;
-                                translated++;
+                                // Only count as translated if the handler actually wrote
+                                // the segment to Trados. Pre-v4.19.55 the counter was
+                                // bumped here unconditionally, so write failures (e.g.
+                                // ProcessSegmentPair throwing) would be logged but the
+                                // final completion summary would still over-report
+                                // success. Requires SegmentTranslated to be raised
+                                // synchronously so the flag is up-to-date here.
+                                if (args.WriteSucceeded)
+                                {
+                                    batchTranslated++;
+                                    translated++;
+                                }
+                                else
+                                {
+                                    batchFailed++;
+                                    failed++;
+                                }
                             }
                             else
                             {

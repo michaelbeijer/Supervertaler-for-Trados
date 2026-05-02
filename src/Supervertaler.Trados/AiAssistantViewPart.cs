@@ -3450,7 +3450,12 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
 
         private void OnBatchSegmentTranslated(object sender, BatchSegmentResultEventArgs e)
         {
-            SafeInvoke(() =>
+            // Run SYNCHRONOUSLY on the UI thread so e.WriteSucceeded is set
+            // before BatchTranslator reads it back. SafeInvoke uses BeginInvoke
+            // (asynchronous) and would return before the write attempt, leaving
+            // the flag at its default true and the final completion summary
+            // over-reporting success on write failures.
+            void DoWrite()
             {
                 try
                 {
@@ -3458,7 +3463,7 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                     // while batch translation is running (OnActiveDocumentChanged can null
                     // _activeDocument between the null check and ProcessSegmentPair).
                     var doc = _activeDocument;
-                    if (e.SegmentPairRef == null || doc == null) return;
+                    if (e.SegmentPairRef == null || doc == null) { e.WriteSucceeded = false; return; }
 
                     // All segments now store ISegmentPair for ProcessSegmentPair.
                     // This avoids the editor buffer issue (Selection.Target.Replace
@@ -3511,10 +3516,17 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                 }
                 catch (Exception ex)
                 {
+                    e.WriteSucceeded = false;
                     _control.Value.BatchTranslateControl.AppendLog(
                         $"Failed to write segment {e.SegmentIndex}: {ex.Message}", true);
                 }
-            });
+            }
+
+            var ctrl = _control.Value;
+            if (ctrl.InvokeRequired)
+                ctrl.Invoke(new Action(DoWrite));
+            else
+                DoWrite();
         }
 
         private void OnBatchCompleted(object sender, BatchCompletedEventArgs e)

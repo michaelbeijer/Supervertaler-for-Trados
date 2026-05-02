@@ -1148,10 +1148,15 @@ namespace Supervertaler.Trados.Core
             var outerMatch = Regex.Match(json, outerPattern);
             if (!outerMatch.Success) return null;
 
-            // Search within a reasonable range after the outer key
+            // Search the rest of the string after the outer key. Pre-v4.19.55
+            // this was capped at 2000 chars on the assumption that the inner
+            // key was always near the start of the outer object – which broke
+            // silently once the shared Workbench settings file grew enough
+            // keys/profiles to push the target past the window. The fallback
+            // already uses a regex that stops at the first match, so removing
+            // the cap is cheap.
             var startIdx = outerMatch.Index + outerMatch.Length;
-            var searchLen = Math.Min(2000, json.Length - startIdx);
-            var section = json.Substring(startIdx, searchLen);
+            var section = json.Substring(startIdx);
 
             return ExtractJsonString(section, innerKey);
         }

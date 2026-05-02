@@ -304,13 +304,48 @@ namespace Supervertaler.Trados.Core
                 // and "English (US)" compare correctly.
                 var projNorm = LanguageUtils.ShortenLanguageName(projectSourceLang ?? "");
                 string termbaseSrcLang = "";
+                string termbaseTgtLang = "";
                 if (termbaseDirection.TryGetValue(entry.TermbaseId, out var dir))
+                {
                     termbaseSrcLang = dir.src ?? "";
-                var tbNorm = LanguageUtils.ShortenLanguageName(termbaseSrcLang);
-                bool isInverted = !string.IsNullOrEmpty(projectSourceLang)
-                    && !string.IsNullOrEmpty(termbaseSrcLang)
-                    && !projNorm.StartsWith(tbNorm, StringComparison.OrdinalIgnoreCase)
-                    && !tbNorm.StartsWith(projNorm, StringComparison.OrdinalIgnoreCase);
+                    termbaseTgtLang = dir.tgt ?? "";
+                }
+                var tbSrcNorm = LanguageUtils.ShortenLanguageName(termbaseSrcLang);
+                var tbTgtNorm = LanguageUtils.ShortenLanguageName(termbaseTgtLang);
+
+                bool LangMatches(string a, string b) =>
+                    !string.IsNullOrEmpty(a) && !string.IsNullOrEmpty(b)
+                    && (a.StartsWith(b, StringComparison.OrdinalIgnoreCase)
+                        || b.StartsWith(a, StringComparison.OrdinalIgnoreCase));
+
+                bool projMatchesSrc = LangMatches(projNorm, tbSrcNorm);
+                bool projMatchesTgt = LangMatches(projNorm, tbTgtNorm);
+
+                bool isInverted;
+                if (string.IsNullOrEmpty(projectSourceLang) || string.IsNullOrEmpty(termbaseSrcLang))
+                {
+                    // Project or termbase has no declared language – preserve
+                    // the legacy "assume not inverted" fallback.
+                    isInverted = false;
+                }
+                else if (projMatchesSrc)
+                {
+                    isInverted = false;
+                }
+                else if (projMatchesTgt)
+                {
+                    isInverted = true;
+                }
+                else
+                {
+                    // Termbase language pair doesn't match the project on either
+                    // side – skip the entry instead of mis-inverting it.
+                    // Pre-v4.19.55 the inversion check treated *any* mismatch as
+                    // "inverted", so a DE-FR termbase loaded into an EN-NL
+                    // project would get its sides swapped and indexed under
+                    // languages it has no terms for.
+                    continue;
+                }
 
                 if (isInverted)
                 {

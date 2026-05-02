@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.19.55] – 2026-05-02
+
+### Fixed (bug sweep based on a Codex 5.5 review pass)
+
+- **Termbase inversion no longer mis-handles unrelated language pairs.** [TermbaseReader.cs](src/Supervertaler.Trados/Core/TermbaseReader.cs) treated any project-source ≠ termbase-source mismatch as "inverted", which meant a DE-FR termbase loaded into an EN-NL project would get its sides swapped and indexed under languages it has no terms for. Now the inversion check verifies project-source actually matches termbase-target before swapping; entries from termbases whose language pair doesn't match the project on either side are skipped instead of mis-indexed.
+- **Batch Translate completion summary now reflects actual writes.** [BatchTranslator.cs](src/Supervertaler.Trados/Core/BatchTranslator.cs) was incrementing `translated` as soon as the LLM returned a parseable response; the Trados write happened later in [AiAssistantViewPart.OnBatchSegmentTranslated](src/Supervertaler.Trados/AiAssistantViewPart.cs) and write failures were logged but not subtracted, so the final "translated N" report could over-count. Added a `WriteSucceeded` flag on the segment-result event args; the handler now runs synchronously on the UI thread and signals failure back, and the translator's counters reflect the real outcome.
+- **Plugin no longer deletes `%LocalAppData%\Supervertaler\` on every Trados start.** [UserDataPath.CleanupLegacyFolders](src/Supervertaler.Trados/Settings/UserDataPath.cs) wiped that folder unconditionally on the assumption it was a stale Workbench artifact – ungated by any migration flag, so any user (or future contributor) putting data there would lose it on the next plugin start. The deletion was added on a hunch; it's now removed.
+- **API-key fallback parser scans the whole shared settings file.** [LlmClient.ExtractNestedJsonString](src/Supervertaler.Trados/Core/LlmClient.cs) only searched 2000 chars after `"api_keys"`. The shared Workbench settings.json is already 10 KB; a key past the window would silently fail to load. Removed the cap.
+- **Build no longer warns about `System.Memory` / `System.Buffers` / `System.Runtime.CompilerServices.Unsafe` version conflicts.** Trados ships older transitive copies than `Microsoft.Data.Sqlite 8.0.0` needs; MSBuild was picking the older "primary" assemblies and hoping for the best. Added explicit `PackageReference` entries to pin the versions SQLite expects, eliminating the MSB3277 warnings and removing the time-bomb risk that a future SQLite update reaches into newer-version-only APIs.
+
+---
+
 ## [4.19.54] – 2026-05-02
 
 ### Fixed (critical settings-loss regression introduced in v4.19.52)

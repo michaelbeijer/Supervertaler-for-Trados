@@ -5,8 +5,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>Supervertaler.Trados</RootNamespace>
     <AssemblyName>Supervertaler.Trados</AssemblyName>
-    <Version>4.19.54</Version>
-    <InformationalVersion>4.19.54</InformationalVersion>
+    <Version>4.19.55</Version>
+    <InformationalVersion>4.19.55</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <Authors>Michael Beijer</Authors>
     <Company>Supervertaler</Company>
@@ -81,6 +81,15 @@
   <ItemGroup>
     <PackageReference Include="iTextSharp" Version="5.5.13.5" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
+    <!-- Explicit System.Memory/System.Buffers references make MSBuild treat
+         these as primary instead of transitive, eliminating the v4.0.1.1 vs
+         v4.0.1.2 conflict warning between Trados-bundled and Sqlite-required
+         versions. Microsoft.Data.Sqlite 8.0.0 needs System.Memory >= 4.5.4
+         and System.Buffers >= 4.5.1; pinning to the matching shipped versions
+         ensures MSBuild ships the binaries SQLite expects at runtime. -->
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+    <PackageReference Include="System.Buffers" Version="4.5.1" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
   </ItemGroup>
 
   <!-- Plugin package manifest and extension manifest -->

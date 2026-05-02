@@ -714,28 +714,24 @@ namespace Supervertaler.Trados.Settings
         }
 
         /// <summary>
-        /// Removes legacy AppData folders that are no longer used:
-        ///   %LocalAppData%\Supervertaler.Trados\  – old plugin settings (migrated)
-        ///   %LocalAppData%\Supervertaler\          – stale Workbench artifact on Windows
-        /// Only deletes if the migration flag exists (data has been safely copied).
+        /// Removes the legacy plugin-only settings directory at
+        /// <c>%LocalAppData%\Supervertaler.Trados\</c> after the one-time
+        /// migration has completed (signalled by the <c>.migrated</c> flag
+        /// inside the new Trados data directory).
+        ///
+        /// Earlier versions also tried to remove <c>%LocalAppData%\Supervertaler\</c>
+        /// on every startup on the assumption that it was a stale Workbench
+        /// artifact. That deletion was ungated – any user (or future-us) who
+        /// happened to have data there would lose it on every Trados start.
+        /// Removed in v4.19.55; the directory is now left untouched.
         /// </summary>
         private static void CleanupLegacyFolders()
         {
             var flagFile = Path.Combine(TradosDir, ".migrated");
-            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-            // Remove %LocalAppData%\Supervertaler.Trados\ (old plugin-only dir)
-            // Only if migration has completed (flag exists)
             if (File.Exists(flagFile) && Directory.Exists(LegacyDir))
             {
                 try { Directory.Delete(LegacyDir, true); } catch { }
-            }
-
-            // Remove %LocalAppData%\Supervertaler\ (stale Workbench artifact, not used by any current code)
-            var staleWorkbenchDir = Path.Combine(localAppData, "Supervertaler");
-            if (Directory.Exists(staleWorkbenchDir))
-            {
-                try { Directory.Delete(staleWorkbenchDir, true); } catch { }
             }
         }
 

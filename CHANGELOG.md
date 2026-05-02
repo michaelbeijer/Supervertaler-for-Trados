@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.19.61] – 2026-05-02
+
+### Added (Termbase Editor: sort by creation time)
+
+- **New "Created" column in the Termbase Editor.** Surfaces the `termbase_terms.created_date` value the schema has stored for every term since v1 (default `CURRENT_TIMESTAMP`). Click the column header to sort by date – click again to reverse. Useful for finding and removing recently-added entries: add a term, realise it was wrong, sort by Created descending, the row is at the top. Read-only, formatted `yyyy-MM-dd HH:mm`. `TermEntry.CreatedDate` (nullable `DateTime`) and the `GetAllTermsByTermbaseId` SELECT both updated to expose the column.
+
+---
+
 ## [4.19.60] – 2026-05-02
 
 ### Added (route QuickLauncher prompts to Workbench Sidekick)

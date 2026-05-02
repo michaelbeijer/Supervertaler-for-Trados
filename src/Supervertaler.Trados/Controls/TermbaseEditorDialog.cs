@@ -304,6 +304,7 @@ namespace Supervertaler.Trados.Controls
                 _dataTable.Columns.Add("SrcAbbr", typeof(string));
                 _dataTable.Columns.Add("TgtAbbr", typeof(string));
                 _dataTable.Columns.Add("Url", typeof(string));
+                _dataTable.Columns.Add("Created", typeof(DateTime));
 
                 foreach (var term in terms)
                 {
@@ -321,7 +322,8 @@ namespace Supervertaler.Trados.Controls
                         term.Forbidden,
                         term.SourceAbbreviation ?? "",
                         term.TargetAbbreviation ?? "",
-                        term.Url ?? "");
+                        term.Url ?? "",
+                        term.CreatedDate.HasValue ? (object)term.CreatedDate.Value : DBNull.Value);
                 }
 
                 _bindingSource = new BindingSource { DataSource = _dataTable };
@@ -408,6 +410,21 @@ namespace Supervertaler.Trados.Controls
                     _dgvTerms.Columns["Url"].ToolTipText = "Reference URL";
                     _dgvTerms.Columns["Url"].FillWeight = 12;
                     _dgvTerms.Columns["Url"].MinimumWidth = 50;
+                }
+                if (_dgvTerms.Columns.Contains("Created"))
+                {
+                    _dgvTerms.Columns["Created"].HeaderText = "Created";
+                    _dgvTerms.Columns["Created"].ToolTipText =
+                        "When this term was added.\r\n" +
+                        "Click the column header to sort by date – useful for finding\r\n" +
+                        "and removing recently-added entries.";
+                    _dgvTerms.Columns["Created"].ReadOnly = true;
+                    _dgvTerms.Columns["Created"].DefaultCellStyle.Format = "yyyy-MM-dd HH:mm";
+                    _dgvTerms.Columns["Created"].DefaultCellStyle.ForeColor = Color.FromArgb(120, 120, 120);
+                    _dgvTerms.Columns["Created"].DefaultCellStyle.Font = new Font("Segoe UI", 8.5f);
+                    _dgvTerms.Columns["Created"].FillWeight = 12;
+                    _dgvTerms.Columns["Created"].MinimumWidth = 110;
+                    _dgvTerms.Columns["Created"].SortMode = DataGridViewColumnSortMode.Automatic;
                 }
 
                 UpdateTermCountLabel();

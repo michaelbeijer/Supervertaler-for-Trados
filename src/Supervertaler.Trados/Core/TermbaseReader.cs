@@ -683,6 +683,32 @@ namespace Supervertaler.Trados.Core
             if (TryGetOrdinal(reader, "client", out ord) && !reader.IsDBNull(ord))
                 entry.Client = reader.GetString(ord);
 
+            // created_date is stored as TEXT (SQLite CURRENT_TIMESTAMP returns
+            // 'YYYY-MM-DD HH:MM:SS' UTC) but Microsoft.Data.Sqlite may also
+            // expose it as DateTime depending on version. Handle both shapes.
+            if (TryGetOrdinal(reader, "created_date", out ord) && !reader.IsDBNull(ord))
+            {
+                try
+                {
+                    var raw = reader.GetValue(ord);
+                    if (raw is DateTime dt)
+                    {
+                        entry.CreatedDate = dt;
+                    }
+                    else if (raw is string s
+                        && DateTime.TryParse(
+                            s,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.AssumeUniversal
+                                | System.Globalization.DateTimeStyles.AdjustToUniversal,
+                            out var parsed))
+                    {
+                        entry.CreatedDate = parsed.ToLocalTime();
+                    }
+                }
+                catch { /* malformed date – leave null */ }
+            }
+
             return entry;
         }
 
@@ -1369,6 +1395,7 @@ namespace Supervertaler.Trados.Core
                     SELECT t.id, t.source_term, t.target_term, t.termbase_id,
                            t.source_lang, t.target_lang, t.definition, t.domain,
                            t.notes, t.forbidden, t.case_sensitive,
+                           t.created_date,
                            tb.name AS termbase_name,
                            tb.is_project_termbase,
                            COALESCE(tb.ranking, 99) AS ranking

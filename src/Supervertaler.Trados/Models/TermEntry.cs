@@ -39,6 +39,17 @@ namespace Supervertaler.Trados.Models
         public bool IsNonTranslatable { get; set; }
 
         /// <summary>
+        /// When this term was first inserted. Populated from the
+        /// <c>termbase_terms.created_date</c> column the schema has had
+        /// since v1 (default <c>CURRENT_TIMESTAMP</c>), so every row in
+        /// every Supervertaler termbase has one. Nullable for forward
+        /// compatibility with hypothetical future rows that explicitly
+        /// store NULL. Used by the Termbase Editor to let the user sort
+        /// by recency and find recently-added entries quickly.
+        /// </summary>
+        public System.DateTime? CreatedDate { get; set; }
+
+        /// <summary>
         /// Client code – a short identifier for the client this term belongs to
         /// (e.g. "ACME", "GLOBEX"). Used to filter KB context and match
         /// SuperMemory client profiles. Stored in the termbase_terms table.

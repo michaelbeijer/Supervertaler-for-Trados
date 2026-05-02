@@ -424,8 +424,18 @@ namespace Supervertaler.Trados.Controls
                     _dgvTerms.Columns["Created"].DefaultCellStyle.Format = "yyyy-MM-dd HH:mm";
                     _dgvTerms.Columns["Created"].DefaultCellStyle.ForeColor = Color.FromArgb(120, 120, 120);
                     _dgvTerms.Columns["Created"].DefaultCellStyle.Font = new Font("Segoe UI", 8.5f);
-                    _dgvTerms.Columns["Created"].FillWeight = 12;
-                    _dgvTerms.Columns["Created"].MinimumWidth = 110;
+                    // Use fixed Width with AutoSizeMode=None instead of MinimumWidth.
+                    // With the grid in Fill mode (AutoSizeColumnsMode = Fill set on
+                    // the DataGridView itself), assigning MinimumWidth larger than
+                    // the column's current auto-computed Width fires a layout pass
+                    // through DataGridViewBand.Thickness that NREs during dialog
+                    // construction. Switching this column to a fixed-Width column
+                    // bypasses the Fill arithmetic for it entirely; FillWeight is
+                    // dropped to 1 so the remaining columns redistribute the
+                    // available space among themselves the way they always did.
+                    _dgvTerms.Columns["Created"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                    _dgvTerms.Columns["Created"].Width = 120;
+                    _dgvTerms.Columns["Created"].FillWeight = 1;
                     _dgvTerms.Columns["Created"].SortMode = DataGridViewColumnSortMode.Automatic;
                 }
 

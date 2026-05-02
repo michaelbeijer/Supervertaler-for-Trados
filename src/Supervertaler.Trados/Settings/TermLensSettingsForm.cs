@@ -943,7 +943,7 @@ namespace Supervertaler.Trados.Settings
         /// per-write *inversion* of unrelated termbases, but writing the
         /// wrong-language terms into them was still possible. This dialog
         /// catches the mistake at tick-time. Confirmations persist across
-        /// sessions in <see cref="TermLensSettings.ConfirmedNonMatchingWriteTermbaseIds"/>.
+        /// sessions in <see cref="TermLensSettings.ConfirmedNonMatchingWriteTermbaseNames"/>.
         /// </summary>
         private bool ConfirmWriteToNonMatchingTermbase(TermbaseInfo tb, string colName)
         {

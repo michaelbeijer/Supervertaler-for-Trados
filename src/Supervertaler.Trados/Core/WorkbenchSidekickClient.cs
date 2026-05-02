@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -31,6 +32,17 @@ namespace Supervertaler.Trados.Core
     {
         private const int HandshakeVersion = 1;
         private const int TimeoutMs = 5000;
+
+        // Windows blocks SetForegroundWindow / activateWindow when called by
+        // a background process (Workbench is in the background while Trados
+        // is the active window). Calling AllowSetForegroundWindow from the
+        // foreground process (Trados) grants the target process (Workbench)
+        // permission to come to the front, just for this user-initiated
+        // event. Without this the Sidekick window opens but stays hidden
+        // behind Trados – the user has to Alt+K to find it.
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool AllowSetForegroundWindow(int dwProcessId);
 
         [DataContract]
         private class Handshake
@@ -88,6 +100,11 @@ namespace Supervertaler.Trados.Core
                 // Stale handshake from a hard kill.
                 return (false, "Workbench appears to have exited");
             }
+
+            // Grant Workbench permission to bring its Sidekick window to the
+            // front. Best-effort – if the call fails, the prompt still gets
+            // delivered, the user just has to summon Sidekick manually.
+            try { AllowSetForegroundWindow(hs.Pid); } catch { /* ignore */ }
 
             try
             {

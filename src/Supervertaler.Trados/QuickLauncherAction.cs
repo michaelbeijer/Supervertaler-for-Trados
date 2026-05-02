@@ -412,6 +412,23 @@ namespace Supervertaler.Trados
                         surroundingSegments, placeholder, tmMatchesText);
                 }
 
+                // Route to the user's configured target. The Workbench
+                // Sidekick path posts the expanded prompt over a localhost
+                // bridge to Supervertaler Workbench, which echoes the
+                // display version into Sidekick's chat and runs the full
+                // expansion through its LLM client. On any failure
+                // (Sidekick not running, bridge unreachable, stale PID)
+                // we silently fall back to the in-Trados Assistant so a
+                // missing Sidekick never blocks the user from running
+                // their prompt.
+                var target = settings?.AiSettings?.QuickLauncherTarget ?? "TradosAssistant";
+                if (string.Equals(target, "WorkbenchSidekick", StringComparison.OrdinalIgnoreCase))
+                {
+                    var (ok, _) = Core.WorkbenchSidekickClient.RunPrompt(
+                        expanded, displayExpanded ?? expanded, capturedPrompt.Name);
+                    if (ok) return;
+                    // Fell through – fall back to the in-Trados Assistant.
+                }
                 AiAssistantViewPart.RunQuickLauncherPrompt(expanded, displayExpanded, capturedPrompt.Name);
             };
 

@@ -65,6 +65,8 @@ namespace Supervertaler.Trados.Controls
         private CheckBox _chkDemoMode;
         private Label _lblSurroundingSegments;
         private NumericUpDown _nudSurroundingSegments;
+        private Label _lblQuickLauncherTarget;
+        private ComboBox _cmbQuickLauncherTarget;
 
         private Label _lblInfo;
         private List<TermbaseInfo> _availableTermbases = new List<TermbaseInfo>();
@@ -718,6 +720,37 @@ namespace Supervertaler.Trados.Controls
                 "Only applies to Chat and QuickLauncher \u2013 not to Batch Operations.");
             Controls.Add(_nudSurroundingSegments);
 
+            _lblQuickLauncherTarget = new Label
+            {
+                Text = "QuickLauncher prompts go to:",
+                Location = new Point(36, 0), // positioned dynamically
+                AutoSize = true,
+                ForeColor = labelColor
+            };
+            Controls.Add(_lblQuickLauncherTarget);
+
+            _cmbQuickLauncherTarget = new ComboBox
+            {
+                Location = new Point(210, 0), // positioned dynamically
+                Width = 220,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            _cmbQuickLauncherTarget.Items.Add("In-Trados AI Assistant");
+            _cmbQuickLauncherTarget.Items.Add("Workbench Sidekick");
+            _cmbQuickLauncherTarget.SelectedIndex = 0;
+            var qlTargetTip = new ToolTip { AutoPopDelay = 10000, InitialDelay = 300 };
+            qlTargetTip.SetToolTip(_cmbQuickLauncherTarget,
+                "Where Ctrl+Q QuickLauncher prompts are run.\r\n" +
+                "\r\n" +
+                "  In-Trados AI Assistant \u2013 default. Prompt + response stay in the\r\n" +
+                "  Trados Assistant chat panel.\r\n" +
+                "\r\n" +
+                "  Workbench Sidekick \u2013 posts the prompt to Supervertaler Workbench's\r\n" +
+                "  Sidekick Chat over a localhost bridge. Useful when you prefer the\r\n" +
+                "  Sidekick's chat UI or want both products' chat history in one place.\r\n" +
+                "  Falls back to the in-Trados Assistant if Sidekick isn't running.");
+            Controls.Add(_cmbQuickLauncherTarget);
+
             // === Info label ===
             _lblInfo = new Label
             {
@@ -810,6 +843,10 @@ namespace Supervertaler.Trados.Controls
 
             _lblSurroundingSegments.Location = new Point(36, y + 3);
             _nudSurroundingSegments.Location = new Point(210, y);
+            y += 34;
+
+            _lblQuickLauncherTarget.Location = new Point(36, y + 3);
+            _cmbQuickLauncherTarget.Location = new Point(210, y);
             y += 34;
 
             _lblInfo.Location = new Point(16, y);
@@ -916,6 +953,9 @@ namespace Supervertaler.Trados.Controls
             _lblMaxSegments.Enabled = settings.IncludeDocumentContext;
             _nudSurroundingSegments.Value = Math.Max(_nudSurroundingSegments.Minimum,
                 Math.Min(_nudSurroundingSegments.Maximum, settings.QuickLauncherSurroundingSegments));
+            _cmbQuickLauncherTarget.SelectedIndex =
+                string.Equals(settings.QuickLauncherTarget, "WorkbenchSidekick", StringComparison.OrdinalIgnoreCase)
+                    ? 1 : 0;
             _chkIncludeTermMetadata.Checked = settings.IncludeTermMetadata;
             _chkIncludeSuperMemory.Checked = settings.IncludeSuperMemoryContext;
             _chkIncludeSuperMemoryAutoPrompt.Checked = settings.IncludeSuperMemoryInAutoPrompt;
@@ -1024,6 +1064,8 @@ namespace Supervertaler.Trados.Controls
             settings.IncludeDocumentContext = _chkIncludeDocumentContext.Checked;
             settings.DocumentContextMaxSegments = (int)_nudMaxSegments.Value;
             settings.QuickLauncherSurroundingSegments = (int)_nudSurroundingSegments.Value;
+            settings.QuickLauncherTarget = _cmbQuickLauncherTarget.SelectedIndex == 1
+                ? "WorkbenchSidekick" : "TradosAssistant";
             settings.IncludeTermMetadata = _chkIncludeTermMetadata.Checked;
             settings.IncludeSuperMemoryContext = _chkIncludeSuperMemory.Checked;
             settings.IncludeSuperMemoryInAutoPrompt = _chkIncludeSuperMemoryAutoPrompt.Checked;

@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.19.60] – 2026-05-02
+
+### Added (route QuickLauncher prompts to Workbench Sidekick)
+
+- **`AiSettings.QuickLauncherTarget`** – new string setting (data-member `quickLauncherTarget`, values `"TradosAssistant"` (default) or `"WorkbenchSidekick"`) that picks where Ctrl+Q QuickLauncher prompts run. The default keeps the existing behaviour: prompt + response stay in the in-Trados Assistant chat. The Workbench-Sidekick option posts the expanded prompt to Supervertaler Workbench's Sidekick Chat over a localhost bridge, with the response rendered in Sidekick instead of in Trados.
+- **`Core.WorkbenchSidekickClient`** – inverse of the existing `Core.SidekickBridge`. Discovers the Workbench's bridge via the handshake file at `<root>/workbench/runtime/sidekick-bridge.json`, validates the PID is alive, POSTs to `http://127.0.0.1:<port>/v1/run-prompt` with a Bearer token. On any failure (Sidekick not running, stale handshake, network error) the call site silently falls back to the in-Trados Assistant so a missing Sidekick never blocks the user from running their prompt.
+- **AI Settings dropdown** – a new "QuickLauncher prompts go to:" combo box in Settings → AI Settings, with a tooltip explaining the two targets and the fallback behaviour.
+
+The Workbench side of this feature ships in Supervertaler-Workbench (modules/sidekick_bridge_server.py and a new `run_prompt_requested` signal handler in `FloatingAssistant`); upgrade Workbench to the matching version for the route to work.
+
+---
+
 ## [4.19.59] – 2026-05-02
 
 ### Changed (stronger key for the non-matching-termbase confirmation list)

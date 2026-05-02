@@ -189,6 +189,22 @@ namespace Supervertaler.Trados.Settings
             = new List<string>();
 
         /// <summary>
+        /// Where QuickLauncher prompts run. <c>"TradosAssistant"</c> (default,
+        /// preserves existing behaviour) routes the prompt + response through
+        /// the in-Trados AI Assistant chat. <c>"WorkbenchSidekick"</c> instead
+        /// posts the prompt to Supervertaler Workbench's Sidekick Chat via
+        /// the localhost bridge it exposes (see WorkbenchSidekickClient and
+        /// the Workbench-side modules/sidekick_bridge_server.py).
+        ///
+        /// When set to WorkbenchSidekick but the Sidekick isn't running /
+        /// reachable, the action falls back to the in-Trados Assistant with
+        /// a status line citing the reason – the user is never blocked from
+        /// running their prompt by an unavailable Sidekick.
+        /// </summary>
+        [DataMember(Name = "quickLauncherTarget")]
+        public string QuickLauncherTarget { get; set; } = "TradosAssistant";
+
+        /// <summary>
         /// Whether to include term definitions, domains, and notes alongside
         /// matched terminology in the AI chat prompt.
         /// </summary>

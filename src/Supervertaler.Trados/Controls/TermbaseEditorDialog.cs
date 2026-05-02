@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using Supervertaler.Trados.Core;
 using Supervertaler.Trados.Models;
@@ -431,7 +433,38 @@ namespace Supervertaler.Trados.Controls
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to load terms:\n{ex.Message}",
+                // Surface the exception type AND a couple of stack-frames so
+                // diagnostic reports include enough info to pinpoint the
+                // throwing line. The popup is user-facing so we keep it
+                // short; the full trace also goes to a sidecar log file the
+                // user can attach to a bug report.
+                var topFrames = "";
+                try
+                {
+                    var lines = (ex.StackTrace ?? "").Split(new[] { '\r', '\n' },
+                        StringSplitOptions.RemoveEmptyEntries);
+                    if (lines.Length > 0)
+                        topFrames = "\n\n" + string.Join("\n", lines.Take(4));
+                }
+                catch { }
+
+                try
+                {
+                    var dir = Path.GetDirectoryName(_dbPath);
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        var logPath = Path.Combine(dir, "termbase-editor-errors.log");
+                        File.AppendAllText(logPath,
+                            $"[{DateTime.Now:O}] LoadTerms threw\r\n" +
+                            $"  termbase: {_termbase?.Name} (id {_termbase?.Id})\r\n" +
+                            $"  {ex.GetType().FullName}: {ex.Message}\r\n" +
+                            (ex.StackTrace ?? "(no stack trace)") + "\r\n\r\n");
+                    }
+                }
+                catch { /* logging must never throw out of the catch */ }
+
+                MessageBox.Show(
+                    $"Failed to load terms:\n{ex.GetType().Name}: {ex.Message}{topFrames}",
                     "TermLens", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally

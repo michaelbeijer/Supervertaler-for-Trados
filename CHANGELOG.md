@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.19.58] – 2026-05-02
+
+### Added (UX guard for non-matching Write / Project termbases)
+
+- **Confirm dialog when assigning a non-matching termbase as Write or Project.** Pre-v4.19.56 the inversion logic would silently swap source/target columns when the user ticked an unrelated-language-pair termbase as Write, writing terms in the wrong direction. v4.19.56 stopped the silent swap, but the user could still tick a non-matching termbase as Write and have new terms written into a database whose language pair didn't match the project. v4.19.58 catches this at tick-time: when the user ticks Write or Project on a termbase whose `LanguageUtils.CompareTermbaseDirection` reports as `Unrelated`, the Settings → Termbases tab now shows a confirm dialog ("This is an EN-NL termbase, but the active project's source language is German…") with a "Yes, add anyway" / "No" choice. Confirmed termbases are remembered in `TermLensSettings.ConfirmedNonMatchingWriteTermbaseIds` so the user is never re-asked for the same termbase. Unticking the box clears the override so a future re-tick re-asks. Header "tick-all" Write skips non-matching termbases that haven't been individually confirmed, so a bulk select can't sneak unrelated termbases through. Read-only ticks (the Read column) are exempt – there's no harm in *reading* a non-matching termbase, only in writing into it.
+- **`TermLensEditorViewPart.GetCurrentProjectSourceLanguage()`** – new public static accessor that mirrors the existing `GetCurrentProjectPath` / `GetCurrentProjectName` helpers, used by the Settings dialog to find out the active project's source language at form-open time.
+
+---
+
 ## [4.19.57] – 2026-05-02
 
 ### Added (regression guard for the language-direction helper)

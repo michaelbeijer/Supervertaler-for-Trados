@@ -75,11 +75,17 @@ namespace Supervertaler.Trados.Settings
         // MultiTerm termbases from the active Trados project (rows after _termbases in the grid)
         private List<MultiTermTermbaseInfo> _multiTermInfos = new List<MultiTermTermbaseInfo>();
 
+        // Active project source language captured at form open. Null when no
+        // project is loaded – in that case the language-mismatch warning is
+        // suppressed because we have nothing to compare against.
+        private string _projectSourceLanguage;
+
         public TermLensSettingsForm(TermLensSettings settings,
             Core.PromptLibrary promptLibrary = null, int defaultTab = 0)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _promptLibrary = promptLibrary ?? new Core.PromptLibrary();
+            _projectSourceLanguage = TermLensEditorViewPart.GetCurrentProjectSourceLanguage();
             BuildUI();
             PopulateFromSettings();
 
@@ -849,13 +855,39 @@ namespace Supervertaler.Trados.Settings
                 return;
             }
 
+            // Warn-once when a non-matching termbase is being assigned as Write
+            // or Project. We only check the database termbases (rows < _termbases.Count);
+            // MultiTerm rows already short-circuit above. Untick removes the
+            // confirmation so a re-tick re-asks. Read column is exempt –
+            // there's no harm in *reading* a non-matching termbase, only in
+            // writing into it.
+            if ((colName == "colWrite" || colName == "colProject") && e.RowIndex < _termbases.Count)
+            {
+                _dgvTermbases.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                var clicked = _dgvTermbases.Rows[e.RowIndex].Cells[colName].Value as bool? ?? false;
+                var tb = _termbases[e.RowIndex];
+
+                if (clicked)
+                {
+                    if (!ConfirmWriteToNonMatchingTermbase(tb, colName))
+                    {
+                        // User cancelled – revert the tick.
+                        _dgvTermbases.Rows[e.RowIndex].Cells[colName].Value = false;
+                        _dgvTermbases.RefreshEdit();
+                        return;
+                    }
+                }
+                else
+                {
+                    // Unticking removes the override so a future re-tick re-asks.
+                    _settings.ConfirmedNonMatchingWriteTermbaseIds?.Remove(tb.Id);
+                }
+            }
+
             // Radio-button enforcement for Project column only (only one can be project)
             // Write column allows multiple selections – terms are inserted into all write targets.
             if (colName == "colProject")
             {
-                // Commit the edit so .Value is up-to-date
-                _dgvTermbases.CommitEdit(DataGridViewDataErrorContexts.Commit);
-
                 var clicked = _dgvTermbases.Rows[e.RowIndex].Cells[colName].Value as bool? ?? false;
 
                 if (clicked)
@@ -868,6 +900,87 @@ namespace Supervertaler.Trados.Settings
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Whether the termbase is eligible to be auto-ticked by a bulk
+        /// "tick-all Write" header click. Non-matching termbases that the
+        /// user hasn't already confirmed are skipped – the user has to tick
+        /// them individually so the per-termbase confirm dialog can ask.
+        /// </summary>
+        private bool IsTermbaseEligibleForBulkWriteTick(TermbaseInfo tb)
+        {
+            if (tb == null) return false;
+            if (string.IsNullOrEmpty(_projectSourceLanguage)) return true;
+
+            var direction = LanguageUtils.CompareTermbaseDirection(
+                _projectSourceLanguage, tb.SourceLang, tb.TargetLang);
+            if (direction != LanguageUtils.TermbaseDirection.Unrelated) return true;
+
+            return _settings.ConfirmedNonMatchingWriteTermbaseIds != null
+                && _settings.ConfirmedNonMatchingWriteTermbaseIds.Contains(tb.Id);
+        }
+
+        /// <summary>
+        /// Shows a confirm dialog when the user ticks Write or Project on a
+        /// termbase whose declared language pair doesn't match the active
+        /// project (the <see cref="LanguageUtils.TermbaseDirection.Unrelated"/>
+        /// case from <see cref="LanguageUtils.CompareTermbaseDirection"/>).
+        /// Returns <c>true</c> if the tick should proceed (no project loaded,
+        /// language pair matches, or the user already confirmed for this
+        /// termbase, or the user clicks Yes), <c>false</c> if it should be
+        /// reverted.
+        ///
+        /// Pre-v4.19.58 the user could silently tick Write or Project on a
+        /// non-matching termbase and the AI / Quick-Add paths would happily
+        /// write terms into it without questioning – v4.19.56 stopped the
+        /// per-write *inversion* of unrelated termbases, but writing the
+        /// wrong-language terms into them was still possible. This dialog
+        /// catches the mistake at tick-time. Confirmations persist across
+        /// sessions in <see cref="TermLensSettings.ConfirmedNonMatchingWriteTermbaseIds"/>.
+        /// </summary>
+        private bool ConfirmWriteToNonMatchingTermbase(TermbaseInfo tb, string colName)
+        {
+            // No project loaded → can't compare → don't warn.
+            if (string.IsNullOrEmpty(_projectSourceLanguage)) return true;
+            if (tb == null) return true;
+
+            var direction = LanguageUtils.CompareTermbaseDirection(
+                _projectSourceLanguage, tb.SourceLang, tb.TargetLang);
+            if (direction != LanguageUtils.TermbaseDirection.Unrelated) return true;
+
+            // Already confirmed for this termbase – don't nag.
+            if (_settings.ConfirmedNonMatchingWriteTermbaseIds != null
+                && _settings.ConfirmedNonMatchingWriteTermbaseIds.Contains(tb.Id))
+            {
+                return true;
+            }
+
+            var role = colName == "colProject" ? "the Project termbase" : "a Write termbase";
+            var projShort = LanguageUtils.ShortenLanguageName(_projectSourceLanguage) ?? _projectSourceLanguage;
+            var tbDir = $"{LanguageUtils.ShortenLanguageName(tb.SourceLang) ?? tb.SourceLang} → " +
+                        $"{LanguageUtils.ShortenLanguageName(tb.TargetLang) ?? tb.TargetLang}";
+
+            var msg =
+                $"“{tb.Name}” is a {tbDir} termbase, but the active project's source " +
+                $"language is {projShort}.\n\n" +
+                $"Setting it as {role} means new terms added during this project will be written " +
+                "into a termbase whose language pair doesn't match.\n\n" +
+                "This is occasionally intentional (multilingual or global termbases, bootstrapping " +
+                "a new direction) – tick “Yes” to continue. The plugin will remember this " +
+                "choice for this termbase and won't ask again until you untick the box.";
+
+            var result = MessageBox.Show(this, msg,
+                "Supervertaler — Termbase language pair doesn't match project",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+
+            if (result != DialogResult.Yes) return false;
+
+            if (_settings.ConfirmedNonMatchingWriteTermbaseIds == null)
+                _settings.ConfirmedNonMatchingWriteTermbaseIds = new List<long>();
+            if (!_settings.ConfirmedNonMatchingWriteTermbaseIds.Contains(tb.Id))
+                _settings.ConfirmedNonMatchingWriteTermbaseIds.Add(tb.Id);
+            return true;
         }
 
         private void OnColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
@@ -908,6 +1021,18 @@ namespace Supervertaler.Trados.Settings
                 foreach (DataGridViewRow row in _dgvTermbases.Rows)
                 {
                     if (skipMultiTerm && row.Index >= _termbases.Count) continue;
+
+                    // Skip non-matching termbases when bulk-ticking Write –
+                    // each one needs explicit per-termbase confirmation, not a
+                    // hidden bulk override. Already-confirmed ones flow
+                    // through normally. Unticking is unconditional.
+                    if (newValue && col.Name == "colWrite" && row.Index < _termbases.Count)
+                    {
+                        var tb = _termbases[row.Index];
+                        if (!IsTermbaseEligibleForBulkWriteTick(tb))
+                            continue;
+                    }
+
                     row.Cells[col.Name].Value = newValue;
                 }
             }

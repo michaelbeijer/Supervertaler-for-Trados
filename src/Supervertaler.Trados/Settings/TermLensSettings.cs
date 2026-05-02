@@ -54,6 +54,18 @@ namespace Supervertaler.Trados.Settings
         public List<long> WriteTermbaseIds { get; set; } = new List<long>();
 
         /// <summary>
+        /// IDs of termbases for which the user has explicitly confirmed
+        /// Write/Project assignment despite the termbase's declared language
+        /// pair not matching the active project (i.e.
+        /// <see cref="Core.LanguageUtils.TermbaseDirection.Unrelated"/>).
+        /// The confirm dialog in Settings → Termbases adds the ID here on
+        /// "Yes, add anyway"; unticking the box removes it so a re-tick
+        /// re-asks. Empty / missing means no overrides have been confirmed.
+        /// </summary>
+        [DataMember(Name = "confirmedNonMatchingWriteTermbaseIds")]
+        public List<long> ConfirmedNonMatchingWriteTermbaseIds { get; set; } = new List<long>();
+
+        /// <summary>
         /// ID of the termbase the user has marked as the "Project" termbase.
         /// The project termbase is shown in pink; all others in blue.
         /// -1 means no project termbase is configured.
@@ -223,6 +235,8 @@ namespace Supervertaler.Trados.Settings
                     // Ensure list is never null
                     if (s.WriteTermbaseIds == null)
                         s.WriteTermbaseIds = new List<long>();
+                    if (s.ConfirmedNonMatchingWriteTermbaseIds == null)
+                        s.ConfirmedNonMatchingWriteTermbaseIds = new List<long>();
 
                     // Migrate: chord delay missing from older settings (deserializes as 0)
                     if (s.ChordDelayMs <= 0)

@@ -1129,6 +1129,18 @@ namespace Supervertaler.Trados
             return _currentInstance?._currentProjectName;
         }
 
+        /// <summary>
+        /// Returns the active document's source-language display name (e.g.
+        /// "English (United States)"), or null when no document is open.
+        /// Used by the Settings dialog to warn when the user ticks Write or
+        /// Project on a termbase whose language pair doesn't match the
+        /// active project.
+        /// </summary>
+        public static string GetCurrentProjectSourceLanguage()
+        {
+            return _currentInstance?.GetDocumentSourceLanguage();
+        }
+
         private void OnActiveFilePropertiesChanged(object sender, EventArgs e)
         {
             // Fired when file/project properties change – reload MultiTerm

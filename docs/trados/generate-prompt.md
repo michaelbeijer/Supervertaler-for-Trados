@@ -125,6 +125,10 @@ If your termbase contains incorrect or low-quality entries, these will be inject
 
 After saving the generated prompt, select it from the prompt dropdown on the Batch Operations tab. It works with all scopes and providers, just like any other prompt.
 
+**AutoPrompt always uses your configured AI provider**
+
+[Clipboard Mode](clipboard-mode.md) does **not** apply to AutoPrompt – ticking the Clipboard Mode checkbox affects only the actual Translate / Proofread passes, not prompt generation. AutoPrompt always sends the meta-prompt request to whichever provider is selected in [AI Settings](settings/ai-settings.md). This enables a useful pattern: keep Clipboard Mode ticked, click AutoPrompt to generate the prompt via your paid API, then run the bulk Translate via clipboard against a free web-tier model. See [Combining with AutoPrompt – the hybrid pattern](clipboard-mode.md#combining-with-autoprompt--the-hybrid-pattern) for the full workflow.
+
 **Regenerate when the project changes**
 
 If your project evolves significantly (new terminology, different document sections, additional termbases), run AutoPrompt again to generate an updated prompt.

@@ -134,7 +134,7 @@ These options control what additional context is included in AI prompts. The set
 | Max segments | Yes | Yes |
 | Include term definitions and domains | Yes | Yes |
 | Log prompts to Reports | Yes | Yes |
-| Include TM matches | Yes | No |
+| Include TM matches | Yes | AutoPrompt only |
 | Surrounding segments | Yes | No |
 
 ### AI context (Batch operations, Chat and QuickLauncher)
@@ -173,16 +173,20 @@ For [AutoPrompt](../generate-prompt.md), **TermScan** automatically filters the 
 **Only enable termbases you trust.** The AI will follow your glossary entries even when they are wrong. If a termbase contains inaccurate, outdated, or low-quality translations, the AI will be forced to use them – producing worse results than if no termbase were enabled at all. Modern LLMs are remarkably good at choosing correct terminology on their own. When in doubt, disable termbases and add terms incrementally as you review the AI's output.
 {% endhint %}
 
-### AI context (Chat and QuickLauncher)
+### AI context (mostly Chat and QuickLauncher)
 
-These settings apply only to the **Supervertaler Assistant** chat window and **QuickLauncher** prompts. They do **not** affect Batch Translate or Batch Proofread.
+These settings apply primarily to the **Supervertaler Assistant** chat window and **QuickLauncher** prompts. The exception is **Include TM matches**, which also feeds AutoPrompt – see the per-setting notes below.
 
 #### Include TM matches
 
-When enabled, translation memory matches for the current segment are included in the prompt. This gives the AI context from previous translations, improving consistency. This setting also controls whether TM reference pairs are included when using [AutoPrompt](../generate-prompt.md).
+The behaviour of this checkbox depends on which feature is asking for context:
 
-{% hint style="info" %}
-TM matches are per-segment and require a Trados TM lookup for each segment. Batch Operations skip this to keep processing fast.
+- **Chat and QuickLauncher (live TM lookups).** When enabled, the AI gets translation memory matches – fuzzy and exact – for the active segment. This gives the AI reference translations from your project TMs to improve consistency.
+- **AutoPrompt (Batch Operations).** When enabled, [AutoPrompt](../generate-prompt.md) samples up to 50 already-translated, human-confirmed segment pairs evenly from the active document and includes them in the meta-prompt as in-project reference translations. This includes 100% / exact matches that have been applied and confirmed, fuzzy-and-edited segments, and segments translated from scratch – any segment with a Translated, Approved, or Signed-off confirmation level qualifies. AutoPrompt does **not** do live TM lookups; it samples confirmed segments straight from the document.
+- **Other Batch Operations (Translate, Proofread).** Unaffected by this checkbox – they always work segment-by-segment without TM reference pairs, regardless of how it's set.
+
+{% hint style="success" %}
+**Tip for AutoPrompt users:** confirm a handful of segments you are happy with before clicking AutoPrompt. Even 10–20 confirmed segments give the AI meaningful style anchors to work from. Without any confirmed segments to sample, the generated prompt won't have in-project reference translations.
 {% endhint %}
 
 #### Surrounding segments

@@ -136,6 +136,23 @@ Both modes use the same prompts, terminology, document context, and tag handling
 Many users start with Clipboard Mode to explore AI translation with zero setup, then move to API Mode later for larger projects where full automation is more efficient. The two modes complement each other – you can switch between them at any time by ticking or unticking the Clipboard Mode checkbox.
 {% endhint %}
 
+## Combining with AutoPrompt – the hybrid pattern
+
+[AutoPrompt](generate-prompt.md) **always uses your configured AI provider** to generate the meta-prompt – Clipboard Mode does **not** apply to AutoPrompt, only to the actual Translate / Proofread passes. This is intentional, and it enables a useful hybrid workflow:
+
+1. Tick **Clipboard Mode**.
+2. Click **AutoPrompt…** – the prompt-generation request still goes through your configured API (a small, one-shot call, even on an Opus-class model this is cheap relative to bulk translation).
+3. Refine the generated prompt in the AI Assistant chat and **Save as Prompt…**.
+4. Select the saved prompt from the dropdown.
+5. Click **Copy to Clipboard** – Supervertaler builds a ready-to-paste batch for your web-based AI using the AutoPrompt-generated system prompt.
+6. Paste into ChatGPT / Claude.ai / Gemini, copy the response, click **Paste from Clipboard**.
+
+The result: paid API for the small-but-clever prompt-writing call, free web tier for the expensive bulk translation. You get the full AutoPrompt analysis pipeline (TermScan, domain detection, sampling of confirmed reference pairs) without paying per-token API rates for the bulk Translate.
+
+{% hint style="info" %}
+If you want to run AutoPrompt without using any API key – for example before you have signed up for a provider – you'll need to use API Mode-only features (the in-app Chat panel) at least once for the prompt-generation step. There is currently no clipboard-only AutoPrompt path; AutoPrompt always sends the meta-prompt request to a configured provider.
+{% endhint %}
+
 ## Tips
 
 ### Use the Best Model Available

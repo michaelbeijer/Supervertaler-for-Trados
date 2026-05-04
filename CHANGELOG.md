@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.19.65] – 2026-05-04
+
+### Fixed (AutoPrompt tooltip: clarify that Clipboard Mode does not apply)
+
+- **The AutoPrompt link tooltip didn't mention that Clipboard Mode is ignored by AutoPrompt.** Reported by Michael while drafting an auto-prompt with Clipboard Mode ticked – reasonable assumption that "this batch operation goes via clipboard" applied to AutoPrompt too, but the AutoPrompt handler at `AiAssistantViewPart.OnGeneratePromptRequested` doesn't reference `IsClipboardMode` at all and always sends the meta-prompt to whichever AI provider is configured in AI Settings. Added a paragraph to the tooltip in [BatchTranslateControl.cs:286-298](src/Supervertaler.Trados/Controls/BatchTranslateControl.cs) documenting this and pointing out the useful pattern it enables: keep Clipboard Mode ticked, click AutoPrompt to generate the prompt via your paid API, then run the bulk Translate via clipboard against a free web-tier model (ChatGPT / Claude.ai / Gemini). Best of both worlds – paid API for the small-but-clever prompt-writing call, free web tier for the expensive bulk translation.
+- No behavioural change. `AutoPopDelay` raised to 12 s so the longer tooltip doesn't dismiss before you finish reading.
+
+---
+
 ## [4.19.64] – 2026-05-04
 
 ### Fixed (CRITICAL: termbase write target persisted across project switches)

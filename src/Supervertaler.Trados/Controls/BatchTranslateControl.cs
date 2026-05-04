@@ -283,12 +283,17 @@ namespace Supervertaler.Trados.Controls
             };
             _lnkGeneratePrompt.LinkClicked += (s, ev) =>
                 GeneratePromptRequested?.Invoke(this, EventArgs.Empty);
-            var tip = new ToolTip();
+            var tip = new ToolTip { AutoPopDelay = 12000, InitialDelay = 300 };
             tip.SetToolTip(_lnkGeneratePrompt,
                 "AutoPrompt analyses your project\u2019s content, terminology (via TermScan),\r\n" +
                 "and TM data to generate a domain-specific translation prompt using AI.\r\n\r\n" +
                 "The result appears in the AI Assistant chat, where you can refine it.\r\n" +
-                "Right-click any assistant message \u2192 \u201cSave as Prompt\u2026\u201d to save it.");
+                "Right-click any assistant message \u2192 \u201cSave as Prompt\u2026\u201d to save it.\r\n\r\n" +
+                "Always uses the AI provider configured in AI Settings \u2013 Clipboard Mode\r\n" +
+                "does not apply to AutoPrompt, only to the actual Translate / Proofread\r\n" +
+                "passes. Useful pattern: keep Clipboard Mode ticked, click AutoPrompt to\r\n" +
+                "generate the prompt via your paid API, then run the bulk Translate via\r\n" +
+                "clipboard against a free web-tier model.");
             Controls.Add(_lnkGeneratePrompt);
             y += 28;
 

@@ -395,6 +395,7 @@ namespace Supervertaler.Trados.Core
             if (_provider == LlmModels.ProviderGrok) return "Grok";
             if (_provider == LlmModels.ProviderMistral) return "Mistral";
             if (_provider == LlmModels.ProviderDeepSeek) return "DeepSeek";
+            if (_provider == LlmModels.ProviderOpenRouter) return "OpenRouter";
             if (_provider == LlmModels.ProviderCustomOpenAi) return "Custom OpenAI";
             return "OpenAI";
         }
@@ -1617,7 +1618,24 @@ namespace Supervertaler.Trados.Core
                     // Extract tool_calls array from choices[0].message
                     var toolCalls = ExtractOpenAiToolCalls(body);
                     if (toolCalls.Count == 0)
-                        throw new InvalidOperationException("OpenAI indicated tool_calls but no calls found in response.");
+                    {
+                        // Defensive fallback. Some providers (notably DeepSeek
+                        // through OpenRouter, and some Custom-OpenAI gateways)
+                        // sometimes set finish_reason="tool_calls" while
+                        // omitting the actual tool_calls array – the model
+                        // intended to answer in plain text after all. Rather
+                        // than failing the whole turn, fall through to the
+                        // text content if any is present.
+                        var fallbackText = ExtractOpenAiContent(body);
+                        if (!string.IsNullOrWhiteSpace(fallbackText))
+                            return fallbackText;
+
+                        throw new InvalidOperationException(
+                            $"{OpenAiProviderLabel()} indicated tool_calls but " +
+                            "no calls were found in the response. The model " +
+                            "may not support tool use, or the provider may " +
+                            "have stripped the tool_calls field.");
+                    }
 
                     // Extract content text (may be null when only tool calls)
                     var assistantText = ExtractOpenAiAssistantContent(body);

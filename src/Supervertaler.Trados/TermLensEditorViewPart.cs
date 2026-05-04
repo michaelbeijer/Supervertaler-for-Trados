@@ -1020,6 +1020,13 @@ namespace Supervertaler.Trados
                     }
 
                     _settings.ApplyProjectOverlay(ps);
+                    // CRITICAL: persist the global settings file so that
+                    // disk-based readers (QuickAddTermAction, AddTermAction)
+                    // see the new project's WriteTermbaseIds / ProjectTermbaseId
+                    // instead of the previous project's stale values. Pre-fix,
+                    // pressing Alt+Down on a freshly-opened project would write
+                    // to the previous project's Write termbase.
+                    _settings.Save();
 
                     // Reload termbase with the project-specific path
                     LoadTermbase(forceReload: true);
@@ -1047,6 +1054,11 @@ namespace Supervertaler.Trados
                     };
                     _settings.ApplyProjectOverlay(newPs);
                     ProjectSettings.Save(projectPath, newPs);
+                    // CRITICAL: persist the global settings file so disk-based
+                    // readers see the empty WriteTermbaseIds / cleared
+                    // ProjectTermbaseId. See comment on the matching call
+                    // above for the bug this prevents.
+                    _settings.Save();
 
                     // Reload termbase with clean state
                     LoadTermbase(forceReload: true);
@@ -1554,7 +1566,13 @@ namespace Supervertaler.Trados
             {
                 var ps = ProjectSettings.Load(instance._currentProjectPath);
                 if (ps != null)
+                {
                     instance._settings.ApplyProjectOverlay(ps);
+                    // Keep the global settings file in sync so disk-based
+                    // readers (QuickAddTermAction, AddTermAction) see the
+                    // current project's effective Write/Project termbase IDs.
+                    instance._settings.Save();
+                }
             }
 
             instance.LoadTermbase(forceReload: true);
@@ -1579,7 +1597,11 @@ namespace Supervertaler.Trados
             {
                 var ps = ProjectSettings.Load(instance._currentProjectPath);
                 if (ps != null)
+                {
                     instance._settings.ApplyProjectOverlay(ps);
+                    // Keep the global settings file in sync (see notes above).
+                    instance._settings.Save();
+                }
             }
 
             instance.LoadTermbase(forceReload: true);

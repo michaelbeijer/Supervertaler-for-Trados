@@ -1,0 +1,25 @@
+# RWS App Store Manager – v4.19.64.0
+
+**Version number:** `4.19.64.0`
+**Minimum studio version:** `18.0`
+**Maximum studio version:** `18.9`
+**Checksum:** `9c2042645800d2b42c2a53b2b74890e4d55464ebbb2c277a63d0feabee60692e`
+
+---
+
+## Changelog
+
+### Added
+- **When `finish_reason == "tool_calls"` but the response contains no tool-call objects, fall through to the text content** instead of throwing. Some providers (notably DeepSeek through OpenRouter, and some Custom-OpenAI gateways) occasionally set the finish reason but omit the `tool_calls` array – the model intended to answer in plain text after all. With this fix, those turns succeed with the model's text reply rather than blowing up the whole conversation. If neither tool calls nor text is present, the error message remains but now uses the dynamic provider label.
+
+### Fixed
+- **Quick-add (Alt+Down) and Add Term dialog (Ctrl+Alt+T) were writing new terms to the *previous* project's Write termbase, even after switching projects.** The Settings → Termbases tab correctly showed all termbases unchecked for the new project (because the in-memory overlay had been applied), but the global `TermLensSettings.json` on disk still held the previous project's `WriteTermbaseIds`. Both `QuickAddTermAction` and `AddTermAction` call `TermLensSettings.Load()` to read the current write targets, which read the **disk** copy – getting the stale list and writing terms to the wrong termbase. Reported by Michael with a reproduction case (new project, all termbases unchecked in settings, Alt+Down still wrote two terms to the patents termbase).
+- The fix at [TermLensEditorViewPart.cs:1022-1052 / 1557 / 1582](src/Supervertaler.Trados/TermLensEditorViewPart.cs) calls `_settings.Save()` after every `_settings.ApplyProjectOverlay(...)` so the global settings file is kept in sync with the current project's effective Write/Project termbase IDs. Three call sites updated: project-detected-existing, project-detected-new, settings-reloaded, and post-term-added refresh.
+- Anyone running v4.19.55–63 should check their Patents termbase (or whatever they had last set as Write before switching to a new project) for stray terms that ended up there by accident. Audit by sorting the Termbase Editor's Created column descending – stray terms will cluster around the project switches.
+- **The "Include TM matches in AI context" checkbox was documented as Chat / QuickLauncher only, but it also gates AutoPrompt's reference-pair sampling.** The section heading note read *"These settings do not apply to Batch Operations."* and the checkbox tooltip claimed *"Only applies to Chat and QuickLauncher – not to Batch Operations."*. In reality `AiAssistantViewPart.OnGeneratePromptRequested()` reads the same `IncludeTmMatches` flag at line 1159 to decide whether to call `CollectTmReferencePairs()` – which walks the active document and samples up to 50 already-translated, human-confirmed segment pairs to ship into the meta-prompt. AutoPrompt is a Batch Operations feature, so users who turned the checkbox off thinking it didn't matter for AutoPrompt were silently losing in-project translation examples. Reported by Michael with a screenshot annotating the contradictory wording.
+- The tooltip's other claim – that the checkbox enables *"Translation Memory fuzzy matches for the active segment"* – was true for Chat / QuickLauncher (live TM lookups, fuzzy + exact) but wrong for AutoPrompt: AutoPrompt doesn't do a TM lookup at all; it samples confirmed segments straight from the active document, so 100% / exact matches that have been applied and confirmed are absolutely included alongside fuzzy-edited and from-scratch translations.
+- The fix at [AiSettingsPanel.cs:654-695](src/Supervertaler.Trados/Controls/AiSettingsPanel.cs) renames the checkbox to *"Include TM matches in AI context (Chat, QuickLauncher, AutoPrompt)"*, softens the section note to *"Most of these apply to Chat and QuickLauncher only – see each tooltip for exceptions."*, and replaces the tooltip with a longer description that documents both code paths separately and clarifies that other Batch Operations (Translate, Proofread) are unaffected by the checkbox. No behavioural change – the checkbox already controlled both code paths; this release just makes the UI honest about it.
+- **Error messages now name the actual provider you selected**, not "OpenAI". OpenRouter / DeepSeek / Mistral / Grok / Custom-OpenAI users were seeing things like "OpenAI indicated tool_calls but no calls found in response" because the provider-label helper at [LlmClient.cs:393](src/Supervertaler.Trados/Core/LlmClient.cs#L393) didn't have an OpenRouter case (fell through to the "OpenAI" default), and one tool-use error string was hardcoded to "OpenAI" rather than going through the helper. Now `OpenAiProviderLabel()` includes OpenRouter, and the tool-use error formats with the dynamic label.
+- Reported by a user who saw "OpenAI" in the error while running DeepSeek-V4-Pro through OpenRouter.
+
+For the full changelog, see: https://github.com/Supervertaler/Supervertaler-for-Trados/releases

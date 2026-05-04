@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.19.64] – 2026-05-04
+
+### Fixed (CRITICAL: termbase write target persisted across project switches)
+
+- **Quick-add (Alt+Down) and Add Term dialog (Ctrl+Alt+T) were writing new terms to the *previous* project's Write termbase, even after switching projects.** The Settings → Termbases tab correctly showed all termbases unchecked for the new project (because the in-memory overlay had been applied), but the global `TermLensSettings.json` on disk still held the previous project's `WriteTermbaseIds`. Both `QuickAddTermAction` and `AddTermAction` call `TermLensSettings.Load()` to read the current write targets, which read the **disk** copy – getting the stale list and writing terms to the wrong termbase. Reported by Michael with a reproduction case (new project, all termbases unchecked in settings, Alt+Down still wrote two terms to the patents termbase).
+- The fix at [TermLensEditorViewPart.cs:1022-1052 / 1557 / 1582](src/Supervertaler.Trados/TermLensEditorViewPart.cs) calls `_settings.Save()` after every `_settings.ApplyProjectOverlay(...)` so the global settings file is kept in sync with the current project's effective Write/Project termbase IDs. Three call sites updated: project-detected-existing, project-detected-new, settings-reloaded, and post-term-added refresh.
+- Anyone running v4.19.55–63 should check their Patents termbase (or whatever they had last set as Write before switching to a new project) for stray terms that ended up there by accident. Audit by sorting the Termbase Editor's Created column descending – stray terms will cluster around the project switches.
+
+### Fixed (AI Settings: misleading "Include TM matches" label and tooltip)
+
+- **The "Include TM matches in AI context" checkbox was documented as Chat / QuickLauncher only, but it also gates AutoPrompt's reference-pair sampling.** The section heading note read *"These settings do not apply to Batch Operations."* and the checkbox tooltip claimed *"Only applies to Chat and QuickLauncher – not to Batch Operations."*. In reality `AiAssistantViewPart.OnGeneratePromptRequested()` reads the same `IncludeTmMatches` flag at line 1159 to decide whether to call `CollectTmReferencePairs()` – which walks the active document and samples up to 50 already-translated, human-confirmed segment pairs to ship into the meta-prompt. AutoPrompt is a Batch Operations feature, so users who turned the checkbox off thinking it didn't matter for AutoPrompt were silently losing in-project translation examples. Reported by Michael with a screenshot annotating the contradictory wording.
+- The tooltip's other claim – that the checkbox enables *"Translation Memory fuzzy matches for the active segment"* – was true for Chat / QuickLauncher (live TM lookups, fuzzy + exact) but wrong for AutoPrompt: AutoPrompt doesn't do a TM lookup at all; it samples confirmed segments straight from the active document, so 100% / exact matches that have been applied and confirmed are absolutely included alongside fuzzy-edited and from-scratch translations.
+- The fix at [AiSettingsPanel.cs:654-695](src/Supervertaler.Trados/Controls/AiSettingsPanel.cs) renames the checkbox to *"Include TM matches in AI context (Chat, QuickLauncher, AutoPrompt)"*, softens the section note to *"Most of these apply to Chat and QuickLauncher only – see each tooltip for exceptions."*, and replaces the tooltip with a longer description that documents both code paths separately and clarifies that other Batch Operations (Translate, Proofread) are unaffected by the checkbox. No behavioural change – the checkbox already controlled both code paths; this release just makes the UI honest about it.
+
+---
+
 ## [4.19.63] – 2026-05-04
 
 ### Fixed (AI Assistant: provider name in error messages)

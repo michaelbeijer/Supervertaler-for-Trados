@@ -653,7 +653,7 @@ namespace Supervertaler.Trados.Controls
 
             _lblChatContextNote = new Label
             {
-                Text = "These settings do not apply to Batch Operations.",
+                Text = "Most of these apply to Chat and QuickLauncher only \u2013 see each tooltip for exceptions.",
                 Location = new Point(16, 0), // positioned dynamically
                 AutoSize = true,
                 ForeColor = Color.FromArgb(130, 130, 130),
@@ -663,18 +663,29 @@ namespace Supervertaler.Trados.Controls
 
             _chkIncludeTmMatches = new CheckBox
             {
-                Text = "Include TM matches in AI context",
+                Text = "Include TM matches in AI context (Chat, QuickLauncher, AutoPrompt)",
                 Location = new Point(16, 0), // positioned dynamically
                 AutoSize = true,
                 ForeColor = labelColor,
                 Checked = true
             };
-            var tmTip = new ToolTip { AutoPopDelay = 10000, InitialDelay = 300 };
+            var tmTip = new ToolTip { AutoPopDelay = 12000, InitialDelay = 300 };
             tmTip.SetToolTip(_chkIncludeTmMatches,
-                "When enabled, Translation Memory fuzzy matches for the active segment\r\n" +
-                "are included in the AI prompt. This gives the AI reference translations\r\n" +
-                "from your TM to improve consistency and accuracy.\r\n" +
-                "Only applies to Chat and QuickLauncher \u2013 not to Batch Operations.");
+                "When enabled, the AI gets translation reference pairs in two ways:\r\n" +
+                "\r\n" +
+                "  \u2022 Chat / QuickLauncher: live TM lookups for the active segment \u2013 fuzzy\r\n" +
+                "    and exact matches from your project TMs are included as references.\r\n" +
+                "\r\n" +
+                "  \u2022 AutoPrompt (Batch Operations): up to 50 already-translated, human-\r\n" +
+                "    confirmed segment pairs are sampled evenly from the active document\r\n" +
+                "    and included as in-project translation examples. Includes 100% / exact\r\n" +
+                "    matches that have been applied and confirmed, fuzzy-and-edited\r\n" +
+                "    segments, and segments translated from scratch \u2013 anything with a\r\n" +
+                "    Translated / ApprovedTranslation / ApprovedSignOff confirmation level.\r\n" +
+                "\r\n" +
+                "Other Batch Operations (Translate, Proofread) are unaffected by this\r\n" +
+                "checkbox \u2013 they always work segment-by-segment without TM reference\r\n" +
+                "pairs.");
             Controls.Add(_chkIncludeTmMatches);
 
             _chkDemoMode = new CheckBox

@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.19.66] – 2026-05-04
+
+### Fixed (Batch operations: Translation Results pane stole focus at every batch boundary)
+
+- **During Batch Translate / Batch Proofread, every batch boundary kicked the user away from the Supervertaler Assistant pane back to Trados Studio's built-in Translation Results pane.** With a Supervertaler Assistant tab docked next to Translation Results in the bottom dock strip, the user couldn't watch the live progress log because the tab kept switching itself away. Reported by Michael halfway through a 213-segment patent translation across 8 batches.
+- Root cause: `ProcessSegmentPair` writes each translated segment via Trados' supported API, which moves the editor's active-segment cursor to the just-written segment. The built-in Translation Results pane is wired to react to active-segment changes and re-runs TM/MT lookups for the new segment, which on Trados 18 brings its tab to the front. During a batch the writes are fast enough that Trados can't keep up – so the focus steal happens once, in the gap between batches, when the model is busy producing the next batch's response.
+- Fix at [AiAssistantViewPart.cs OnBatchProgress](src/Supervertaler.Trados/AiAssistantViewPart.cs): when a `BatchProgressEventArgs.Message` starts with `"Translating batch "` or `"Proofreading batch "` (i.e. a new batch is starting), call `Activate()` on the AiAssistantViewPart to re-bring its tab to the front. Triggering on batch-start rather than batch-end is intentional: Trados' focus steal happens in the gap that follows the batch-complete log line, so re-activating at the START of the next batch happens after the steal and reliably wins. There's a brief flicker (Translation Results visible for a fraction of a second between batches) but the user is back on the Supervertaler Assistant log immediately afterwards. Same fix covers Batch Proofread because `BatchProofreader` and `BatchTranslator` share the `OnBatchProgress` handler.
+- No change to actual translation behaviour. If the user explicitly switches to Translation Results mid-batch, they'll be kicked back at the next batch boundary – an acceptable trade-off for the much-more-common "stay on the live log" workflow.
+
+---
+
 ## [4.19.65] – 2026-05-04
 
 ### Fixed (AutoPrompt tooltip: clarify that Clipboard Mode does not apply)

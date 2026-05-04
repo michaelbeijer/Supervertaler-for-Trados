@@ -3456,6 +3456,29 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
             SafeInvoke(() =>
             {
                 _control.Value.BatchTranslateControl.ReportProgress(e.Current, e.Total, e.Message, e.IsError);
+
+                // Re-activate the Supervertaler Assistant pane at every batch
+                // boundary. When ProcessSegmentPair writes a translation to a
+                // segment, Trados' built-in Translation Results pane reacts to
+                // the active-segment change and steals focus during the gap
+                // between batches (when no new segment writes are happening to
+                // mask it). The user's Supervertaler Assistant tab loses front
+                // position on every batch boundary. Counter that by re-Activating
+                // our viewpart whenever a new batch starts, so the user is taken
+                // straight back to the live progress log.
+                //
+                // We trigger on "Translating batch" / "Proofreading batch" (start
+                // of next batch) rather than "✓ Batch X complete" because Trados'
+                // focus steal happens AFTER our batch-complete log line during
+                // the API request gap; calling Activate at batch-start happens
+                // after the steal has already occurred and so reliably wins.
+                if (!string.IsNullOrEmpty(e.Message) &&
+                    (e.Message.StartsWith("Translating batch ", StringComparison.Ordinal) ||
+                     e.Message.StartsWith("Proofreading batch ", StringComparison.Ordinal)))
+                {
+                    try { Activate(); }
+                    catch { /* Activate may not be available in all Trados versions */ }
+                }
             });
         }
 

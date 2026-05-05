@@ -204,3 +204,4 @@ Hotkeys can be customised in **Settings → Keyboard Shortcuts → Global**.
 - [Sidekick Overview](overview.md)
 - [Keyboard Shortcuts](../settings/shortcuts.md)
 - [AI Settings](../settings/general.md)
+

@@ -35,13 +35,31 @@ If no prompt is selected, the AI uses a default proofreading instruction that ch
 You can create custom proofreading prompts in the [Prompt Manager](settings/prompts.md). Set the category to **Proofread** so they appear in the dropdown when proofreading.
 {% endhint %}
 
+### Default Proofreading Prompt
+
+The shipped **Default Proofreading Prompt** is deliberately slim. The hardcoded base of every Batch Proofread already includes the persona, the five quality categories (accuracy / completeness / terminology / grammar / number formatting), the output format, the "no full corrected translations" rule, and language-specific checks for Dutch, German, and French – so the prompt itself only needs to add what's missing from the base.
+
+What the default prompt *does* add:
+
+* **Default to OK.** Raise an ISSUE only when a specific, demonstrable problem can be pointed to in the translation – never speculative or hypothetical concerns.
+* **Citation discipline.** When flagging a terminology consistency issue, the AI must cite specific source segment numbers in the **Evidence:** field – e.g. *"`'trekriem'` rendered as `'pull belt'` in `[SEGMENT 0031]`, `'draw strap'` in `[SEGMENT 0084]`"*. Inconsistency claims without concrete citations are not allowed.
+* **Source query distinction.** If the source itself contains an error (typo, duplication, missing word, internal inconsistency), the AI prefixes the Issue line with **"Source query:"** and notes whether the translation handled it correctly. A faithful rendering of a flawed source is not a translation error.
+* **Explicit boundaries.** The AI does not re-engineer the source, propose alternative terminology without a citation, flag stylistic preferences as errors, or flag empty target lines (those mean the segment hasn't been translated yet).
+
+{% hint style="info" %}
+**If you want to customise:** clone the default in the [Prompt Manager](settings/prompts.md) and edit your copy. The default itself is read-only and gets refreshed when the plugin updates. Your clone keeps all your changes.
+{% endhint %}
+
 ## Reports Tab
 
 Proofreading results appear in the **Reports** tab of the Supervertaler Assistant panel. Each issue is shown as a clickable card containing:
 
 * **Segment number** – the actual per-file segment number as shown in the Trados editor grid
 * **Issue description** – what the AI found wrong
+* **Evidence** *(when applicable)* – specific source segment numbers the AI cites to back up the claim, shown in italic grey between the issue and the suggestion. Required for terminology consistency claims (see *Default Proofreading Prompt* below) so you can verify the inconsistency yourself by jumping to the cited segments.
 * **Suggestion** – the AI's recommended fix (if available)
+
+Right-click any card to copy the issue, the evidence, the suggestion, or the whole card to the clipboard.
 
 ### Navigating to Issues
 
@@ -68,13 +86,18 @@ Check the **"Also add issues as Trados comments"** checkbox in the Batch Operati
 
 ## AI Context in Proofreading
 
-The AI Proofreader uses the same context sources as Batch Translate from your [AI Settings](settings/ai-settings.md):
+Batch Proofread builds a richer context than Batch Translate – it has to, because verifying whether a term is rendered consistently across the document is exactly the kind of question the AI needs the whole document to answer.
 
-* **Document content** – when enabled, all source segments are included so the AI understands the document type and can judge whether the translation style is appropriate.
-* **Termbase terms** – terminology from enabled termbases is checked against the translations, including term definitions and domains when that option is enabled.
-* **Custom prompts** – the selected proofreading prompt provides domain-specific quality checks.
+* **Full bilingual document context** – when **Include document context** is enabled in [AI Settings](settings/ai-settings.md), every segment in the document is included with both source AND target text, with no truncation. This is what makes target-side consistency verifiable: the AI can check "this term is rendered as X in [SEGMENT 0031] and Y in [SEGMENT 0084]" against the actual document, not against a guess. Segment numbers in the document context match the `[SEGMENT XXXX]` numbers the AI sees in the batch it's reviewing, so citations cross-reference both ways.
+* **Termbase terms** – terminology from enabled termbases is checked against the translations, including term definitions and domains when that option is enabled. Forbidden terms are flagged with a `⚠️ DO NOT USE` marker so the AI knows to flag them as issues if it sees them in the translation.
+* **Language-specific checks** – Dutch, German, and French targets get auto-included quality checks (compound spelling, dt-errors, de/het articles for Dutch; capitalisation and case system for German; accents and punctuation spacing for French). These come from the hardcoded base and don't need to be in your custom prompt.
+* **Custom prompts** – the selected proofreading prompt provides domain-specific quality checks on top of all of the above.
 
 TM matches and surrounding segments are **not** included in proofreading – these are Chat & QuickLauncher features only. See the [AI Settings](settings/ai-settings.md) page for a full comparison table.
+
+{% hint style="warning" %}
+**Token cost:** Sending the full bilingual document roughly doubles the context size compared to source-only. For typical patent / legal / technical jobs (under ~500 segments) this is a minor cost increase – usually a few extra cents per batch on Sonnet-class models. For very long documents the cost scales linearly; if you proofread a 5,000-segment book you may want to disable Include document context and rely on per-batch context only.
+{% endhint %}
 
 ## Clipboard Mode
 

@@ -17,6 +17,18 @@ Both modes share the same prompt selector, provider/model configuration, and sco
 
 Both Translate and Proofread modes support **[Clipboard Mode](clipboard-mode.md)** – an alternative workflow that lets you use any web-based AI (ChatGPT, Claude, Gemini, etc.) without an API key. Tick the **Clipboard Mode** checkbox to switch from API-based processing to a manual copy/paste workflow. See [Clipboard Mode](clipboard-mode.md) for full details.
 
+### Preview prompt
+
+Next to the action button, the **👁 Preview prompt** link opens a read-only dialog showing **exactly what would be sent to the AI** for the current configuration: the assembled system prompt (including the active custom prompt, termbase entries, language-specific checks, and the full bilingual document context for proofread), followed by the numbered segment list. No LLM call is made.
+
+This is useful for:
+
+* **Sanity-checking before an expensive call** – see what the model will actually receive (including how many tokens of context, whether your termbase is being included, whether the right segments are in scope) before clicking Translate / Proofread.
+* **Debugging unexpected output** – if the AI produces an odd suggestion, the preview shows you the exact prompt the model was answering, so you can see whether the issue is in your custom prompt, the termbase, the document context, or the segment list.
+* **Manually pasting into a web LLM** – the dialog has its own *Copy to clipboard* button, so you can use it as a one-shot "send this to ChatGPT/Claude/Gemini" path without toggling Clipboard Mode.
+
+The preview works in both **API mode** and **Clipboard Mode** without switching, and is available for both Translate and Proofread.
+
 ### AutoPrompt
 
 The Batch Operations tab also includes an **[AutoPrompt](generate-prompt.md)** link that uses AI to create a comprehensive, domain-specific translation prompt based on your project's content, terminology, and TM data.

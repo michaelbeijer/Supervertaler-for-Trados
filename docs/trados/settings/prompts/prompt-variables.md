@@ -42,3 +42,16 @@ These are only available in QuickLauncher prompts, because they refer to the spe
 
 To keep the chat history readable, the chat bubble shows a compact summary (e.g. `[source document – 47 segments]`) instead of the full source text. The complete document is still sent to the AI.
 {% endhint %}
+
+### Scope: which prompts see which variables
+
+The variables above are **only substituted in QuickLauncher prompts**. In Batch Translate and Batch Proofread custom prompts, only the two **language variables** (`{{SOURCE_LANGUAGE}}` and `{{TARGET_LANGUAGE}}`) get filled in – any other variable left in the prompt body will be replaced with an empty string.
+
+This isn't a limitation in practice. The batch flows assemble a richer system prompt automatically, with no variables required:
+
+* **Batch Translate** automatically includes source-only document context (when **Include document context** is on in [AI Settings](../ai-settings.md)), termbase entries, and language-specific checks.
+* **Batch Proofread** automatically includes the **full bilingual document context** (source + target, untruncated), termbase entries, and language-specific checks.
+
+So the right place for your custom prompt content in batch mode is to **complement** what's already there – domain-specific guidance, citation discipline, project-specific terminology preferences – rather than try to re-inject document context with `{{PROJECT}}`.
+
+If you want to see exactly what gets sent to the AI for a batch run – fully assembled, including the auto-injected context – click the **👁 Preview prompt** link next to the Translate / Proofread button on the Batch Operations tab. See [Batch Operations](../../batch-operations.md) for details.

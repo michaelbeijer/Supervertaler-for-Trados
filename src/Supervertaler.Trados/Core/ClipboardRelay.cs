@@ -97,17 +97,18 @@ namespace Supervertaler.Trados.Core
             string customPromptContent = null,
             List<TermEntry> termbaseTerms = null,
             string customSystemPrompt = null,
-            List<string> documentSegments = null,
-            int maxDocumentSegments = 500,
+            List<(string source, string target)> documentSegments = null,
             bool includeTermMetadata = true)
         {
             var sb = new StringBuilder(segments.Count * 400 + 4096);
 
-            // Build system prompt using proofreading base
+            // Build system prompt using proofreading base. Document context is
+            // bilingual (source + target) and untruncated — matches the API path so
+            // a "what gets sent to the AI" preview is faithful for both modes.
             var systemPrompt = ProofreadingPrompt.BuildSystemPrompt(
                 sourceLang, targetLang,
                 termbaseTerms, customPromptContent,
-                documentSegments, maxDocumentSegments, includeTermMetadata);
+                documentSegments, includeTermMetadata);
 
             sb.AppendLine(systemPrompt);
             sb.AppendLine();

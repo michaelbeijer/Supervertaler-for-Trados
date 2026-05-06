@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.19.69] – 2026-05-06
+
+### Fixed (CRITICAL: v4.19.68 broke the build)
+
+- **`ClipboardRelay.FormatForProofreading` was passing `List<string> documentSegments` and `int maxDocumentSegments` to `ProofreadingPrompt.BuildSystemPrompt`** at [ClipboardRelay.cs:107-110](src/Supervertaler.Trados/Core/ClipboardRelay.cs), but v4.19.68 changed `BuildSystemPrompt`'s signature to take `List<(string source, string target)> documentSegments` and dropped the `maxDocumentSegments` parameter. The build error was masked by the `bash build.sh` skip in v4.19.68's "no build for now" instruction. Caught while doing the prompt-preview wiring in v4.19.69 — anyone trying to compile v4.19.68 would have hit it immediately. Fixed by updating `FormatForProofreading`'s parameter type to match and updating its caller in [AiAssistantViewPart.OnCopyToClipboardRequested](src/Supervertaler.Trados/AiAssistantViewPart.cs) to call the new `CollectBilingualDocumentContext` for proofread mode (so the clipboard text faithfully matches what the API path would now send).
+
+### Improved (Batch Operations: "Preview prompt" link + checkbox positioning)
+
+- **New "👁 Preview prompt" link next to the Translate / Proofread button** opens a read-only dialog showing EXACTLY what would be sent to the AI for the current configuration — assembled system prompt (incl. termbase, language-specific checks, full bilingual document context for proofread, and the active custom prompt) plus the numbered segment list. Reuses the same `ClipboardRelay` assembly as Copy-to-Clipboard so what users see is what the LLM would receive. Works in both API mode and Clipboard mode without toggling. The dialog has its own "Copy to clipboard" button as a bonus, so it doubles as a "manual paste into web LLM" path. New file: [PromptPreviewDialog.cs](src/Supervertaler.Trados/Controls/PromptPreviewDialog.cs); event wired through [BatchTranslateControl.PreviewPromptRequested](src/Supervertaler.Trados/Controls/BatchTranslateControl.cs) → [AiAssistantViewPart.OnPreviewPromptRequested](src/Supervertaler.Trados/AiAssistantViewPart.cs). Mirrors the equivalent Workbench feature.
+- **Fixed the "Also add issues as Trados comments" checkbox text being clipped behind the Proofread button.** The checkbox was hardcoded at `x=140` while the action button at `x=12` is AutoSize – when the text changed from "▶ Translate" to the wider "▶ Proofread", the button extended past x=140 and covered the checkbox's leading characters. Reported by Michael with a screenshot showing "...so add issues as Trados comments" with the leading "Also" hidden. Fixed in [BatchTranslateControl.cs](src/Supervertaler.Trados/Controls/BatchTranslateControl.cs) by binding the checkbox position to `_btnTranslate.SizeChanged` (always sits at `_btnTranslate.Right + 8`). Same logic positions the new Preview prompt link, which sits after the rightmost visible control on the row regardless of mode.
+
+---
+
 ## [4.19.68] – 2026-05-06
 
 ### Improved (Batch Proofread: full bilingual document context + citation discipline + Evidence field)

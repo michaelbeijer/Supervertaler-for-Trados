@@ -48,6 +48,7 @@ namespace Supervertaler.Trados.Controls
         private Button _btnTranslate;
         private CheckBox _chkAddComments;
         private LinkLabel _lnkGeneratePrompt;
+        private LinkLabel _lnkPreviewPrompt;
 
         // Clipboard Mode
         private CheckBox _chkClipboardMode;
@@ -99,6 +100,11 @@ namespace Supervertaler.Trados.Controls
 
         /// <summary>Fired when user clicks "Paste from Clipboard" in Clipboard Mode.</summary>
         public event EventHandler PasteFromClipboardRequested;
+
+        /// <summary>Fired when user clicks "Preview prompt" – pops a dialog showing
+        /// exactly what would be sent to the AI (system prompt + termbase + document
+        /// context + bilingual segment list), regardless of mode (API or Clipboard).</summary>
+        public event EventHandler PreviewPromptRequested;
 
         /// <summary>Gets the current batch mode.</summary>
         public BatchMode CurrentMode => _currentMode;
@@ -398,6 +404,40 @@ namespace Supervertaler.Trados.Controls
             };
             Controls.Add(_chkAddComments);
 
+            // Keep the checkbox to the right of the action button at all times.
+            // The button is AutoSize and its text changes between "Translate" and
+            // "Proofread" (different widths), so a hardcoded x=140 was clipping
+            // the checkbox text behind the wider "Proofread" caption.
+            _btnTranslate.SizeChanged += (s, ev) =>
+            {
+                _chkAddComments.Location = new Point(_btnTranslate.Right + 8, y + 4);
+                RepositionPreviewPromptLink();
+            };
+
+            // ─── Preview prompt link ───────────────────────────────
+            // Shows a read-only dialog with EXACTLY what would be sent to the AI
+            // (system prompt incl. termbase + bilingual document context + the
+            // numbered segments to review). Available in both API and Clipboard
+            // mode – useful for debugging "why is the model doing X" without
+            // having to switch modes or actually trigger the LLM call.
+            _lnkPreviewPrompt = new LinkLabel
+            {
+                Text = "👁  Preview prompt",
+                AutoSize = true,
+                Font = bodyFont,
+                Location = new Point(_btnTranslate.Right + 8, y + 7)
+            };
+            _lnkPreviewPrompt.LinkClicked += (s, ev) =>
+                PreviewPromptRequested?.Invoke(this, EventArgs.Empty);
+            var previewTip = new ToolTip();
+            previewTip.SetToolTip(_lnkPreviewPrompt,
+                "See exactly what will be sent to the AI for this batch:\r\n" +
+                "the assembled system prompt (including the active custom prompt,\r\n" +
+                "termbase entries, language-specific checks, and the full bilingual\r\n" +
+                "document context for proofread), plus the numbered segment list.\r\n" +
+                "Useful for inspecting before triggering an actual call.");
+            Controls.Add(_lnkPreviewPrompt);
+
             // ─── Clipboard Mode buttons (hidden by default) ─────
             _btnCopyToClipboard = new Button
             {
@@ -536,6 +576,7 @@ namespace Supervertaler.Trados.Controls
             var isTranslateMode = _currentMode == BatchMode.Translate && !(_chkClipboardMode?.Checked ?? false);
             _chkTmxBackup.Visible = isTranslateMode;
             _lnkOpenBackupFolder.Visible = isTranslateMode;
+            RepositionPreviewPromptLink();
 
             // Notify listeners to refresh prompt dropdown
             BatchModeChanged?.Invoke(this, EventArgs.Empty);
@@ -603,6 +644,10 @@ namespace Supervertaler.Trados.Controls
             var showTmx = !clip && _currentMode == BatchMode.Translate;
             _chkTmxBackup.Visible = showTmx;
             _lnkOpenBackupFolder.Visible = showTmx;
+
+            // Preview prompt link sits after the rightmost visible control on the
+            // action row – position depends on which controls are showing.
+            RepositionPreviewPromptLink();
         }
 
         /// <summary>
@@ -787,6 +832,23 @@ namespace Supervertaler.Trados.Controls
                 }
             }
             _cmbPrompt.DropDownWidth = maxWidth;
+        }
+
+        /// <summary>
+        /// Repositions the "Preview prompt" link so it always sits after the rightmost
+        /// visible control on the action row. In Translate mode that's the action button;
+        /// in Proofread mode the "Also add issues as Trados comments" checkbox extends
+        /// further right and the link must clear it.
+        /// </summary>
+        private void RepositionPreviewPromptLink()
+        {
+            if (_lnkPreviewPrompt == null || _btnTranslate == null) return;
+
+            int rightEdge = _btnTranslate.Right;
+            if (_chkAddComments != null && _chkAddComments.Visible)
+                rightEdge = Math.Max(rightEdge, _chkAddComments.Right);
+
+            _lnkPreviewPrompt.Location = new Point(rightEdge + 12, _lnkPreviewPrompt.Location.Y);
         }
 
         /// <summary>

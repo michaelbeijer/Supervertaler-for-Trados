@@ -253,6 +253,7 @@ namespace Supervertaler.Trados
             batchControl.OpenBackupFolderRequested += OnOpenBackupFolderRequested;
             batchControl.CopyToClipboardRequested += OnCopyToClipboardRequested;
             batchControl.PasteFromClipboardRequested += OnPasteFromClipboardRequested;
+            batchControl.PreviewPromptRequested += OnPreviewPromptRequested;
             batchControl.ModelChangeRequested += OnModelChangeRequested;
 
             // Wire reports control events
@@ -3665,28 +3666,35 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                 var customPromptContent = ResolveCustomPromptContent(sourceLang, targetLang);
                 var customSystemPrompt = aiSettings?.CustomSystemPrompt;
 
-                // Collect document context
-                List<string> docSegments = null;
-                if (aiSettings != null && aiSettings.IncludeDocumentContext)
-                {
-                    var docCtx = CollectDocumentContext();
-                    docSegments = docCtx.Item1;
-                }
-
-                var maxDocSegs = aiSettings?.DocumentContextMaxSegments ?? 500;
                 var includeTermMeta = aiSettings?.IncludeTermMetadata ?? true;
+                var includeDocContext = aiSettings != null && aiSettings.IncludeDocumentContext;
+                var maxDocSegs = aiSettings?.DocumentContextMaxSegments ?? 500;
 
-                // Format for clipboard
+                // Format for clipboard. Proofread mode uses the same full bilingual
+                // document context the API path uses, so the clipboard text really
+                // is "what would be sent to the AI". Translate mode keeps its
+                // source-only document context (target text doesn't exist yet).
                 string clipboardText;
                 if (batchControl.CurrentMode == BatchMode.Proofread)
                 {
+                    var bilingualDocSegments = includeDocContext
+                        ? CollectBilingualDocumentContext()
+                        : null;
+
                     clipboardText = ClipboardRelay.FormatForProofreading(
                         segments, sourceLang, targetLang,
                         customPromptContent, termbaseTerms, customSystemPrompt,
-                        docSegments, maxDocSegs, includeTermMeta);
+                        bilingualDocSegments, includeTermMeta);
                 }
                 else
                 {
+                    List<string> docSegments = null;
+                    if (includeDocContext)
+                    {
+                        var docCtx = CollectDocumentContext();
+                        docSegments = docCtx.Item1;
+                    }
+
                     clipboardText = ClipboardRelay.FormatForTranslation(
                         segments, sourceLang, targetLang,
                         customPromptContent, termbaseTerms, customSystemPrompt,
@@ -3707,6 +3715,121 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                 batchControl.AppendLog(
                     $"Copied {segments.Count} segments to clipboard for {mode}. " +
                     $"Paste into your LLM, then copy the response and click \u201cPaste from Clipboard\u201d.");
+            });
+        }
+
+        /// <summary>
+        /// Shows a read-only dialog with EXACTLY what would be sent to the AI for
+        /// the current Batch Translate / Batch Proofread configuration. Reuses the
+        /// same ClipboardRelay assembly the Copy-to-Clipboard path uses, so what
+        /// the user sees in the preview is identical to what the LLM would receive.
+        /// Does NOT trigger an actual API call.
+        /// </summary>
+        private void OnPreviewPromptRequested(object sender, EventArgs e)
+        {
+            SafeInvoke(() =>
+            {
+                var batchControl = _control.Value.BatchTranslateControl;
+
+                if (_activeDocument == null)
+                {
+                    batchControl.AppendLog("No document open.", true);
+                    return;
+                }
+
+                var sourceLang = GetDocumentSourceLanguage();
+                var targetLang = GetDocumentTargetLanguage();
+
+                if (string.IsNullOrEmpty(sourceLang) || string.IsNullOrEmpty(targetLang))
+                {
+                    batchControl.AppendLog("Cannot determine source/target language from document.", true);
+                    return;
+                }
+
+                var aiSettings = _settings?.AiSettings;
+
+                // Collect segments based on mode and scope
+                List<BatchSegment> segments;
+                if (batchControl.CurrentMode == BatchMode.Proofread)
+                {
+                    var proofScope = batchControl.GetSelectedProofreadScope();
+                    segments = CollectProofreadSegments(proofScope);
+                }
+                else
+                {
+                    var scope = batchControl.GetSelectedScope();
+                    segments = CollectSegments(scope);
+                }
+
+                if (segments.Count == 0)
+                {
+                    batchControl.AppendLog("No segments matched the current scope.", true);
+                    return;
+                }
+
+                // Apply the Limit spinner so the preview reflects what would actually be sent
+                var clipLimit = batchControl.GetMaxSegments();
+                if (clipLimit > 0 && segments.Count > clipLimit)
+                    segments = segments.Take(clipLimit).ToList();
+
+                // Termbase terms, prompt path, custom prompt \u2014 same flow as the copy path
+                var allTerms = TermLensEditorViewPart.GetCurrentTermbaseTerms();
+                var batchDisabledIds = aiSettings?.DisabledAiTermbaseIds ?? new List<long>();
+                var termbaseTerms = batchDisabledIds.Count > 0
+                    ? allTerms.Where(t => !batchDisabledIds.Contains(t.TermbaseId)).ToList()
+                    : allTerms;
+
+                var selectedPromptPath = batchControl.GetSelectedPromptPath();
+                if (aiSettings != null)
+                    aiSettings.SelectedPromptPath = selectedPromptPath;
+                _settings.Save();
+
+                var customPromptContent = ResolveCustomPromptContent(sourceLang, targetLang);
+                var customSystemPrompt = aiSettings?.CustomSystemPrompt;
+
+                var includeTermMeta = aiSettings?.IncludeTermMetadata ?? true;
+                var includeDocContext = aiSettings != null && aiSettings.IncludeDocumentContext;
+                var maxDocSegs = aiSettings?.DocumentContextMaxSegments ?? 500;
+
+                string promptText;
+                if (batchControl.CurrentMode == BatchMode.Proofread)
+                {
+                    var bilingualDocSegments = includeDocContext
+                        ? CollectBilingualDocumentContext()
+                        : null;
+
+                    promptText = ClipboardRelay.FormatForProofreading(
+                        segments, sourceLang, targetLang,
+                        customPromptContent, termbaseTerms, customSystemPrompt,
+                        bilingualDocSegments, includeTermMeta);
+                }
+                else
+                {
+                    List<string> docSegments = null;
+                    if (includeDocContext)
+                    {
+                        var docCtx = CollectDocumentContext();
+                        docSegments = docCtx.Item1;
+                    }
+
+                    promptText = ClipboardRelay.FormatForTranslation(
+                        segments, sourceLang, targetLang,
+                        customPromptContent, termbaseTerms, customSystemPrompt,
+                        docSegments, maxDocSegs, includeTermMeta);
+                }
+
+                var modeLabel = batchControl.CurrentMode == BatchMode.Proofread
+                    ? "proofreading" : "translation";
+                var title = $"Prompt preview \u2013 {modeLabel} ({segments.Count} segments)";
+                var headerText = "This is exactly what will be sent to the AI for this batch: " +
+                    "the assembled system prompt (including the active custom prompt, termbase entries, " +
+                    "language-specific checks, and the full bilingual document context for proofread), " +
+                    "followed by the numbered segment list. No LLM call is made by this preview.";
+
+                using (var dlg = new Controls.PromptPreviewDialog(title, headerText, promptText))
+                {
+                    dlg.ShowDialog();
+                }
             });
         }
 

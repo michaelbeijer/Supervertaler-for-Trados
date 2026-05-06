@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.19.67] – 2026-05-06
+
+### Fixed (Anonymous usage statistics: pings going to a non-existent Cloudflare subdomain)
+
+- **The plugin's anonymous usage pings have been silently failing for ~6 weeks.** The Trados Plugin tab on the stats dashboard showed 8 unique users all-time but zero active in the last 30 days, while the Workbench tab kept getting fresh data. Caused by a wrong-subdomain change in v4.18.20 (28 Mar 2026) that pointed pings at `supervertaler-stats.supervertaler.workers.dev` – a Cloudflare account subdomain that doesn't exist. The actual Worker lives at `supervertaler-stats.michaelbeijer-co-uk.workers.dev` (account subdomains are tied to the Cloudflare account, not the GitHub org). The Workbench's Python client was untouched and kept pinging the correct URL throughout, which is why only the Trados tab went quiet.
+- Fix at [UsageStatistics.cs:32](src/Supervertaler.Trados/Core/UsageStatistics.cs) restores the correct URL. The 30-day metric on the dashboard will stay depressed for at least 1–2 weeks until existing installs update via the AppStore – `HttpClient.PostAsync` swallows the exception in the existing `catch` block, so users on broken versions will keep failing silently until they upgrade.
+
+---
+
 ## [4.19.66] – 2026-05-04
 
 ### Fixed (Batch operations: Translation Results pane stole focus at every batch boundary)

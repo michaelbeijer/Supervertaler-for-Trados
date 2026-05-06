@@ -408,9 +408,17 @@ namespace Supervertaler.Trados.Controls
             // The button is AutoSize and its text changes between "Translate" and
             // "Proofread" (different widths), so a hardcoded x=140 was clipping
             // the checkbox text behind the wider "Proofread" caption.
+            //
+            // Capture the action-row Y to a local — `y` is incremented as the rest
+            // of BuildUI lays out subsequent controls, and the lambda fires LATER
+            // (when the button's Text/SizeChanged) so closing over `y` directly
+            // would read whatever stale value `y` had landed on by then. That
+            // produced the bug where the checkbox jumped down into the log area
+            // the first time the user switched to Proofread mode.
+            int actionRowY = y;
             _btnTranslate.SizeChanged += (s, ev) =>
             {
-                _chkAddComments.Location = new Point(_btnTranslate.Right + 8, y + 4);
+                _chkAddComments.Location = new Point(_btnTranslate.Right + 8, actionRowY + 4);
                 RepositionPreviewPromptLink();
             };
 
@@ -425,7 +433,7 @@ namespace Supervertaler.Trados.Controls
                 Text = "👁  Preview prompt",
                 AutoSize = true,
                 Font = bodyFont,
-                Location = new Point(_btnTranslate.Right + 8, y + 7)
+                Location = new Point(_btnTranslate.Right + 8, actionRowY + 7)
             };
             _lnkPreviewPrompt.LinkClicked += (s, ev) =>
                 PreviewPromptRequested?.Invoke(this, EventArgs.Empty);

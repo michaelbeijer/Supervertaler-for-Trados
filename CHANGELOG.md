@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.19.70] – 2026-05-06
+
+### Fixed (Batch Operations: "Also add issues as Trados comments" jumped into the log area on mode switch)
+
+- **The Trados-comments checkbox migrated down into the log panel the first time the user switched to Proofread mode.** Visible in Michael's screenshot: button + Preview prompt link sat correctly on the action row, but the checkbox was floating ~80 px lower, near the Log header. Caused by the `_btnTranslate.SizeChanged` lambda introduced in v4.19.69 capturing `y` by reference. `y` is the running layout cursor in [`BatchTranslateControl.BuildUI`](src/Supervertaler.Trados/Controls/BatchTranslateControl.cs); by the time the lambda fired (button text change "Translate" → "Proofread" → SizeChanged), `y` had been incremented past the action row by the rest of `BuildUI` (Clipboard buttons, log panel header, etc.), so the checkbox got placed at whatever Y the cursor had landed on. Classic closure-over-mutable-loop-variable trap.
+- Fix at [BatchTranslateControl.cs](src/Supervertaler.Trados/Controls/BatchTranslateControl.cs) captures `y` into a local `actionRowY` before the lambda is created. Both the SizeChanged repositioner and the Preview prompt link's initial Y now reference `actionRowY` so they stay anchored to the action row regardless of when the lambda runs.
+
+---
+
 ## [4.19.69] – 2026-05-06
 
 ### Fixed (CRITICAL: v4.19.68 broke the build)

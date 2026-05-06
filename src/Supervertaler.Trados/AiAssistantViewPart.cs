@@ -4197,7 +4197,33 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                 catch (Exception)
                 {
                     // Segment may no longer be accessible
+                    return;
                 }
+
+                // Re-activate the Supervertaler Assistant pane after navigation.
+                // Same focus-steal scenario as the v4.19.66 batch-boundary fix:
+                // SetActiveSegmentPair fires Trados' active-segment-changed event,
+                // and the built-in Translation Results pane reacts by re-running
+                // its TM/MT lookups for the new segment, which on Trados 18 brings
+                // its tab to the front. Without this counter-Activate, every click
+                // on a Reports issue card kicks the user away from the Reports
+                // tab to Translation Results — exactly when they want to read the
+                // issue details and act on them.
+                //
+                // The synchronous Activate() handles the case where Trados raises
+                // its event inline. The deferred one (posted via BeginInvoke on
+                // the control) handles the case where Trados queues the focus
+                // steal for a later UI tick — by posting our Activate after, we
+                // run after the steal has already happened and reliably win.
+                try { Activate(); } catch { }
+                try
+                {
+                    _control.Value.BeginInvoke((Action)(() =>
+                    {
+                        try { Activate(); } catch { }
+                    }));
+                }
+                catch { /* control may not be available */ }
             });
         }
 

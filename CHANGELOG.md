@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.19.71] – 2026-05-06
+
+### Fixed (Reports tab: clicking an issue card kicked focus to Translation Results)
+
+- **Every click on a proofreading issue card sent the user to Trados' built-in Translation Results pane, forcing a manual switch back to the Supervertaler Assistant pane to read the issue details.** Same root cause as the v4.19.66 batch-boundary fix: `SetActiveSegmentPair` fires Trados' active-segment-changed event, and the built-in Translation Results pane reacts by re-running its TM/MT lookups, which on Trados 18 brings its tab to the front. Reported by Michael while working through proofread results — described it as "annoying" and "I have to switch back to the Supervertaler Assistant pane every time I click into a heading."
+- Fix at [`AiAssistantViewPart.OnNavigateToSegment`](src/Supervertaler.Trados/AiAssistantViewPart.cs) now calls `Activate()` on the Supervertaler Assistant view-part after navigating, so the user lands back on Reports immediately. Belt-and-braces: a synchronous `Activate()` handles the case where Trados raises its event inline, and a second `Activate()` posted via `BeginInvoke` handles the case where Trados queues the focus steal for a later UI tick — by running after the steal has already happened, the deferred call reliably wins. Same belt-and-braces pattern that worked for v4.19.66.
+
+---
+
 ## [4.19.70] – 2026-05-06
 
 ### Fixed (Batch Operations: "Also add issues as Trados comments" jumped into the log area on mode switch)

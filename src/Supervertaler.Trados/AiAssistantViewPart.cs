@@ -3945,12 +3945,14 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
 
                 var customPromptContent = ResolveCustomPromptContent(sourceLang, targetLang);
 
-                // Collect document context for AI document type analysis
-                List<string> docSegments = null;
+                // Collect FULL bilingual document context (source + target for every
+                // segment in the document, no truncation). The proofreader needs both
+                // sides to verify cross-document target consistency – source-only
+                // context can't catch "rendered as X here, Y there" claims.
+                List<(string source, string target)> docSegments = null;
                 if (aiSettings.IncludeDocumentContext)
                 {
-                    var docCtx = CollectDocumentContext();
-                    docSegments = docCtx.Item1;
+                    docSegments = CollectBilingualDocumentContext();
                 }
 
                 int batchSize = aiSettings.BatchSize > 0 ? aiSettings.BatchSize : 20;
@@ -3962,7 +3964,8 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
                 batchControl.SetRunning(true);
                 batchControl.AppendLog(
                     $"Starting proofreading: {segments.Count} segments, provider={provider}, model={model}, " +
-                    $"batch size={batchSize}");
+                    $"batch size={batchSize}" +
+                    (docSegments != null ? $", bilingual context: {docSegments.Count} segments" : ", no document context"));
 
                 _proofreadCts = new CancellationTokenSource();
                 _batchProofreader = new BatchProofreader();
@@ -5173,6 +5176,37 @@ Always list the original source filename(s) in the `sources:` frontmatter field.
         /// Also determines the 0-based index of the active segment.
         /// Returns (segments, activeIndex) where activeIndex is -1 if not found.
         /// </summary>
+        /// <summary>
+        /// Collects the full document as bilingual (source, target) pairs for use as
+        /// proofreading context. Unlike <see cref="CollectDocumentContext"/> which is
+        /// source-only and used by Batch Translate / chat, this also includes the
+        /// existing target so the proofreader can verify target-side consistency
+        /// across the whole document – not just within the current 20-segment batch.
+        /// </summary>
+        private List<(string source, string target)> CollectBilingualDocumentContext()
+        {
+            var segments = new List<(string source, string target)>();
+
+            if (_activeDocument == null)
+                return segments;
+
+            try
+            {
+                foreach (var pair in _activeDocument.SegmentPairs)
+                {
+                    var sourceText = pair.Source?.ToString() ?? "";
+                    var targetText = pair.Target?.ToString() ?? "";
+                    segments.Add((sourceText, targetText));
+                }
+            }
+            catch (Exception)
+            {
+                // Document may not be accessible during transitions
+            }
+
+            return segments;
+        }
+
         private Tuple<List<string>, int> CollectDocumentContext()
         {
             var segments = new List<string>();

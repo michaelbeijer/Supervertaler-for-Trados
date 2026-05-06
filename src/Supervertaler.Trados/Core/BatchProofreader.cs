@@ -52,7 +52,7 @@ namespace Supervertaler.Trados.Core
             int batchSize,
             CancellationToken cancellationToken,
             string customPromptContent = null,
-            List<string> documentSegments = null)
+            List<(string source, string target)> documentSegments = null)
         {
             var sw = Stopwatch.StartNew();
             int totalChecked = 0;
@@ -68,14 +68,13 @@ namespace Supervertaler.Trados.Core
                 return;
             }
 
-            // Build system prompt (with document context and term metadata)
+            // Build system prompt with full bilingual document context (no truncation –
+            // proofreading specifically benefits from cross-document consistency checks).
             var includeDoc = aiSettings?.IncludeDocumentContext != false;
-            var maxDocSegs = aiSettings?.DocumentContextMaxSegments ?? 500;
             var includeTermMeta = aiSettings?.IncludeTermMetadata != false;
             var systemPrompt = ProofreadingPrompt.BuildSystemPrompt(
                 sourceLang, targetLang, termbaseTerms, customPromptContent,
                 includeDoc ? documentSegments : null,
-                maxDocSegs,
                 includeTermMeta);
 
             // Resolve provider settings
@@ -129,12 +128,14 @@ namespace Supervertaler.Trados.Core
                     {
                         var batchSw = Stopwatch.StartNew();
 
-                        // Build numbered segment list for prompt
+                        // Build numbered segment list for prompt – use absolute document
+                        // segment numbers (segments[i].Index + 1) so the model can cite them
+                        // against the same numbers in # DOCUMENT CONTENT.
                         var promptSegments = new List<(int number, string source, string target)>();
                         for (int i = startIdx; i < endIdx; i++)
                         {
                             promptSegments.Add((
-                                number: i + 1, // 1-based numbering
+                                number: segments[i].Index + 1, // absolute document position, 1-based
                                 source: segments[i].SourceText,
                                 target: segments[i].ExistingTarget
                             ));
@@ -152,10 +153,10 @@ namespace Supervertaler.Trados.Core
                         var parsed = ProofreadingPrompt.ParseBatchResponse(
                             response, startIdx + 1, batchCount);
 
-                        // Map parsed results back to segments by number
-                        var resultMap = new Dictionary<int, (bool isOk, string issue, string suggestion)>();
+                        // Map parsed results back to segments by absolute number
+                        var resultMap = new Dictionary<int, (bool isOk, string issue, string suggestion, string evidence)>();
                         foreach (var p in parsed)
-                            resultMap[p.segmentNumber] = (p.isOk, p.issueDescription, p.suggestion);
+                            resultMap[p.segmentNumber] = (p.isOk, p.issueDescription, p.suggestion, p.evidence);
 
                         // Apply results
                         int batchIssues = 0;
@@ -163,7 +164,7 @@ namespace Supervertaler.Trados.Core
 
                         for (int i = startIdx; i < endIdx; i++)
                         {
-                            int number = i + 1; // match 1-based numbering
+                            int number = segments[i].Index + 1; // absolute document position, matches prompt
 
                             // Extract paragraph unit ID and segment ID from ref array
                             string puId = null, segId = null;
@@ -189,6 +190,7 @@ namespace Supervertaler.Trados.Core
                                 proofResult.IsOk = result.isOk;
                                 proofResult.IssueDescription = result.issue;
                                 proofResult.Suggestion = result.suggestion;
+                                proofResult.Evidence = result.evidence;
                             }
                             else
                             {

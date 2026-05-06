@@ -13,6 +13,7 @@ namespace Supervertaler.Trados.Models
         public bool IsOk { get; set; }
         public string IssueDescription { get; set; }
         public string Suggestion { get; set; }
+        public string Evidence { get; set; }          // Specific source segments cited by the model (terminology consistency etc.)
         public object SegmentPairRef { get; set; }   // ISegmentPair or string[] for navigation
         public string ParagraphUnitId { get; set; }
         public string SegmentId { get; set; }

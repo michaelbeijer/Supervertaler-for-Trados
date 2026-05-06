@@ -22,7 +22,7 @@ namespace Supervertaler.Trados.Core
         /// <param name="customPromptContent">Optional custom prompt content (already variable-substituted)</param>
         public static string BuildSystemPrompt(string sourceLang, string targetLang,
             List<TermEntry> terms = null, string customPromptContent = null,
-            List<string> documentSegments = null, int maxDocumentSegments = 500,
+            List<(string source, string target)> documentSegments = null,
             bool includeTermMetadata = true)
         {
             var sb = new StringBuilder(4096);
@@ -53,6 +53,7 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine("[SEGMENT 0001] OK");
             sb.AppendLine("[SEGMENT 0002] ISSUE");
             sb.AppendLine("Issue: <description of the problem>");
+            sb.AppendLine("Evidence: <specific source segment numbers cited from # DOCUMENT CONTENT, where applicable; otherwise omit this line>");
             sb.AppendLine("Suggestion: <how to fix it>");
             sb.AppendLine();
 
@@ -60,10 +61,11 @@ namespace Supervertaler.Trados.Core
             sb.AppendLine("**IMPORTANT RULES**:");
             sb.AppendLine("- You MUST respond for EVERY segment in the batch.");
             sb.AppendLine("- Use OK if the translation is correct.");
-            sb.AppendLine("- Use ISSUE if there is a problem, followed by Issue: and Suggestion: lines.");
+            sb.AppendLine("- Use ISSUE if there is a problem, followed by Issue: and Suggestion: lines (and Evidence: where relevant).");
             sb.AppendLine("- Do NOT provide corrected translations \u2014 only describe the issues and suggest fixes.");
             sb.AppendLine("- Be concise but specific in your descriptions.");
             sb.AppendLine("- Do NOT flag stylistic preferences unless they are clear errors.");
+            sb.AppendLine("- Segment numbers in OUTPUT and any Evidence citations refer to the document-absolute numbers shown in [SEGMENT XXXX] headers and in # DOCUMENT CONTENT \u2014 NOT to within-batch positions.");
 
             // Termbase injection
             if (terms != null && terms.Count > 0)
@@ -112,46 +114,32 @@ namespace Supervertaler.Trados.Core
                 sb.Append(customPromptContent);
             }
 
-            // Document context (all source segments for document type analysis)
+            // Document context – full bilingual document (source + target) with no truncation.
+            // Segment numbers here are document-absolute and match the [SEGMENT XXXX] numbers
+            // used in the user-prompt batch, so the model can cross-reference both directions.
             if (documentSegments != null && documentSegments.Count > 0)
             {
                 sb.AppendLine();
                 sb.AppendLine();
                 sb.AppendLine("# DOCUMENT CONTENT");
-                sb.AppendLine("The following is the source document content. Analyze it to determine the document type");
-                sb.AppendLine("(legal, medical, technical, marketing, financial, patent, scientific, etc.) and use that");
-                sb.AppendLine("assessment to inform your quality judgements about terminology, style, and register.");
+                sb.AppendLine("The following is the FULL document with both source and target text for every segment.");
+                sb.AppendLine("Use it to verify any claim about consistency, recurring terminology, or whether a");
+                sb.AppendLine("variant appears elsewhere – both on the source side AND the target side – before");
+                sb.AppendLine("flagging an issue. Do not raise a consistency concern you have not confirmed against");
+                sb.AppendLine("this document.");
+                sb.AppendLine();
+                sb.AppendLine("Segment numbers below are document-absolute and match the [SEGMENT XXXX] numbers in");
+                sb.AppendLine("the batch you are reviewing. An empty Target line means that segment has not yet");
+                sb.AppendLine("been translated.");
                 sb.AppendLine();
 
-                var max = maxDocumentSegments > 0 ? maxDocumentSegments : 500;
-
-                if (documentSegments.Count <= max)
+                for (int i = 0; i < documentSegments.Count; i++)
                 {
-                    for (int i = 0; i < documentSegments.Count; i++)
-                    {
-                        sb.Append(i + 1).Append(". ").AppendLine(documentSegments[i]);
-                    }
-                }
-                else
-                {
-                    int firstCount = (int)(max * 0.8);
-                    int lastCount = max - firstCount;
-                    int omitted = documentSegments.Count - max;
-
-                    for (int i = 0; i < firstCount; i++)
-                    {
-                        sb.Append(i + 1).Append(". ").AppendLine(documentSegments[i]);
-                    }
-
+                    var pair = documentSegments[i];
+                    sb.Append("[SEGMENT ").Append((i + 1).ToString("D4")).AppendLine("]");
+                    sb.Append("Source: ").AppendLine(pair.source ?? "");
+                    sb.Append("Target: ").AppendLine(pair.target ?? "");
                     sb.AppendLine();
-                    sb.Append("[... ").Append(omitted).AppendLine(" segments omitted ...]");
-                    sb.AppendLine();
-
-                    int startLast = documentSegments.Count - lastCount;
-                    for (int i = startLast; i < documentSegments.Count; i++)
-                    {
-                        sb.Append(i + 1).Append(". ").AppendLine(documentSegments[i]);
-                    }
                 }
             }
 
@@ -225,10 +213,10 @@ namespace Supervertaler.Trados.Core
         /// <param name="batchStartNumber">1-based number of the first segment in this batch</param>
         /// <param name="batchSize">Number of segments expected in this batch</param>
         /// <returns>List of parsed results: (segmentNumber, isOk, issueDescription, suggestion)</returns>
-        public static List<(int segmentNumber, bool isOk, string issueDescription, string suggestion)>
+        public static List<(int segmentNumber, bool isOk, string issueDescription, string suggestion, string evidence)>
             ParseBatchResponse(string response, int batchStartNumber, int batchSize)
         {
-            var results = new List<(int, bool, string, string)>();
+            var results = new List<(int, bool, string, string, string)>();
             if (string.IsNullOrWhiteSpace(response))
                 return results;
 
@@ -242,11 +230,14 @@ namespace Supervertaler.Trados.Core
             var issuePattern = new Regex(@"^\s*Issue\s*:\s*(.+)", RegexOptions.IgnoreCase);
             // Pattern to match Suggestion: line
             var suggestionPattern = new Regex(@"^\s*Suggestion\s*:\s*(.+)", RegexOptions.IgnoreCase);
+            // Pattern to match Evidence: line (optional \u2014 only used for issues citing other segments)
+            var evidencePattern = new Regex(@"^\s*Evidence\s*:\s*(.+)", RegexOptions.IgnoreCase);
 
             int currentNumber = -1;
             bool currentIsOk = true;
             string currentIssue = null;
             string currentSuggestion = null;
+            string currentEvidence = null;
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -258,7 +249,7 @@ namespace Supervertaler.Trados.Core
                     // Flush previous segment if any
                     if (currentNumber >= 0)
                     {
-                        results.Add((currentNumber, currentIsOk, currentIssue, currentSuggestion));
+                        results.Add((currentNumber, currentIsOk, currentIssue, currentSuggestion, currentEvidence));
                     }
 
                     currentNumber = int.Parse(segMatch.Groups[1].Value);
@@ -267,6 +258,7 @@ namespace Supervertaler.Trados.Core
                     currentIsOk = verdict == "OK" || verdict == "PASS" || verdict == "\u2713";
                     currentIssue = null;
                     currentSuggestion = null;
+                    currentEvidence = null;
                 }
                 else if (currentNumber >= 0)
                 {
@@ -274,6 +266,13 @@ namespace Supervertaler.Trados.Core
                     if (issueMatch.Success)
                     {
                         currentIssue = issueMatch.Groups[1].Value.Trim();
+                        continue;
+                    }
+
+                    var evMatch = evidencePattern.Match(line);
+                    if (evMatch.Success)
+                    {
+                        currentEvidence = evMatch.Groups[1].Value.Trim();
                         continue;
                     }
 
@@ -288,7 +287,7 @@ namespace Supervertaler.Trados.Core
             // Flush last segment
             if (currentNumber >= 0)
             {
-                results.Add((currentNumber, currentIsOk, currentIssue, currentSuggestion));
+                results.Add((currentNumber, currentIsOk, currentIssue, currentSuggestion, currentEvidence));
             }
 
             return results;

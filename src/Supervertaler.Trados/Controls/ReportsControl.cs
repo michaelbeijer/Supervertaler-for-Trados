@@ -300,6 +300,28 @@ namespace Supervertaler.Trados.Controls
                     Tag = "desc"
                 };
 
+                // Evidence (if model cited specific source segments – e.g. for terminology
+                // consistency claims). Rendered between description and suggestion in italic
+                // grey so the eye reads it as "the *why* for the issue", not as an action.
+                TextBox txtEvidence = null;
+                if (!string.IsNullOrEmpty(issue.Evidence))
+                {
+                    txtEvidence = new TextBox
+                    {
+                        Text = "Evidence: " + issue.Evidence,
+                        Font = new Font("Segoe UI", 8f, FontStyle.Italic),
+                        ForeColor = SuggColor,
+                        BackColor = CardColor,
+                        Location = new Point(8, 44),
+                        ReadOnly = true,
+                        BorderStyle = BorderStyle.None,
+                        Multiline = true,
+                        WordWrap = true,
+                        TabStop = false,
+                        Tag = "evidence"
+                    };
+                }
+
                 // Suggestion (if available, also a selectable TextBox)
                 TextBox txtSugg = null;
                 if (!string.IsNullOrEmpty(issue.Suggestion))
@@ -323,6 +345,8 @@ namespace Supervertaler.Trados.Controls
                 card.Controls.Add(chk);
                 card.Controls.Add(lblSegNum);
                 card.Controls.Add(txtDesc);
+                if (txtEvidence != null)
+                    card.Controls.Add(txtEvidence);
                 if (txtSugg != null)
                     card.Controls.Add(txtSugg);
 
@@ -331,6 +355,8 @@ namespace Supervertaler.Trados.Controls
                 card.ContextMenuStrip = ctxMenu;
                 lblSegNum.ContextMenuStrip = ctxMenu;
                 txtDesc.ContextMenuStrip = ctxMenu;
+                if (txtEvidence != null)
+                    txtEvidence.ContextMenuStrip = ctxMenu;
                 if (txtSugg != null)
                     txtSugg.ContextMenuStrip = ctxMenu;
 
@@ -398,7 +424,7 @@ namespace Supervertaler.Trados.Controls
                 _resultsPanel.Controls.Add(card);
 
                 // Layout the card – need to measure text height
-                LayoutCard(card, lblSegNum, txtDesc, txtSugg);
+                LayoutCard(card, lblSegNum, txtDesc, txtEvidence, txtSugg);
 
                 yPos += card.Height + 4;
             }
@@ -722,6 +748,16 @@ namespace Supervertaler.Trados.Controls
             }) { Font = menuFont };
             menu.Items.Add(miCopyIssue);
 
+            if (!string.IsNullOrEmpty(issue.Evidence))
+            {
+                var miCopyEv = new ToolStripMenuItem("Copy evidence", null, (s, e) =>
+                {
+                    try { Clipboard.SetText(issue.Evidence); }
+                    catch { }
+                }) { Font = menuFont };
+                menu.Items.Add(miCopyEv);
+            }
+
             if (hasSuggestion)
             {
                 var miCopySugg = new ToolStripMenuItem("Copy suggestion", null, (s, e) =>
@@ -739,6 +775,8 @@ namespace Supervertaler.Trados.Controls
                 try
                 {
                     var text = $"Segment {issue.SegmentNumber}\n{issue.IssueDescription}";
+                    if (!string.IsNullOrEmpty(issue.Evidence))
+                        text += $"\nEvidence: {issue.Evidence}";
                     if (!string.IsNullOrEmpty(issue.Suggestion))
                         text += $"\nSuggestion: {issue.Suggestion}";
                     Clipboard.SetText(text);
@@ -760,7 +798,8 @@ namespace Supervertaler.Trados.Controls
             });
         }
 
-        private void LayoutCard(Panel card, Label lblSegNum, Control txtDesc, Control txtSugg)
+        private void LayoutCard(Panel card, Label lblSegNum, Control txtDesc,
+            Control txtEvidence, Control txtSugg)
         {
             var availableWidth = _resultsPanel.ClientSize.Width
                 - SystemInformation.VerticalScrollBarWidth - 24;
@@ -778,10 +817,23 @@ namespace Supervertaler.Trados.Controls
             txtDesc.Height = Math.Max(16, descSize.Height + 4);
 
             int cardHeight = txtDesc.Bottom + 6;
+            int nextTop = txtDesc.Bottom + 2;
+
+            if (txtEvidence != null)
+            {
+                txtEvidence.Location = new Point(8, nextTop);
+                txtEvidence.Width = textWidth;
+                var evSize = TextRenderer.MeasureText(txtEvidence.Text, txtEvidence.Font,
+                    new Size(textWidth, int.MaxValue),
+                    TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl);
+                txtEvidence.Height = Math.Max(16, evSize.Height + 4);
+                cardHeight = txtEvidence.Bottom + 6;
+                nextTop = txtEvidence.Bottom + 2;
+            }
 
             if (txtSugg != null)
             {
-                txtSugg.Location = new Point(8, txtDesc.Bottom + 2);
+                txtSugg.Location = new Point(8, nextTop);
                 txtSugg.Width = textWidth;
                 var suggSize = TextRenderer.MeasureText(txtSugg.Text, txtSugg.Font,
                     new Size(textWidth, int.MaxValue),
@@ -845,19 +897,21 @@ namespace Supervertaler.Trados.Controls
 
                 // Find controls inside card by Tag
                 Label lblSegNum = null;
-                Control txtDesc = null, txtSugg = null;
+                Control txtDesc = null, txtEvidence = null, txtSugg = null;
                 foreach (Control child in card.Controls)
                 {
                     if (child is Label lbl && lbl.Font.Bold)
                         lblSegNum = lbl;
                     else if (child is TextBox tb && (string)tb.Tag == "desc")
                         txtDesc = tb;
+                    else if (child is TextBox te && (string)te.Tag == "evidence")
+                        txtEvidence = te;
                     else if (child is TextBox ts && (string)ts.Tag == "sugg")
                         txtSugg = ts;
                 }
 
                 if (lblSegNum != null && txtDesc != null)
-                    LayoutCard(card, lblSegNum, txtDesc, txtSugg);
+                    LayoutCard(card, lblSegNum, txtDesc, txtEvidence, txtSugg);
 
                 yPos += card.Height + 4;
             }

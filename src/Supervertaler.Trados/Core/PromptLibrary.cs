@@ -435,6 +435,10 @@ namespace Supervertaler.Trados.Core
             // Clean up domain-specific translate prompts removed in v4.13.0
             CleanUpRetiredPrompts();
 
+            // Refresh outdated default prompt content (only when still flagged default,
+            // never user-cloned/edited copies – those keep their default: false flag).
+            RefreshOutdatedDefaultProofreadingPrompt();
+
             foreach (var def in GetDefaultPromptDefinitions())
             {
                 // def.Category is now e.g. "QuickLauncher/Default"
@@ -642,6 +646,59 @@ namespace Supervertaler.Trados.Core
                     catch { /* ignore */ }
                 }
             }
+        }
+
+        /// <summary>
+        /// One-shot content migration for the Default Proofreading Prompt.
+        ///
+        /// The default prompt was rewritten in v4.19.67 to:
+        /// (a) stop duplicating the hardcoded base in ProofreadingPrompt.BuildSystemPrompt
+        ///     (persona, 5 categories, output format, language-specific checks, ""no
+        ///     corrections"" rule – all already auto-included),
+        /// (b) add default-to-OK framing, citation discipline against # DOCUMENT CONTENT,
+        ///     a Source query category, and explicit boundaries that target the false-
+        ///     positive patterns we observed in real proofreads.
+        ///
+        /// Existing installs already have ""Default Proofreading Prompt.md"" on disk, so
+        /// EnsureDefaultPrompts' "if (!File.Exists)" check would normally leave them on
+        /// the old content forever. This method detects the old-style content and deletes
+        /// the file so the next pass writes the new version. We only delete files still
+        /// flagged "default: true" – user-cloned/edited copies have "default: false" and
+        /// are never touched.
+        /// </summary>
+        private void RefreshOutdatedDefaultProofreadingPrompt()
+        {
+            try
+            {
+                var folder = Path.Combine(PromptsDir, "Proofread", "Default");
+                var filePath = Path.Combine(folder, SanitizeFileName("Default Proofreading Prompt") + ".md");
+                if (!File.Exists(filePath)) return;
+
+                string content;
+                try { content = File.ReadAllText(filePath); }
+                catch { return; }
+
+                // Only refresh if still flagged as default (user clones become default: false).
+                if (!IsDefaultPromptFile(content)) return;
+
+                // Distinctive markers from the v4.13.0 → v4.19.66 default content. Any
+                // copy still containing these section headers is the OLD default and
+                // can be replaced. The new content uses different headings entirely.
+                bool isOldContent =
+                    content.Contains("## 1. Accuracy") &&
+                    content.Contains("## 2. Completeness") &&
+                    content.Contains("## 5. Number & Unit Formatting");
+
+                // New-content marker – if this is already there, the file is up to date.
+                bool isNewContent = content.Contains("# Verifying claims against the document");
+
+                if (isOldContent && !isNewContent)
+                {
+                    try { File.Delete(filePath); }
+                    catch { /* ignore – file locked or permissions */ }
+                }
+            }
+            catch { /* defensive – never break startup over a prompt-refresh error */ }
         }
 
         /// <summary>
@@ -1122,75 +1179,28 @@ namespace Supervertaler.Trados.Core
                 new PromptTemplate
                 {
                     Name = "Default Proofreading Prompt",
-                    Description = "Reviews translations for accuracy, completeness, terminology, grammar, and style issues",
+                    Description = "Reviews translations with strict default-to-OK framing, citation discipline against the full bilingual document, and explicit handling of source-side errors",
                     Category = "Proofread/Default",
                     IsDefault = true,
-                    Content = @"You are a professional translation proofreader. Your task is to review {{SOURCE_LANGUAGE}} to {{TARGET_LANGUAGE}} translation pairs and identify issues. You must check EVERY segment provided – do not skip any.
+                    Content = @"# Verifying claims against the document
 
-For each segment, check the following:
+The full document – both source and target – is provided in the # DOCUMENT CONTENT block of the system prompt. Segment numbers there match the [SEGMENT XXXX] numbers in this batch. Use it to verify any claim about consistency, recurring terminology, or whether a variant appears elsewhere – on EITHER side – before flagging.
 
-## 1. Accuracy
-- Does the translation faithfully convey the meaning of the source?
-- Are there any mistranslations, shifts in meaning, or misinterpretations?
-- Are ambiguous source phrases resolved appropriately for the target language?
+**Default to OK.** Raise an ISSUE only when you can point to a specific, demonstrable problem in the translation. Do not raise speculative concerns or hypothetical inconsistencies. If you cannot verify a claim against the segments shown in # DOCUMENT CONTENT, do not raise it.
 
-## 2. Completeness
-- Is any source content omitted in the translation?
-- Is any content added that is not present in the source?
-- Are all numbers, dates, and references carried over correctly?
+When you flag a terminology consistency issue, you MUST include an Evidence: line citing the specific source segment numbers where each variant appears – e.g. ""Evidence: 'trekriem' rendered as 'pull belt' in [SEGMENT 0031], 'draw strap' in [SEGMENT 0084]"". Inconsistency claims without concrete citations from # DOCUMENT CONTENT are not allowed.
 
-## 3. Terminology Consistency
-- Are key terms translated consistently across segments?
-- Are domain-specific terms translated correctly?
-- Are proper nouns, brand names, and product names handled appropriately?
+# Source-side errors
 
-## 4. Grammar & Style
-- Is the translation grammatically correct in {{TARGET_LANGUAGE}}?
-- Is the style appropriate for the text type and register?
-- Is the sentence structure natural and fluent in the target language?
+If the SOURCE itself appears to contain an error (typo, duplication, missing word, internal inconsistency), prefix the Issue line with ""Source query:"" and indicate whether the translation has handled it appropriately. Do NOT propose a target change unless the translation has mishandled the source error. A faithful rendering of a flawed source is not a translation error.
 
-## 5. Number & Unit Formatting
-- Are numbers formatted according to {{TARGET_LANGUAGE}} conventions (decimal separators, thousand separators)?
-- Are units of measurement correct and properly formatted?
-- Are currency symbols and codes appropriate for the target locale?
+# Boundaries
 
-## Language-Specific Checks
-
-### Dutch
-- Compound words: verify correct spelling (e.g., 'ziekenhuisopname' not 'ziekenhuis opname')
-- dt-errors: check verb conjugation (word/wordt, vind/vindt, etc.)
-- de/het articles: verify correct article usage with nouns
-- Spelling: follow current Woordenlijst Nederlandse Taal (het Groene Boekje)
-
-### German
-- Compound nouns: verify correct formation (Zusammenschreibung)
-- Capitalization: all nouns must be capitalized
-- Case system: check correct use of Nominativ, Akkusativ, Dativ, Genitiv
-- Verb position: verify correct verb placement in main and subordinate clauses
-
-### French
-- Accents: verify all accents are correct (é, è, ê, ë, à, ç, etc.)
-- Gender/number agreement: check adjective-noun and subject-verb agreement
-- Punctuation spacing: non-breaking space before ; : ! ? and inside « »
-- Elision and liaison rules
-
-## Output Format
-
-You MUST use this exact format for every segment. Check ALL segments – do not skip any.
-
-For segments with no issues:
-[SEGMENT XXXX] OK
-
-For segments with issues:
-[SEGMENT XXXX] ISSUE
-Issue: <brief description of the problem>
-Suggestion: <describe what should be changed – do NOT provide a full corrected translation>
-
-IMPORTANT RULES:
-- NEVER provide corrected full translations. Only describe the issue and suggest what specifically should be fixed.
-- Use the segment number as it appears in the input (e.g., [SEGMENT 0042]).
-- Report each distinct issue on its own ISSUE block if a segment has multiple problems.
-- You MUST review ALL segments. Do not stop early or summarize remaining segments as 'OK'."
+- Your job is to assess the translation, not to re-engineer the source or fact-check its substantive (technical, legal, factual) claims. If a passage in the source describes a mechanism or argument oddly, that is not your concern unless the translation distorts it.
+- Do not propose alternative terminology unless you can show – with a source segment citation from # DOCUMENT CONTENT – that the proposed term is already used elsewhere in the document, OR that it appears in the # TERMBASE block.
+- Stylistic preferences are not issues. Only flag stylistic problems where the target is genuinely ungrammatical or unidiomatic in {{TARGET_LANGUAGE}}, not where it could be polished.
+- Do not flag a missing translation. An empty Target line means that segment has not been translated yet – that is not what this proofread is checking.
+- Patent, legal, and technical text is often deliberately stiff or formulaic. A literal-but-correct rendering of awkward source structure is normal in those genres and should not be flagged as a style problem."
                 },
                 new PromptTemplate
                 {
